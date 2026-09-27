@@ -1,6 +1,6 @@
-# Moonbound · A Mission Forge Adventure
+# Exovisionaries · A Mission Forge Adventure
 
-Moonbound is a character-guided game for young explorers. The playable chapter follows a three-person ice-exploration mission from the first idea through an Apollo-inspired launch into Earth parking orbit. Mira, Leo and Kai guide players with short hints and clear scenes. Moon travel, landing, other lunar missions and Mars are marked Coming Soon.
+Exovisionaries is a character-guided game for young explorers. The playable chapter follows a three-person ice-exploration mission from the first idea through an Apollo-inspired launch into Earth parking orbit. Mira, Leo and Kai guide players with short hints and clear scenes. Moon travel, landing, other lunar missions and Mars are marked Coming Soon.
 
 ## Play the chapter
 
@@ -33,4 +33,4 @@ Open `http://localhost:5173/`. `npm run build` produces a production bundle, and
 - `public/story/`: the character illustrations supplied by the project team.
 - `backups/before-story-redesign-20260926-130824/`: a local copy of the previous source and documentation.
 
-The original view components are retained in `src/components/` for reference; `src/App.tsx` renders the Moonbound experience.
+The original view components are retained in `src/components/` for reference; `src/App.tsx` renders the Exovisionaries experience.

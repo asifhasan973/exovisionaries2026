@@ -80,7 +80,7 @@ export const SOURCES_DATA: CitationItem[] = [
     publisher: 'NASA',
     url: 'https://www.nasa.gov/humans-in-space/orion-spacecraft/orion-overview/',
     scope: 'Modern reference for a four-person spacecraft capable of missions up to 21 days',
-    caveat: 'Moonbound keeps its three-seat Apollo-inspired story architecture and uses Orion’s published 21-day independent mission capability as the planning ceiling. Longer missions require an additional docked habitat.'
+    caveat: 'Exovisionaries keeps its three-seat Apollo-inspired story architecture and uses Orion’s published 21-day independent mission capability as the planning ceiling. Longer missions require an additional docked habitat.'
   },
   {
     id: 'moon-polar-env',

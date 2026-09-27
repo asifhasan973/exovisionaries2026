@@ -42,7 +42,7 @@ Chapter 2 will read this exact snapshot to initiate:
 
 ## Story redesign · 26 September 2026
 
-Replaced the active interface with **Moonbound**, a character-guided illustrated adventure. The earlier interface is retained in source for reference; App now renders `src/game/StoryGame.tsx`.
+Replaced the active interface with **Exovisionaries**, a character-guided illustrated adventure. The earlier interface is retained in source for reference; App now renders `src/game/StoryGame.tsx`.
 
 - Warm cream, lavender, mint and yellow; short hints, large original part illustrations, and the team's supplied character artwork.
 - A new versioned save begins with zero installed parts and zero assigned astronauts. Old saves remain untouched under their original key.
