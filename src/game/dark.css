@@ -1,0 +1,170 @@
+/* ExoVisionaries-inspired night palette. Illustration assets keep their natural colors. */
+body:has(.theme-dark){background:#08071e}
+.game.theme-dark{
+  color-scheme:dark;
+  --ink:#f6f1ff;
+  --purple:#db8cff;
+  --lavender:#382765;
+  --cream:#090820;
+  --muted:#c0b1d8;
+  --yellow:#ef6aff;
+  --mint:#99e0d6;
+  --line:#594777;
+  color:#f6f1ff;
+  background:
+    radial-gradient(circle at 72% 16%,#5b258d50 0,transparent 31%),
+    radial-gradient(circle at 12% 48%,#2127667d 0,transparent 39%),
+    radial-gradient(#ffffff9c .8px,transparent 1.3px) 0 0/113px 107px,
+    radial-gradient(#efbaff9c .7px,transparent 1.3px) 43px 62px/179px 163px,
+    linear-gradient(155deg,#08071b 0%,#10113b 51%,#160b38 100%);
+}
+.theme-dark .game-header{background:#0b0925d6;border-bottom-color:#ffffff20;backdrop-filter:blur(12px)}
+.theme-dark .brand{color:#fff7ff}
+.theme-dark .brand-mark{background:linear-gradient(135deg,#be35f4,#ee65dc);box-shadow:0 0 20px #cb39f558}
+.theme-dark .brand-sub{color:#c9a7e1}
+.theme-dark .chapter-marker,.theme-dark .muted{color:#c1b3d8}
+.theme-dark .round-btn{color:#f4e9ff;border-color:#9670c06b;background:#261b4b88}
+.theme-dark .round-btn:hover:not(:disabled),.theme-dark .round-btn.active{background:#6a2d94;border-color:#d780ec}
+.theme-dark .theme-toggle{color:#f8bcff;border-color:#bc58e59c;background:#64259088}
+.theme-dark .primary{color:#170b30;background:linear-gradient(115deg,#f27bec,#cd51f5);box-shadow:0 4px 0 #7625ae,0 5px 26px #ce50ee38}
+.theme-dark .primary:hover:not(:disabled){background:linear-gradient(115deg,#ff98f0,#e176ff)}
+.theme-dark .primary:active:not(:disabled){box-shadow:0 2px 0 #7625ae}
+.theme-dark .soft-button{color:#f5e7ff;background:#39265d;box-shadow:0 3px 0 #261342}
+.theme-dark .text-btn{color:#e9d6fa}
+.theme-dark .eyebrow,.theme-dark .guide-name{color:#e398f4}
+.theme-dark .dot,.theme-dark .tiny-star{color:#f078e8}
+.theme-dark .label-tag{color:#f3ddff;border-color:#ae70d661;background:#49286899}
+.theme-dark .label-tag.mint{color:#aeebe4;border-color:#56aeaa77;background:#174647ab}
+.theme-dark .guide .portrait{border-color:#6c3a9a;box-shadow:0 0 0 1px #b764dd}
+.theme-dark .guide p{color:#e9dff6}
+.theme-dark .read-aloud{color:#ebd6fd;background:#48266b}
+.theme-dark .skip-link{color:#170f2b;background:#fff2ff}
+.theme-dark .welcome h1>span{color:#ec85f0;text-shadow:0 0 30px #d150ed66}
+.theme-dark .welcome-copy>p,.theme-dark .hero-byline{color:#c9bedc}
+.theme-dark .hero-byline strong{color:#f0ddff}
+.theme-dark .mini-avatars svg{border-color:#191038}
+.theme-dark .comic-photo{border-color:#f6e7ff;box-shadow:0 24px 80px #030114a8,0 0 45px #d562f446}
+.theme-dark .photo-caption{color:#2a1641}
+.theme-dark .photo-caption span{color:#704578}
+.theme-dark .hero-moon>span{color:#efc4f9}
+.theme-dark .art-orbit{border-color:#c76cfa88}
+.theme-dark .mission-sticker{background:#9c41c3;border-color:#1d103d;color:#fff5ff;box-shadow:0 8px 24px #0008}
+.theme-dark .deco-star,.theme-dark .orbit-doodle{color:#f586ed}
+.theme-dark .adventure-route{border-top-color:#9963ba63}
+.theme-dark .route-intro{color:#b8a6d6}
+.theme-dark .route-intro b,.theme-dark .adventure-route strong{color:#f7efff}
+.theme-dark .route-icon,.theme-dark .adventure-route>div:nth-of-type(2) .route-icon,.theme-dark .adventure-route>div:nth-of-type(3) .route-icon,.theme-dark .adventure-route>div:nth-of-type(4) .route-icon{color:#f3b6ff;background:#522676;border:1px solid #8b47aa}
+.theme-dark .adventure-route small,.theme-dark .route-moon{color:#c998e6}
+.theme-dark .moon-card{background:radial-gradient(circle at 50% 36%,#5f4a92 0,#2d205b 49%,#181441 100%);border-color:#a76acb}
+.theme-dark .mars-card{background:radial-gradient(circle at 50% 35%,#4c2c62,#22143d 68%);border-color:#765388}
+.theme-dark .destination-caption small{color:#d2b5e4}
+.theme-dark .destination-caption strong{color:#fff4ff}
+.theme-dark .circle-arrow{color:#f4d1ff;background:#823cafaa}
+.theme-dark .orbit-ring{border-color:#d083ed99}
+.theme-dark .mission-story{color:#f8f0ff;background:#211646;border-color:#754b9c}
+.theme-dark .mission-brief>p{color:#d2c2e4}
+.theme-dark .visual-mission svg{color:#ea94f4}
+.theme-dark .other-missions{border-top-color:#805695}
+.theme-dark .other-missions button{color:#ddc3ea}
+.theme-dark .site-scene{border:1px solid #7f55a4;background:linear-gradient(#100f3a,#503a80)}
+.theme-dark .site-sun{color:#ffdaaa;filter:drop-shadow(0 0 20px #ffcbac)}
+.theme-dark .moon-mountains{background:#8276a6}
+.theme-dark .moon-mountains.front{background:#a597ba}
+.theme-dark .moon-ground{background:#bbacc2;box-shadow:inset 0 5px 0 #e5d5df}
+.theme-dark .site-pin{color:#f9efff;background:#2d2057;border-color:#9b68bb;box-shadow:0 10px 24px #06051c77}
+.theme-dark .site-pin>span{color:#f4b2fb;background:#663380}
+.theme-dark .site-pin small{color:#d9c2e7}
+.theme-dark .site-pin b{color:#b9f0da}
+.theme-dark .site-pin.chosen{border-color:#f18af4;box-shadow:0 0 0 5px #e77aff55,0 12px 24px #05031288}
+.theme-dark .shadow-pin{color:#f4e6fa;background:#231643cc}
+.theme-dark .site-label{color:#f6e9fb}
+.theme-dark .workshop-progress{border-color:#83529d;background:#221641}
+.theme-dark .workshop-progress button{color:#d9bee7}
+.theme-dark .workshop-progress button>span{color:#f0d6f5;background:#543374}
+.theme-dark .workshop-progress button.current{color:#fff4ff;background:#873db5}
+.theme-dark .parts-shelf{color:#f8f1ff;background:#191236;border-color:#744a98}
+.theme-dark .shelf-heading>span,.theme-dark .parts-shelf .mini,.theme-dark .shelf-controls{color:#c9abda}
+.theme-dark .shelf-controls button{color:#f4ddff;background:#4c2b69}
+.theme-dark .part-card{color:#f6eaff;background:#342052;border-color:#765491}
+.theme-dark .part-card:hover{background:#4c2a6e;border-color:#cf79ea}
+.theme-dark .part-card.picked{background:#683082;border-color:#ef93f5}
+.theme-dark .part-card.installed{background:#214d57;border-color:#75cabb}
+.theme-dark .part-card small{color:#d1b9df}
+.theme-dark .destination-part-tabs{background:#21143e;border-color:#71488e}.theme-dark .destination-part-tabs button{color:#c6a9d5}.theme-dark .destination-part-tabs button.current{background:#653481;color:#fff1ff}.theme-dark .batch-actions button{background:#32204d;border-color:#704b89;color:#d8bfdf}.theme-dark .batch-actions .batch-add{background:#9d45c5;color:white;border-color:#bd68dd}.theme-dark .part-card.marked{background:#5b2d72;border-color:#e483ee}.theme-dark .part-select-indicator{background:#24163dcc;color:#ddb4ea}.theme-dark .part-card.installed .part-select-indicator{background:#2b625b;color:#b9efdc}.theme-dark .locked-part-icon{background:#4a315e;color:#df9bec}.theme-dark .locked-label{color:#d09cdd}.theme-dark .mission-meters>div{background:#205049;color:#c4f2dd}.theme-dark .mission-meters.over>div:nth-child(2),.theme-dark .mission-meters>p{background:#694048;color:#ffd5cf}
+.theme-dark .assembly-bay{color:#f8eaff;background:#281c51;border-color:#744f9f}
+.theme-dark .bay-tools .round-btn{color:#f0d6fb;background:#4c2a6b;border-color:#9b62be}
+.theme-dark .bay-header .label-tag{color:#f4dafa;background:#432461cc}
+.theme-dark .hangar-window{background:linear-gradient(#141b55,#3b3e82);border-color:#605196;box-shadow:0 0 0 1px #8c6cbe,0 0 45px #aa6cf653}
+.theme-dark .hangar-window span{border-color:#9b8ac1}
+.theme-dark .hangar-window:after{border-color:#9b8ac1}
+.theme-dark .hangar-beam,.theme-dark .hangar-beam:after{background:#52397c}
+.theme-dark .launch-plinth{background:#7e58a7;border-bottom-color:#5d418b;box-shadow:0 10px 0 #2e2157}
+.theme-dark .floor-lines{background:repeating-linear-gradient(0deg,transparent,transparent 27px,#ae85cf30 28px,#ae85cf30 29px),#241844}
+.theme-dark .empty-note{color:#dab7eb}
+.theme-dark .drop-spot{color:#f9eaff;background:#44265ee8;border-color:#c179e4;box-shadow:0 0 0 5px #9252bb40}
+.theme-dark .drop-spot:before{border-color:#cc8be6}
+.theme-dark .drop-spot small,.theme-dark .packing-slot>small{color:#d7b6e7}
+.theme-dark .drop-plus{color:#f7d9ff;background:#8f4db5}
+.theme-dark .bay-bottom{color:#dbc2e8;background:#1a113acc}
+.theme-dark .packing-title>.label-tag{color:#eab7fb}
+.theme-dark .packing-slot{color:#f6eaff;background:#3b265baa;border-color:#ac79c7}
+.theme-dark .packing-slot.match{background:#65407f;border-color:#eea1f4}
+.theme-dark .packing-slot.filled{background:#3a245c;border-color:#a367c4}
+.theme-dark .slot-number{color:#dda9f5}
+.theme-dark .budget-pill{color:#c4f2dd;background:#205049}
+.theme-dark .budget-pill.over{color:#ffd5cf;background:#694048}
+.theme-dark .model-preview{background:#1b1239}
+.theme-dark .crew-room{background:#211541;border-color:#744e98}
+.theme-dark .duration-planner{background:#2d1d4b;border-color:#795397}.theme-dark .duration-heading small,.theme-dark .duration-scale,.theme-dark .duration-scale small,.theme-dark .duration-planner>p{color:#d2b9de}.theme-dark .duration-heading>b,.theme-dark .duration-icon{background:#54346f;color:#f0c9ef}.theme-dark .duration-planner>p{border-color:#604077}
+.theme-dark .crew-seat{color:#f7eaff;background:#372358;border-color:#855dac}
+.theme-dark .crew-seat.active{background:#643279;border-color:#ed89ec;box-shadow:0 0 0 4px #dc70f246}
+.theme-dark .crew-seat.filled{background:#3c2860}
+.theme-dark .seat-role{color:#e9aff4}
+.theme-dark .crew-seat>small{color:#d6c2e5}
+.theme-dark .empty-helmet{color:#cf9bde;background:#573673}
+.theme-dark .crew-pick{border-top-color:#79559b}
+.theme-dark .candidate{color:#faedff;background:#332051;border-color:#795397}
+.theme-dark .candidate:hover,.theme-dark .candidate.selected{background:#58347a;border-color:#dc8bea}
+.theme-dark .candidate small{color:#d6bee5}
+.theme-dark .candidate-plus{color:#e39dec}
+.theme-dark .readiness-room{background:#211641;border-color:#76509b}
+.theme-dark .ready-rocket{border-color:#694c89}
+.theme-dark .rocket-base{background:#7856a4}
+.theme-dark .readiness-card{color:#f4edff;background:#1c4650;border-color:#5aadb0}
+.theme-dark .readiness-card>svg,.theme-dark .readiness-card>span{color:#a4e9d1}
+.theme-dark .readiness-card.missing{background:#51304c;border-color:#aa6886}
+.theme-dark .readiness-card.missing>svg,.theme-dark .readiness-card.missing>span{color:#ffc4ce}
+.theme-dark .flight-scene{background:linear-gradient(155deg,#101039,#313069 60%,#6d417e);border-color:#845eaa}
+.theme-dark .flight-copy>p{color:#ded1ef}
+.theme-dark .preflight-switches button{color:#f7edff;background:#2f2053;border-color:#8b65ac}
+.theme-dark .preflight-switches button>svg,.theme-dark .preflight-switches small{color:#dca6eb}
+.theme-dark .preflight-switches button>.switch-dot{border-color:#c78ada}
+.theme-dark .preflight-switches button.ready{background:#1d5552;border-color:#60bbb5}
+.theme-dark .preflight-switches button.ready>svg:last-child{color:#aaf0d6}
+.theme-dark .flight-cloud{background:#d9b7ff3f}
+.theme-dark .flight-horizon{background:#353a68;border-color:#846aab}
+.theme-dark .pad-tower{border-color:#9a7dbb;background:repeating-linear-gradient(48deg,transparent 0,transparent 33px,#9275b4 34px,#9275b4 38px,transparent 39px)}
+.theme-dark .pad-tower i{background:#9a7dbb}
+.theme-dark .pad-platform{background:#81639e;border-color:#5b417a}
+.theme-dark .flight-scene-label{color:#e4c8f1}
+.theme-dark .countdown{background:#190c3bd9}
+.theme-dark .countdown span,.theme-dark .countdown strong{color:#f18df4}
+.theme-dark .flight-scene.space-sky{background:linear-gradient(130deg,#100b2e,#3c2468);border-color:#8c5caa}
+.theme-dark .orbit-celebration{border:1px solid #8458ae}
+.theme-dark .field-notes{color:#f8efff;background:#171035;border-left-color:#775097}
+.theme-dark .notes-heading,.theme-dark .part-details dl>div,.theme-dark .field-notes details{border-color:#674385}
+.theme-dark .notebook-cover,.theme-dark .notebook-cover>h2{color:#edb6fa}
+.theme-dark .notebook-cover>p,.theme-dark .kid-lesson,.theme-dark .part-details dt,.theme-dark .field-notes details,.theme-dark .field-notes summary{color:#d5bbdf}
+.theme-dark .notes-art{background:#3e255c}
+.theme-dark .field-notes details a{color:#eca5f2}
+.theme-dark .story-dialog{color:#f7edff;background:#201440;border-color:#9b63bf;box-shadow:0 30px 120px #03010fc9}
+.theme-dark .story-dialog::backdrop{background:#050313bd}
+.theme-dark .story-dialog>p{color:#d6c5e8}
+.theme-dark .setting-row{color:#f6ebff;background:#352055;border-color:#77509a}
+.theme-dark .setting-row:hover{background:#4a296a}
+.theme-dark .setting-row>svg,.theme-dark .setting-row>b{color:#efadf3}
+.theme-dark .setting-row small{color:#d0b5df}
+.theme-dark .coming-lock{color:#f3c5fa;background:#713b98;border-color:#201440}
+.theme-dark .rocket-piece-hit:hover{background:#efafff33;outline-color:#efafff}
+.theme-dark .rocket-piece-hit:focus-visible,.theme-dark button:focus-visible{outline-color:#f29ff7}
+@media(max-width:560px){.theme-dark .game-header{background:#0b0925f2}}

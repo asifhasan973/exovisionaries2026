@@ -1,0 +1,231 @@
+.flight-scene--3d {
+  background: #0c0823 !important;
+  border-color: #765092 !important;
+}
+
+.flight-workspace {
+  display: grid;
+  grid-template-columns: minmax(330px, 410px) minmax(0, 1fr);
+  gap: 12px;
+  height: clamp(500px, calc(100dvh - 230px), 650px);
+}
+
+.flight-workspace>.flight-scene {
+  height: 100%;
+  min-width: 0;
+}
+
+.flight-scene--3d .flight-stars,
+.flight-scene--3d .flight-cloud,
+.flight-scene--3d .flight-horizon,
+.flight-scene--3d .pad-tower,
+.flight-scene--3d .pad-platform,
+.flight-scene--3d .flight-rocket,
+.flight-scene--3d .spent-stage,
+.flight-scene--3d .released-tower {
+  display: none !important;
+}
+
+.flight-scene-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  overflow: hidden;
+}
+
+.flight-scene-canvas canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.flight-workspace>.flight-control-panel {
+  position: relative;
+  inset: auto;
+  z-index: 2;
+  width: auto;
+  max-width: none;
+  height: 100%;
+  padding: 20px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, #f8f5edeb, #f3e7f6e8);
+  border: 1px solid #d9b9df;
+  box-shadow: 0 18px 50px #0a061640;
+  overflow: auto;
+  scrollbar-width: thin;
+}
+
+.theme-dark .flight-workspace>.flight-control-panel {
+  background: linear-gradient(135deg, #241542f2, #31194eea);
+  border-color: #945cac;
+  box-shadow: 0 22px 60px #03010f80;
+}
+
+.flight-control-panel h1 {
+  font-size: clamp(31px, 3vw, 43px);
+  margin: 15px 0 10px;
+}
+
+.flight-control-panel>p {
+  margin: 0;
+  font-size: 12px;
+}
+
+.flight-workspace .flight-control-panel .preflight-switches {
+  display: flex;
+  flex-direction: column;
+  max-width: none;
+  gap: 7px;
+  margin: 15px 0 13px;
+}
+
+.flight-workspace .flight-control-panel .preflight-switches button {
+  position: relative;
+  flex-direction: row;
+  justify-content: flex-start;
+  min-height: 56px;
+  padding: 9px 13px;
+  text-align: left;
+}
+
+.flight-workspace .flight-control-panel .preflight-switches button>span {
+  flex: 1;
+  text-align: left;
+}
+
+.flight-workspace .flight-control-panel .preflight-switches button>svg:last-child:not(:first-child),
+.flight-workspace .flight-control-panel .preflight-switches button>.switch-dot {
+  position: static;
+  width: 15px;
+  height: 15px;
+  flex: 0 0 15px;
+  margin-left: auto;
+}
+
+.flight-control-panel .launch-button {
+  min-height: 44px;
+}
+
+.flight-scene--3d .flight-scene-label {
+  position: absolute;
+  z-index: 6;
+}
+
+.flight-scene--3d .countdown {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+}
+
+.flight-skip {
+  position: absolute;
+  z-index: 7;
+  top: 18px;
+  right: 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 8px 12px;
+  border: 1px solid #dca7ed8c;
+  border-radius: 999px;
+  color: #f8ecff;
+  background: #231540c7;
+  box-shadow: 0 8px 24px #02040d55;
+  backdrop-filter: blur(8px);
+  font-size: 10px;
+  font-weight: 700
+}
+
+.flight-skip:hover {
+  background: #5c2b7f
+}
+
+.sun-reference {
+  position: absolute;
+  z-index: 5;
+  top: 24px;
+  left: 43%;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #fff7d5;
+  pointer-events: none;
+  text-shadow: 0 2px 8px #02040c;
+  transition: opacity .5s ease;
+}
+
+.sun-reference-disc {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff8c7;
+  box-shadow: 0 0 8px #fff7c9, 0 0 24px #ffcf6c, 0 0 50px #ff9e3b99;
+}
+
+.sun-reference strong,.sun-reference small {
+  display: block;
+}
+
+.sun-reference strong {
+  font-size: 7px;
+  letter-spacing: 1.8px;
+}
+
+.sun-reference small {
+  margin-top: 2px;
+  font-size: 7px;
+  color: #f5e9c5;
+}
+
+@media(max-width:900px) {
+  .flight-workspace {
+    grid-template-columns: minmax(290px, 340px) minmax(0, 1fr);
+  }
+
+  .flight-workspace>.flight-control-panel {
+    padding: 22px 18px;
+  }
+}
+
+@media(max-width:720px) {
+  .flight-workspace {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+  }
+
+  .flight-workspace>.flight-control-panel {
+    height: auto;
+  }
+
+  .flight-workspace>.flight-scene {
+    height: 520px;
+    flex: 0 0 520px;
+  }
+}
+
+.orbit-chapter .orbit-celebration {
+  position: relative;
+  overflow: hidden;
+}
+
+.orbit-scene-3d {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.orbit-chapter .orbit-copy,
+.orbit-chapter .orbit-stamp,
+.orbit-chapter .guide {
+  position: relative;
+  z-index: 2;
+}
+
+.orbit-chapter .orbit-earth,
+.orbit-chapter .orbit-ship {
+  display: none;
+}
