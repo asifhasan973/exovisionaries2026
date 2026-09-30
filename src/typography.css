@@ -1,0 +1,369 @@
+/*
+ * GLOBAL TYPOGRAPHY CONTROLS
+ * --------------------------
+ * Change only these values when you want to resize text across the whole game.
+ * This file is imported last so it remains the single typography control panel.
+ */
+:root {
+  --font-display: clamp(42px, 4.2vw, 62px);
+  --font-page-title: clamp(32px, 2.8vw, 46px);
+  --font-section-title: clamp(24px, 2vw, 34px);
+  --font-card-title: 14px;
+  --font-body: 15px;
+  --font-action: 14px;
+  --font-small: 12px;
+  --font-label: 10px;
+  --font-micro: 9px;
+}
+
+/* Shared type hierarchy */
+.game {
+  font-size: var(--font-body);
+}
+
+.game h1,
+.game .chapter-top h1 {
+  font-size: var(--font-page-title);
+}
+
+.game h2,
+.game .mission-brief h2,
+.game .ready-list h2,
+.game .flight-control-panel h1,
+.game .flight-copy h1,
+.game .orbit-copy h1 {
+  font-size: var(--font-section-title);
+}
+
+.game .welcome h1 {
+  font-size: var(--font-display);
+}
+
+.game .primary,
+.game .soft-button,
+.game .text-btn,
+.game .notes-toggle,
+.game .launch-button,
+.game .flight-copy .staging-button {
+  font-size: var(--font-action);
+}
+
+.game .brand {
+  font-size: 23px;
+}
+
+.game .brand-sub,
+.game .chapter-marker,
+.game .eyebrow,
+.game .label-tag,
+.game .guide-name,
+.game .image-label,
+.game .site-label,
+.game .flight-scene-label {
+  font-size: var(--font-label);
+}
+
+.game .mini,
+.game small {
+  font-size: var(--font-small);
+}
+
+/* Welcome and story pages */
+.game .welcome-copy .eyebrow,
+.game .welcome-copy>p,
+.game .mission-brief>p,
+.game .story-dialog>p,
+.game .setting-row>span,
+.game .orbit-copy p,
+.game .flight-copy>p,
+.game .flight-control-panel>p {
+  font-size: var(--font-body);
+}
+
+.game .hero-byline,
+.game .photo-caption span,
+.game .hero-moon>span,
+.game .mission-sticker b,
+.game .route-intro,
+.game .adventure-route small,
+.game .destination-caption small,
+.game .visual-mission>span,
+.game .other-missions button,
+.game .site-pin small,
+.game .site-pin b,
+.game .shadow-pin {
+  font-size: var(--font-small);
+}
+
+.game .photo-caption strong,
+.game .adventure-route strong,
+.game .site-pin strong {
+  font-size: var(--font-card-title);
+}
+
+.game .destination-caption strong {
+  font-size: 34px;
+}
+
+/* Mission guide */
+.game .guide-name,
+.game .assembly-guide-top .guide-name {
+  font-size: var(--font-label);
+}
+
+.game .guide p,
+.game.notes-open .guide p {
+  font-size: var(--font-small);
+}
+
+.game .assembly-guide-top .guide-name {
+  font-size: 13px;
+  letter-spacing: 1.35px;
+  margin-bottom: 7px;
+}
+
+.game .assembly-guide-top .guide p {
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+/* Workshop navigation and catalogue */
+.game .view-tabs button,
+.game .workshop-progress button,
+.game .parts-shelf .workshop-progress button,
+.game .destination-part-tabs button,
+.game .batch-actions button,
+.game .shelf-navigation .text-btn,
+.game .shelf-navigation .primary {
+  font-size: var(--font-small);
+}
+
+.game .workshop-progress button>span,
+.game .parts-shelf .workshop-progress button>span {
+  font-size: var(--font-micro);
+}
+
+.game .shelf-heading h2,
+.game .parts-shelf .shelf-heading h2,
+.game .crew-pick .shelf-heading h2,
+.game .packing-title h2 {
+  font-size: 24px;
+}
+
+.game .shelf-heading>span,
+.game .crew-pick .shelf-heading>span,
+.game .parts-shelf>.mini,
+.game .shelf-controls,
+.game .packing-title>.label-tag {
+  font-size: var(--font-label);
+}
+
+.game .part-card strong,
+.game .packing-slot>strong,
+.game .locked-part-card strong {
+  font-size: var(--font-card-title);
+}
+
+.game .part-card small,
+.game .packing-slot>small,
+.game .locked-part-card small,
+.game .locked-label {
+  font-size: var(--font-micro);
+}
+
+.game .part-card small,
+.game .locked-part-card small {
+  line-height: 1.25;
+}
+
+.game .bay-header .label-tag,
+.game .bay-bottom,
+.game .bay-bottom .text-btn,
+.game .budget-pill,
+.game .budget-pill small,
+.game .slot-number {
+  font-size: var(--font-label);
+}
+
+/* 3D rocket lab */
+.game .builder-tag,
+.game .builder-fit,
+.game .builder-side-label,
+.game .builder-side-label small,
+.game .builder-instructions,
+.game .builder-instructions small,
+.game .builder-install,
+.game .builder-ready,
+.game .builder-remove,
+.game .builder-bench-label,
+.game .builder-bench-label small,
+.game .builder-target strong,
+.game .builder-target small {
+  font-size: var(--font-small);
+}
+
+.game .rocket-builder-loading,
+.game .builder-unavailable {
+  font-size: var(--font-body);
+}
+
+.game .mission-meters span {
+  font-size: var(--font-micro);
+  white-space: normal;
+  line-height: 1.15;
+}
+
+.game .mission-meters strong {
+  font-size: 12px;
+}
+
+.game .mission-meters>p {
+  font-size: var(--font-micro);
+}
+
+/* Crew, duration and launch-readiness pages */
+.game .duration-heading small,
+.game .duration-heading>b,
+.game .duration-scale,
+.game .duration-scale small,
+.game .ready-crew-member small,
+.game .seat-role {
+  font-size: var(--font-label);
+}
+
+.game .duration-heading strong {
+  font-size: 25px;
+}
+
+.game .duration-planner>p,
+.game .crew-seat>small,
+.game .candidate small,
+.game .readiness-card>span,
+.game .ready-list>.mini {
+  font-size: var(--font-small);
+}
+
+.game .crew-seat>strong {
+  font-size: 22px;
+}
+
+.game .candidate strong,
+.game .readiness-card strong,
+.game .ready-crew-member strong {
+  font-size: var(--font-card-title);
+}
+
+.game .ready-crew-panel>p {
+  font-size: var(--font-body);
+}
+
+/* Launch and orbit */
+.game .preflight-switches button,
+.game .preflight-switches button>span,
+.game .preflight-switches small,
+.game .flight-stage-track>span,
+.game .flight-copy .flight-caption,
+.game .flight-live,
+.game .flight-skip,
+.game .sun-reference strong,
+.game .sun-reference small,
+.game .earned-badges>span,
+.game .light-text,
+.game .orbit-stamp>span {
+  font-size: var(--font-small);
+}
+
+.game .flight-numbers small {
+  font-size: var(--font-label);
+}
+
+.game .flight-numbers strong {
+  font-size: 38px;
+}
+
+/* Field notes and dialogs */
+.game .notes-heading>span {
+  font-size: 21px;
+}
+
+.game .notebook-cover>h2,
+.game .part-details>h2,
+.game .dialog-heading h2 {
+  font-size: 28px;
+}
+
+.game .notebook-cover>p,
+.game .field-notes>.muted,
+.game .kid-lesson,
+.game .part-details dl,
+.game .field-notes details,
+.game .field-notes summary,
+.game .field-notes details p,
+.game .field-notes details a,
+.game .setting-row small,
+.game .setting-row>b {
+  font-size: var(--font-small);
+}
+
+.game .part-details dt,
+.game .part-details>.eyebrow {
+  font-size: var(--font-label);
+}
+
+/* Keep compact controls readable on tablets and phones. */
+@media (max-width: 800px) {
+  :root {
+    --font-display: clamp(38px, 9vw, 52px);
+    --font-page-title: clamp(29px, 6vw, 40px);
+    --font-section-title: clamp(23px, 5vw, 32px);
+    --font-card-title: 13px;
+    --font-body: 14px;
+    --font-action: 14px;
+    --font-small: 11px;
+    --font-label: 9px;
+    --font-micro: 9px;
+  }
+
+  .game .parts-shelf .workshop-progress button {
+    flex-direction: column;
+    gap: 3px;
+    padding: 7px 3px;
+    line-height: 1.1;
+    text-align: center;
+    white-space: normal;
+  }
+
+  .game .assembly-guide-top .guide-name {
+    font-size: 11px;
+  }
+
+  .game .assembly-guide-top .guide p {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 560px) {
+  :root {
+    --font-display: clamp(36px, 11vw, 48px);
+    --font-page-title: clamp(27px, 8vw, 36px);
+    --font-section-title: clamp(22px, 6vw, 30px);
+    --font-body: 14px;
+  }
+
+  .game .brand {
+    font-size: 19px;
+  }
+
+  .game .destination-caption strong {
+    font-size: 30px;
+  }
+
+  .game .crew-seat>strong {
+    font-size: 17px;
+  }
+
+  .game .part-card strong,
+  .game .packing-slot>strong {
+    font-size: 13px;
+  }
+}

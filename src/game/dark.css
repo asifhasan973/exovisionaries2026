@@ -1,4 +1,4 @@
-/* ExoVisionaries-inspired night palette. Illustration assets keep their natural colors. */
+/* Zero To Beyond night palette. Illustration assets keep their natural colors. */
 body:has(.theme-dark){background:#08071e}
 .game.theme-dark{
   color-scheme:dark;

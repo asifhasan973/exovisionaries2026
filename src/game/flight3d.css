@@ -142,6 +142,28 @@
   background: #5c2b7f
 }
 
+.flight-speed-controls {
+  position: absolute;
+  z-index: 7;
+  top: 18px;
+  left: 18px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 6px 5px 10px;
+  border: 1px solid #dca7ed70;
+  border-radius: 999px;
+  background: #17112fd4;
+  color: #f8ecff;
+  box-shadow: 0 8px 24px #02040d55;
+  backdrop-filter: blur(9px)
+}
+
+.flight-speed-controls>span { margin-right: 3px; font-size: 7px; font-weight: 900; letter-spacing: 1.2px; color: #d9c4e8 }
+.flight-speed-controls button { min-width: 34px; height: 30px; padding: 0 7px; border-radius: 999px; color: #d9c7e6; font-size: 10px; font-weight: 900 }
+.flight-speed-controls button:hover { background: #57306e; color: #fff }
+.flight-speed-controls button.active { background: #dc66eb; color: #1e0c2b; box-shadow: 0 0 18px #d95be466 }
+
 .sun-reference {
   position: absolute;
   z-index: 5;
@@ -204,6 +226,8 @@
     height: 520px;
     flex: 0 0 520px;
   }
+
+  .flight-speed-controls>span { display:none }
 }
 
 .orbit-chapter .orbit-celebration {

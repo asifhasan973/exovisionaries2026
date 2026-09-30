@@ -6,6 +6,7 @@ export type MissionPhase =
   | 'mission'
   | 'site'
   | 'assembly'
+  | 'testing'
   | 'crew'
   | 'readiness'
   | 'launchpad'

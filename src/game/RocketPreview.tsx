@@ -19,5 +19,5 @@ export default function RocketPreview({installed}:{installed:Partial<Record<Slot
  const observer=new ResizeObserver(resize);observer.observe(host);resize();
  return()=>{observer.disconnect();controls.dispose();rocket.traverse(obj=>{if(obj instanceof THREE.Mesh)obj.geometry.dispose();});renderer.dispose();renderer.domElement.remove();};
  },[installed]);
- return <div className="model-preview" ref={container}><p>3D is unavailable on this device. Your illustrated rocket is still ready to play.</p></div>;
+ return <div className="model-preview" ref={container}><p>3D is unavailable. Use the 2D rocket.</p></div>;
 }

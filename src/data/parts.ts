@@ -312,8 +312,8 @@ export const PARTS: Record<string, PartDefinition> = {
   },
   'stowed-lunar-payload': {
     id: 'stowed-lunar-payload',
-    name: 'Enclosed Lunar Payload Package',
-    subtitle: 'Stowed Lunar Lander & Surface Package ($300M Reserved)',
+    name: 'Stowed Two-Stage Lunar Lander',
+    subtitle: 'Descent Stage, Ascent Stage & Protective Spacecraft Adapter',
     category: 'launchVehicle',
     compatibleSlots: ['lunar-payload-bay'],
     costDollars: 0,
@@ -322,8 +322,8 @@ export const PARTS: Record<string, PartDefinition> = {
     massKg: 15100,
     massStatus: 'sourced',
     powerWatts: 0,
-    description: 'Stowed beneath protective aerodynamic fairing panels. Stays enclosed throughout Earth parking orbit for deployment during lunar transit in Chapter 2.',
-    educationalNote: 'In accordance with Apollo mission flight rules, payload fairings are not jettisoned and landers are not extracted while in Earth parking orbit.',
+    description: 'The complete lunar lander travels folded beneath protective adapter panels. Its descent stage lands the crew; its ascent stage later lifts them back to the command spacecraft in lunar orbit.',
+    educationalNote: 'The lander stays enclosed throughout Earth parking orbit. It is extracted only after the translunar injection burn in Milestone 2.',
     sourceCitation: 'NASA Apollo 11 Mission Overview (SLA Fairing Architecture)',
     meshType: 'lunarPayload'
   },

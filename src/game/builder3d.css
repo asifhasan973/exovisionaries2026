@@ -8,32 +8,207 @@
 }
 
 /* Mission catalogue and batch-loading controls */
-.destination-part-tabs{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin:0 0 8px;padding:4px;border:1px solid #dfd3e2;border-radius:12px;background:#f2eaf1}
-.destination-part-tabs button{min-width:0;padding:8px 6px;border-radius:8px;color:#88708f;font-size:9px;display:flex;align-items:center;justify-content:center;gap:4px}
-.destination-part-tabs button.current{background:#fff9ed;color:#765385;box-shadow:0 2px 8px #5d3f6920}
-.batch-actions{display:grid;grid-template-columns:1fr 1.2fr;gap:7px;margin-bottom:8px}
-.batch-actions button{min-height:34px;border:1px solid #d8c9de;border-radius:10px;display:flex;align-items:center;justify-content:center;gap:5px;font-size:9px;color:#765f81;background:#f5edf2}
-.batch-actions .batch-add{color:#fff;background:#8d52ad;border-color:#8d52ad;font-weight:700}
-.batch-actions button:disabled{opacity:.45;cursor:not-allowed}
-.part-card.marked{border:2px solid #bc70d0;background:#f0ddf3;padding:4px 3px 7px}
-.part-select-indicator{position:absolute;left:6px;top:6px;width:18px;height:18px;border-radius:6px;display:grid;place-items:center;color:#8f6b9e;background:#fffaf0cc;z-index:2}
-.part-card.installed .part-select-indicator{color:#557d68;background:#dff0df}
-.mars-preview-grid .locked-part-card{min-height:132px;padding:12px 8px;cursor:not-allowed;opacity:.8;text-align:center}
-.locked-part-icon{width:44px;height:44px;border-radius:14px;background:#e1d5e8;color:#8e719a;display:grid;place-items:center;margin-bottom:4px}
-.locked-part-card small{font-size:7px;line-height:1.35;min-height:28px}
-.locked-label{font-size:6px;letter-spacing:.7px;color:#9c7aa8;margin-top:4px}
-.mission-meters{margin-top:8px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;flex-shrink:0}
-.mission-meters>div{min-width:0;border-radius:9px;padding:7px 6px;background:#eaf0e2;color:#687b63;display:flex;flex-direction:column;align-items:flex-start;gap:2px}
-.mission-meters span{font-size:6px;text-transform:uppercase;letter-spacing:.35px;white-space:nowrap}
-.mission-meters strong{font-size:8px;white-space:nowrap}
-.mission-meters small{display:none}
-.mission-meters>p{grid-column:1/-1;margin:0;border-radius:9px;padding:6px 8px;background:#f3d9d3;color:#965d59;font-size:7px;line-height:1.3}
-.mission-meters.over>div:nth-child(2){background:#f3d9d3;color:#965d59}
+.destination-part-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+  margin: 0 0 8px;
+  padding: 4px;
+  border: 1px solid #dfd3e2;
+  border-radius: 12px;
+  background: #f2eaf1
+}
 
-@media(max-width:560px){
- .destination-part-tabs{margin-top:2px}.batch-actions{grid-template-columns:1fr 1fr}.batch-actions button{font-size:8px;min-height:32px}
- .mission-meters{grid-template-columns:repeat(3,minmax(0,1fr));overflow:visible;padding-bottom:0}.mission-meters>div{min-width:0}
- .mars-preview-grid .locked-part-card{min-height:112px}.locked-part-card small{display:none}
+.destination-part-tabs button {
+  min-width: 0;
+  padding: 8px 6px;
+  border-radius: 8px;
+  color: #88708f;
+  font-size: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px
+}
+
+.destination-part-tabs button.current {
+  background: #fff9ed;
+  color: #765385;
+  box-shadow: 0 2px 8px #5d3f6920
+}
+
+.batch-actions {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 7px;
+  margin-bottom: 8px
+}
+
+.batch-actions button {
+  min-height: 34px;
+  border: 1px solid #d8c9de;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-size: 9px;
+  color: #765f81;
+  background: #f5edf2
+}
+
+.batch-actions .batch-add {
+  color: #fff;
+  background: #8d52ad;
+  border-color: #8d52ad;
+  font-weight: 700
+}
+
+.batch-actions button:disabled {
+  opacity: .45;
+  cursor: not-allowed
+}
+
+.part-card.marked {
+  border: 2px solid #bc70d0;
+  background: #f0ddf3;
+  padding: 4px 3px 7px
+}
+
+.part-select-indicator {
+  position: absolute;
+  left: 6px;
+  top: 6px;
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  color: #8f6b9e;
+  background: #fffaf0cc;
+  z-index: 2
+}
+
+.part-card.installed .part-select-indicator {
+  color: #557d68;
+  background: #dff0df
+}
+
+.mars-preview-grid .locked-part-card {
+  min-height: 132px;
+  padding: 12px 8px;
+  cursor: not-allowed;
+  opacity: .8;
+  text-align: center
+}
+
+.locked-part-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: #e1d5e8;
+  color: #8e719a;
+  display: grid;
+  place-items: center;
+  margin-bottom: 4px
+}
+
+.locked-part-card small {
+  font-size: 7px;
+  line-height: 1.35;
+  min-height: 28px
+}
+
+.locked-label {
+  font-size: 6px;
+  letter-spacing: .7px;
+  color: #9c7aa8;
+  margin-top: 4px
+}
+
+.mission-meters {
+  margin-top: 8px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 5px;
+  flex-shrink: 0
+}
+
+.mission-meters>div {
+  min-width: 0;
+  border-radius: 9px;
+  padding: 7px 6px;
+  background: #eaf0e2;
+  color: #687b63;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px
+}
+
+.mission-meters span {
+  font-size: 6px;
+  text-transform: uppercase;
+  letter-spacing: .35px;
+  white-space: nowrap
+}
+
+.mission-meters strong {
+  font-size: 8px;
+  white-space: nowrap
+}
+
+.mission-meters small {
+  display: none
+}
+
+.mission-meters>p {
+  grid-column: 1/-1;
+  margin: 0;
+  border-radius: 9px;
+  padding: 6px 8px;
+  background: #f3d9d3;
+  color: #965d59;
+  font-size: 7px;
+  line-height: 1.3
+}
+
+.mission-meters.over>div:nth-child(2) {
+  background: #f3d9d3;
+  color: #965d59
+}
+
+@media(max-width:560px) {
+  .destination-part-tabs {
+    margin-top: 2px
+  }
+
+  .batch-actions {
+    grid-template-columns: 1fr 1fr
+  }
+
+  .batch-actions button {
+    font-size: 8px;
+    min-height: 32px
+  }
+
+  .mission-meters {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    overflow: visible;
+    padding-bottom: 0
+  }
+
+  .mission-meters>div {
+    min-width: 0
+  }
+
+  .mars-preview-grid .locked-part-card {
+    min-height: 112px
+  }
+
+  .locked-part-card small {
+    display: none
+  }
 }
 
 .parts-shelf .workshop-top-actions {
@@ -882,7 +1057,9 @@
 }
 
 @keyframes target-yellow-blink {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 0 0 5px #ffd83a0d, 0 0 14px #ffd83a38
   }
 
@@ -907,10 +1084,33 @@
 }
 
 .snap-flight img,
-.snap-flight svg {
+.snap-flight svg,
+.return-flight img,
+.return-flight svg {
   width: 60px;
   height: 60px;
   object-fit: contain
+}
+
+.return-flight {
+  position: fixed;
+  z-index: 1000;
+  width: 68px;
+  height: 68px;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  border: 2px solid #d3a1df;
+  border-radius: 18px;
+  background: #1b1638ee;
+  box-shadow: 0 0 20px #cf87df66;
+  animation: return-to-shelf .3s cubic-bezier(.55, .05, .75, .25) forwards
+}
+
+@keyframes return-to-shelf {
+  0% { transform: translate(0, 0) scale(1); opacity: 1 }
+  70% { opacity: 1 }
+  100% { transform: translate(var(--return-x), var(--return-y)) scale(.35); opacity: 0 }
 }
 
 @keyframes snap-to-rocket {
@@ -959,10 +1159,10 @@
 .assembly-heading {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  align-items: center;
-  gap: 34px;
+  align-items: stretch;
+  gap: 28px;
   min-height: 0;
-  margin-bottom: 14px
+  margin-bottom: 18px
 }
 
 .assembly-title,
@@ -970,21 +1170,31 @@
   min-width: 0
 }
 
+.assembly-title {
+  display: flex;
+  flex-direction: column;
+  justify-content: center
+}
+
 .assembly-guide-top {
   margin-top: 0;
   display: flex;
-  justify-content: flex-start
+  align-items: center;
+  justify-content: flex-start;
+  padding: 10px 0 10px 28px;
+  border-left: 1px solid #d9cce1
 }
 
 .assembly-guide-top .guide {
-  max-width: 760px;
-  gap: 10px
+  width: 100%;
+  max-width: none;
+  gap: 16px
 }
 
 .assembly-guide-top .guide .portrait {
-  width: 48px;
-  height: 48px;
-  border-width: 2px
+  width: 68px;
+  height: 68px;
+  border-width: 3px
 }
 
 .assembly-guide-top .guide p {
@@ -996,8 +1206,13 @@
 }
 
 .assembly-guide-top .read-aloud {
-  width: 29px;
-  height: 29px
+  width: 40px;
+  height: 40px;
+  margin-left: 6px
+}
+
+.theme-dark .assembly-guide-top {
+  border-left-color: #603e79
 }
 
 .assembly-chapter .workshop {
@@ -1094,6 +1309,7 @@
 }
 
 @media(max-width:1100px) and (min-width:801px) {
+
   .assembly-chapter .workshop,
   .assembly-chapter.view-3d .workshop {
     grid-template-columns: 290px minmax(0, 1fr)
@@ -1103,8 +1319,18 @@
 @media(max-width:800px) {
   .assembly-heading {
     grid-template-columns: 1fr;
-    gap: 11px;
+    gap: 12px;
     align-items: start
+  }
+
+  .assembly-guide-top {
+    padding: 12px 0 0;
+    border-left: 0;
+    border-top: 1px solid #d9cce1
+  }
+
+  .theme-dark .assembly-guide-top {
+    border-top-color: #603e79
   }
 
   .assembly-chapter .workshop,
@@ -1116,8 +1342,8 @@
 
 @media(max-width:560px) {
   .assembly-guide-top .guide .portrait {
-    width: 43px;
-    height: 43px
+    width: 54px;
+    height: 54px
   }
 
   .assembly-guide-top .guide p {
@@ -1135,3 +1361,8 @@
     height: 100px
   }
 }
+
+/* Final workshop header override: story dialogue opens as a full-screen scene. */
+.assembly-heading{grid-template-columns:minmax(0,1fr) auto;align-items:center}.assembly-brief-button{display:flex;align-items:center;gap:12px;min-width:270px;padding:8px 14px 8px 8px;border:1px solid #d3bddc;border-radius:999px;background:#eee0f0;text-align:left;box-shadow:0 8px 24px #2a14321a}.assembly-brief-button img{width:62px;height:62px;border-radius:50%;object-fit:cover;object-position:50% 14%;background:#15355b;border:3px solid #fff}.assembly-brief-button>span{display:flex;flex:1;flex-direction:column;gap:4px}.assembly-brief-button small{font-size:8px;font-weight:900;letter-spacing:1.3px;color:#9a5faa}.assembly-brief-button strong{font:600 16px Fredoka,sans-serif}.assembly-brief-button:hover{border-color:#b65dcb;transform:translateY(-2px)}.theme-dark .assembly-brief-button{border-color:#683a7e;background:#2b1744;color:#fff}.theme-dark .assembly-brief-button small{color:#ea8cf2}.assembly-chapter .workshop{height:clamp(590px,calc(100dvh - 330px),750px)}
+@media(max-width:800px){.assembly-heading{grid-template-columns:1fr auto!important}.assembly-brief-button{min-width:0}.assembly-brief-button>span{display:none}.assembly-brief-button img{width:52px;height:52px}.assembly-chapter .workshop{height:610px}}
+@media(max-width:560px){.assembly-heading{grid-template-columns:1fr auto!important}.assembly-brief-button{padding:6px}.assembly-brief-button>svg{display:none}.assembly-brief-button img{width:46px;height:46px}.assembly-chapter .workshop{height:auto}}

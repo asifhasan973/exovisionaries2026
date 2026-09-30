@@ -18,7 +18,7 @@ export const MARS_PREVIEW_PARTS = [
 ];
 export const shortNames: Record<string, string> = {
  'stage-1-booster':'Booster','interstage-1-2':'Big connector','stage-2-cryo':'Second stage','interstage-2-3':'Small connector',
- 'stage-3-departure':'Orbit engine','instrument-unit-ring':'Rocket brain','stowed-lunar-payload':'Moon cargo',
+ 'stage-3-departure':'Orbit engine','instrument-unit-ring':'Rocket brain','stowed-lunar-payload':'Two-stage lunar lander',
  'service-module-core':'Service module','crew-capsule-command':'Crew capsule','launch-escape-tower':'Escape tower',
  'eclss-primary-scrubber':'Air recycler','primary-flight-avionics':'Flight computer','fuel-cell-power-bus':'Fuel cells','high-gain-comm-array':'Radio dish',
  'neutron-spectrometer':'Ice detector','nav-context-camera':'Mapping camera','subsurface-drill':'Moon drill','mass-spectrometer':'Gas detective',
@@ -34,23 +34,23 @@ export const partLesson: Record<string,string> = {
  'interstage-2-3':'A smaller connector joins the next stage.',
  'stage-3-departure':'This engine gives us the speed to circle Earth.',
  'instrument-unit-ring':'The rocket brain helps us follow the right path.',
- 'stowed-lunar-payload':'Our Moon equipment travels safely inside this shell.',
+ 'stowed-lunar-payload':'One stage lands; the other lifts off.',
  'service-module-core':'The crew needs supplies, power and a small engine.',
- 'crew-capsule-command':'A safe little home for three brave astronauts!',
+ 'crew-capsule-command':'A safe cabin for three astronauts.',
  'launch-escape-tower':'This tower can pull the capsule away in an emergency.',
  'eclss-primary-scrubber':'Clean air helps our astronauts breathe.',
  'primary-flight-avionics':'This computer helps the crew navigate.',
  'fuel-cell-power-bus':'Fuel cells turn chemical energy into electricity.',
  'high-gain-comm-array':'Now our crew can talk to mission control!',
- 'neutron-spectrometer':'This detector finds clues to hydrogen, which can point to water ice.',
- 'nav-context-camera':'Pictures help scientists map the ground around an ice clue.'
- ,'lunar-docking-adapter':'The docking ring makes a sealed bridge between two spacecraft.',
- 'surface-comm-beacon':'A relay helps the crew talk around crater walls and ridges.',
- 'eva-suit-support-kit':'This kit keeps Moon suits powered, sealed and ready for dusty work.',
- 'sample-return-vault':'The sealed vault protects precious Moon samples on the way home.',
- 'laser-retroreflector':'Earth scientists can bounce lasers from this mirror for decades.',
- 'passive-seismometer':'Tiny ground vibrations reveal what the Moon is like inside.',
- 'thermal-control-field-kit':'Heaters and blankets protect tools from hot sunlight and cold shadow.',
- 'lunar-navigation-beacon':'A local beacon helps explorers navigate where there is no GPS.'
+ 'neutron-spectrometer':'Hydrogen clues can point to water ice.',
+ 'nav-context-camera':'Pictures map the ground around ice clues.'
+ ,'lunar-docking-adapter':'The ring joins two spacecraft safely.',
+ 'surface-comm-beacon':'A relay sends signals around crater walls.',
+ 'eva-suit-support-kit':'This kit keeps Moon suits ready.',
+ 'sample-return-vault':'The vault protects Moon samples.',
+ 'laser-retroreflector':'Earth can bounce lasers from this mirror.',
+ 'passive-seismometer':'Moonquakes reveal the Moon’s inside.',
+ 'thermal-control-field-kit':'Heaters protect tools from extreme temperatures.',
+ 'lunar-navigation-beacon':'A beacon guides explorers without GPS.'
 };
 export function partName(id:string) { return shortNames[id] || id.split('-').map(w=>w[0]?.toUpperCase()+w.slice(1)).join(' '); }

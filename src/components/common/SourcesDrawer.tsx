@@ -88,7 +88,7 @@ export const SourcesDrawer: React.FC = () => {
         </div>
 
         <div className="mt-auto pt-6 text-[10px] font-mono text-slate-600 text-center">
-          Exovisionaries • NASA Space Apps Challenge 2026
+          Zero To Beyond • NASA Space Apps Challenge 2026
         </div>
       </div>
     </div>

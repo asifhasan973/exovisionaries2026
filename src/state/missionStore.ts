@@ -6,6 +6,7 @@ import { sound } from '../audio/soundEngine';
 import { QUICK_LAUNCH_CREW, QUICK_LAUNCH_INSTALLED_PARTS } from '../data/defaultManifest';
 import { PARTS, SLOTS } from '../data/parts';
 import { computeBudgetAccounting, computeMassAccounting } from '../engine/accounting';
+import { STORY_BUILD_INSTALLED_PARTS } from '../game/assemblyMission';
 import {
   AssemblyViewMode,
   CrewRole,
@@ -53,6 +54,7 @@ interface MissionState {
   // Crew State
   crewAssignments: Partial<Record<CrewRole, string | null>>;
   missionDurationDays: number;
+  systemTestsPassed: boolean;
 
   // Flight & Orbit Snapshot
   launchSnapshot: LaunchSnapshot | null;
@@ -91,6 +93,8 @@ interface MissionState {
 
   // Flight Actions
   applyQuickLaunchManifest: () => void;
+  applyStoryBuild: () => void;
+  completeSystemTests: () => void;
   prepareLaunch: () => boolean; // creates immutable snapshot
   setAscentProgress: (progress: number) => void;
   toggleAscentPause: () => void;
@@ -136,12 +140,13 @@ function loadSavedState(): Partial<MissionState> | null {
       if (candidate && (candidate.primaryRole === role || candidate.secondaryRole === role) && !Object.values(crew).includes(id)) crew[role] = id;
     }
     // Resume flights at the pad rather than restoring a half-finished animation.
-    const phases: MissionPhase[] = ['welcome','destination','mission','site','assembly','crew','readiness','launchpad','orbit'];
+    const phases: MissionPhase[] = ['welcome','destination','mission','site','assembly','testing','crew','readiness','launchpad','orbit'];
     const phase = parsed.currentPhase === 'ascent' ? 'launchpad' : parsed.currentPhase;
     return { currentPhase: phases.includes(phase) ? phase : 'welcome', installedParts: installed,
       crewAssignments: crew, selectedDestination: 'moon', selectedMission: 'lunar-ice-explorer',
       selectedSite: parsed.selectedSite === 'crater-rim' ? 'crater-rim' : 'ridge',
       missionDurationDays: Math.max(8, Math.min(21, Number(parsed.missionDurationDays) || 8)),
+      systemTestsPassed: parsed.systemTestsPassed === true,
       audioSettings: { isMuted: parsed.audioSettings?.isMuted !== false, captionsEnabled: true,
         reducedMotion: parsed.audioSettings?.reducedMotion === true } };
   } catch {
@@ -160,6 +165,7 @@ function saveState(state: Partial<MissionState>) {
       installedParts: state.installedParts,
       crewAssignments: state.crewAssignments,
       missionDurationDays: state.missionDurationDays,
+      systemTestsPassed: state.systemTestsPassed,
       launchSnapshot: state.launchSnapshot,
       audioSettings: state.audioSettings
     };
@@ -187,6 +193,7 @@ export const useMissionStore = create<MissionState>((set, get) => ({
 
   crewAssignments: saved?.crewAssignments || INITIAL_CREW,
   missionDurationDays: saved?.missionDurationDays || 8,
+  systemTestsPassed: saved?.systemTestsPassed || false,
 
   launchSnapshot: saved?.launchSnapshot || null,
   ascentProgress: 0,
@@ -280,7 +287,8 @@ export const useMissionStore = create<MissionState>((set, get) => ({
       redoStack: [],
       selectedSlotId: slotId,
       selectedPartId: partId,
-      isDraggingPartId: null
+      isDraggingPartId: null,
+      systemTestsPassed: false
     });
     saveState(get());
   },
@@ -318,7 +326,8 @@ export const useMissionStore = create<MissionState>((set, get) => ({
         redoStack: [],
         selectedPartId: installed[installed.length - 1],
         selectedSlotId: (Object.entries(updated).find(([, id]) => id === installed[installed.length - 1])?.[0] as SlotInterface | undefined) ?? null,
-        isDraggingPartId: null
+        isDraggingPartId: null,
+        systemTestsPassed: false
       });
       saveState(get());
     }
@@ -339,7 +348,8 @@ export const useMissionStore = create<MissionState>((set, get) => ({
       redoStack: [],
       selectedSlotId: slotId,
       selectedPartId: partId,
-      isDraggingPartId: null
+      isDraggingPartId: null,
+      systemTestsPassed: false
     });
     saveState(get());
   },
@@ -357,7 +367,8 @@ export const useMissionStore = create<MissionState>((set, get) => ({
       installedParts: updated,
       undoStack,
       redoStack: [],
-      selectedSlotId: null
+      selectedSlotId: null,
+      systemTestsPassed: false
     });
     saveState(get());
   },
@@ -374,7 +385,8 @@ export const useMissionStore = create<MissionState>((set, get) => ({
     set({
       installedParts: previous,
       undoStack: newUndoStack,
-      redoStack: newRedoStack
+      redoStack: newRedoStack,
+      systemTestsPassed: false
     });
     saveState(get());
   },
@@ -391,7 +403,8 @@ export const useMissionStore = create<MissionState>((set, get) => ({
     set({
       installedParts: next,
       undoStack: newUndoStack,
-      redoStack: newRedoStack
+      redoStack: newRedoStack,
+      systemTestsPassed: false
     });
     saveState(get());
   },
@@ -442,8 +455,28 @@ export const useMissionStore = create<MissionState>((set, get) => ({
     saveState(get());
   },
 
+  applyStoryBuild: () => {
+    sound.playRadioBeep(true);
+    set({
+      installedParts: { ...STORY_BUILD_INSTALLED_PARTS },
+      undoStack: [],
+      redoStack: [],
+      selectedPartId: null,
+      selectedSlotId: null,
+      systemTestsPassed: false
+    });
+    saveState(get());
+  },
+
+  completeSystemTests: () => {
+    sound.playRadioBeep(true);
+    set({ systemTestsPassed: true });
+    saveState(get());
+  },
+
   prepareLaunch: () => {
     const state = get();
+    if (!state.systemTestsPassed) return false;
     if (!validateLaunchReadiness(state.selectedMission, state.selectedSite, state.installedParts, state.crewAssignments, state.missionDurationDays).isClearToLaunch) return false;
     const budget = computeBudgetAccounting(state.installedParts);
     const mass = computeMassAccounting(state.installedParts, state.crewAssignments, state.missionDurationDays);
@@ -495,6 +528,7 @@ export const useMissionStore = create<MissionState>((set, get) => ({
       installedParts: {},
       crewAssignments: { ...INITIAL_CREW },
       missionDurationDays: 8,
+      systemTestsPassed: false,
       selectedPartId: null, selectedSlotId: null, isDraggingPartId: null,
       undoStack: [], redoStack: [], assemblyViewMode: 'fullStack',
       launchSnapshot: null,
