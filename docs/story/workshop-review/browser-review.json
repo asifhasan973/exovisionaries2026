@@ -1,0 +1,34 @@
+{
+  "errors": [],
+  "failedRequests": [],
+  "totals": {
+    "credits": 960,
+    "massKg": 280,
+    "normalW": 218,
+    "peakW": 373,
+    "landerW": 60,
+    "solarW": 250,
+    "batteryWh": 220,
+    "deficitW": 0,
+    "batteryMinutes": null,
+    "potentialScience": 38,
+    "spentScience": 0
+  },
+  "verificationScope": "Continue at the repaired details-dialog boundary; previous stages verified in the earlier browser pass.",
+  "features": [
+    "initial empty bay",
+    "forgiving far drop",
+    "out-of-bay returns to shelf",
+    "undo/redo",
+    "select all",
+    "multi install",
+    "single-choice replacement",
+    "depth keyboard control",
+    "NASA info dialog",
+    "persist hardware and cursor on reload",
+    "390/320 responsive",
+    "keyboard install",
+    "assembly checkpoint before approval",
+    "confirmed Quick Build"
+  ]
+}

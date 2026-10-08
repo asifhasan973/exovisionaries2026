@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark" />
+  <title>Character Studio · Zero To Beyond</title>
+  <link rel="stylesheet" href="preview.css" />
+</head>
+<body>
+  <header class="studio-header"><a href="/">✦ Zero To Beyond</a><span>CHARACTER STUDIO · MODULE 02</span></header>
+  <main>
+    <div class="studio-title"><div><p class="eyebrow">THE FACES OF OUR ADVENTURE</p><h1>Meet your mission crew.</h1></div><span class="version-pill">12 expressions · 48 face frames</span></div>
+    <p id="status" role="status">Loading your crew…</p>
+    <div id="studio" class="studio" hidden>
+      <section class="stage" aria-label="Animated character preview">
+        <div class="stage-stars" aria-hidden="true">✦<span>✧</span></div>
+        <figure class="actor" data-character="chief"><canvas width="600" height="900" aria-label="Chief character animation"></canvas><figcaption><b>Chief</b><span>MISSION OFFICER</span></figcaption></figure>
+        <figure class="actor" data-character="commander"><canvas width="600" height="900" aria-label="Commander character animation"></canvas><figcaption><b>Commander</b><span>YOUR MISSION COMPANION</span></figcaption></figure>
+        <div class="stage-label"><span id="performance-dot"></span><span id="performance-label">Talking preview</span></div>
+      </section>
+      <aside class="controls" aria-label="Character controls">
+        <div class="control-group"><p class="eyebrow">CHOOSE A CHARACTER</p><div class="segmented" id="character-controls"><button type="button" data-character="chief" aria-pressed="false">Chief</button><button type="button" data-character="commander" aria-pressed="true">Commander</button></div></div>
+        <div class="control-group"><h2>Expression</h2><div class="options" id="expression-controls"></div></div>
+        <div class="control-group"><h2>Gesture</h2><div class="options" id="pose-controls"></div></div>
+        <div class="control-group"><h2>Performance</h2><button class="primary" type="button" id="talk-control" aria-pressed="true">Ⅱ Pause talking</button><div class="options frame-options" id="frame-controls"><button type="button" data-frame="auto" aria-pressed="true">Play</button><button type="button" data-frame="closed" aria-pressed="false">Rest</button><button type="button" data-frame="ah" aria-pressed="false">Ah</button><button type="button" data-frame="oo" aria-pressed="false">Oo</button><button type="button" data-frame="blink" aria-pressed="false">Blink</button></div></div>
+        <div class="cue-check"><span id="cue-index">1 / 1</span><button type="button" id="next-cue">Next script cue →</button></div>
+        <p class="studio-note">Art preview only. Mouth motion is rhythmic; speech timing comes in Module 3.</p>
+      </aside>
+    </div>
+    <details class="contact-panel" id="contact-panel"><summary>Inspect all expressions &amp; face frames <span>↓</span></summary><div id="contact-sheets"></div></details>
+  </main>
+  <script type="module" src="preview.mjs"></script>
+</body>
+</html>

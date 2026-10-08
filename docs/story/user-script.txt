@@ -1,0 +1,391 @@
+First Step (Mission Selection) 
+Enter ur name : Charlie
+BG: Space 
+
+Conversation between Chief and Commander (user user-companion):
+
+Chief: Charlie, good to see you.
+Charlie: Thank you, Chief. 
+Chief: In our last meeting, we made an important decision. You’ve been selected to lead your own space mission as the Commander.
+Commander: My own mission?
+Chief: That’s right. You’ll choose where you want to go, what you want to investigate, and how you’ll prepare your spacecraft and crew.
+Commander: That’s a big responsibility.
+Chief: It is. So, Commander… where do you want to go? Well then, best of luck!!
+
+[Commander’s Avatar will appear guiding the user through dialog bubble]
+Commander: Hey there, little learner! As you can see, I have just received a huge responsibility. I must succeed no matter what!!
+Commander: As one of my closest friends, I want you to help me complete the mission. Don’t worry. I am always here to guide you. Now let’s start with the planet selection!
+
+MOON and mars selection slide will appear.
+[Planet selection popup will appear. Options: Moon, Mars, Comming Soon]
+Commander:  What exactly will we be looking for? Great! Now lets decide what exactly we will be looking for.
+Chief: That depends on your mission objective. Think carefully.Your objective will determine what location is best, what kind of spacecraft, instruments, rover, power system, and other equipment you’ll need.
+Commander: It depends on our mission objective. Think carefully. Our objective will determine what location is best, what kind of spacecraft, instruments, rover, power system, and other equipment we’ll need.
+
+[Mission Objective selection popup will appear]
+Mission A — Lunar South Pole Ice Explorer 
+Mission B — Lunar Geology Explorer
+
+Commander: Now that our mission is fixed, we will choose the landing site.
+
+[Landing Site Selection]
+🧊 SITE A — Ice-Proximity Crater Rim
+ Balanced exploration mission ⭐
+ Moderate risk • Short ice traverse • High science
+🌑 SITE B — Permanently Shadowed Region
+ Extreme science mission
+ Very high risk • Maximum ice access • Severe power/thermal challenges
+
+Chief: You’ll have a limited budget, mass, and power supply. Every choice comes with a trade-off.
+Commander: Then I’d better choose wisely.
+Chief: That’s what I want to hear. Your mission begins now, Commander. Make every decision count.
+Commander: We must remember that we’ll have limited budget, mass, and power supply. Every choice we make, comes with a trade-off.
+Commander: Now I thing we are good to go. Let’s dive into the mission, mate!
+
+
+Second Step (Spacecraft Design Specifications)
+The player receives: 
+Resource
+Starting limit
+💰 Budget
+1,000 credits
+⚖️ Payload mass
+350 kg
+⚡ Available power
+450 W peak
+❤️ Rover health
+100%
+🧪 Science score
+0
+
+
+Do the values of mass and power (in the subsequent sections) match or make sense compared to the actual ones?
+
+Budget for scientific instruments 
+1. 🚀 LANDER SYSTEM
+These are mandatory.
+Component
+Mass
+Cost (Credit)
+Power
+Science
+Risk if missing
+Lander body
+80 kg
+100
+—
+—
+Mission impossible
+Landing engines
+25 kg
+60
+—
+—
+Crash
+Landing radar/altimeter
+8 kg
+35
+15 W
++2
+Landing error
+Navigation computer
+6 kg
+30
+20 W
++2
+Navigation failure
+Communication antenna
+10 kg
+40
+15 W
++3
+Data loss
+Landing cameras
+5 kg
+20
+10 W
++3
+Higher landing risk
+
+Mandatory starting cost: 285 credits
+Mandatory mass: 134 kg
+So: 1,000 − 285 = 715 credits remaining
+2. 🤖 CHOOSE YOUR ROVER
+This is your first major trade-off.  Here the user gonna choose which rover is appropriate. 
+🟡 Basic Rover
+Mass
+55 kg
+Cost
+120 Credit
+Power requirement
+100 W
+Science bonus
++5
+Terrain capability
+⭐⭐
+Reliability
+70%
+
+Cheap, light, but not ideal for South Pole terrain.
+
+🔵 Polar Explorer
+Mass
+85 kg
+Cost
+190 Credit
+Power requirement
+130 W
+Science bonus
++15
+Terrain capability
+⭐⭐⭐⭐
+Reliability
+90%
+
+Recommended for the game.
+NASA's VIPER was specifically designed to traverse the highly cratered South Pole, with specialized mobility for varying terrain and soil conditions.
+
+🔴 Heavy Science Rover
+Mass
+115 kg
+Cost
+250 Credit
+Power requirement
+160 W
+Science bonus
++25
+Terrain capability
+⭐⭐⭐⭐⭐
+Reliability
+94%
+
+But now the player has less budget and mass for science instruments.
+That's  the trade-off.
+4. 🔬 SCIENCE PAYLOAD
+Now the player gets to build the actual South Pole Explorer.
+=> Neutron Spectrometer — NSS 
+Mass 2kg | cost 65 credits | power 5W | special ability : ICE SCAN
+=> Near-Infrared Spectrometer — NIRVSS 
+Mass 5kg | cost 75 credits | power 30W | special ability : Hydrogen detection and what it actually is.
+5. 🟠 TRIDENT DRILL (depth choosing trade off )
+This should be one of the most expensive and powerful choices.
+Real TRIDENT is a rotary-percussive drill designed to excavate lunar regolith to approximately 1 meter, while measuring properties such as temperature and material strength.
+Mass
+18 kg
+Cost
+110 credits
+Power
+20 W normal / 175 W peak
+Science
++35
+Depth
+1 m
+
+Special ability:
+DRILL
+Player chooses:
+10 cm
+ 20 cm
+ 30 cm
+ 40 cm
+ ...
+ 100 cm
+The deeper they drill: More science → more power → more risk
+For example:
+20 cm → +5 science
+ 50 cm → +15
+ 100 cm → +35
+6. 📷 VISUAL NAVIGATION SYSTEM (3rd trade off)
+Give the player a choice between cheap and advanced cameras. 
+
+Basic Navigation Camera
+Mass
+3 kg
+Cost
+20
+Power
+8 W
+Science
++3
+Safety
++10
+
+Stereo Hazard Camera
+Mass
+6 kg
+Cost
+40
+Power
+15 W
+Science
++8
+Safety
++25
+
+7. ☀️ POWER SYSTEM
+This is very important for your South Pole mission.
+=> Solar Array
+Standard | 40 credits | 150 W
+High-efficiency | 75 credits | +250 W
+8. 🔋 BATTERY
+This makes the shadowed-crater gameplay possible.
+
+
+
+Battery
+Mass
+Cost
+Capacity
+Small
+6 kg
+30
+100
+Medium
+12 kg
+60
+220
+Large
+20 kg
+100
+400
+
+Gameplay example
+The player enters a permanently shadowed region.
+Solar: 0 W
+Rover consumes: 100 W
+Battery:🔋 72%
+Then:🔋 51%
+Then:🔋 28%
+Then: ⚠️ LOW POWER
+Now the player must decide: Continue toward the ice deposit or retreat?
+9. ❄️ THERMAL SYSTEM
+This should be another strategic decision.
+Basic thermal protection
+35 credits
+moderate insulation
+limited heater capability
+Advanced thermal protection
+75 credits
+insulation
+heaters
+temperature monitoring
+much lower failure risk
+10. 📡 COMMUNICATION
+Basic
+25 credits
+low bandwidth
+occasional data loss
+High-gain
+55 credits
+better bandwidth
+reliable science transmission
+The previously mentioned instruments are gonna trade off for budget (credits), mass (kgs), power (W) only. [MISSING_VALUES]
+
+Make it a mission preparation sequence:
+STEP 1 (Choose rover)
+Basic
+Polar Explorer
+Heavy Science
+↓
+STEP 2 (Choose science package - Mandatory)
+ Prospect
+ Analyze
+ Drill (Science point based on depth choose-Trade off)
+↓
+STEP 3 (Power management)
+Solar
+Battery
+↓
+STEP 4 (Survival)
+Thermal
+Communication
+Navigation
+↓
+STEP 5 (MASS CHECK)
+Payload limit: 350 kg
+Your spacecraft: 337 kg 🟢 ACCEPT
+or
+Your spacecraft: 386 kg 🔴 TOO HEAVY
+“Commander, remove 36 kg of equipment.”
+↓
+STEP 6 (POWER CHECK)
+Maximum available: 450 W
+Your system:
+Normal consumption: 280 W
+Drill peak: 175 W
+⚠️ Power margin: LOW
+↓
+STEP 7 (BUDGET CHECK)
+Budget: 1,000 credits
+Spent: 946
+Remaining: 54
+🟢 MISSION APPROVED 
+
+Space craft design stages
+STAGE 1 — SPACECRAFT BUS
+ Body
+ Engines
+ Communication
+ Solar panels
+ Battery
+ Computer
+STAGE 2 — ROVER
+Rover chassis
+Wheels
+Suspension
+Navigation system
+Cameras
+STAGE 3 — SCIENCE PAYLOAD
+Player chooses:
+NSS
+NIRVSS
+TRIDENT
+MSOLO
+STAGE 4 — SURVIVAL
+Thermal protection
+Battery upgrade
+Solar upgrade
+Communication upgrade
+
+
+Rocket Design steps already done by Asif (No specific configurations).
+An info icon on all the components to view the details and description about it in a popup.
+
+Exploration Stage
+🌑 THEN THE ACTUAL MISSION STARTS
+And this is where I think your game could become really strong for Art & Technology.
+The player doesn't immediately know where the ice is.
+They land.
+Phase 1 — Explore
+NSS starts scanning:
+Hydrogen signal: LOW
+Drive 200 m.
+Hydrogen signal: MEDIUM
+Drive another 150 m.
+🟢 HIGH HYDROGEN SIGNATURE
+Now the player has to decide:
+Drill here
+Explore further
+Enter permanently shadowed crater
+And each choice has consequences.
+
+If they choose A:
+Drill → NIRVSS → MSOLO
+🛠️ 20 cm
+ 🛠️ 40 cm
+ 🛠️ 60 cm
+ 🛠️ 80 cm
+ 🛠️ 100 cm
+Then:
+🟢 WATER ICE CONFIRMED
+Mission Science Score: +150
+
+If they choose C:
+They enter the shadow.
+Solar: 250 W → 0 W
+Battery: 100% → 82% → 64% → 46%
+Temperature: -80°C → -110°C
+Then the player realizes:
+“Oh shit… I need to get out before my battery dies.”
+😂
+THAT is the kind of trade-off that makes the game feel like a mission rather than a quiz.

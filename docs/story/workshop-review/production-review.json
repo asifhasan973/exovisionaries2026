@@ -1,0 +1,12 @@
+{
+  "productionURL": "http://127.0.0.1:4173/",
+  "mobileWidths": [
+    390,
+    320
+  ],
+  "loaded3DAndThumbnails": true,
+  "shadowSolarZero": true,
+  "touchSwap": true,
+  "summaryUndoHonestlyDisabled": true,
+  "errors": []
+}

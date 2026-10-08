@@ -1,0 +1,265 @@
+{
+  "previewURL": "http://127.0.0.1:5173/story/characters-v1/preview.html",
+  "faces": [
+    {
+      "character": "chief",
+      "expression": "welcoming",
+      "ah": {
+        "total": 8540,
+        "outside": 0
+      },
+      "oo": {
+        "total": 8529,
+        "outside": 0
+      },
+      "blink": {
+        "total": 15651,
+        "outside": 0
+      }
+    },
+    {
+      "character": "chief",
+      "expression": "proud",
+      "ah": {
+        "total": 8955,
+        "outside": 0
+      },
+      "oo": {
+        "total": 8965,
+        "outside": 0
+      },
+      "blink": {
+        "total": 16691,
+        "outside": 0
+      }
+    },
+    {
+      "character": "chief",
+      "expression": "focused",
+      "ah": {
+        "total": 8691,
+        "outside": 0
+      },
+      "oo": {
+        "total": 8713,
+        "outside": 0
+      },
+      "blink": {
+        "total": 16433,
+        "outside": 0
+      }
+    },
+    {
+      "character": "chief",
+      "expression": "encouraging",
+      "ah": {
+        "total": 12632,
+        "outside": 0
+      },
+      "oo": {
+        "total": 12641,
+        "outside": 0
+      },
+      "blink": {
+        "total": 25691,
+        "outside": 0
+      }
+    },
+    {
+      "character": "chief",
+      "expression": "confident",
+      "ah": {
+        "total": 12980,
+        "outside": 0
+      },
+      "oo": {
+        "total": 12994,
+        "outside": 0
+      },
+      "blink": {
+        "total": 25861,
+        "outside": 0
+      }
+    },
+    {
+      "character": "commander",
+      "expression": "thoughtful",
+      "ah": {
+        "total": 3809,
+        "outside": 0
+      },
+      "oo": {
+        "total": 3813,
+        "outside": 0
+      },
+      "blink": {
+        "total": 13736,
+        "outside": 0
+      }
+    },
+    {
+      "character": "commander",
+      "expression": "grateful",
+      "ah": {
+        "total": 4011,
+        "outside": 0
+      },
+      "oo": {
+        "total": 4009,
+        "outside": 0
+      },
+      "blink": {
+        "total": 14547,
+        "outside": 0
+      }
+    },
+    {
+      "character": "commander",
+      "expression": "surprised",
+      "ah": {
+        "total": 3758,
+        "outside": 0
+      },
+      "oo": {
+        "total": 3754,
+        "outside": 0
+      },
+      "blink": {
+        "total": 16317,
+        "outside": 0
+      }
+    },
+    {
+      "character": "commander",
+      "expression": "determined",
+      "ah": {
+        "total": 4007,
+        "outside": 0
+      },
+      "oo": {
+        "total": 3976,
+        "outside": 0
+      },
+      "blink": {
+        "total": 9467,
+        "outside": 0
+      }
+    },
+    {
+      "character": "commander",
+      "expression": "encouraging",
+      "ah": {
+        "total": 4149,
+        "outside": 0
+      },
+      "oo": {
+        "total": 4050,
+        "outside": 0
+      },
+      "blink": {
+        "total": 9437,
+        "outside": 0
+      }
+    },
+    {
+      "character": "commander",
+      "expression": "curious",
+      "ah": {
+        "total": 4205,
+        "outside": 0
+      },
+      "oo": {
+        "total": 4184,
+        "outside": 0
+      },
+      "blink": {
+        "total": 9455,
+        "outside": 0
+      }
+    },
+    {
+      "character": "commander",
+      "expression": "confident",
+      "ah": {
+        "total": 13039,
+        "outside": 0
+      },
+      "oo": {
+        "total": 12943,
+        "outside": 0
+      },
+      "blink": {
+        "total": 30713,
+        "outside": 0
+      }
+    }
+  ],
+  "gestures": [
+    {
+      "character": "chief",
+      "pose": "greet",
+      "changedPixels": 10850
+    },
+    {
+      "character": "chief",
+      "pose": "listen",
+      "changedPixels": 0
+    },
+    {
+      "character": "chief",
+      "pose": "explain",
+      "changedPixels": 5069
+    },
+    {
+      "character": "chief",
+      "pose": "point",
+      "changedPixels": 6298
+    },
+    {
+      "character": "commander",
+      "pose": "listen",
+      "changedPixels": 0
+    },
+    {
+      "character": "commander",
+      "pose": "explain",
+      "changedPixels": 9497
+    },
+    {
+      "character": "commander",
+      "pose": "point",
+      "changedPixels": 8547
+    },
+    {
+      "character": "commander",
+      "pose": "think",
+      "changedPixels": 8235
+    },
+    {
+      "character": "commander",
+      "pose": "ready",
+      "changedPixels": 6596
+    }
+  ],
+  "scriptCues": 16,
+  "mobile": {
+    "width": 390,
+    "contentWidth": 390
+  },
+  "reducedMotion": {
+    "mouth": "closed",
+    "blink": false,
+    "gesture": 0,
+    "nod": 0,
+    "breath": 0
+  },
+  "animation": {
+    "frames": 48,
+    "width": 960,
+    "pageHeight": 800
+  },
+  "errors": [],
+  "assetEncoding": "quality 94 WebP with exact original alpha",
+  "finalMask": "localized eyelid replacement using feathered additive blend; hair/nose outside features fixed",
+  "finalVerifiedAt": "2026-10-07T18:48:50.973Z"
+}

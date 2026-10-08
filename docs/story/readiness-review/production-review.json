@@ -1,0 +1,8 @@
+{
+  "results": [
+    "Production lazy scene, packing resume, approval endpoint and reduced motion",
+    "No-WebGL fallback still packs and approves; no runtime crash"
+  ],
+  "errors": [],
+  "failedRequests": []
+}

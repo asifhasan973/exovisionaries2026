@@ -1,0 +1,26 @@
+{
+  "scope": "Equipment rehearsal, shorter onboarding, workshop reactions, interactive checks/launch, distinct recorded voices",
+  "checks": {
+    "original_suite": "50/50 passed",
+    "focused_regressions": "6/6 passed, including all engineer reactions matching actual face/pose assets",
+    "production_build": "passed",
+    "story_lint": "passed"
+  },
+  "browser_verified": [
+    "Chief and Commander recorded playback started; Skip briefing stopped at required mission choices",
+    "Workshop install changed engineer reaction and actual assembled hardware",
+    "Judge demo required repair and checks; exit restored normal one-part build",
+    "Healthy connector did not pass the fault challenge; fixing radar unlocked mass check",
+    "Drive, drill and return worked with phone-sized controls; no horizontal document overflow",
+    "100 Wh battery and 100 cm drill reached reserve cutoff on return; equipment upgrade to 220 Wh completed same 85.6 Wh rehearsal with 134.4 Wh remaining",
+    "Challenge missed windows safely held releases, stage retry permitted correct release, orbit reached at 200 km / 7.79 km/s",
+    "Mobile canvas release actions and 2x flight control were usable"
+  ],
+  "limitations": [
+    "Resource values and compressed rehearsal/launch are authored educational game models, not spacecraft certification",
+    "Voice clips preserve fixed script; personalized first greeting uses browser male voice fallback",
+    "Character animation uses authored mouth/blink/gesture effects, not phoneme-accurate lip-sync",
+    "Existing production warnings remain for the lazily loaded shared Three.js chunk and character art-lab URL"
+  ],
+  "no_deployment_or_push": true
+}

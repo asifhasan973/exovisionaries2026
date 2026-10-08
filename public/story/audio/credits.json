@@ -1,0 +1,155 @@
+{
+  "voices": {
+    "chief": "en-US-GuyNeural",
+    "commander": "en-GB-SoniaNeural"
+  },
+  "format": "MP3",
+  "purpose": "Synthetic character narration",
+  "lines": [
+    {
+      "id": "appointment-01",
+      "character": "chief",
+      "text": "Charlie, good to see you."
+    },
+    {
+      "id": "appointment-02",
+      "character": "commander",
+      "text": "Thank you, Chief."
+    },
+    {
+      "id": "appointment-03",
+      "character": "chief",
+      "text": "In our last meeting, we made an important decision. You\u2019ve been selected to lead your own space mission as the Commander."
+    },
+    {
+      "id": "appointment-04",
+      "character": "commander",
+      "text": "My own mission?"
+    },
+    {
+      "id": "appointment-05",
+      "character": "chief",
+      "text": "That\u2019s right. You\u2019ll choose where you want to go, what you want to investigate, and how you\u2019ll prepare your spacecraft and crew."
+    },
+    {
+      "id": "appointment-06",
+      "character": "commander",
+      "text": "That\u2019s a big responsibility."
+    },
+    {
+      "id": "appointment-07",
+      "character": "chief",
+      "text": "It is. So, Commander\u2026 where do you want to go? Well then, best of luck!!"
+    },
+    {
+      "id": "companionIntro-01",
+      "character": "commander",
+      "text": "Hey there, little learner! As you can see, I have just received a huge responsibility. I must succeed no matter what!!"
+    },
+    {
+      "id": "companionIntro-02",
+      "character": "commander",
+      "text": "As one of my closest friends, I want you to help me complete the mission. Don\u2019t worry. I am always here to guide you. Now let\u2019s start with the planet selection!"
+    },
+    {
+      "id": "objectiveBriefing-01",
+      "character": "commander",
+      "text": "What exactly will we be looking for? Great! Now lets decide what exactly we will be looking for."
+    },
+    {
+      "id": "objectiveBriefing-02",
+      "character": "chief",
+      "text": "That depends on your mission objective. Think carefully.Your objective will determine what location is best, what kind of spacecraft, instruments, rover, power system, and other equipment you\u2019ll need."
+    },
+    {
+      "id": "objectiveBriefing-03",
+      "character": "commander",
+      "text": "It depends on our mission objective. Think carefully. Our objective will determine what location is best, what kind of spacecraft, instruments, rover, power system, and other equipment we\u2019ll need."
+    },
+    {
+      "id": "siteBriefing-01",
+      "character": "commander",
+      "text": "Now that our mission is fixed, we will choose the landing site."
+    },
+    {
+      "id": "resourceBriefing-01",
+      "character": "chief",
+      "text": "You\u2019ll have a limited budget, mass, and power supply. Every choice comes with a trade-off."
+    },
+    {
+      "id": "resourceBriefing-02",
+      "character": "commander",
+      "text": "Then I\u2019d better choose wisely."
+    },
+    {
+      "id": "resourceBriefing-03",
+      "character": "chief",
+      "text": "That\u2019s what I want to hear. Your mission begins now, Commander. Make every decision count."
+    },
+    {
+      "id": "resourceBriefing-04",
+      "character": "commander",
+      "text": "We must remember that we\u2019ll have limited budget, mass, and power supply. Every choice we make, comes with a trade-off."
+    },
+    {
+      "id": "resourceBriefing-05",
+      "character": "commander",
+      "text": "Now I thing we are good to go. Let\u2019s dive into the mission, mate!"
+    },
+    {
+      "id": "engineer-lander",
+      "character": "commander",
+      "text": "Nice fit! Our lander is coming together."
+    },
+    {
+      "id": "engineer-rover",
+      "character": "commander",
+      "text": "Rover ready! Its power use changes our battery time."
+    },
+    {
+      "id": "engineer-science",
+      "character": "commander",
+      "text": "Tool secured! Choose how deep we should drill."
+    },
+    {
+      "id": "engineer-power",
+      "character": "commander",
+      "text": "Power connected! Watch our time in shadow."
+    },
+    {
+      "id": "engineer-survival",
+      "character": "commander",
+      "text": "Good choice! Your explorer is better protected."
+    },
+    {
+      "id": "engineer-complete",
+      "character": "commander",
+      "text": "You did it! This system is ready."
+    },
+    {
+      "id": "engineer-warning",
+      "character": "commander",
+      "text": "Over budget! Swap an upgrade before launch."
+    },
+    {
+      "id": "engineer-depth",
+      "character": "commander",
+      "text": "Deeper drilling uses more energy. Save enough to come back."
+    },
+    {
+      "id": "engineer-intro",
+      "character": "commander",
+      "text": "Let\u2019s build! Pick a part and drag it into the bay."
+    },
+    {
+      "id": "engineer-trialPass",
+      "character": "commander",
+      "text": "We made it back with energy to spare. Great planning!"
+    },
+    {
+      "id": "engineer-trialFail",
+      "character": "commander",
+      "text": "Our test found a problem. Change the equipment and try again."
+    }
+  ]
+}

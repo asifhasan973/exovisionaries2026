@@ -1,0 +1,85 @@
+{
+  "tool": "built-in image_gen",
+  "encoding": "WebP quality 94, alphaQuality 100; original dimensions and every alpha value preserved; RGB uses high-quality compression",
+  "files": [
+    {
+      "name": "commander-body",
+      "source": "/Users/asifhasan/.codex/generated_images/01a0dbbc-a273-7f01-a4ef-7ed9122d3a01/exec-c984b864-5b7e-4c65-8fe9-aa0a1b896637.png",
+      "output": "public/story/characters-v1/commander-body.webp",
+      "width": 1448,
+      "height": 1086,
+      "bytes": 279022,
+      "sha256": "33c05f0e82f02e01eca64f97dec3ceed0e2d4eeeeb59d97fddc139ec6b79fcc7",
+      "sourceBytes": 1110524,
+      "alphaExactMatch": true
+    },
+    {
+      "name": "commander-faces-a",
+      "source": "/Users/asifhasan/.codex/generated_images/01a0dbbc-a273-7f01-a4ef-7ed9122d3a01/exec-1e767ae2-6d30-46aa-a144-9aff53ac371d.png",
+      "output": "public/story/characters-v1/commander-faces-a.webp",
+      "width": 1448,
+      "height": 1086,
+      "bytes": 417684,
+      "sha256": "9b8193a25b40de80567624caddb5be400866b91f1bb210f60efe8c04d901defa",
+      "sourceBytes": 1802924,
+      "alphaExactMatch": true
+    },
+    {
+      "name": "chief-faces-a",
+      "source": "/Users/asifhasan/.codex/generated_images/01a0dbbc-a273-7f01-a4ef-7ed9122d3a01/exec-f6fb41a9-270c-4eac-82d2-54f8c886fb2a.png",
+      "output": "public/story/characters-v1/chief-faces-a.webp",
+      "width": 1448,
+      "height": 1086,
+      "bytes": 581772,
+      "sha256": "46759a1f3cb90e967efea5318663e65ed549eb6af59958db1d5f4ce0251c5db3",
+      "sourceBytes": 2512944,
+      "alphaExactMatch": true
+    },
+    {
+      "name": "commander-faces-b",
+      "source": "/Users/asifhasan/.codex/generated_images/01a0dbbc-a273-7f01-a4ef-7ed9122d3a01/exec-e04836a4-ebe2-417e-b537-5ca843500657.png",
+      "output": "public/story/characters-v1/commander-faces-b.webp",
+      "width": 1448,
+      "height": 1086,
+      "bytes": 427274,
+      "sha256": "4edf7970f307afcb87f970441e84a150232bf51e569da1008233ea5af21a147a",
+      "sourceBytes": 1909743,
+      "alphaExactMatch": true
+    },
+    {
+      "name": "commander-faces-c",
+      "source": "/Users/asifhasan/.codex/generated_images/01a0dbbc-a273-7f01-a4ef-7ed9122d3a01/exec-ce46a469-3796-4b0c-8b80-75733b2a779a.png",
+      "output": "public/story/characters-v1/commander-faces-c.webp",
+      "width": 1983,
+      "height": 793,
+      "bytes": 224022,
+      "sha256": "873d1773a0c8c9a7952e60236f7e5c453fb0fb983f8e894ee5766d0ea8c8f435",
+      "sourceBytes": 1220157,
+      "alphaExactMatch": true
+    },
+    {
+      "name": "chief-faces-b",
+      "source": "/Users/asifhasan/.codex/generated_images/01a0dbbc-a273-7f01-a4ef-7ed9122d3a01/exec-2bd6b718-5d36-434f-ae28-61fc18ba1906.png",
+      "output": "public/story/characters-v1/chief-faces-b.webp",
+      "width": 1774,
+      "height": 887,
+      "bytes": 482978,
+      "sha256": "4a0658a2c735d26bcf1fe347819a1a1967e56dd9ad98391794dc92bda12c0849",
+      "sourceBytes": 2322533,
+      "alphaExactMatch": true
+    },
+    {
+      "name": "chief-body",
+      "source": "/Users/asifhasan/.codex/generated_images/01a0dbbc-a273-7f01-a4ef-7ed9122d3a01/exec-0cd35b19-74c5-4945-83fa-57dda51b3b5d.png",
+      "output": "public/story/characters-v1/chief-body.webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 310708,
+      "sha256": "9626854ca87737ffeb8609cf9d0370df6bd7e4f98831f2d620e823bea64cb4f2",
+      "sourceBytes": 1348043,
+      "alphaExactMatch": true
+    }
+  ],
+  "originalPngBytes": 12226868,
+  "shippedBytes": 2723460
+}

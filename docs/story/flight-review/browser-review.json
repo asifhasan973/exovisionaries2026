@@ -1,0 +1,11 @@
+{
+  "baseURL": "http://127.0.0.1:4173/",
+  "results": [
+    "approved packing → countdown → 2× → engine-audio start/mute → pause/reload/resume → ordered booster/fairing actions → Earth orbit → replay/back → honest skip",
+    "390px mobile controls, orbit and no horizontal overflow",
+    "320px mobile controls, orbit and no horizontal overflow",
+    "WebGL failure still allows skip and orbit"
+  ],
+  "errors": [],
+  "failedRequests": []
+}

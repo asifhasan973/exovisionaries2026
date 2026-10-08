@@ -1,0 +1,1267 @@
+{
+  "version": 1,
+  "stage": {
+    "width": 600,
+    "height": 900
+  },
+  "atlases": {
+    "commander-body": {
+      "file": "commander-body.webp",
+      "width": 1448,
+      "height": 1086
+    },
+    "commander-faces-a": {
+      "file": "commander-faces-a.webp",
+      "width": 1448,
+      "height": 1086
+    },
+    "chief-faces-a": {
+      "file": "chief-faces-a.webp",
+      "width": 1448,
+      "height": 1086
+    },
+    "commander-faces-b": {
+      "file": "commander-faces-b.webp",
+      "width": 1448,
+      "height": 1086
+    },
+    "commander-faces-c": {
+      "file": "commander-faces-c.webp",
+      "width": 1983,
+      "height": 793
+    },
+    "chief-faces-b": {
+      "file": "chief-faces-b.webp",
+      "width": 1774,
+      "height": 887
+    },
+    "chief-body": {
+      "file": "chief-body.webp",
+      "width": 1254,
+      "height": 1254
+    }
+  },
+  "characters": {
+    "commander": {
+      "displayName": "Commander",
+      "identity": "Existing Mira identity; role follows the new script",
+      "bodyAtlas": "commander-body",
+      "bodyGrid": [
+        3,
+        2
+      ],
+      "bodyScale": 1.14,
+      "neckTarget": [
+        320,
+        267
+      ],
+      "poses": {
+        "listen": {
+          "cell": 0,
+          "neck": [
+            254,
+            23
+          ],
+          "arm": [
+            [
+              111,
+              214
+            ],
+            [
+              153,
+              226
+            ],
+            [
+              149,
+              269
+            ],
+            [
+              141,
+              309
+            ],
+            [
+              151,
+              354
+            ],
+            [
+              140,
+              391
+            ],
+            [
+              119,
+              381
+            ],
+            [
+              108,
+              329
+            ],
+            [
+              106,
+              283
+            ]
+          ],
+          "pivot": [
+            130,
+            229
+          ]
+        },
+        "explain": {
+          "cell": 1,
+          "neck": [
+            248,
+            25
+          ],
+          "arm": [
+            [
+              112,
+              139
+            ],
+            [
+              133,
+              151
+            ],
+            [
+              164,
+              185
+            ],
+            [
+              146,
+              229
+            ],
+            [
+              112,
+              232
+            ],
+            [
+              78,
+              209
+            ],
+            [
+              43,
+              190
+            ],
+            [
+              38,
+              165
+            ],
+            [
+              61,
+              133
+            ],
+            [
+              78,
+              137
+            ]
+          ],
+          "pivot": [
+            143,
+            208
+          ]
+        },
+        "point": {
+          "cell": 2,
+          "neck": [
+            296,
+            26
+          ],
+          "arm": [
+            [
+              96,
+              115
+            ],
+            [
+              146,
+              124
+            ],
+            [
+              201,
+              143
+            ],
+            [
+              180,
+              173
+            ],
+            [
+              136,
+              178
+            ],
+            [
+              74,
+              151
+            ],
+            [
+              31,
+              132
+            ],
+            [
+              23,
+              112
+            ],
+            [
+              61,
+              105
+            ]
+          ],
+          "pivot": [
+            162,
+            151
+          ]
+        },
+        "think": {
+          "cell": 3,
+          "neck": [
+            247,
+            22
+          ],
+          "arm": [
+            [
+              151,
+              65
+            ],
+            [
+              177,
+              35
+            ],
+            [
+              194,
+              11
+            ],
+            [
+              224,
+              8
+            ],
+            [
+              242,
+              33
+            ],
+            [
+              221,
+              57
+            ],
+            [
+              190,
+              90
+            ],
+            [
+              169,
+              126
+            ],
+            [
+              137,
+              150
+            ],
+            [
+              117,
+              136
+            ]
+          ],
+          "pivot": [
+            147,
+            125
+          ]
+        },
+        "ready": {
+          "cell": 4,
+          "neck": [
+            242,
+            25
+          ],
+          "arm": [
+            [
+              114,
+              137
+            ],
+            [
+              132,
+              107
+            ],
+            [
+              152,
+              66
+            ],
+            [
+              171,
+              60
+            ],
+            [
+              202,
+              76
+            ],
+            [
+              203,
+              100
+            ],
+            [
+              170,
+              112
+            ],
+            [
+              148,
+              164
+            ],
+            [
+              121,
+              185
+            ],
+            [
+              102,
+              169
+            ]
+          ],
+          "pivot": [
+            123,
+            156
+          ]
+        }
+      },
+      "expressions": {
+        "thoughtful": {
+          "atlas": "commander-faces-a",
+          "closed": [
+            0,
+            0,
+            380,
+            350
+          ],
+          "anchor": [
+            180,
+            330
+          ],
+          "scale": 0.78,
+          "mouth": [
+            88,
+            265,
+            96,
+            55
+          ],
+          "eyes": [
+            39,
+            166,
+            179,
+            83
+          ],
+          "columnWidth": 362,
+          "offsets": {
+            "ah": [
+              -7,
+              0
+            ],
+            "oo": [
+              -14,
+              0
+            ],
+            "blink": [
+              -16,
+              -1
+            ]
+          }
+        },
+        "grateful": {
+          "atlas": "commander-faces-a",
+          "closed": [
+            0,
+            362,
+            380,
+            344
+          ],
+          "anchor": [
+            180,
+            318
+          ],
+          "scale": 0.78,
+          "mouth": [
+            88,
+            251,
+            100,
+            55
+          ],
+          "eyes": [
+            39,
+            152,
+            183,
+            84
+          ],
+          "columnWidth": 362,
+          "offsets": {
+            "ah": [
+              -6,
+              0
+            ],
+            "oo": [
+              -10,
+              0
+            ],
+            "blink": [
+              -13,
+              0
+            ]
+          }
+        },
+        "surprised": {
+          "atlas": "commander-faces-a",
+          "closed": [
+            0,
+            724,
+            380,
+            338
+          ],
+          "anchor": [
+            180,
+            302
+          ],
+          "scale": 0.78,
+          "mouth": [
+            88,
+            241,
+            100,
+            52
+          ],
+          "eyes": [
+            39,
+            133,
+            189,
+            91
+          ],
+          "columnWidth": 362,
+          "offsets": {
+            "ah": [
+              -6,
+              0
+            ],
+            "oo": [
+              -11,
+              0
+            ],
+            "blink": [
+              -14,
+              0
+            ]
+          }
+        },
+        "determined": {
+          "atlas": "commander-faces-b",
+          "closed": [
+            0,
+            0,
+            380,
+            356
+          ],
+          "anchor": [
+            185,
+            337
+          ],
+          "scale": 0.755,
+          "mouth": [
+            94,
+            269,
+            96,
+            57
+          ],
+          "eyes": [
+            36,
+            170,
+            193,
+            88
+          ],
+          "columnWidth": 362,
+          "offsets": {
+            "ah": [
+              1,
+              0
+            ],
+            "oo": [
+              1,
+              0
+            ],
+            "blink": [
+              0,
+              1
+            ]
+          },
+          "eyelids": [
+            [
+              42,
+              211,
+              85,
+              48
+            ],
+            [
+              126,
+              194,
+              104,
+              58
+            ]
+          ]
+        },
+        "encouraging": {
+          "atlas": "commander-faces-b",
+          "closed": [
+            0,
+            362,
+            380,
+            339
+          ],
+          "anchor": [
+            185,
+            324
+          ],
+          "scale": 0.755,
+          "mouth": [
+            94,
+            255,
+            99,
+            57
+          ],
+          "eyes": [
+            36,
+            154,
+            196,
+            88
+          ],
+          "columnWidth": 362,
+          "offsets": {
+            "ah": [
+              1,
+              0
+            ],
+            "oo": [
+              0,
+              0
+            ],
+            "blink": [
+              0,
+              1
+            ]
+          },
+          "eyelids": [
+            [
+              42,
+              197,
+              85,
+              48
+            ],
+            [
+              126,
+              180,
+              104,
+              58
+            ]
+          ]
+        },
+        "curious": {
+          "atlas": "commander-faces-b",
+          "closed": [
+            0,
+            724,
+            380,
+            342
+          ],
+          "anchor": [
+            185,
+            307
+          ],
+          "scale": 0.755,
+          "mouth": [
+            94,
+            236,
+            98,
+            59
+          ],
+          "eyes": [
+            36,
+            131,
+            195,
+            94
+          ],
+          "columnWidth": 362,
+          "offsets": {
+            "ah": [
+              1,
+              0
+            ],
+            "oo": [
+              0,
+              0
+            ],
+            "blink": [
+              0,
+              1
+            ]
+          },
+          "eyelids": [
+            [
+              42,
+              178,
+              85,
+              48
+            ],
+            [
+              126,
+              161,
+              104,
+              58
+            ]
+          ]
+        },
+        "confident": {
+          "atlas": "commander-faces-c",
+          "closed": [
+            0,
+            145,
+            512,
+            513
+          ],
+          "anchor": [
+            254,
+            479
+          ],
+          "scale": 0.523,
+          "mouth": [
+            108,
+            371,
+            167,
+            105
+          ],
+          "eyes": [
+            26,
+            231,
+            289,
+            111
+          ],
+          "columnWidth": 495.75,
+          "offsets": {
+            "ah": [
+              1,
+              0
+            ],
+            "oo": [
+              -2,
+              0
+            ],
+            "blink": [
+              -2,
+              2
+            ]
+          }
+        }
+      }
+    },
+    "chief": {
+      "displayName": "Chief",
+      "identity": "Senior mission officer; consistent silver hair and short beard",
+      "bodyAtlas": "chief-body",
+      "bodyGrid": [
+        2,
+        2
+      ],
+      "bodyScale": 1,
+      "neckTarget": [
+        350,
+        267
+      ],
+      "poses": {
+        "greet": {
+          "cell": 0,
+          "neck": [
+            381,
+            50
+          ],
+          "arm": [
+            [
+              87,
+              92
+            ],
+            [
+              164,
+              86
+            ],
+            [
+              205,
+              125
+            ],
+            [
+              188,
+              195
+            ],
+            [
+              177,
+              241
+            ],
+            [
+              152,
+              264
+            ],
+            [
+              127,
+              229
+            ],
+            [
+              126,
+              199
+            ],
+            [
+              95,
+              167
+            ]
+          ],
+          "pivot": [
+            164,
+            246
+          ]
+        },
+        "listen": {
+          "cell": 1,
+          "neck": [
+            307,
+            50
+          ],
+          "arm": [
+            [
+              122,
+              293
+            ],
+            [
+              170,
+              305
+            ],
+            [
+              168,
+              365
+            ],
+            [
+              176,
+              417
+            ],
+            [
+              162,
+              450
+            ],
+            [
+              141,
+              442
+            ],
+            [
+              115,
+              403
+            ],
+            [
+              108,
+              358
+            ]
+          ],
+          "pivot": [
+            143,
+            314
+          ]
+        },
+        "explain": {
+          "cell": 2,
+          "neck": [
+            380,
+            25
+          ],
+          "arm": [
+            [
+              46,
+              185
+            ],
+            [
+              71,
+              170
+            ],
+            [
+              108,
+              189
+            ],
+            [
+              146,
+              208
+            ],
+            [
+              185,
+              227
+            ],
+            [
+              172,
+              254
+            ],
+            [
+              141,
+              257
+            ],
+            [
+              98,
+              232
+            ],
+            [
+              60,
+              219
+            ],
+            [
+              37,
+              202
+            ]
+          ],
+          "pivot": [
+            157,
+            235
+          ]
+        },
+        "point": {
+          "cell": 3,
+          "neck": [
+            302,
+            25
+          ],
+          "arm": [
+            [
+              75,
+              113
+            ],
+            [
+              104,
+              110
+            ],
+            [
+              131,
+              140
+            ],
+            [
+              155,
+              169
+            ],
+            [
+              153,
+              209
+            ],
+            [
+              127,
+              232
+            ],
+            [
+              92,
+              207
+            ],
+            [
+              78,
+              179
+            ],
+            [
+              69,
+              149
+            ]
+          ],
+          "pivot": [
+            131,
+            207
+          ]
+        }
+      },
+      "expressions": {
+        "welcoming": {
+          "atlas": "chief-faces-a",
+          "closed": [
+            0,
+            0,
+            374,
+            374
+          ],
+          "anchor": [
+            210,
+            361
+          ],
+          "scale": 0.74,
+          "mouth": [
+            105,
+            267,
+            139,
+            80
+          ],
+          "eyes": [
+            67,
+            170,
+            190,
+            86
+          ],
+          "columnWidth": 362,
+          "offsets": {
+            "ah": [
+              -8,
+              0
+            ],
+            "oo": [
+              -9,
+              0
+            ],
+            "blink": [
+              -11,
+              0
+            ]
+          }
+        },
+        "proud": {
+          "atlas": "chief-faces-a",
+          "closed": [
+            0,
+            374,
+            374,
+            354
+          ],
+          "anchor": [
+            210,
+            347
+          ],
+          "scale": 0.74,
+          "mouth": [
+            105,
+            248,
+            139,
+            84
+          ],
+          "eyes": [
+            67,
+            148,
+            190,
+            91
+          ],
+          "columnWidth": 362,
+          "offsets": {
+            "ah": [
+              -8,
+              0
+            ],
+            "oo": [
+              -9,
+              0
+            ],
+            "blink": [
+              -11,
+              0
+            ]
+          }
+        },
+        "focused": {
+          "atlas": "chief-faces-a",
+          "closed": [
+            0,
+            728,
+            374,
+            358
+          ],
+          "anchor": [
+            210,
+            347
+          ],
+          "scale": 0.74,
+          "mouth": [
+            105,
+            254,
+            139,
+            82
+          ],
+          "eyes": [
+            67,
+            156,
+            191,
+            90
+          ],
+          "columnWidth": 362,
+          "offsets": {
+            "ah": [
+              -8,
+              0
+            ],
+            "oo": [
+              -9,
+              0
+            ],
+            "blink": [
+              -11,
+              0
+            ]
+          }
+        },
+        "encouraging": {
+          "atlas": "chief-faces-b",
+          "closed": [
+            0,
+            0,
+            448,
+            451
+          ],
+          "anchor": [
+            263,
+            437
+          ],
+          "scale": 0.586,
+          "mouth": [
+            118,
+            317,
+            173,
+            95
+          ],
+          "eyes": [
+            77,
+            203,
+            238,
+            111
+          ],
+          "columnWidth": 443.5,
+          "offsets": {
+            "ah": [
+              -5,
+              0
+            ],
+            "oo": [
+              -6,
+              0
+            ],
+            "blink": [
+              -8,
+              -1
+            ]
+          }
+        },
+        "confident": {
+          "atlas": "chief-faces-b",
+          "closed": [
+            0,
+            451,
+            448,
+            436
+          ],
+          "anchor": [
+            263,
+            430
+          ],
+          "scale": 0.586,
+          "mouth": [
+            118,
+            305,
+            173,
+            98
+          ],
+          "eyes": [
+            77,
+            189,
+            238,
+            112
+          ],
+          "columnWidth": 443.5,
+          "offsets": {
+            "ah": [
+              -5,
+              0
+            ],
+            "oo": [
+              -6,
+              0
+            ],
+            "blink": [
+              -8,
+              -1
+            ]
+          }
+        }
+      }
+    }
+  },
+  "cueBindings": [
+    {
+      "lineId": "appointment-01",
+      "role": "speaker",
+      "character": "chief",
+      "expression": "welcoming",
+      "pose": "greet"
+    },
+    {
+      "lineId": "appointment-01",
+      "role": "listener",
+      "character": "commander",
+      "expression": "thoughtful",
+      "pose": "listen"
+    },
+    {
+      "lineId": "appointment-02",
+      "role": "speaker",
+      "character": "commander",
+      "expression": "grateful",
+      "pose": "listen"
+    },
+    {
+      "lineId": "appointment-02",
+      "role": "listener",
+      "character": "chief",
+      "expression": "encouraging",
+      "pose": "listen"
+    },
+    {
+      "lineId": "appointment-03",
+      "role": "speaker",
+      "character": "chief",
+      "expression": "proud",
+      "pose": "explain"
+    },
+    {
+      "lineId": "appointment-03",
+      "role": "listener",
+      "character": "commander",
+      "expression": "thoughtful",
+      "pose": "listen"
+    },
+    {
+      "lineId": "appointment-04",
+      "role": "speaker",
+      "character": "commander",
+      "expression": "surprised",
+      "pose": "think"
+    },
+    {
+      "lineId": "appointment-04",
+      "role": "listener",
+      "character": "chief",
+      "expression": "encouraging",
+      "pose": "listen"
+    },
+    {
+      "lineId": "appointment-05",
+      "role": "speaker",
+      "character": "chief",
+      "expression": "confident",
+      "pose": "explain"
+    },
+    {
+      "lineId": "appointment-05",
+      "role": "listener",
+      "character": "commander",
+      "expression": "thoughtful",
+      "pose": "listen"
+    },
+    {
+      "lineId": "appointment-06",
+      "role": "speaker",
+      "character": "commander",
+      "expression": "thoughtful",
+      "pose": "think"
+    },
+    {
+      "lineId": "appointment-06",
+      "role": "listener",
+      "character": "chief",
+      "expression": "encouraging",
+      "pose": "listen"
+    },
+    {
+      "lineId": "appointment-07",
+      "role": "speaker",
+      "character": "chief",
+      "expression": "encouraging",
+      "pose": "point"
+    },
+    {
+      "lineId": "appointment-07",
+      "role": "listener",
+      "character": "commander",
+      "expression": "thoughtful",
+      "pose": "listen"
+    },
+    {
+      "lineId": "companionIntro-01",
+      "role": "speaker",
+      "character": "commander",
+      "expression": "determined",
+      "pose": "ready"
+    },
+    {
+      "lineId": "companionIntro-02",
+      "role": "speaker",
+      "character": "commander",
+      "expression": "encouraging",
+      "pose": "point"
+    },
+    {
+      "lineId": "objectiveBriefing-01",
+      "role": "speaker",
+      "character": "commander",
+      "expression": "curious",
+      "pose": "think"
+    },
+    {
+      "lineId": "objectiveBriefing-02",
+      "role": "speaker",
+      "character": "chief",
+      "expression": "focused",
+      "pose": "explain"
+    },
+    {
+      "lineId": "objectiveBriefing-02",
+      "role": "listener",
+      "character": "commander",
+      "expression": "thoughtful",
+      "pose": "listen"
+    },
+    {
+      "lineId": "objectiveBriefing-03",
+      "role": "speaker",
+      "character": "commander",
+      "expression": "thoughtful",
+      "pose": "explain"
+    },
+    {
+      "lineId": "siteBriefing-01",
+      "role": "speaker",
+      "character": "commander",
+      "expression": "confident",
+      "pose": "point"
+    },
+    {
+      "lineId": "resourceBriefing-01",
+      "role": "speaker",
+      "character": "chief",
+      "expression": "focused",
+      "pose": "explain"
+    },
+    {
+      "lineId": "resourceBriefing-01",
+      "role": "listener",
+      "character": "commander",
+      "expression": "thoughtful",
+      "pose": "listen"
+    },
+    {
+      "lineId": "resourceBriefing-02",
+      "role": "speaker",
+      "character": "commander",
+      "expression": "determined",
+      "pose": "ready"
+    },
+    {
+      "lineId": "resourceBriefing-03",
+      "role": "speaker",
+      "character": "chief",
+      "expression": "encouraging",
+      "pose": "point"
+    },
+    {
+      "lineId": "resourceBriefing-03",
+      "role": "listener",
+      "character": "commander",
+      "expression": "thoughtful",
+      "pose": "listen"
+    },
+    {
+      "lineId": "resourceBriefing-04",
+      "role": "speaker",
+      "character": "commander",
+      "expression": "thoughtful",
+      "pose": "explain"
+    },
+    {
+      "lineId": "resourceBriefing-05",
+      "role": "speaker",
+      "character": "commander",
+      "expression": "confident",
+      "pose": "ready"
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "speechVerification": "Injected speech lifecycle events; real browser voice availability checked separately. Audible quality is not asserted.",
+  "lines": [
+    "appointment-01",
+    "appointment-02",
+    "appointment-03",
+    "appointment-04",
+    "appointment-05",
+    "appointment-06",
+    "appointment-07",
+    "companionIntro-01",
+    "companionIntro-02",
+    "objectiveBriefing-01",
+    "objectiveBriefing-02",
+    "objectiveBriefing-03",
+    "siteBriefing-01",
+    "resourceBriefing-01",
+    "resourceBriefing-02",
+    "resourceBriefing-03",
+    "resourceBriefing-04",
+    "resourceBriefing-05"
+  ],
+  "errors": [],
+  "failedRequests": [],
+  "exactDialogueCount": 18,
+  "mobile": {
+    "width": 390,
+    "docWidth": 390,
+    "text": "That depends on your mission objective. Think carefully.Your objective will determine what location is best, what kind of spacecraft, instruments, rover, power system, and other equipment you’ll need.",
+    "panelHeight": 251,
+    "contentHeight": 283
+  },
+  "uniqueAtlasRequests": 7,
+  "totalAtlasRequests": 7,
+  "realBrowserSpeech": {
+    "voiceCount": 180,
+    "events": [
+      {
+        "type": "start",
+        "error": null
+      }
+    ],
+    "status": "Speaking…",
+    "speakingActors": 1
+  },
+  "production": {
+    "route": "/?module=3",
+    "bundledRigDraws": true,
+    "legacyRootRenders": true,
+    "errors": []
+  }
+}

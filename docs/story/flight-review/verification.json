@@ -1,0 +1,50 @@
+{
+  "module": 7,
+  "scope": "Approved robotic mission \u2192 liftoff \u2192 Earth parking orbit",
+  "unitTests": {
+    "command": "node --test tests/*.test.mjs",
+    "passed": 43,
+    "failed": 0
+  },
+  "build": {
+    "command": "npm run build",
+    "status": "passed",
+    "warnings": [
+      "Existing character compositor runtime URL fallback",
+      "Large lazy shared Three chunk (~586 KB)"
+    ]
+  },
+  "lint": {
+    "command": "npm run lint -- src/game/story",
+    "status": "passed",
+    "warnings": 0
+  },
+  "browser": {
+    "development": "Passed before visual refinement",
+    "production": "Passed final built bundle at 127.0.0.1:4173",
+    "report": "browser-review.json",
+    "errors": 0,
+    "failedRequests": 0,
+    "viewports": [
+      1440,
+      390,
+      320
+    ],
+    "fallback": "WebGL unavailable remains playable",
+    "audio": "Buffer source started during ascent and stopped on mute; synthesized effect, not perceptual audio review"
+  },
+  "visualReview": [
+    "Desktop pad and orbit",
+    "320px mobile pad and full rocket framing"
+  ],
+  "notImplemented": [
+    "Moon transfer",
+    "Lunar landing",
+    "Lunar exploration"
+  ],
+  "limitations": [
+    "Authored ascent, not trajectory solver",
+    "Illustrative carrier, scale and sunlight direction",
+    "Equipment approval only covers existing rehearsal rules"
+  ]
+}

@@ -1,0 +1,111 @@
+{
+  "exactLines": [
+    "appointment-01",
+    "appointment-02",
+    "appointment-03",
+    "appointment-04",
+    "appointment-05",
+    "appointment-06",
+    "appointment-07",
+    "companionIntro-01",
+    "companionIntro-02",
+    "objectiveBriefing-01",
+    "objectiveBriefing-02",
+    "objectiveBriefing-03",
+    "siteBriefing-01",
+    "resourceBriefing-01",
+    "resourceBriefing-02",
+    "resourceBriefing-03",
+    "resourceBriefing-04",
+    "resourceBriefing-05"
+  ],
+  "errors": [],
+  "failedRequests": [],
+  "primaryRoute": "Name → appointment → companion → Moon → objective briefing → objective → site briefing → site → resource briefing → saved plan",
+  "plan": {
+    "version": 1,
+    "playerName": "Asha Rahman",
+    "stepId": "resource-limits",
+    "lineIndex": 0,
+    "selections": {
+      "destination": "moon",
+      "objective": "lunar-ice",
+      "site": "crater-rim"
+    },
+    "completedActivities": [],
+    "history": [
+      {
+        "stepId": "player-name",
+        "lineIndex": 0
+      },
+      {
+        "stepId": "appointment",
+        "lineIndex": 6
+      },
+      {
+        "stepId": "companion-intro",
+        "lineIndex": 1
+      },
+      {
+        "stepId": "destination",
+        "lineIndex": 0
+      },
+      {
+        "stepId": "objective-briefing",
+        "lineIndex": 2
+      },
+      {
+        "stepId": "objective",
+        "lineIndex": 0
+      },
+      {
+        "stepId": "site-briefing",
+        "lineIndex": 0
+      },
+      {
+        "stepId": "site",
+        "lineIndex": 0
+      },
+      {
+        "stepId": "resource-briefing",
+        "lineIndex": 4
+      }
+    ],
+    "preparationVersion": 1,
+    "preparation": {
+      "landerPartIds": [],
+      "roverId": null,
+      "sciencePartIds": [],
+      "drillDepthCm": null,
+      "navigationId": null,
+      "solarId": null,
+      "batteryId": null,
+      "thermalId": null,
+      "communicationId": null
+    }
+  },
+  "alternateSelections": {
+    "destination": "moon",
+    "objective": "lunar-geology",
+    "site": "permanent-shadow"
+  },
+  "mobile": {
+    "viewport": "390 × 844",
+    "noHorizontalOverflow": true,
+    "widths": [
+      [
+        390,
+        390
+      ],
+      [
+        390,
+        390
+      ],
+      [
+        390,
+        390
+      ]
+    ]
+  },
+  "storageFailurePlayable": true
+}
