@@ -1,0 +1,109 @@
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
+import { Expand, Home, Pause, Play, RotateCw, Smartphone, Volume2, VolumeX } from 'lucide-react';
+import { MobileGameContext, MOBILE_GAME_QUERY } from './mobileGameContext.ts';
+import { GameInfo } from './GameInfo.tsx';
+import { SettingsButton } from './GameSettings.tsx';
+import { LearningControls } from './Learning.tsx';
+import './mobileGame.css';
+
+type LockableOrientation = ScreenOrientation & { lock?: (orientation: 'landscape') => Promise<void> };
+
+/** Fullscreen is an enhancement. Unsupported or rejected browser APIs never block play. */
+export function MobileGameProvider({ children, active, voiceEnabled, onToggleVoice, onHome, onPause, onResume }: {
+  children: ReactNode; active: boolean; voiceEnabled: boolean; onToggleVoice(): void; onHome(): void; onPause(): void; onResume(): void;
+}) {
+  const [mobile, setMobile] = useState(() => matchMedia(MOBILE_GAME_QUERY).matches);
+  const [portrait, setPortrait] = useState(() => matchMedia('(orientation: portrait)').matches);
+  const [uprightAllowed, setUprightAllowed] = useState(false);
+  const [menu, setMenu] = useState(false);
+  const [fullscreen, setFullscreen] = useState(!!document.fullscreenElement);
+  const [screenMessage, setScreenMessage] = useState('');
+  const wanted = useRef(false), ownedFullscreen = useRef(false), ownedLock = useRef(false), rotating = useRef(false);
+  const allowUpright = useCallback(() => setUprightAllowed(true), []);
+  const release = useCallback(() => {
+    wanted.current = false;
+    if (ownedLock.current) { screen.orientation?.unlock?.(); ownedLock.current = false; }
+    if (ownedFullscreen.current && document.fullscreenElement) void document.exitFullscreen?.().catch(() => {});
+    ownedFullscreen.current = false;
+  }, []);
+  const requestScreen = useCallback(() => {
+    if (!matchMedia(MOBILE_GAME_QUERY).matches) return;
+    wanted.current = true;
+    setScreenMessage('');
+    const lock = async () => {
+      if (!wanted.current) return;
+      try {
+        const orientation = screen.orientation as LockableOrientation | undefined;
+        if (orientation?.lock) { await orientation.lock('landscape'); ownedLock.current = true;
+          if (!wanted.current) { orientation.unlock(); ownedLock.current = false; } }
+      } catch { /* The rotate-phone prompt covers browsers without orientation locking. */ }
+    };
+    if (document.fullscreenElement) { void lock(); return; }
+    if (!document.fullscreenEnabled || !document.documentElement.requestFullscreen) {
+      setScreenMessage('Your game still fills this window.'); return;
+    }
+    // Call directly in Play's click handler, before any await loses user activation.
+    try {
+      void document.documentElement.requestFullscreen().then(() => {
+        ownedFullscreen.current = true;
+        if (!wanted.current) { release(); return; }
+        void lock();
+      }).catch(() => setScreenMessage('Keep playing here, or try Fullscreen again.'));
+    } catch { setScreenMessage('Keep playing here, or try Fullscreen again.'); }
+  }, [release]);
+  const start = useCallback(() => { setUprightAllowed(false); requestScreen(); }, [requestScreen]);
+  const openMenu = useCallback(() => { onPause(); setMenu(true); }, [onPause]);
+  const closeMenu = () => { setMenu(false); onResume(); };
+  useEffect(() => {
+    const devices = matchMedia(MOBILE_GAME_QUERY), orientation = matchMedia('(orientation: portrait)');
+    const updateDevice = () => setMobile(devices.matches), updateOrientation = () => setPortrait(orientation.matches);
+    const updateFullscreen = () => {
+      setFullscreen(!!document.fullscreenElement);
+      if (!document.fullscreenElement && ownedFullscreen.current) {
+        ownedFullscreen.current = false;
+        if (ownedLock.current) { screen.orientation?.unlock?.(); ownedLock.current = false; }
+        window.dispatchEvent(new Event('game-help-open'));
+      }
+    };
+    devices.addEventListener('change', updateDevice); orientation.addEventListener('change', updateOrientation);
+    document.addEventListener('fullscreenchange', updateFullscreen);
+    return () => { devices.removeEventListener('change', updateDevice); orientation.removeEventListener('change', updateOrientation); document.removeEventListener('fullscreenchange', updateFullscreen); release(); };
+  }, [release]);
+  useEffect(() => { if (!active || !mobile) release(); }, [active, mobile, release]);
+  const rotatePrompt = mobile && active && portrait && !uprightAllowed;
+  useEffect(() => {
+    if (rotatePrompt && !rotating.current) { rotating.current = true; onPause(); }
+    else if (!rotatePrompt && rotating.current) {
+      rotating.current = false;
+      if (active && !menu) onResume();
+    }
+  }, [rotatePrompt, active, menu, onPause, onResume]);
+  const mode = mobile && active;
+  return <MobileGameContext.Provider value={{ mobile, active: mode, start, openMenu }}>
+    {children}
+    {mode ? <div className="mobile-game-tools" role="group" aria-label="Game controls">
+      <button onClick={openMenu} aria-label="Pause and open game menu" title="Pause"><Pause size={19}/></button>
+      <button onClick={onToggleVoice} aria-label={voiceEnabled ? 'Mute narration' : 'Enable narration'} aria-pressed={voiceEnabled} title="Voice">
+        {voiceEnabled ? <Volume2 size={19}/> : <VolumeX size={19}/>}</button>
+    </div> : null}
+    {mode && menu && !rotatePrompt ? <GameInfo title="Paused" onClose={closeMenu} pages={[
+      <div className="mobile-pause-menu" key="pause">
+        <button className="mobile-resume" onClick={closeMenu}><Play size={20}/>Back to game</button>
+        <div className="mobile-menu-grid"><LearningControls onOpen={() => setMenu(false)}/><SettingsButton onOpen={() => setMenu(false)}/>
+          <button onClick={() => { requestScreen(); }} disabled={fullscreen} aria-label={fullscreen ? 'Already fullscreen' : 'Enter fullscreen'}><Expand size={20}/><span>{fullscreen ? 'Fullscreen on' : 'Fullscreen'}</span></button>
+          <button onClick={() => { setMenu(false); setUprightAllowed(false); requestScreen(); }}><RotateCw size={20}/><span>Turn phone</span></button>
+        </div>
+        {screenMessage ? <p role="status">{screenMessage}</p> : null}
+        <button className="mobile-menu-home" onClick={() => { setMenu(false); release(); onHome(); }}><Home size={19}/>Mission home</button>
+      </div>
+    ]}/> : null}
+    {rotatePrompt ? <GameInfo title="Turn your phone" onClose={allowUpright} pages={[
+      <div className="mobile-rotate-guide" key="rotate"><div className="mobile-phone-turn" aria-hidden="true"><Smartphone size={78}/><RotateCw size={32}/></div>
+        <p>More room for your space adventure!</p>
+        <button className="mobile-resume" onClick={() => { requestScreen(); }}>Try fullscreen<Expand size={18}/></button>
+        <button className="mobile-upright" onClick={allowUpright}>Play upright</button>
+      </div>
+    ]}/> : null}
+  </MobileGameContext.Provider>;
+}

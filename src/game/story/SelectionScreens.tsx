@@ -11,6 +11,7 @@ import './selection.css';
 import './missionExperience.css';
 const HomeViewport = lazy(() => import('./HomeViewport.tsx').then(module => ({ default: module.HomeViewport })));
 import { Term } from './Learning.tsx';
+import { useMobileGame } from './mobileGameContext.ts';
 
 const GUIDE: CharacterCue = { character: 'commander', expression: 'encouraging', pose: 'point' };
 const READY: CharacterCue = { character: 'commander', expression: 'confident', pose: 'ready' };
@@ -31,6 +32,7 @@ export function NameScreen({ playerName, playerGender, onSubmit, onBack, frame, 
   playerName: string; playerGender: PlayerGender; onSubmit(name: string, gender: PlayerGender): void; onBack(): void; frame: SelectionFrame;
   onDemo?: (gender: PlayerGender) => void;
 }) {
+  const { mobile } = useMobileGame();
   const [draft, setDraft] = useState(playerName);
   const [gender, setGender] = useState(playerGender);
   const [error, setError] = useState(false);
@@ -44,7 +46,7 @@ export function NameScreen({ playerName, playerGender, onSubmit, onBack, frame, 
         <form id="commander-name" onSubmit={event => { event.preventDefault(); if (!draft.trim()) { setError(true); return; } onSubmit(draft, gender); }}>
           <label htmlFor="commander-name-input">Your explorer name</label>
           <input id="commander-name-input" name="commanderName" value={draft} placeholder="Charlie" maxLength={40} autoComplete="nickname"
-            autoFocus required aria-describedby={error ? 'name-error' : undefined}
+            autoFocus={!mobile} required aria-describedby={error ? 'name-error' : undefined}
             onChange={event => { setDraft(event.target.value); setError(false); }} />
           {error ? <p id="name-error" role="alert">Enter a name to begin.</p> : null}
           <fieldset className="player-gender-picker">
@@ -100,16 +102,17 @@ export function MissionHome({ progress, onContinue, onRestart, frame, onDemo }: 
   onDemo?: () => void;
 }) {
   const hasProgress = !!progress.playerName;
+  const mobileGame = useMobileGame();
   return <StoryShell {...frame} controls={null}>
     <main className="mission-home" id="story-content" tabIndex={-1} aria-labelledby="mission-home-title">
       <section className="home-copy">
         <span className="home-mission-tag"><span/>YOUR FIRST MOON MISSION</span>
         <h1 id="mission-home-title">Small explorer.<br/><em>Big adventure.</em></h1>
         <p>Build it. Test it. Launch it.</p>
-        <button className="home-play conversation-next" data-primary-action onClick={onContinue}><Play size={25} fill="currentColor"/>Play now<ArrowRight size={25}/></button>
+        <button className="home-play conversation-next" data-primary-action onClick={() => { mobileGame.start(); onContinue(); }}><Play size={25} fill="currentColor"/>Play now<ArrowRight size={25}/></button>
         <span className="home-play-note">{hasProgress ? `Continue ${progress.playerName}’s saved adventure` : 'Your adventure starts here'}</span>
         <div className="home-other-actions">
-          {onDemo ? <button onClick={onDemo}><Rocket size={18}/>Judge demo</button> : null}
+          {onDemo ? <button onClick={() => { mobileGame.start(); onDemo(); }}><Rocket size={18}/>Judge demo</button> : null}
           {hasProgress ? <button onClick={onRestart}><RotateCcw size={17}/>New mission</button> : null}
         </div>
         <div className="home-mission-trail" aria-label="Mission path"><span><span>01</span>Build</span><i/><span><span>02</span>Test</span><i/><span><span>03</span>Launch</span></div>

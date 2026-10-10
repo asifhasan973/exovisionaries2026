@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import './viewport.css';
 import { SettingsButton } from './GameSettings.tsx';
 import { HintButton, LearningControls } from './Learning.tsx';
+import { useMobileGame } from './mobileGameContext.ts';
 
 export interface StoryShellProps {
   children: ReactNode;
@@ -20,6 +21,7 @@ export interface StoryShellProps {
 /** Shared navigation frame for conversations, mission cards and the workshop handoff. */
 export function StoryShell({ children, controls, headerExtra, onHome, exitURL = import.meta.env.BASE_URL,
   voiceEnabled = true, onToggleVoice, voiceAvailable = true, skipTarget = 'story-content' }: StoryShellProps) {
+  const mobileGame = useMobileGame();
   useEffect(() => {
     const advance = (event: KeyboardEvent) => {
       if (event.key !== 'Enter' || event.defaultPrevented || event.repeat || event.isComposing || event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) return;
@@ -34,9 +36,9 @@ export function StoryShell({ children, controls, headerExtra, onHome, exitURL = 
     return () => window.removeEventListener('keydown', advance);
   }, []);
   const brand = <><span><Rocket size={25} /></span>Zero To Beyond</>;
-  return <div className={`conversation-game ${controls ? '' : 'without-footer'}`}>
+  return <div className={`conversation-game ${controls ? '' : 'without-footer'} ${mobileGame.active ? 'is-mobile-game' : ''}`}>
     <a className="conversation-skip" href={`#${skipTarget}`}>Skip to mission</a>
-    <header className="conversation-header">
+    {!mobileGame.active ? <header className="conversation-header">
       {onHome ? <button className="conversation-brand" onClick={onHome} aria-label="Zero To Beyond home">{brand}</button>
         : <a className="conversation-brand" href={exitURL}>{brand}</a>}
       <nav aria-label="Mission controls">
@@ -48,7 +50,7 @@ export function StoryShell({ children, controls, headerExtra, onHome, exitURL = 
           {voiceEnabled && voiceAvailable ? <Volume2 size={21} /> : <VolumeX size={21} />}<span>Voice</span>
         </button> : null}
       </nav>
-    </header>
+    </header> : null}
     {children}
     {controls}
   </div>;

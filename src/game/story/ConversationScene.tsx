@@ -56,6 +56,7 @@ export function ConversationScene({ title, lines, lineIndex, playerName, onNext,
   useEffect(() => {
     const keyboard = (event: KeyboardEvent) => {
       if (event.defaultPrevented || event.repeat || event.ctrlKey || event.metaKey || event.altKey) return;
+      if (document.querySelector('dialog[open]')) return;
       const target = event.target as HTMLElement;
       if (target.closest('input, textarea, select, button, a, [contenteditable="true"]')) return;
       if (event.key === 'ArrowRight' || event.key === ' ') { event.preventDefault(); next(); }

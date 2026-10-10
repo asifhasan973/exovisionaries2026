@@ -20,6 +20,8 @@ import './selection.css';
 import './playability.css';
 import { LearningProvider } from './Learning.tsx';
 import { GestureGuide } from './GestureGuide.tsx';
+import { MobileGameProvider } from './MobileGame.tsx';
+import { trialActive } from './trial.ts';
 
 /** Exact dialogue and a real preparation manifest share one saved mission. */
 export default function ExactStory() {
@@ -55,6 +57,17 @@ export default function ExactStory() {
     return () => window.removeEventListener('pagehide', save);
   }, []);
   const dispatch = useCallback((event: MissionEvent) => setMission(current => reduceMission(current, event)), []);
+  const pausedFromMenu = useRef({ flight: false, trial: false });
+  const pauseGame = useCallback(() => {
+    const current = latest.current;
+    pausedFromMenu.current = { flight: current.flight.status === 'running', trial: trialActive(current.readiness.trial) && !current.readiness.trial.paused };
+    window.dispatchEvent(new Event('game-help-open'));
+  }, []);
+  const resumeGame = useCallback(() => {
+    if (pausedFromMenu.current.flight) dispatch({ type: 'flight-resume' });
+    if (pausedFromMenu.current.trial) dispatch({ type: 'trial-resume' });
+    pausedFromMenu.current = { flight: false, trial: false };
+  }, [dispatch]);
   const reset = () => { setAutoBuilding(false); setAutoplay(true); setMission(createWorkshopSession(createStoryProgress())); setDemo(false); setRestart(false); setHome(false); };
   const startDemo = (gender: PlayerGender = progress.playerGender) => { setAutoBuilding(false); normalMission.current = mission; setDemo(true); setMission(createJudgeMission(gender)); setHome(false); };
   const goHome = () => { setAutoBuilding(false); if (demo) { setMission(normalMission.current); setDemo(false); } setHome(true); };
@@ -100,5 +113,9 @@ export default function ExactStory() {
   else if (step.module === 6) screen = <ReadinessScreen key={progress.stepId} session={mission} dispatch={dispatch} onBack={back} frame={frame} />;
   else screen = <WorkshopScreen key={progress.stepId} session={mission} dispatch={dispatch} onBack={back} frame={frame}
     autoBuilding={autoBuilding} onStopAutoBuild={() => setAutoBuilding(false)} onAutoBuild={() => { dispatch({ type: 'begin-auto-build' }); setAutoBuilding(true); }} />;
-  return <PlayerCharacterProvider value={progress.playerGender}><GameSettingsProvider voiceEnabled={voiceEnabled} onToggleVoice={() => setVoiceEnabled(value => !value)} onRestart={requestRestart}><LearningProvider>{screen}<GestureGuide key={`${progress.stepId}-${home}`} step={progress.stepId} repair={mission.repair && !repairApplied(mission.repair, mission.preparation) ? mission.repair : undefined} hidden={home || restart || autoBuilding} /><RestartStoryDialog open={restart} onClose={() => setRestart(false)} onConfirm={reset} /></LearningProvider></GameSettingsProvider></PlayerCharacterProvider>;
+  return <PlayerCharacterProvider value={progress.playerGender}><GameSettingsProvider voiceEnabled={voiceEnabled} onToggleVoice={() => setVoiceEnabled(value => !value)} onRestart={requestRestart}><LearningProvider>
+    <MobileGameProvider active={!home} voiceEnabled={voiceEnabled} onToggleVoice={() => setVoiceEnabled(value => !value)} onHome={goHome} onPause={pauseGame} onResume={resumeGame}>
+      {screen}<GestureGuide key={`${progress.stepId}-${home}`} step={progress.stepId} repair={mission.repair && !repairApplied(mission.repair, mission.preparation) ? mission.repair : undefined} hidden={home || restart || autoBuilding} /><RestartStoryDialog open={restart} onClose={() => setRestart(false)} onConfirm={reset} />
+    </MobileGameProvider>
+  </LearningProvider></GameSettingsProvider></PlayerCharacterProvider>;
 }

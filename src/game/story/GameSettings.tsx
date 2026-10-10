@@ -21,4 +21,4 @@ export function GameSettingsProvider({ children, voiceEnabled, onToggleVoice, on
     </div>
   ]} /> : null}</SettingsContext.Provider>;
 }
-export function SettingsButton() { return <button className="conversation-icon labeled-control" aria-label="Game settings" title="Game settings" onClick={() => window.dispatchEvent(new Event('open-game-settings'))}><Settings size={20} /><span>Settings</span></button>; }
+export function SettingsButton({ onOpen }: { onOpen?: () => void } = {}) { return <button className="conversation-icon labeled-control" aria-label="Game settings" title="Game settings" onClick={() => { onOpen?.(); window.dispatchEvent(new Event('open-game-settings')); }}><Settings size={20} /><span>Settings</span></button>; }

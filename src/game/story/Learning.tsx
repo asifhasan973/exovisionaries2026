@@ -34,10 +34,10 @@ export function Term({ term, children }: { term: LearningTerm; children?: ReactN
   const open = useContext(LearningContext);
   return <span className="learning-term">{children ?? GLOSSARY[term].name}{open ? <button type="button" className="learning-info" aria-label={`Explain ${GLOSSARY[term].name}`} title={`What is ${GLOSSARY[term].name}?`} onClick={() => open(term)}><Info size={15} /></button> : null}</span>;
 }
-export function LearningControls() {
+export function LearningControls({ onOpen }: { onOpen?: () => void } = {}) {
   const open = useContext(LearningContext);
   if (!open) return null;
-  return <button className="conversation-icon labeled-control" aria-label="Open space words" title="Space words" onClick={() => open('all')}><BookOpen size={20} /><span>Words</span></button>;
+  return <button className="conversation-icon labeled-control" aria-label="Open space words" title="Space words" onClick={() => { onOpen?.(); open('all'); }}><BookOpen size={20} /><span>Words</span></button>;
 }
 export function HintButton({ disabled = false }: { disabled?: boolean }) {
   return <button type="button" className="game-hint" disabled={disabled} aria-label="Hint: show the next action" onClick={() => window.dispatchEvent(new Event('replay-game-help'))}><Lightbulb size={19}/><span>Hint</span></button>;
