@@ -16,7 +16,7 @@ const manifest = {
   characters: {
     commander: {
       displayName: 'Commander', identity: 'Existing Mira identity; role follows the new script',
-      bodyAtlas: 'commander-body', bodyGrid: [3, 2], bodyScale: 1.14, neckTarget: [320, 267],
+      bodyAtlas: 'commander-body', bodyGrid: [3, 2], bodyScale: 1.14, neckTarget: [320, 267], headOffset: [0, 10],
       poses: {
         listen: body(0, [254, 23], [[111, 214], [153, 226], [149, 269], [141, 309], [151, 354], [140, 391], [119, 381], [108, 329], [106, 283]], [130, 229]),
         explain: body(1, [248, 25], [[112, 139], [133, 151], [164, 185], [146, 229], [112, 232], [78, 209], [43, 190], [38, 165], [61, 133], [78, 137]], [143, 208]),
@@ -36,7 +36,7 @@ const manifest = {
     },
     chief: {
       displayName: 'Chief', identity: 'Senior mission officer; consistent silver hair and short beard',
-      bodyAtlas: 'chief-body', bodyGrid: [2, 2], bodyScale: 1, neckTarget: [350, 267],
+      bodyAtlas: 'chief-body', bodyGrid: [2, 2], bodyScale: 1, neckTarget: [350, 267], headOffset: [0, 18],
       poses: {
         greet: body(0, [381, 50], [[87, 92], [164, 86], [205, 125], [188, 195], [177, 241], [152, 264], [127, 229], [126, 199], [95, 167]], [164, 246]),
         listen: body(1, [307, 50], [[122, 293], [170, 305], [168, 365], [176, 417], [162, 450], [141, 442], [115, 403], [108, 358]], [143, 314]),
@@ -59,5 +59,16 @@ const manifest = {
 manifest.characters.commander.expressions.determined.eyelids = [[42, 211, 85, 48], [126, 194, 104, 58]];
 manifest.characters.commander.expressions.encouraging.eyelids = [[42, 197, 85, 48], [126, 180, 104, 58]];
 manifest.characters.commander.expressions.curious.eyelids = [[42, 178, 85, 48], [126, 161, 104, 58]];
+// Remove each face's duplicate neck tab at the jaw; the body supplies the neck.
+const jawEdges = {
+  thoughtful: [155, 334, 244, 280], grateful: [155, 327, 244, 273],
+  surprised: [150, 315, 244, 261], determined: [155, 342, 244, 286],
+  encouraging: [155, 330, 244, 274], curious: [151, 316, 244, 261],
+  confident: [197, 472, 325, 397],
+};
+for (const [expression, edge] of Object.entries(jawEdges)) manifest.characters.commander.expressions[expression].neckCut = edge;
+// The male atlas is a complete-body rig with registered talking/blinking frames.
+manifest.characters['commander-male'] = JSON.parse(readFileSync(new URL('../public/story/characters-v1/commander-male-rig.json', import.meta.url)));
+manifest.atlases['commander-male-atlas'] = { file: 'commander-male-atlas.png', width: 1024, height: 1536 };
 writeFileSync(new URL('../public/story/characters-v1/manifest.json', import.meta.url), JSON.stringify(manifest, null, 2) + '\n');
 console.log('Character manifest: 12 expression sets, 9 poses, all script cue bindings.');

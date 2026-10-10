@@ -1,0 +1,261 @@
+{
+  "displayName": "Commander",
+  "identity": "Young male South Asian commander; blue flight suit, short dark hair",
+  "bodyAtlas": "commander-male-atlas",
+  "bodyGrid": [
+    4,
+    3
+  ],
+  "bodyScale": 1.65,
+  "neckTarget": [
+    300,
+    190
+  ],
+  "poses": {
+    "greet": {
+      "cell": 0,
+      "neck": [
+        0,
+        0
+      ],
+      "arm": [],
+      "pivot": [
+        0,
+        0
+      ]
+    },
+    "listen": {
+      "cell": 0,
+      "neck": [
+        0,
+        0
+      ],
+      "arm": [],
+      "pivot": [
+        0,
+        0
+      ]
+    },
+    "explain": {
+      "cell": 0,
+      "neck": [
+        0,
+        0
+      ],
+      "arm": [],
+      "pivot": [
+        0,
+        0
+      ]
+    },
+    "think": {
+      "cell": 0,
+      "neck": [
+        0,
+        0
+      ],
+      "arm": [],
+      "pivot": [
+        0,
+        0
+      ]
+    },
+    "point": {
+      "cell": 0,
+      "neck": [
+        0,
+        0
+      ],
+      "arm": [],
+      "pivot": [
+        0,
+        0
+      ]
+    },
+    "ready": {
+      "cell": 0,
+      "neck": [
+        0,
+        0
+      ],
+      "arm": [],
+      "pivot": [
+        0,
+        0
+      ]
+    }
+  },
+  "expressions": {},
+  "fullBody": {
+    "expressionRows": {
+      "welcoming": 0,
+      "grateful": 1,
+      "proud": 1,
+      "surprised": 0,
+      "confident": 1,
+      "thoughtful": 2,
+      "encouraging": 0,
+      "determined": 1,
+      "curious": 2,
+      "focused": 2
+    },
+    "portrait": [
+      -65,
+      -70,
+      130,
+      155
+    ],
+    "frames": [
+      [
+        {
+          "rect": [
+            13,
+            38,
+            259,
+            487
+          ],
+          "anchor": [
+            151,
+            69
+          ]
+        },
+        {
+          "rect": [
+            269,
+            37,
+            253,
+            488
+          ],
+          "anchor": [
+            145,
+            70
+          ]
+        },
+        {
+          "rect": [
+            516,
+            38,
+            250,
+            488
+          ],
+          "anchor": [
+            147,
+            69
+          ]
+        },
+        {
+          "rect": [
+            761,
+            37,
+            247,
+            488
+          ],
+          "anchor": [
+            150,
+            70
+          ]
+        }
+      ],
+      [
+        {
+          "rect": [
+            50,
+            550,
+            220,
+            488
+          ],
+          "anchor": [
+            116,
+            69
+          ]
+        },
+        {
+          "rect": [
+            300,
+            549,
+            222,
+            489
+          ],
+          "anchor": [
+            116,
+            70
+          ]
+        },
+        {
+          "rect": [
+            548,
+            549,
+            217,
+            489
+          ],
+          "anchor": [
+            122,
+            70
+          ]
+        },
+        {
+          "rect": [
+            799,
+            549,
+            213,
+            489
+          ],
+          "anchor": [
+            120,
+            70
+          ]
+        }
+      ],
+      [
+        {
+          "rect": [
+            51,
+            1049,
+            220,
+            468
+          ],
+          "anchor": [
+            119,
+            75
+          ]
+        },
+        {
+          "rect": [
+            304,
+            1050,
+            216,
+            467
+          ],
+          "anchor": [
+            111,
+            74
+          ]
+        },
+        {
+          "rect": [
+            549,
+            1051,
+            215,
+            466
+          ],
+          "anchor": [
+            117,
+            73
+          ]
+        },
+        {
+          "rect": [
+            799,
+            1050,
+            205,
+            467
+          ],
+          "anchor": [
+            117,
+            74
+          ]
+        }
+      ]
+    ]
+  }
+}

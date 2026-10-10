@@ -4,7 +4,7 @@ import type { StoryEvent, StoryProgress, StoryStepId } from './types.ts';
 export const STORY_SAVE_KEY = 'zero_to_beyond_script_story_v1';
 
 export function createStoryProgress(): StoryProgress {
-  return { version: 1, playerName: '', stepId: 'player-name', lineIndex: 0, selections: {}, completedActivities: [], history: [] };
+  return { version: 1, playerName: '', playerGender: 'female', stepId: 'player-name', lineIndex: 0, selections: {}, completedActivities: [], history: [] };
 }
 
 function advanceStep(progress: StoryProgress): StoryProgress {
@@ -23,7 +23,7 @@ export function reduceStoryProgress(progress: StoryProgress, event: StoryEvent):
     case 'set-name': {
       if (step.kind !== 'name') return progress;
       const playerName = event.name.trim().replace(/\s+/g, ' ').normalize('NFC').slice(0, 40);
-      return { ...progress, playerName };
+      return { ...progress, playerName, playerGender: event.gender ?? progress.playerGender };
     }
     case 'select': {
       if (step.kind !== 'choice' || !step.options.some(option => option.id === event.choiceId && option.available)) return progress;
@@ -73,7 +73,7 @@ export function restoreStoryProgress(raw: string | null): StoryProgress {
     if (saved?.version !== 1 || typeof saved.playerName !== 'string') return fresh;
     const target = STORY_FLOW.find(step => step.id === saved.stepId);
     if (!target) return fresh;
-    let progress = reduceStoryProgress(fresh, { type: 'set-name', name: saved.playerName });
+    let progress = reduceStoryProgress(fresh, { type: 'set-name', name: saved.playerName, gender: saved.playerGender === 'male' ? 'male' : 'female' });
     // Back navigation may leave valid later choices in the save. Keep them across reloads,
     // while validating each option and still reconstructing the current cursor through gates.
     for (const step of STORY_FLOW) {

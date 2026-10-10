@@ -1,0 +1,52 @@
+/** Small explanations: game balance values stay distinct from real hardware data. */
+export const GLOSSARY = {
+  mission: { name: 'Mission', icon: '🚀', text: 'A job to do in space.', example: 'Our job: look for clues of ice on the Moon.' },
+  objective: { name: 'Objective', icon: '🎯', text: 'The thing you want to find or do.', example: 'Like a treasure hunt: your goal is to find ice clues.' },
+  lander: { name: 'Lander', icon: '🛬', text: 'A spacecraft that lands on the ground.', example: 'It carries our rover safely down to the Moon.' },
+  rover: { name: 'Rover', icon: '🛞', text: 'A robot with wheels that explores the ground.', example: 'Like a little car that can work on the Moon!' },
+  mass: { name: 'Mass', icon: '⚖️', text: 'How much stuff is in something. We count it in kilograms (kg).', example: 'More parts add more mass. Our rocket can only carry so much.' },
+  budget: { name: 'Budget', icon: '🪙', text: 'How many coins you can spend.', example: 'You have 1,000 game coins. Save some by choosing smaller parts.' },
+  credits: { name: 'Credits', icon: '🪙', text: 'The pretend coins we use to buy game parts.', example: '100 credits means 100 game coins. It is not a real price.' },
+  power: { name: 'Power', icon: '⚡', text: 'How fast something uses energy.', example: 'A busy drill uses energy faster than a small camera.' },
+  peak: { name: 'Peak load', icon: '⚡', text: 'The most power your equipment needs at one time.', example: 'When the drill starts, it may need a big burst of power.' },
+  energy: { name: 'Energy', icon: '🔋', text: 'The stored supply that helps things work.', example: 'A full battery holds more energy than an empty one.' },
+  battery: { name: 'Battery', icon: '🔋', text: 'A box that stores energy to run your robot.', example: 'In a dark crater, the battery keeps the rover moving.' },
+  watts: { name: 'W · Watts', icon: '⚡', text: 'A number that tells us how fast energy is used or made.', example: 'A 100 W robot uses energy faster than a 50 W robot.' },
+  wh: { name: 'Wh · Watt-hours', icon: '🔋', text: 'A number that tells us how much energy a battery holds.', example: 'For the same robot, a bigger Wh number means the battery lasts longer.' },
+  reserve: { name: 'Reserve', icon: '🏠', text: 'Energy you save for later.', example: 'We leave 20% in the battery, like saving a snack for the trip home.' },
+  solar: { name: 'Solar array', icon: '☀️', text: 'Panels that turn sunlight into electricity.', example: 'They need sunlight. In dark shadow, they cannot charge our battery.' },
+  shadow: { name: 'Permanent shadow', icon: '🌑', text: 'A place where sunlight never reaches the ground.', example: 'Some deep Moon craters stay dark and very cold.' },
+  thermal: { name: 'Thermal protection', icon: '🧥', text: 'Layers and heaters that help keep the robot at a safe temperature.', example: 'Like a warm coat and a heater for our rover.' },
+  navigation: { name: 'Navigation', icon: '🧭', text: 'Finding the way to a place.', example: 'Cameras help our rover spot rocks and choose a safe path.' },
+  communication: { name: 'Communication', icon: '📡', text: 'Sending messages to someone far away.', example: 'The rover uses a radio to send its discoveries to the lander.' },
+  radar: { name: 'Radar', icon: '📡', text: 'A tool that sends out radio waves and listens for them to bounce back.', example: 'It helps the lander tell how close the ground is.' },
+  antenna: { name: 'Antenna', icon: '📡', text: 'A part that sends and catches radio messages.', example: 'Like ears for the robot’s radio.' },
+  drill: { name: 'Drill depth', icon: '🪛', text: 'How far your tool digs into the ground.', example: 'A deeper hole takes more time and battery energy.' },
+  reliability: { name: 'Reliability', icon: '🛡️', text: 'How often something works without trouble.', example: 'A higher game rating means a better chance of working well.' },
+  geology: { name: 'Geology', icon: '🪨', text: 'Learning about rocks and the ground.', example: 'Moon rocks can tell us what happened there long ago.' },
+  crater: { name: 'Crater rim', icon: '🌙', text: 'The edge of a big bowl-shaped hole in the ground.', example: 'A Moon crater’s edge can get light while its deep floor stays dark.' },
+  payload: { name: 'Payload', icon: '📦', text: 'The things a rocket is carrying to space.', example: 'Our lander, rover and tools travel inside the rocket.' },
+  adapter: { name: 'Adapter', icon: '🧩', text: 'A joining piece that holds two things together.', example: 'It holds our explorer firmly inside the rocket.' },
+  fairing: { name: 'Fairing', icon: '🛡️', text: 'The rocket’s protective cover.', example: 'It protects our explorer from fast-moving air during launch.' },
+  booster: { name: 'Booster', icon: '🚀', text: 'A rocket part that gives a big push at launch.', example: 'When its fuel is used up, we let it go to carry less mass.' },
+  orbit: { name: 'Orbit', icon: '🌍', text: 'Moving around a planet while gravity pulls you toward it.', example: 'Our spacecraft moves sideways fast enough to keep going around Earth.' },
+  rehearsal: { name: 'Rehearsal', icon: '🎮', text: 'A practice run before the real adventure.', example: 'Try driving and drilling here. Practice samples earn no science points.' },
+  nss: { name: 'NSS', icon: '🔎', text: 'A tool that looks for tiny particle clues called neutrons.', example: 'It can find hydrogen clues. More tools must check whether there is water ice.' },
+  nirvss: { name: 'NIRVSS', icon: '🌈', text: 'A tool that studies the ground using light our eyes cannot see.', example: 'The light can give clues about water and minerals.' },
+  trident: { name: 'TRIDENT', icon: '🪛', text: 'A drill that brings little pieces of Moon soil up to the surface.', example: 'Other tools can study the pieces it digs up.' },
+  msolo: { name: 'MSOLO', icon: '🫧', text: 'A tool that checks gases coming from the soil.', example: 'It helps scientists look for clues of water and other gases.' },
+} as const;
+export type LearningTerm = keyof typeof GLOSSARY;
+export const PART_TERMS: Record<string, LearningTerm> = {
+  'lander-body': 'lander', 'landing-engines': 'lander', 'landing-radar': 'radar', 'navigation-computer': 'navigation', 'lander-antenna': 'antenna', 'landing-cameras': 'navigation',
+  'basic-rover': 'rover', 'polar-rover': 'rover', 'heavy-rover': 'rover', nss: 'nss', nirvss: 'nirvss', trident: 'trident', msolo: 'msolo',
+  'standard-solar': 'solar', 'efficient-solar': 'solar', 'small-battery': 'battery', 'medium-battery': 'battery', 'large-battery': 'battery',
+  'basic-navigation-camera': 'navigation', 'stereo-hazard-camera': 'navigation', 'basic-thermal': 'thermal', 'advanced-thermal': 'thermal', 'basic-communication': 'communication', 'high-gain-communication': 'communication',
+};
+
+export const WORD_GROUPS: { name: string; icon: string; terms: LearningTerm[] }[] = [
+  { name: 'Rocket', icon: '🚀', terms: ['mission','objective','lander','payload','adapter','fairing','booster','orbit','mass','budget','credits'] },
+  { name: 'Energy', icon: '🔋', terms: ['power','peak','energy','battery','watts','wh','reserve','solar'] },
+  { name: 'Moon', icon: '🌙', terms: ['shadow','thermal','geology','crater','rehearsal'] },
+  { name: 'Rover & tools', icon: '🛞', terms: ['rover','navigation','communication','radar','antenna','drill','reliability','nss','nirvss','trident','msolo'] },
+];

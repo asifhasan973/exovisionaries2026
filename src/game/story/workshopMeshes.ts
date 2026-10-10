@@ -35,10 +35,14 @@ export function createPartMesh(id: string): THREE.Group {
     const count = basic ? 2 : 3;
     for (const side of [-1, 1]) for (let i = 0; i < count; i++) {
       const z = count === 2 ? (i - .5) * 1 : (i - 1) * .65;
+      const start = group.children.length;
       const wheel = cylinder(.32, .32, .19, dark, side * (width / 2 + .27), .37, z); wheel.rotation.z = Math.PI / 2;
       const hub = cylinder(.11, .11, .22, silver, side * (width / 2 + .27), .37, z); hub.rotation.z = Math.PI / 2;
-      rod(new THREE.Vector3(side * width / 2, .85, z * .4), new THREE.Vector3(side * (width / 2 + .27), .37, z), .05, silver);
       for (let k = 0; k < 12; k++) { const angle = k * Math.PI / 6; box(.22, .04, .055, silver, side * (width / 2 + .27), .37 + Math.cos(angle) * .31, z + Math.sin(angle) * .31).rotation.x = -angle; }
+      const pieces = group.children.slice(start);
+      const pivot = new THREE.Group(); pivot.position.set(side * (width / 2 + .27), .37, z); pivot.userData.wheelPivot = true; group.add(pivot);
+      for (const piece of pieces) { piece.position.sub(pivot.position); pivot.add(piece); }
+      rod(new THREE.Vector3(side * width / 2, .85, z * .4), new THREE.Vector3(side * (width / 2 + .27), .37, z), .05, silver);
     }
     cylinder(.055, .055, .55, silver, 0, 1.52, -.3); box(.45, .15, .22, white, 0, 1.83, -.3);
     for (const x of [-.12, .12]) { const eye = cylinder(.06, .06, .035, blue, x, 1.84, -.44); eye.rotation.x = Math.PI / 2; }
@@ -53,9 +57,12 @@ export function createPartMesh(id: string): THREE.Group {
     if (id === 'basic-communication') { cylinder(.018, .018, .45, gold, 0, .55); box(.23, .18, .18, white, 0, -.15); }
     else { const dish = mesh(new THREE.SphereGeometry(.33, 28, 16, 0, Math.PI * 2, 0, .9), white, 0, .5); dish.rotation.x = .8; rod(new THREE.Vector3(0, .45, 0), new THREE.Vector3(0, .68, .25), .025, gold); }
   } else if (id === 'trident') {
-    box(.32, .42, .3, gold, 0, .3); box(.18, 1, .16, silver, .2, -.05); cylinder(.07, .07, 1, dark, 0, -.45);
+    box(.32, .42, .3, gold, 0, .3); box(.18, 1, .16, silver, .2, -.05);
+    const start = group.children.length;
+    cylinder(.07, .07, 1, dark, 0, -.45);
     for (let i = 0; i < 9; i++) { const ring = mesh(new THREE.TorusGeometry(.075, .019, 6, 18), silver, 0, -.08 - i * .09); ring.rotation.x = Math.PI / 2 + .25; }
     mesh(new THREE.ConeGeometry(.08, .15, 16), silver, 0, -.99).rotation.z = Math.PI;
+    const pieces = group.children.slice(start), bit = new THREE.Group(); bit.name = 'drill-bit'; group.add(bit); pieces.forEach(piece => bit.add(piece));
   } else if (id === 'nss') {
     cylinder(.14, .14, .5, gold); cylinder(.15, .15, .07, silver, 0, .28); box(.35, .08, .35, dark, 0, -.3);
   } else if (id === 'nirvss') {

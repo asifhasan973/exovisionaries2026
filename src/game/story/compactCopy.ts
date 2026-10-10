@@ -1,0 +1,21 @@
+/** Concise game presentation. The full authored script remains in dialogue.ts. */
+export const COMPACT_DIALOGUE: Record<string, string> = {
+  'appointment-01': 'Charlie, good to see you.',
+  'appointment-02': 'Thank you, Chief!',
+  'appointment-03': 'You’re our new Mission Commander!',
+  'appointment-04': 'My own mission?',
+  'appointment-05': 'Choose a destination. Build your explorer!',
+  'appointment-06': 'I’m ready for the challenge!',
+  'appointment-07': 'Where will you go? Good luck, Commander!',
+  'companionIntro-01': 'Hey, Explorer! Will you help me?',
+  'companionIntro-02': 'Let’s choose where to go!',
+  'objectiveBriefing-01': 'What shall we discover?',
+  'objectiveBriefing-02': 'Choose your mission objective.',
+  'objectiveBriefing-03': 'Ice clues or Moon rocks? You decide!',
+  'siteBriefing-01': 'Pick a place to land!',
+  'resourceBriefing-01': 'Watch your budget, mass and power.',
+  'resourceBriefing-02': 'I’ll choose wisely!',
+  'resourceBriefing-03': 'Your mission starts now!',
+  'resourceBriefing-04': 'Let’s keep our explorer light and ready.',
+  'resourceBriefing-05': 'Time to build, Explorer!',
+};

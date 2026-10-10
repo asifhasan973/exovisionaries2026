@@ -5,7 +5,7 @@ import { createJudgeMission } from '../src/game/story/demo.ts';
 import { quickPreparation, installPart } from '../src/game/story/preparation.ts';
 import { emptyTrial, reduceTrial, restoreTrial, trialPassed, trialPlan } from '../src/game/story/trial.ts';
 import { emptyFlight, reduceFlight, restoreFlight } from '../src/game/story/flight.ts';
-import { reduceMission } from '../src/game/story/workshopSession.ts';
+import { createWorkshopSession, reduceMission } from '../src/game/story/workshopSession.ts';
 import { missionSignature } from '../src/game/story/readiness.ts';
 import { readSelectionSession, writeSelectionSession } from '../src/game/story/selectionSession.ts';
 import { finishTrial } from './mission-helpers.mjs';
@@ -91,4 +91,20 @@ test('every engineer reaction has real face and body assets', async () => {
     assert.ok(manifest.characters[cue.character].expressions[cue.expression], reaction + ': face');
     assert.ok(manifest.characters[cue.character].poses[cue.pose], reaction + ': pose');
   }
+});
+
+
+test('a real completed trial accepts power automatically; retry and forged completion cannot advance', () => {
+  let mission = createJudgeMission();
+  mission = reduceMission(reduceMission(reduceMission(mission, { type: 'connect-radar' }), { type: 'run-check' }), { type: 'next' });
+  const passed = finishTrial(mission);
+  assert.equal(passed.readiness.checks['power-check'], missionSignature(passed.progress, passed.preparation));
+  assert.equal(reduceMission(passed, { type: 'next' }).progress.stepId, 'budget-check');
+  const retry = reduceMission(passed, { type: 'trial-retry' });
+  assert.equal(reduceMission(retry, { type: 'next' }), retry);
+  const saved = { ...passed.readiness, checks: { 'mass-check': passed.readiness.checks['mass-check'] } };
+  const resumed = createWorkshopSession(passed.progress, passed.preparation, saved);
+  assert.equal(reduceMission(resumed, { type: 'next' }).progress.stepId, 'budget-check');
+  const forged = createWorkshopSession(passed.progress, passed.preparation, { ...saved, trial: { ...saved.trial, spentWh: 0 } });
+  assert.equal(reduceMission(forged, { type: 'next' }), forged);
 });

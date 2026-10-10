@@ -1,3 +1,4 @@
+import { useGameSettings } from './gameSettingsContext.ts';
 import { useEffect, useRef, useState } from 'react';
 import { Expand } from 'lucide-react';
 import * as THREE from 'three';
@@ -7,7 +8,10 @@ import { disposeGroup } from './workshopMeshes.ts';
 import { createLaunchHardware } from './launchHardware.ts';
 
 /** Only this packing scene loads Three. It visualizes equipment; it is not a flight simulator. */
-export function PackingViewport({ preparation, packedCount }: { preparation: PreparationSelection; packedCount: number }) {
+export function PackingViewport({ preparation, packedCount, onThumbnails }: { preparation: PreparationSelection; packedCount: number; onThumbnails?: (images: Record<string,string>) => void }) {
+  const { gentle } = useGameSettings();
+  const thumbnailCallback = useRef(onThumbnails);
+  useEffect(() => { thumbnailCallback.current = onThumbnails; }, [onThumbnails]);
   const host = useRef<HTMLDivElement>(null), update = useRef<(count: number) => void>(() => {}), fit = useRef(() => {});
   const count = useRef(packedCount);
   useEffect(() => { count.current = packedCount; }, [packedCount]);
@@ -21,13 +25,24 @@ export function PackingViewport({ preparation, packedCount }: { preparation: Pre
     try { renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'low-power' }); }
     catch { fail(); return () => { disposed = true; }; }
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
-    renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.4;
+    renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.15;
     mount.appendChild(renderer.domElement);
     const scene = new THREE.Scene(), camera = new THREE.PerspectiveCamera(34, 1, .1, 100);
-    scene.add(new THREE.HemisphereLight(0xf4ddff, 0x29183f, 2.5));
+    scene.add(new THREE.HemisphereLight(0xecf0ff, 0x262031, 1.5));
     const light = new THREE.DirectionalLight(0xffffff, 4); light.position.set(5, 12, 6); scene.add(light);
-    const rim = new THREE.DirectionalLight(0xa6c7ff, 3); rim.position.set(-5, 8, -3); scene.add(rim);
+    const rim = new THREE.DirectionalLight(0xa6c7ff, 2); rim.position.set(-5, 8, -3); scene.add(rim);
     const { root, adapter, payload, halves } = createLaunchHardware(preparation); scene.add(root);
+    const thumbnails: Record<string,string> = {};
+    renderer.setSize(180,150,false); camera.aspect = 1.2; camera.updateProjectionMatrix();
+    for (const [name, source] of [['adapter',adapter],['payload',payload],['fairing',halves[0]]] as const) {
+      const imageScene = new THREE.Scene();
+      scene.children.filter(item => item instanceof THREE.Light).forEach(item => imageScene.add(item.clone()));
+      const model = source.clone(true); imageScene.add(model); model.visible = true;
+      const bounds = new THREE.Box3().setFromObject(model), centre = bounds.getCenter(new THREE.Vector3());
+      camera.position.copy(centre).add(new THREE.Vector3(1.3,.9,1.7).normalize().multiplyScalar(bounds.getSize(new THREE.Vector3()).length()*1.6)); camera.lookAt(centre);
+      renderer.render(imageScene,camera); thumbnails[name] = renderer.domElement.toDataURL('image/png');
+    }
+    queueMicrotask(() => { if (!disposed) thumbnailCallback.current?.(thumbnails); });
     const controls = new OrbitControls(camera, renderer.domElement); controls.enableDamping = false; controls.minDistance = 8; controls.maxDistance = 38; controls.maxPolarAngle = Math.PI * .65;
     const render = () => { if (!disposed && !document.hidden) renderer.render(scene, camera); };
     fit.current = () => { camera.position.set(15, 10, 22); controls.target.set(0, 6, 0); controls.update(); render(); }; fit.current();
@@ -47,7 +62,7 @@ export function PackingViewport({ preparation, packedCount }: { preparation: Pre
     };
     update.current = count => {
       cancelAnimationFrame(frame); targetCount = count; from = current;
-      if (reduced.matches || document.hidden) { current = count; pose(count); }
+      if (gentle || reduced.matches || document.hidden) { current = count; pose(count); }
       else { start = performance.now(); frame = requestAnimationFrame(animate); }
     };
     const resize = () => { renderer.setSize(Math.max(1, mount.clientWidth), Math.max(1, mount.clientHeight), false); camera.aspect = Math.max(1, mount.clientWidth) / Math.max(1, mount.clientHeight); camera.updateProjectionMatrix(); render(); };
@@ -59,7 +74,7 @@ export function PackingViewport({ preparation, packedCount }: { preparation: Pre
     return () => { disposed = true; cancelAnimationFrame(frame); observer.disconnect(); controls.removeEventListener('change', render); controls.dispose();
       document.removeEventListener('visibilitychange', visibility); renderer.domElement.removeEventListener('webglcontextlost', lost);
       update.current = () => {}; fit.current = () => {}; disposeGroup(scene); renderer.dispose(); renderer.forceContextLoss(); renderer.domElement.remove(); };
-  }, [preparation]);
+  }, [preparation, gentle]);
   useEffect(() => { update.current(packedCount); }, [packedCount]);
   return <div className="readiness-3d"><div ref={host} className="readiness-canvas" role="img" aria-label={`Robotic carrier: ${packedCount} of 3 packing steps complete`} />
     <span className="readiness-scene-label">PAYLOAD HANGAR · 3D</span><button className="conversation-icon readiness-fit" onClick={() => fit.current()} aria-label="Fit carrier"><Expand size={20} /></button>

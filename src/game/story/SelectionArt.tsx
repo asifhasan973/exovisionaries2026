@@ -51,6 +51,7 @@ export function SelectionArt({ kind }: { kind: SelectionArtKind }) {
       <g fill="#cfcae8"><circle cx="66" cy="35" r="1" /><circle cx="245" cy="51" r="1" /><circle cx="336" cy="29" r="1.5" /></g>
       {!shadow ? <><circle cx="33" cy="113" r="13" fill="#fbe1a0" /><circle cx="33" cy="113" r="23" fill="#fbe1a0" opacity=".08" /></> : null}
       <path d="M0 145L76 91L134 139L212 83L282 149L343 105L400 145V260H0Z" fill="#65647f" />
+      {shadow ? <path d="M0 169H400V260H0Z" fill="#070c23" opacity=".38" /> : <><path d="M54 117L137 155M50 123L104 158" stroke="#ffe2a0" strokeWidth="3" opacity=".6"/><path d="M0 145L76 91L134 139L98 129L76 107L18 145Z" fill="#e6d3b8"/></>}
       <path d="M0 169Q97 150 200 171T400 154V260H0Z" fill={paint('ground')} />
       <ellipse cx="261" cy="190" rx="131" ry="44" fill="#8d8ba1" />
       <ellipse cx="268" cy="192" rx="119" ry="33" fill={paint('crater')} />

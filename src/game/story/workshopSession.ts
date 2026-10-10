@@ -1,3 +1,5 @@
+import { recommendRepair, repairApplied } from './repairGuidance.ts';
+import type { RepairGuide, RepairProblem } from './repairGuidance.ts';
 import { emptyFlight, reduceFlight, launchAuthorized, flightComplete } from './flight.ts';
 import type { FlightState, FlightEvent } from './flight.ts';
 import { createPreparationSelection } from './design.ts';
@@ -12,11 +14,13 @@ import type { ReadinessState, PackingAction } from './readiness.ts';
 import { reduceTrial, trialPassed } from './trial.ts';
 import type { TrialEvent } from './trial.ts';
 
-export interface WorkshopSession { progress: StoryProgress; preparation: PreparationSelection; past: PreparationSelection[]; future: PreparationSelection[]; readiness: ReadinessState; flight: FlightState }
+export interface WorkshopSession { repair?: RepairGuide; progress: StoryProgress; preparation: PreparationSelection; past: PreparationSelection[]; future: PreparationSelection[]; readiness: ReadinessState; flight: FlightState }
 export type MissionEvent = StoryEvent | FlightEvent | TrialEvent | { type: 'connect-radar' } | { type: 'install'; ids: string[] } | { type: 'remove'; id: string } | { type: 'depth'; cm: number }
-  | { type: 'run-check' } | { type: 'pack'; action: PackingAction } | { type: 'undo' } | { type: 'redo' } | { type: 'quick-build' } | { type: 'visit-stage'; stage: WorkshopStage };
+  | { type: 'fix-problem'; problem: RepairProblem } | { type: 'repair-recheck' } | { type: 'run-check' } | { type: 'pack'; action: PackingAction } | { type: 'undo' } | { type: 'redo' } | { type: 'quick-build' } | { type: 'begin-auto-build' } | { type: 'visit-stage'; stage: WorkshopStage };
 export function createWorkshopSession(progress: StoryProgress, preparation = createPreparationSelection(), readiness = emptyReadiness(), flight = emptyFlight()): WorkshopSession {
-  return { progress, preparation, readiness, flight, past: [], future: [] };
+  const session: WorkshopSession = { progress, preparation, readiness, flight, past: [], future: [] };
+  return progress.stepId === 'power-check' && trialPassed(readiness.trial, missionSignature(progress, preparation), preparation, progress.selections.site === 'permanent-shadow')
+    ? reduceMission(session, { type: 'run-check' }) : session;
 }
 function withPreparation(session: WorkshopSession, preparation: PreparationSelection, record = true): WorkshopSession {
   if (preparation === session.preparation || JSON.stringify(preparation) === JSON.stringify(session.preparation)) return session;
@@ -27,11 +31,26 @@ function withPreparation(session: WorkshopSession, preparation: PreparationSelec
 export function reduceMission(session: WorkshopSession, event: MissionEvent): WorkshopSession {
   const step = getStoryStep(session.progress.stepId);
   const stage = WORKSHOP_STAGES.find(id => id === step.id);
+  if (event.type === 'fix-problem') {
+    if (step.module !== 6 && !stage) return session;
+    const repair = recommendRepair(session, event.problem);
+    if (!repair || stage && WORKSHOP_STAGES.indexOf(repair.stage) > WORKSHOP_STAGES.indexOf(stage)) return session;
+    return { ...session, repair, progress: { ...session.progress, stepId: repair.stage, lineIndex: 0,
+      history: [...session.progress.history, { stepId: step.id, lineIndex: session.progress.lineIndex }] } };
+  }
+  if (event.type === 'repair-recheck') {
+    if (!stage || !session.repair || !repairApplied(session.repair, session.preparation) || !WORKSHOP_STAGES.every(id => stageReady(id, session.preparation))) return session;
+    return { ...session, repair: undefined, progress: { ...session.progress, stepId: 'mass-check', lineIndex: 0,
+      history: [...session.progress.history, { stepId: step.id, lineIndex: 0 }] } };
+  }
   if (event.type === 'connect-radar') return step.id === 'mass-check' ? { ...session, readiness: { ...session.readiness, radarConnected: true } } : session;
   if (event.type.startsWith('trial-')) {
     if (step.id !== 'power-check' || !checkAccepted('mass-check', session.progress, session.preparation, session.readiness)) return session;
     const trial = reduceTrial(session.readiness.trial, event as TrialEvent, missionSignature(session.progress, session.preparation), session.preparation, session.progress.selections.site === 'permanent-shadow');
-    return { ...session, readiness: { ...session.readiness, trial } };
+    const updated = { ...session, readiness: { ...session.readiness, trial } };
+    // A completed real rehearsal is the power check; no second confirmation click.
+    return trialPassed(trial, missionSignature(session.progress, session.preparation), session.preparation, session.progress.selections.site === 'permanent-shadow')
+      ? reduceMission(updated, { type: 'run-check' }) : updated;
   }
   if (event.type.startsWith('flight-')) {
     if (!['liftoff', 'earth-orbit'].includes(step.id) || !launchAuthorized(session.progress, session.preparation, session.readiness)) return session;
@@ -66,6 +85,12 @@ export function reduceMission(session: WorkshopSession, event: MissionEvent): Wo
       past: event.type === 'undo' ? session.past.slice(0, -1) : [...session.past, session.preparation],
       future: event.type === 'redo' ? session.future.slice(0, -1) : [...session.future, session.preparation] };
   }
+  if (event.type === 'begin-auto-build') {
+    if (!stage && step.id !== 'resource-limits') return session;
+    return { ...session, repair: undefined, preparation: createPreparationSelection(), past: [], future: [], readiness: emptyReadiness(), flight: emptyFlight(),
+      progress: { ...session.progress, stepId: 'lander-build', lineIndex: 0, completedActivities: ['resource-limits'],
+        history: session.progress.history.filter(cursor => getStoryStep(cursor.stepId).module < 5) } };
+  }
   if (event.type === 'quick-build') {
     if (!stage && step.id !== 'resource-limits') return session;
     const updated = withPreparation(session, quickPreparation());
@@ -83,7 +108,7 @@ export function reduceMission(session: WorkshopSession, event: MissionEvent): Wo
     const currentIndex = stage ? WORKSHOP_STAGES.indexOf(stage) : WORKSHOP_STAGES.length;
     const targetIndex = WORKSHOP_STAGES.indexOf(event.stage);
     if (targetIndex > currentIndex) return session;
-    return { ...session, progress: { ...session.progress, stepId: event.stage, lineIndex: 0,
+    return { ...session, repair: undefined, progress: { ...session.progress, stepId: event.stage, lineIndex: 0,
       history: [...session.progress.history, { stepId: step.id, lineIndex: session.progress.lineIndex }] } };
   }
   if (event.type === 'run-check') {

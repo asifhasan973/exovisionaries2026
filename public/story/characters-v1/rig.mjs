@@ -1,5 +1,6 @@
 /** Module 2 asset compositor. No dialogue routing, speech or game state lives here. */
 const patchCache = new WeakMap();
+const faceCache = new WeakMap();
 
 export async function loadRigAssets(characterId, baseURL = new URL('./', import.meta.url), signal) {
   const root = new URL(baseURL, globalThis.location?.href ?? import.meta.url);
@@ -86,7 +87,7 @@ function featurePatch(image, face, region, frame) {
   return result;
 }
 
-function drawFace(context, assets, face, motion) {
+function drawFaceLayers(context, assets, face, motion) {
   const image = assets.images.get(face.atlas);
   const [, , width, height] = face.closed;
   context.drawImage(image, ...face.closed, 0, 0, width, height);
@@ -108,6 +109,35 @@ function drawFace(context, assets, face, motion) {
   }
 }
 
+function drawFace(context, assets, face, motion) {
+  if (!face.neckCut) return drawFaceLayers(context, assets, face, motion);
+  const image = assets.images.get(face.atlas);
+  let cache = faceCache.get(image);
+  if (!cache) { cache = new Map(); faceCache.set(image, cache); }
+  const key = JSON.stringify([face.closed, face.neckCut, motion.mouth ?? 'closed', Boolean(motion.blink)]);
+  let frame = cache.get(key);
+  if (!frame) {
+    frame = document.createElement('canvas');
+    frame.width = face.closed[2]; frame.height = face.closed[3];
+    const matte = frame.getContext('2d');
+    drawFaceLayers(matte, assets, face, motion);
+    // Face atlases contain a separate neck tab. Keep the jaw and let the body's
+    // continuous neck show beneath it, instead of stacking two neck silhouettes.
+    const pixels = matte.getImageData(0, 0, frame.width, frame.height);
+    const [x1, y1, x2, y2] = face.neckCut;
+    for (let x = x1; x < frame.width; x++) {
+      const edge = y1 + Math.min(1, (x - x1) / (x2 - x1)) * (y2 - y1);
+      for (let y = Math.max(0, Math.floor(edge)); y < frame.height; y++) {
+        const alpha = (y * frame.width + x) * 4 + 3;
+        pixels.data[alpha] *= 1 - Math.min(1, Math.max(0, (y - edge) / 3));
+      }
+    }
+    matte.putImageData(pixels, 0, 0);
+    cache.set(key, frame);
+  }
+  context.drawImage(frame, 0, 0);
+}
+
 function armPath(context, points) {
   context.moveTo(...points[0]);
   for (const point of points.slice(1)) context.lineTo(...point);
@@ -116,6 +146,17 @@ function armPath(context, points) {
 
 /** Draws the selected face with independently composited mouth and blink layers. */
 export function drawCharacterPortrait(context, assets, expression, motion = {}) {
+  if (assets.character.fullBody) {
+    const { character } = assets;
+    const row = character.fullBody.expressionRows[expression] ?? 0;
+    const column = motion.blink ? 3 : motion.mouth === 'ah' ? 1 : motion.mouth === 'oo' ? 2 : 0;
+    const frame = character.fullBody.frames[row][column];
+    const [x, y, w, h] = character.fullBody.portrait;
+    const scale = Math.min(context.canvas.width / w, context.canvas.height / h);
+    context.drawImage(assets.images.get(character.bodyAtlas), frame.rect[0] + frame.anchor[0] + x,
+      frame.rect[1] + frame.anchor[1] + y, w, h, (context.canvas.width-w*scale)/2, (context.canvas.height-h*scale)/2, w*scale, h*scale);
+    return;
+  }
   const face = assets.character.expressions[expression];
   if (!face) throw new Error(`Missing expression: ${assets.characterId}/${expression}`);
   context.save();
@@ -130,6 +171,34 @@ export function drawCharacterPortrait(context, assets, expression, motion = {}) 
 export function drawCharacterRig(context, assets, cue, motion = {}) {
   if (cue.character !== assets.characterId) throw new Error('Cue belongs to another character');
   const { character, manifest } = assets;
+  // Complete-body frames keep the new player's neck seamless. The same motion
+  // sampler drives talking and blinking; expression rows select celebratory poses.
+  if (character.fullBody) {
+    const row = character.fullBody.expressionRows[cue.expression] ?? 0;
+    const column = motion.blink ? 3 : motion.mouth === 'ah' ? 1 : motion.mouth === 'oo' ? 2 : 0;
+    const frame = character.fullBody.frames[row][column];
+    const [left, top, width, height] = frame.rect;
+    const stageScale = Math.min(context.canvas.width / manifest.stage.width, context.canvas.height / manifest.stage.height);
+    context.save();
+    context.translate((context.canvas.width - manifest.stage.width * stageScale) / 2,
+      (context.canvas.height - manifest.stage.height * stageScale) / 2);
+    context.scale(stageScale, stageScale);
+    context.translate(character.neckTarget[0], character.neckTarget[1] + (motion.breath ?? 0));
+    context.rotate((motion.nod ?? 0) * .35);
+    context.scale(character.bodyScale, character.bodyScale);
+    context.translate(-frame.anchor[0], -frame.anchor[1]);
+    // Neighbouring first-row hands and boots slightly overlap bounding rectangles.
+    // Clip only the empty gutter; never cut the current figure's silhouette.
+    if (row === 0) {
+      context.beginPath();
+      context.moveTo(0, 0); context.lineTo(width - 6, 0); context.lineTo(width - 6, 330);
+      context.lineTo(width, 330); context.lineTo(width, height); context.lineTo(6, height);
+      context.lineTo(6, 330); context.lineTo(0, 330); context.closePath(); context.clip();
+    }
+    context.drawImage(assets.images.get(character.bodyAtlas), left, top, width, height, 0, 0, width, height);
+    context.restore();
+    return;
+  }
   const pose = character.poses[cue.pose];
   const face = character.expressions[cue.expression];
   if (!pose || !face) throw new Error(`Missing performance: ${cue.character}/${cue.expression}/${cue.pose}`);
@@ -157,7 +226,9 @@ export function drawCharacterRig(context, assets, cue, motion = {}) {
   context.clip('evenodd'); drawBody(); context.restore();
 
   context.save();
-  context.translate(...character.neckTarget); context.rotate(motion.nod ?? 0); context.scale(face.scale, face.scale);
+  context.translate(character.neckTarget[0] + (character.headOffset?.[0] ?? 0),
+    character.neckTarget[1] + (character.headOffset?.[1] ?? 0));
+  context.rotate(motion.nod ?? 0); context.scale(face.scale, face.scale);
   context.translate(-face.anchor[0], -face.anchor[1]);
   drawFace(context, assets, face, motion); context.restore();
 

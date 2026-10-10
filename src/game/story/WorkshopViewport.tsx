@@ -5,6 +5,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import type { PreparationSelection } from './design.ts';
 import { WORKSHOP_PARTS, installedIds, partById } from './preparation.ts';
 import { attachmentPosition, buildAssembly, createPartMesh, disposeGroup } from './workshopMeshes.ts';
+import { useGameSettings } from './gameSettingsContext.ts';
 
 let thumbnailCache: Record<string, string> | undefined;
 
@@ -13,6 +14,8 @@ export function WorkshopViewport({ preparation, draggingId, lastInstalled, canUn
   canUndo: boolean; canRedo: boolean; onUndo(): void; onRedo(): void;
   onThumbnails(images: Record<string, string>): void; onMeshError(): void;
 }) {
+  const { gentle } = useGameSettings();
+  const gentleMotion = useRef(gentle);
   const host = useRef<HTMLDivElement>(null);
   const model = useRef({ preparation, draggingId, lastInstalled });
   const repaint = useRef<() => void>(() => {});
@@ -20,6 +23,7 @@ export function WorkshopViewport({ preparation, draggingId, lastInstalled, canUn
   const rotate = useRef<(direction: number) => void>(() => {});
   const thumbnailCallback = useRef(onThumbnails), errorCallback = useRef(onMeshError);
   const [failed, setFailed] = useState(false);
+  useEffect(() => { gentleMotion.current = gentle; repaint.current(); }, [gentle]);
   useEffect(() => { thumbnailCallback.current = onThumbnails; errorCallback.current = onMeshError; }, [onThumbnails, onMeshError]);
   useEffect(() => { model.current = { preparation, draggingId, lastInstalled }; repaint.current(); }, [preparation, draggingId, lastInstalled]);
   useEffect(() => {
@@ -75,8 +79,9 @@ export function WorkshopViewport({ preparation, draggingId, lastInstalled, canUn
       const state = model.current;
       if (previousPreparation !== state.preparation) {
         scene.remove(assembly); disposeGroup(assembly); assembly = buildAssembly(state.preparation); scene.add(assembly);
-        previousPreparation = state.preparation; animatedPart = state.lastInstalled ? assembly.getObjectByName(state.lastInstalled) : undefined;
-        if (animatedPart && !reduced.matches) { targetY = animatedPart.position.y; animatedPart.position.y += .5; snapStart = performance.now(); }
+        previousPreparation = state.preparation;
+        animatedPart = !gentleMotion.current && !reduced.matches && state.lastInstalled ? assembly.getObjectByName(state.lastInstalled) : undefined;
+        if (animatedPart) { targetY = animatedPart.position.y; animatedPart.position.y += .5; snapStart = performance.now(); }
       }
       dirty = true;
       controls.enabled = !state.draggingId;
@@ -87,10 +92,11 @@ export function WorkshopViewport({ preparation, draggingId, lastInstalled, canUn
     const render = (time: number) => {
       if (disposed || document.hidden) return;
       if (time - lastFrame > 30) {
+        controls.enableDamping = !gentleMotion.current && !reduced.matches;
         controls.update();
         if (!dirty && !animatedPart && !indicator.visible) return;
-        if (animatedPart) { const fraction = Math.min(1, (time - snapStart) / 240); animatedPart.position.y = targetY + .5 * Math.pow(1 - fraction, 3); if (fraction === 1) animatedPart = undefined; }
-        if (indicator.visible) { indicator.quaternion.copy(camera.quaternion); const scale = reduced.matches ? 1 : 1 + Math.sin(time / 160) * .11; indicator.scale.setScalar(scale); }
+        if (animatedPart) { const fraction = gentleMotion.current || reduced.matches ? 1 : Math.min(1, (time - snapStart) / 240); animatedPart.position.y = targetY + .5 * Math.pow(1 - fraction, 3); if (fraction === 1) animatedPart = undefined; }
+        if (indicator.visible) { indicator.quaternion.copy(camera.quaternion); const scale = gentleMotion.current || reduced.matches ? 1 : 1 + Math.sin(time / 160) * .11; indicator.scale.setScalar(scale); }
         renderer.render(scene, camera); lastFrame = time; dirty = false;
       }
     };

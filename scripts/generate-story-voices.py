@@ -4,20 +4,21 @@ Requires edge-tts in a Python virtual environment. Existing files are reusable.
 import asyncio
 import json
 import pathlib
-import re
+import subprocess
 import edge_tts
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 OUT = ROOT / 'public/story/audio'
-VOICES = {'chief': 'en-US-GuyNeural', 'commander': 'en-GB-SoniaNeural'}
+VOICES = {'chief': 'en-US-GuyNeural', 'commander': 'en-GB-SoniaNeural', 'commander-male': 'en-US-AndrewNeural'}
 
 async def main():
     OUT.mkdir(parents=True, exist_ok=True)
-    script = (ROOT / 'src/game/story/dialogue.ts').read_text()
-    dialogue = json.loads(script.split('export const STORY_DIALOGUE = ', 1)[1].split(' as const satisfies', 1)[0].strip())
-    lines = [(line['id'], line['text'], line['speaker']['character']) for group in dialogue.values() for line in group]
-    source = (ROOT / 'src/game/story/voiceClips.ts').read_text().split('export const ENGINEER_LINES = {', 1)[1].split('} as const', 1)[0]
-    lines += [('engineer-' + key, text, 'commander') for key, text in re.findall(r"\s+(\w+): '([^']*)',", source)]
+    catalogue = json.loads(subprocess.check_output([
+        'node', '--experimental-strip-types', '--input-type=module', '-e',
+        "import {VOICE_CLIPS} from './src/game/story/voiceClips.ts'; console.log(JSON.stringify(VOICE_CLIPS));"
+    ], cwd=ROOT, text=True))
+    lines = [(key, clip['text'], clip['character']) for key, clip in catalogue.items()]
+    lines += [('male-' + key, clip['text'], 'commander-male') for key, clip in catalogue.items() if clip['character'] == 'commander']
     semaphore = asyncio.Semaphore(3)
     async def build(item):
         key, text, character = item

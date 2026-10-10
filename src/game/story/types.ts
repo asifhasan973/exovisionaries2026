@@ -1,5 +1,6 @@
 /** The supplied script is the copy authority for the new pre-launch adventure. */
 export type StoryCharacterId = 'chief' | 'commander';
+export type PlayerGender = 'male' | 'female';
 export type StoryExpression = 'welcoming' | 'grateful' | 'proud' | 'surprised' | 'confident' | 'thoughtful' | 'encouraging' | 'determined' | 'curious' | 'focused';
 export type StoryPose = 'greet' | 'listen' | 'explain' | 'think' | 'point' | 'ready';
 
@@ -43,6 +44,7 @@ export type StoryStep =
 export interface StoryProgress {
   version: 1;
   playerName: string;
+  playerGender: PlayerGender;
   stepId: StoryStepId;
   lineIndex: number;
   selections: Partial<Record<ChoiceKey, ChoiceId>>;
@@ -51,7 +53,7 @@ export interface StoryProgress {
 }
 
 export type StoryEvent =
-  | { type: 'set-name'; name: string }
+  | { type: 'set-name'; name: string; gender?: PlayerGender }
   | { type: 'next' }
   | { type: 'skip-briefing' }
   | { type: 'back' }

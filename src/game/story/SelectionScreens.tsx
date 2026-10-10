@@ -1,12 +1,16 @@
-import { useEffect, useRef, useState } from 'react';
-import { Check, CheckCircle2, LockKeyhole, MapPin, Moon, Rocket, Sparkles } from 'lucide-react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import { ArrowRight, Play, RotateCcw, Check, CheckCircle2, LockKeyhole, MapPin, Moon, Rocket, Sparkles } from 'lucide-react';
 import { CharacterStage } from './CharacterStage.tsx';
 import { SelectionArt } from './SelectionArt.tsx';
 import { StoryControls, StoryShell } from './StoryShell.tsx';
 import type { StoryShellProps } from './StoryShell.tsx';
-import type { CharacterCue, ChoiceId, StoryProgress, StoryStep } from './types.ts';
+import type { CharacterCue, ChoiceId, PlayerGender, StoryProgress, StoryStep } from './types.ts';
+import { PlayerCharacterProvider } from './playerCharacter.tsx';
 import { STORY_FLOW } from './flow.ts';
 import './selection.css';
+import './missionExperience.css';
+const HomeViewport = lazy(() => import('./HomeViewport.tsx').then(module => ({ default: module.HomeViewport })));
+import { Term } from './Learning.tsx';
 
 const GUIDE: CharacterCue = { character: 'commander', expression: 'encouraging', pose: 'point' };
 const READY: CharacterCue = { character: 'commander', expression: 'confident', pose: 'ready' };
@@ -14,7 +18,7 @@ export type SelectionFrame = Omit<StoryShellProps, 'children' | 'controls'>;
 const selectionSteps = STORY_FLOW.filter((step): step is Extract<StoryStep, { kind: 'choice' }> => step.kind === 'choice');
 
 function ProgressDots({ index }: { index: number }) {
-  return <><span>{index + 1} / 3</span><div aria-hidden="true">{selectionSteps.map((step, i) => <i key={step.id} className={index === i ? 'current' : index > i ? 'done' : ''} />)}</div></>;
+  return <><span>Plan · {index + 1}/3</span><div aria-hidden="true">{selectionSteps.map((step, i) => <i key={step.id} className={index === i ? 'current' : index > i ? 'done' : ''} />)}</div></>;
 }
 function GuideStage({ cue = GUIDE }: { cue?: CharacterCue }) {
   return <div className="conversation-stage selection-guide">
@@ -23,27 +27,35 @@ function GuideStage({ cue = GUIDE }: { cue?: CharacterCue }) {
   </div>;
 }
 
-export function NameScreen({ playerName, onSubmit, onBack, frame, onDemo }: {
-  playerName: string; onSubmit(name: string): void; onBack(): void; frame: SelectionFrame;
-  onDemo?: () => void;
+export function NameScreen({ playerName, playerGender, onSubmit, onBack, frame, onDemo }: {
+  playerName: string; playerGender: PlayerGender; onSubmit(name: string, gender: PlayerGender): void; onBack(): void; frame: SelectionFrame;
+  onDemo?: (gender: PlayerGender) => void;
 }) {
   const [draft, setDraft] = useState(playerName);
+  const [gender, setGender] = useState(playerGender);
   const [error, setError] = useState(false);
   return <StoryShell {...frame} controls={<StoryControls onBack={onBack} nextLabel="Start" nextForm="commander-name"
-    nextDisabled={!draft.trim()} progress={<span>NAME</span>} />}>
+    nextDisabled={!draft.trim()} nextHint={!draft.trim() ? "Enter your name" : `Ready, ${draft.trim()}!`} progress={<span>NAME</span>} />}>
     <main className="conversation-main selection-main name-main" id="story-content" tabIndex={-1} aria-labelledby="name-title">
-      <GuideStage />
+      <PlayerCharacterProvider value={gender}><GuideStage /></PlayerCharacterProvider>
       <section className="conversation-panel selection-name-panel">
         <span className="selection-eyebrow"><Sparkles size={17} />ZERO TO BEYOND</span>
-        <h1 id="name-title">Enter ur name</h1>
-        <form id="commander-name" onSubmit={event => { event.preventDefault(); if (!draft.trim()) { setError(true); return; } onSubmit(draft); }}>
-          <label htmlFor="commander-name-input">Commander name</label>
+        <h1 id="name-title">Your name</h1>
+        <form id="commander-name" onSubmit={event => { event.preventDefault(); if (!draft.trim()) { setError(true); return; } onSubmit(draft, gender); }}>
+          <label htmlFor="commander-name-input">Your explorer name</label>
           <input id="commander-name-input" name="commanderName" value={draft} placeholder="Charlie" maxLength={40} autoComplete="nickname"
             autoFocus required aria-describedby={error ? 'name-error' : undefined}
             onChange={event => { setDraft(event.target.value); setError(false); }} />
           {error ? <p id="name-error" role="alert">Enter a name to begin.</p> : null}
+          <fieldset className="player-gender-picker">
+            <legend>Choose your character</legend>
+            <div>{(['male', 'female'] as const).map(option => <label key={option} className={gender === option ? 'is-selected' : ''}>
+              <input type="radio" name="playerGender" value={option} checked={gender === option} onChange={() => setGender(option)} />
+              <span>{option === 'male' ? 'Male' : 'Female'}</span>{gender === option ? <Check size={19} aria-hidden="true" /> : null}
+            </label>)}</div>
+          </fieldset>
         </form>
-        {onDemo ? <button className="story-demo-button" onClick={onDemo}><Rocket size={18} />Judge demo <span>Try checks & launch</span></button> : null}
+        {onDemo ? <button className="story-demo-button" onClick={() => onDemo(gender)}><Rocket size={18} />Judge demo <span>Try checks & launch</span></button> : null}
       </section>
     </main>
   </StoryShell>;
@@ -58,45 +70,55 @@ export function ChoiceScreen({ step, progress, onSelect, onNext, onBack, frame }
   const title = useRef<HTMLHeadingElement>(null);
   useEffect(() => { title.current?.focus({ preventScroll: true }); }, [step.id]);
   return <StoryShell {...frame} controls={<StoryControls onBack={onBack} onNext={onNext}
-    nextDisabled={!step.options.some(option => option.available && option.id === selected)} progress={<ProgressDots index={index} />} />}>
+    nextHint={!selected ? "Pick a card" : "Choice saved"} nextDisabled={!step.options.some(option => option.available && option.id === selected)} progress={<ProgressDots index={index} />} />}>
     <main className="conversation-main selection-main" id="story-content" tabIndex={-1} aria-labelledby="selection-title">
       <GuideStage cue={step.choiceKey === 'site' ? READY : GUIDE} />
       <section className={`selection-board board-${step.choiceKey}`}>
         <span className="selection-eyebrow">MISSION {String(index + 1).padStart(2, '0')}</span>
-        <h1 id="selection-title" tabIndex={-1} ref={title}>{step.title}</h1>
+        <h1 id="selection-title" tabIndex={-1} ref={title}>{step.choiceKey === 'destination' ? 'Where to?' : step.choiceKey === 'objective' ? 'Pick your mission' : 'Where shall we land?'}</h1>
         <div className="selection-cards" role="group" aria-label={step.title}>
-          {step.options.map(option => <button type="button" key={option.id} disabled={!option.available}
+          {step.options.filter(option => option.id !== 'coming-soon').map(option => <article className="selection-choice" key={option.id}><button type="button" key={option.id} disabled={!option.available}
             className={`selection-card ${selected === option.id ? 'is-selected' : ''}`} aria-pressed={selected === option.id}
             aria-label={option.label} onClick={() => onSelect(option.id)}>
             <span className="selection-card-state" aria-hidden="true">{!option.available ? <LockKeyhole size={19} /> : selected === option.id ? <Check size={20} /> : <ArrowMarker />}</span>
             <SelectionArt kind={option.id} />
-            <span className="selection-card-copy"><strong>{option.label}</strong>
-              {option.description ? <span className="selection-card-description">{option.description}</span> : null}
-              {!option.available && option.id === 'mars' ? <span className="selection-card-lock">Comming Soon</span> : null}
+            <span className="selection-card-copy"><strong>{option.id === 'lunar-ice' ? 'Find ice clues' : option.id === 'lunar-geology' ? 'Explore Moon rocks' : option.id === 'crater-rim' ? 'Crater rim' : option.id === 'permanent-shadow' ? 'Deep shadow' : option.id === 'coming-soon' ? 'Coming soon' : option.label}</strong>
+              {option.description ? <span className="selection-card-description">{option.id === 'crater-rim' ? 'More light · safer route' : option.id === 'permanent-shadow' ? 'Dark & cold · harder route' : option.description}</span> : null}
+              {!option.available && option.id === 'mars' ? <span className="selection-card-lock">Coming soon</span> : null}
             </span>
-          </button>)}
+          </button><div className="selection-choice-hint">{option.id === 'moon' ? 'Tap to start →' : option.id === 'crater-rim' ? <Term term="crater">Sunlit start · solar can work</Term> : option.id === 'permanent-shadow' ? <Term term="shadow">No solar · better warmth needed</Term> : option.id === 'lunar-ice' ? <Term term="nss">Look for water clues</Term> : option.id === 'lunar-geology' ? <Term term="geology">Study rocks & soil</Term> : 'Locked'}</div></article>)}
         </div>
+        <div className="selection-word-help">{step.choiceKey === 'site' ? <><Term term="crater">Crater rim</Term><Term term="shadow">Permanent shadow</Term></> : step.choiceKey === 'objective' ? <Term term="geology">Geology</Term> : null}</div>
       </section>
     </main>
   </StoryShell>;
 }
 function ArrowMarker() { return <span className="selection-empty-marker" />; }
 
-export function MissionHome({ progress, onContinue, onBack, onRestart, frame, onDemo }: {
+export function MissionHome({ progress, onContinue, onRestart, frame, onDemo }: {
   progress: StoryProgress; onContinue(): void; onBack(): void; onRestart(): void; frame: SelectionFrame;
   onDemo?: () => void;
 }) {
   const hasProgress = !!progress.playerName;
-  return <StoryShell {...frame} controls={<StoryControls onBack={onBack} onNext={onContinue}
-    nextLabel={hasProgress ? 'Continue' : 'Start'} progress={<span>MISSION</span>} />}>
-    <main className="conversation-main selection-main" id="story-content" tabIndex={-1} aria-labelledby="mission-home-title">
-      <GuideStage />
-      <section className="conversation-panel selection-home-panel">
-        <span className="selection-eyebrow"><Rocket size={18} />A SPACE ADVENTURE</span>
-        <h1 id="mission-home-title">{hasProgress ? `Ready, ${progress.playerName}?` : 'Your mission awaits.'}</h1>
-        {hasProgress ? <p>Your adventure is saved. Let’s continue!</p> : <p>Pick a destination. Prepare your spacecraft.</p>}
-        {hasProgress ? <button className="selection-new-mission" onClick={onRestart}>Start a new mission</button> : null}
-        {onDemo ? <button className="story-demo-button" onClick={onDemo}><Rocket size={18} />Judge demo <span>Try checks & launch</span></button> : null}
+  return <StoryShell {...frame} controls={null}>
+    <main className="mission-home" id="story-content" tabIndex={-1} aria-labelledby="mission-home-title">
+      <section className="home-copy">
+        <span className="home-mission-tag"><span/>YOUR FIRST MOON MISSION</span>
+        <h1 id="mission-home-title">Small explorer.<br/><em>Big adventure.</em></h1>
+        <p>Build it. Test it. Launch it.</p>
+        <button className="home-play conversation-next" data-primary-action onClick={onContinue}><Play size={25} fill="currentColor"/>Play now<ArrowRight size={25}/></button>
+        <span className="home-play-note">{hasProgress ? `Continue ${progress.playerName}’s saved adventure` : 'Your adventure starts here'}</span>
+        <div className="home-other-actions">
+          {onDemo ? <button onClick={onDemo}><Rocket size={18}/>Judge demo</button> : null}
+          {hasProgress ? <button onClick={onRestart}><RotateCcw size={17}/>New mission</button> : null}
+        </div>
+        <div className="home-mission-trail" aria-label="Mission path"><span><span>01</span>Build</span><i/><span><span>02</span>Test</span><i/><span><span>03</span>Launch</span></div>
+      </section>
+      <section className="home-scene" aria-label="Moon mission preview">
+        <div className="home-planet" aria-hidden="true"/><div className="home-orbit" aria-hidden="true"/>
+        <Suspense fallback={<div className="home-world-fallback">Opening your Moon adventure…</div>}><HomeViewport/></Suspense>
+        <div className="home-scene-badge"><span/>MISSION 01 <strong>THE MOON</strong></div>
+        <span className="home-scene-note">Your rover. Your choices.</span>
       </section>
     </main>
   </StoryShell>;

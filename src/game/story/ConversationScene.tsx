@@ -1,3 +1,4 @@
+import { usePlayerGender } from './playerCharacter.tsx';
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { AudioLines, SkipForward, Volume2 } from 'lucide-react';
 import { CharacterStage } from './CharacterStage.tsx';
@@ -8,22 +9,25 @@ import type { CharacterCue, StoryLine } from './types.ts';
 import type { ReactNode } from 'react';
 import './conversation.css';
 import './playability.css';
+import { LearningText } from './Learning.tsx';
+import { COMPACT_DIALOGUE } from './compactCopy.ts';
 
 const CHIEF_LISTEN: CharacterCue = { character: 'chief', expression: 'encouraging', pose: 'listen' };
 const COMMANDER_LISTEN: CharacterCue = { character: 'commander', expression: 'thoughtful', pose: 'listen' };
 
 /** Controlled renderer: Module 4 supplies saved lineIndex and navigation from the story reducer. */
 export function ConversationScene({ title, lines, lineIndex, playerName, onNext, onBack, headerExtra,
-  nextLabel = 'Next', exitURL = import.meta.env.BASE_URL, onHome, narrationEnabled, onNarrationEnabledChange, onSkip }: {
+  nextLabel = 'Next', exitURL = import.meta.env.BASE_URL, onHome, narrationEnabled, onNarrationEnabledChange, onSkip, autoplay = true }: {
   title: string; lines: readonly StoryLine[]; lineIndex: number; playerName: string;
   onNext(): void; onBack(): void; headerExtra?: ReactNode; nextLabel?: string; exitURL?: string;
   onHome?: () => void; narrationEnabled?: boolean; onNarrationEnabledChange?: (enabled: boolean) => void;
-  onSkip?: () => void;
+  onSkip?: () => void; autoplay?: boolean;
 }) {
+  const gender = usePlayerGender();
   const line = lines[lineIndex];
   if (!line) throw new Error(`Missing conversation line: ${title}/${lineIndex}`);
-  const text = getDialogueText(line, playerName);
-  const label = getSpeakerLabel(line, playerName);
+  const text = getDialogueText({ ...line, text: COMPACT_DIALOGUE[line.id] ?? line.text }, playerName);
+  const label = `${getSpeakerLabel(line, playerName)} · ${line.speaker.character === 'chief' ? 'Mission director' : line.sourceSpeaker === 'Charlie' ? 'You' : 'Mission engineer'}`;
   const [controller] = useState(() => new NarrationController(browserNarrationEnvironment()));
   const narration = useSyncExternalStore(controller.subscribe, controller.getSnapshot, controller.getSnapshot);
   const [localEnabled, setLocalEnabled] = useState(true);
@@ -35,16 +39,17 @@ export function ConversationScene({ title, lines, lineIndex, playerName, onNext,
   };
   useEffect(() => {
     // Defer one turn so StrictMode's setup/cleanup probe cannot submit duplicate audio.
-    const timer = enabled ? setTimeout(() => {
-      if (!document.hidden) controller.speak(text, line.speaker.character, line.id);
+    const timer = enabled && autoplay ? setTimeout(() => {
+      if (!document.hidden) controller.speak(text, line.speaker.character, COMPACT_DIALOGUE[line.id] ? `short-${line.id}` : line.id, gender);
     }, 0) : undefined;
     if (!enabled) controller.stop();
     return () => { clearTimeout(timer); controller.stop(); };
-  }, [controller, text, line.id, line.speaker.character, enabled]);
+  }, [controller, text, line.id, line.speaker.character, enabled, autoplay, gender]);
   useEffect(() => {
     const hide = () => { if (document.hidden) controller.stop(); };
     document.addEventListener('visibilitychange', hide);
-    return () => { document.removeEventListener('visibilitychange', hide); controller.stop(); };
+    const pause = () => controller.stop(); window.addEventListener('game-help-open', pause);
+    return () => { document.removeEventListener('visibilitychange', hide); window.removeEventListener('game-help-open', pause); controller.stop(); };
   }, [controller]);
   const next = () => { controller.stop(); onNext(); };
   const back = () => { controller.stop(); onBack(); };
@@ -67,7 +72,7 @@ export function ConversationScene({ title, lines, lineIndex, playerName, onNext,
   return <StoryShell onHome={onHome} exitURL={exitURL} headerExtra={headerExtra} voiceEnabled={enabled}
     onToggleVoice={toggleVoice} voiceAvailable={available} skipTarget="conversation-dialogue"
     controls={<StoryControls onBack={back} onNext={next} nextLabel={nextLabel} progress={<div className="story-briefing-progress">
-      <span aria-label={`Line ${lineIndex + 1} of ${lines.length}`}>{lineIndex + 1} / {lines.length}</span>
+      <span aria-label={`Line ${lineIndex + 1} of ${lines.length}`}>Briefing · {lineIndex + 1}/{lines.length}</span>
       {onSkip ? <button className="story-skip-briefing" aria-label="Skip briefing" title="Skip briefing" onClick={() => { controller.stop(); onSkip(); }}><SkipForward size={18} /><span>Skip briefing</span></button> : null}
     </div>} />}>
     <main className="conversation-main" aria-label={title}>
@@ -84,12 +89,12 @@ export function ConversationScene({ title, lines, lineIndex, playerName, onNext,
         <div className="conversation-dialogue" id="conversation-dialogue" tabIndex={0}>
           <div className="conversation-speaker"><AudioLines size={22} /><strong>{label}</strong>
             <button className="conversation-icon" aria-label="Replay this line" title="Replay this line"
-              disabled={!available || !enabled} onClick={() => controller.speak(text, line.speaker.character, line.id)}><Volume2 size={20} /></button>
+              disabled={!available || !enabled} onClick={() => controller.speak(text, line.speaker.character, COMPACT_DIALOGUE[line.id] ? `short-${line.id}` : line.id, gender)}><Volume2 size={20} /></button>
           </div>
-          <p key={line.id} data-line-id={line.id} aria-live="polite" aria-atomic="true">{text}</p>
+          <p key={line.id} data-line-id={line.id} aria-live="polite" aria-atomic="true"><LearningText text={text} /></p>
         </div>
         <span className="conversation-audio-status" role="status">
-          {narration.status === 'unavailable' ? 'Voice unavailable · keep playing' : narration.status === 'error' ? 'Voice unavailable · tap replay to retry' : !enabled ? 'Voice off' : narration.status === 'speaking' ? 'Speaking…' : '\u00a0'}
+          {narration.status === 'unavailable' ? 'Voice unavailable · keep playing' : narration.status === 'error' ? 'Voice unavailable · tap replay to retry' : !enabled ? 'Voice off' : narration.status === 'speaking' ? '\u00a0' : '\u00a0'}
         </span>
       </section>
     </main>

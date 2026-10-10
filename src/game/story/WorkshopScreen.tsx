@@ -1,5 +1,9 @@
+import { RepairAlert } from './RepairAlert.tsx';
+import { repairApplied } from './repairGuidance.ts';
+import './repair.css';
+import { useGameSettings } from './gameSettingsContext.ts';
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
-import { BatteryCharging, ChevronLeft, ChevronRight, Check, CheckCheck, Coins, Info, PackageCheck, Plus, ShieldCheck, Sparkles, Sun, WandSparkles, Weight, Zap } from 'lucide-react';
+import { BatteryCharging, ChevronLeft, ChevronRight, Check, CheckCheck, Coins, Info, PackageCheck, Plus, Sparkles, Sun, WandSparkles, Weight, Zap, Trash2 } from 'lucide-react';
 import { sound } from '../../audio/soundEngine.ts';
 import { CharacterStage } from './CharacterStage.tsx';
 import { StoryControls, StoryShell } from './StoryShell.tsx';
@@ -13,6 +17,13 @@ import type { MissionEvent, WorkshopSession } from './workshopSession.ts';
 import type { DesignCategory } from './design.ts';
 import './workshop.css';
 import { GameInfo } from './GameInfo.tsx';
+import { Term } from './Learning.tsx';
+import { GLOSSARY, PART_TERMS } from './glossary.ts';
+import type { LearningTerm } from './glossary.ts';
+import { comparePart, optionBenefit, signed } from './partComparison.ts';
+import { AutoBuildStage } from './AutoBuildStage.tsx';
+import { autoBuildParts } from './autoBuildPlan.ts';
+import { nextWorkshopAction } from './workshopNavigation.ts';
 
 const WorkshopViewport = lazy(() => import('./WorkshopViewport.tsx').then(module => ({ default: module.WorkshopViewport })));
 const headings: Record<WorkshopStage, string> = { 'lander-build': 'Build your lander', 'rover-select': 'Choose your rover', 'science-build': 'Pack your science tools', 'power-build': 'Power your explorer', 'survival-build': 'Protect your explorer' };
@@ -21,10 +32,10 @@ const categoryNames: Record<DesignCategory, string> = { lander: 'Lander parts', 
 const stageNames = ['Lander', 'Rover', 'Science', 'Power', 'Survival'];
 const cue = { character: 'commander', expression: 'confident', pose: 'point' } as const;
 
-function Meter({ label, value, limit, unit, icon: Icon }: { label: string; value: number; limit: number; unit: string; icon: typeof Coins }) {
+function Meter({ label, value, limit, unit, icon: Icon, term }: { term?: LearningTerm; label: string; value: number; limit: number; unit: string; icon: typeof Coins }) {
   const over = value > limit;
   return <div className={`workshop-meter ${over ? 'is-over' : ''}`}>
-    <span><Icon size={17} />{label}</span><strong>{value}<small> / {limit} {unit}</small></strong>
+    <span><Icon size={17} />{term ? <Term term={term}>{label}</Term> : label}</span><strong>{value}<small> / {limit} {unit}</small></strong>
     <progress value={Math.min(value, limit)} max={limit} aria-label={`${label}: ${value} of ${limit} ${unit}`} />
     {over ? <small role="status">{value - limit} {unit} over · swap a part</small> : null}
   </div>;
@@ -32,14 +43,18 @@ function Meter({ label, value, limit, unit, icon: Icon }: { label: string; value
 function ManifestMeters({ session }: { session: WorkshopSession }) {
   const totals = preparationTotals(session.preparation, session.progress.selections.site === 'permanent-shadow');
   return <div className="workshop-meters">
-    <Meter label="Budget" value={totals.credits} limit={SCRIPT_RESOURCES.budgetCredits} unit="cr" icon={Coins} />
-    <Meter label="Mass" value={totals.massKg} limit={SCRIPT_RESOURCES.payloadMassLimitKg} unit="kg" icon={Weight} />
-    <Meter label="Peak load" value={totals.peakW} limit={SCRIPT_RESOURCES.peakPowerLimitW} unit="W" icon={Zap} />
+    <Meter term="budget" label="Budget" value={totals.credits} limit={SCRIPT_RESOURCES.budgetCredits} unit="cr" icon={Coins} />
+    <Meter term="mass" label="Mass" value={totals.massKg} limit={SCRIPT_RESOURCES.payloadMassLimitKg} unit="kg" icon={Weight} />
+    {session.progress.stepId === 'science-build' && session.preparation.sciencePartIds.includes('trident') ? <div className="workshop-meter drill-energy-meter" role="status">
+      <span><BatteryCharging size={17}/><Term term="wh">Drill energy</Term></span><strong>{totals.drillEnergyWh}<small> Wh</small></strong>
+      <small>{totals.drillMinutes} min · {totals.peakW} W</small>
+    </div> : <Meter term="peak" label="Peak" value={totals.peakW} limit={SCRIPT_RESOURCES.peakPowerLimitW} unit="W" icon={Zap} />}
   </div>;
 }
-export function WorkshopScreen({ session, dispatch, frame, onBack }: {
-  session: WorkshopSession; dispatch(event: MissionEvent): void; frame: SelectionFrame; onBack(): void;
+export function WorkshopScreen({ session, dispatch, frame, onBack, autoBuilding, onAutoBuild, onStopAutoBuild }: {
+  session: WorkshopSession; dispatch(event: MissionEvent): void; frame: SelectionFrame; onBack(): void; autoBuilding: boolean; onAutoBuild(): void; onStopAutoBuild(): void;
 }) {
+  const { effects } = useGameSettings();
   const stage = WORKSHOP_STAGES.find(id => id === session.progress.stepId);
   const stageIndex = stage ? WORKSHOP_STAGES.indexOf(stage) : -1;
   const [thumbnails, setThumbnails] = useState<Record<string, string>>({});
@@ -48,14 +63,18 @@ export function WorkshopScreen({ session, dispatch, frame, onBack }: {
   const [message, setMessage] = useState('');
   const [lastInstalled, setLastInstalled] = useState<string | null>(null);
   const [dragging, setDragging] = useState<{ id: string; x: number; y: number } | null>(null);
+  const [autoPart, setAutoPart] = useState<string | null>(null);
   const [quickConfirm, setQuickConfirm] = useState(false);
   const [meshError, setMeshError] = useState(false);
-  const [reaction, setReaction] = useState<EngineerReaction>('intro');
+  const [reaction, setReaction] = useState<EngineerReaction>(() => stage && stageReady(stage, session.preparation) ? 'complete' : 'intro');
   const [reactionToken, setReactionToken] = useState(0);
   const drag = useRef<{ id: string; x: number; y: number; pointerId: number; moved: boolean } | null>(null);
   const suppressClick = useRef(false);
   const dropZone = useRef<HTMLDivElement>(null);
-  const [shelfTab, setShelfTab] = useState<DesignCategory | 'depth' | null>(null);
+  const repair = session.repair?.stage === stage ? session.repair : undefined;
+  const appliedRepair = !!repair && repairApplied(repair, session.preparation);
+  const retestReady = appliedRepair && WORKSHOP_STAGES.every(id => stageReady(id, session.preparation));
+  const [shelfTab, setShelfTab] = useState<DesignCategory | 'depth' | null>(() => repair?.category ?? null);
   const [shelfPage, setShelfPage] = useState(0);
   const [shortScreen, setShortScreen] = useState(() => window.matchMedia('(max-height: 760px), (max-width: 700px)').matches);
   const ids = installedIds(session.preparation);
@@ -73,20 +92,34 @@ export function WorkshopScreen({ session, dispatch, frame, onBack }: {
   const activeCategory = shelfTab && shelfTab !== 'depth' && categories.includes(shelfTab) ? shelfTab : categories[0];
   const depthOpen = shelfTab === 'depth' && stage === 'science-build';
   const pageSize = shortScreen ? 1 : 2;
+  useEffect(() => {
+    if (!repair) return;
+    const focusRepair = () => {
+      setShelfTab(repair.category);
+      const options = WORKSHOP_PARTS.filter(part => part.category === repair.category);
+      setShelfPage(repair.partId ? Math.floor(Math.max(0, options.findIndex(part => part.id === repair.partId)) / pageSize) : 0);
+    };
+    focusRepair();
+    window.addEventListener('replay-game-help', focusRepair);
+    return () => window.removeEventListener('replay-game-help', focusRepair);
+  }, [repair, pageSize]);
   const categoryParts = parts.filter(part => part.category === activeCategory);
   const pageCount = Math.ceil(categoryParts.length / pageSize);
   const currentPage = Math.min(shelfPage, Math.max(0, pageCount - 1));
   const visibleParts = categoryParts.slice(currentPage * pageSize, (currentPage + 1) * pageSize);
+  const nextAction = stage ? nextWorkshopAction(stage, session.preparation, activeCategory, currentPage, pageSize, depthOpen) : null;
+  const nextDisabled = nextAction?.kind === 'install' || (nextAction?.kind === 'advance' && !!stage && !stageReady(stage, session.preparation));
   useEffect(() => {
     const cancel = () => { drag.current = null; setDragging(null); };
     window.addEventListener('blur', cancel);
     return () => { window.removeEventListener('blur', cancel); };
   }, []);
   const install = (selected: string[]) => {
-    if (!selected.length) return;
+    if (autoBuilding || !selected.length) return;
     dispatch({ type: 'install', ids: selected }); setLastInstalled(selected.at(-1)!); setMarked([]);
-    sound.setMuted(!frame.voiceEnabled); sound.playSnap();
-    setMessage(`${selected.length === 1 ? partById(selected[0])?.name : `${selected.length} parts`} installed!`);
+    sound.setMuted(!effects); sound.playSnap();
+    const before = preparationTotals(session.preparation), after = preparationTotals(selected.reduce(installPart, session.preparation));
+    setMessage(`${signed(after.credits - before.credits)} cr · ${signed(after.massKg - before.massKg)} kg · ${selected.length === 1 ? partById(selected[0])?.name : `${selected.length} parts`} installed!`);
     const updated = selected.reduce(installPart, session.preparation);
     const overBudget = preparationTotals(updated).credits > SCRIPT_RESOURCES.budgetCredits;
     const category = partById(selected.at(-1))?.category;
@@ -95,7 +128,17 @@ export function WorkshopScreen({ session, dispatch, frame, onBack }: {
       : category === 'solar' || category === 'battery' ? 'power' : 'survival';
     setReaction(response); setReactionToken(value => value + 1);
   };
-  const next = () => { sound.setMuted(!frame.voiceEnabled); sound.playFanfare(); dispatch({ type: 'next' }); };
+  const next = () => {
+    if (nextAction?.kind === 'shelf') { setShelfTab(nextAction.category); setShelfPage(nextAction.page); setMessage('Pick the next part!'); }
+    else if (nextAction?.kind === 'depth') { setShelfTab('depth'); setShelfPage(0); setMessage('Choose a drill depth, then Next.'); }
+    else if (nextAction?.kind === 'advance') { sound.setMuted(!effects); sound.playFanfare(); dispatch({ type: 'next' }); }
+  };
+  const back = () => {
+    if (depthOpen) { setShelfTab(categories[0]); setShelfPage(Math.max(0, pageCount - 1)); }
+    else if (currentPage > 0) setShelfPage(currentPage - 1);
+    else if (categories.indexOf(activeCategory) > 0) { setShelfTab(categories[categories.indexOf(activeCategory) - 1]); setShelfPage(0); }
+    else onBack();
+  };
   const onPointerDown = (event: React.PointerEvent<HTMLButtonElement>, id: string) => {
     if (event.button !== 0 || !event.isPrimary) return;
     suppressClick.current = false;
@@ -121,21 +164,20 @@ export function WorkshopScreen({ session, dispatch, frame, onBack }: {
     if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
   };
   const onPointerCancel = () => { suppressClick.current = true; drag.current = null; setDragging(null); };
-  const scene = <div className={`workshop-drop-zone ${dragging ? 'is-dragging' : ''}`} ref={dropZone} data-testid="workshop-drop-zone">
+  const scene = <div className={`workshop-drop-zone ${dragging || autoBuilding && autoPart ? 'is-dragging' : ''}`} ref={dropZone} data-testid="workshop-drop-zone">
     <Suspense fallback={<div className="workshop-render-fallback">Opening the workshop…</div>}>
-      <WorkshopViewport preparation={session.preparation} draggingId={dragging?.id ?? null} lastInstalled={lastInstalled}
-        canUndo={!!stage && !!session.past.length} canRedo={!!stage && !!session.future.length} onUndo={() => dispatch({ type: 'undo' })} onRedo={() => dispatch({ type: 'redo' })}
+      <WorkshopViewport preparation={session.preparation} draggingId={dragging?.id ?? (autoBuilding ? autoPart : null)} lastInstalled={lastInstalled}
+        canUndo={!autoBuilding && !!stage && !!session.past.length} canRedo={!autoBuilding && !!stage && !!session.future.length} onUndo={() => dispatch({ type: 'undo' })} onRedo={() => dispatch({ type: 'redo' })}
         onThumbnails={setThumbnails} onMeshError={() => setMeshError(true)} />
     </Suspense>
   </div>;
   if (session.progress.stepId === 'resource-limits') return <StoryShell {...frame} controls={<StoryControls onBack={onBack} onNext={() => dispatch({ type: 'next' })} nextLabel="Build" progress={<span>WORKSHOP</span>} />}>
     <main className="conversation-main workshop-resource-main" id="story-content" tabIndex={-1}>
       <div className="conversation-stage"><CharacterStage cue={cue} active speaking={false} label="Commander" /></div>
-      <section className="conversation-panel workshop-resources"><span className="selection-eyebrow">SPACECRAFT DESIGN SPECIFICATIONS</span><h1>Your mission kit</h1>
+      <section className="conversation-panel workshop-resources"><h1>Your mission kit</h1>
         <p>Build a lander. Pack a rover. Stay within your limits.</p>
-        <div className="workshop-resource-cards"><div><Coins /><strong>1,000</strong><span>credits</span></div><div><Weight /><strong>350 kg</strong><span>payload limit</span></div><div><Zap /><strong>450 W</strong><span>peak power limit</span></div></div>
-        <div className="workshop-resource-start"><span><ShieldCheck size={19} />Rover health 100%</span><span><Sparkles size={19} />Science score 0</span></div>
-        <small>Credits and part specifications are game values. NASA-inspired instrument details are in ⓘ.</small>
+        <div className="workshop-resource-cards"><div><Coins /><strong>1,000</strong><span><Term term="credits">credits</Term></span></div><div><Weight /><strong>350 kg</strong><span><Term term="payload">Payload</Term></span></div><div><Zap /><strong>450 W</strong><span><Term term="peak">Peak power</Term></span></div></div>
+
       </section>
     </main>
   </StoryShell>;
@@ -149,77 +191,87 @@ export function WorkshopScreen({ session, dispatch, frame, onBack }: {
       </section>{scene}</div>
     </main>
   </StoryShell>;
-  return <StoryShell {...frame} controls={<StoryControls onBack={onBack} onNext={next} nextDisabled={!stageReady(stage, session.preparation)}
-    nextLabel={stage === 'survival-build' ? 'Finish build' : 'Next'} progress={<span>{stageIndex + 1} / 5</span>} />}>
-    <main className="workshop-main" id="story-content" tabIndex={-1} aria-labelledby="workshop-title">
+  return <StoryShell {...frame} controls={<StoryControls onBack={autoBuilding ? onStopAutoBuild : repair ? onBack : back} onNext={retestReady ? () => dispatch({ type: 'repair-recheck' }) : next} hintDisabled={autoBuilding} nextDisabled={autoBuilding || !!repair && !appliedRepair || !retestReady && nextDisabled}
+    nextHint={autoBuilding ? `${ids.length}/15 parts` : nextAction?.kind === 'install' ? `Install ${nextAction.remaining} ${nextAction.remaining === 1 ? 'part' : 'parts'}` : undefined} nextLabel={repair ? 'Retest mission' : autoBuilding ? 'Auto-building…' : nextAction?.kind === 'install' ? 'Next' : nextAction?.kind === 'shelf' ? `Next: ${nextAction.category === activeCategory ? 'parts' : categoryNames[nextAction.category]}` : nextAction?.kind === 'depth' ? 'Next: drill plan' : stage === 'survival-build' ? 'Finish build' : 'Next stage'} progress={<span>Build · {stageIndex + 1}/5</span>} />}>
+    <main className={`workshop-main ${autoBuilding ? 'is-auto-building' : ''} ${repair && !appliedRepair ? 'is-repairing' : ''}`} id="story-content" tabIndex={-1} aria-labelledby="workshop-title" aria-busy={autoBuilding}>
       <div className="workshop-top-row"><div className="workshop-heading"><div><span className="selection-eyebrow">MISSION WORKSHOP</span><h1 id="workshop-title">{headings[stage]}</h1><p>{stage === 'science-build' && session.progress.selections.objective === 'lunar-geology' ? 'Pack the three tools. Study minerals with NIRVSS.' : instructions[stage]}</p></div>
-        <button className="workshop-quick" onClick={() => setQuickConfirm(true)}><WandSparkles size={18} />Quick build</button>
-      </div><EngineerCompanion reaction={reaction} token={reactionToken} voiceEnabled={frame.voiceEnabled ?? true} /></div>
-      <nav className="workshop-stage-tabs" aria-label="Build stages">{WORKSHOP_STAGES.map((id, index) => <button key={id} aria-current={id === stage ? 'step' : undefined} disabled={index > stageIndex}
+        <button className="workshop-quick" onClick={() => autoBuilding ? onStopAutoBuild() : setQuickConfirm(true)}><WandSparkles size={18} />{autoBuilding ? 'Stop auto build' : 'Auto build'}</button>
+      </div><EngineerCompanion scriptedReply={repair && !appliedRepair ? { id: repair.voiceId, text: repair.text } : undefined} statusText={autoBuilding ? `Watch your ${stageNames[stageIndex].toLowerCase()} system come together!` : undefined} reaction={repair && !appliedRepair ? 'warning' : autoBuilding || reaction === 'complete' && !stageReady(stage, session.preparation) ? 'intro' : reaction} token={reactionToken} voiceEnabled={!autoBuilding && (frame.voiceEnabled ?? true)} /></div>
+      <nav className="workshop-stage-tabs" inert={autoBuilding} aria-label="Build stages">{WORKSHOP_STAGES.map((id, index) => <button key={id} aria-current={id === stage ? 'step' : undefined} disabled={index > stageIndex}
         onClick={() => dispatch({ type: 'visit-stage', stage: id })}><span>{stageReady(id, session.preparation) ? <Check size={14} /> : index + 1}</span>{stageNames[index]}</button>)}</nav>
-      <div className="workshop-layout"><section className="workshop-shelf" aria-label="Parts shelf"><ManifestMeters session={session} />
+      <ManifestMeters session={session} /><div className="workshop-layout" inert={autoBuilding}><section className="workshop-shelf" aria-label="Parts shelf">
         <nav className="workshop-category-tabs" aria-label="Equipment categories">{categories.map(category => <button key={category} aria-pressed={!depthOpen && activeCategory === category} onClick={() => { setShelfTab(category); setShelfPage(0); }}>{categoryNames[category]}</button>)}{stage === 'science-build' ? <button aria-pressed={depthOpen} onClick={() => { setShelfTab('depth'); setShelfPage(0); }}>Drill plan</button> : null}</nav>
         <div className={`workshop-shelf-pages ${depthOpen ? 'is-depth-page' : ''}`}>
+          {repair?.action === 'depth' && !appliedRepair ? <p className="repair-shelf-note">{repair.label}</p> : null}
           {multi && !depthOpen ? <div className="workshop-bulk"><label><input type="checkbox" aria-label="Select all shelf parts" checked={!!missing.length && missing.every(p => marked.includes(p.id))}
             onChange={event => setMarked(event.target.checked ? missing.map(p => p.id) : [])} disabled={!missing.length} />Select all</label>
             <button disabled={!marked.length} onClick={() => install(marked)}><CheckCheck size={17} />Add {marked.length || 'selected'}</button></div> : null}
           {!depthOpen ? <section className="workshop-category" aria-label={categoryNames[activeCategory]}>
             <div className="workshop-part-grid">{visibleParts.map(part => {
               const installed = ids.includes(part.id);
-              return <article key={part.id} className={`workshop-part ${installed ? 'is-installed' : ''}`} data-part-id={part.id}>
+              const comparison = comparePart(session.preparation, part.id, session.progress.selections.site === 'permanent-shadow');
+              return <article key={part.id} className={`workshop-part ${installed ? 'is-installed' : ''} ${installed && lastInstalled === part.id ? 'was-installed' : ''} ${repair?.partId === part.id && !appliedRepair ? `is-repair-target ${repair.action === 'remove' ? 'is-remove-target' : ''}` : ''}`} data-part-id={part.id}>
+                <span className="part-badge">{repair?.partId === part.id && !appliedRepair ? repair.action === 'remove' ? 'Remove this' : 'Pick this' : part.mandatory ? "Required" : multi ? "Optional" : "Choose one"}</span>
                 <div className="workshop-part-top">{multi && !installed ? <input type="checkbox" aria-label={`Mark ${part.name}`} checked={marked.includes(part.id)}
                   onChange={event => setMarked(current => event.target.checked ? [...current, part.id] : current.filter(id => id !== part.id))} /> : <span>{installed ? <Check size={16} /> : <Plus size={16} />}</span>}
                   <button className="workshop-info" aria-label={`Details for ${part.name}`} onClick={() => setInfoId(part.id)}><Info size={17} /></button></div>
-                <button className="workshop-pick" disabled={installed} aria-label={`Install ${part.name}`} onPointerDown={event => onPointerDown(event, part.id)} onPointerMove={onPointerMove} onPointerUp={onPointerUp}
+                <button className="workshop-pick" disabled={installed} aria-label={`${comparison.replaces ? "Replace with" : "Install"} ${part.name}`} onPointerDown={event => onPointerDown(event, part.id)} onPointerMove={onPointerMove} onPointerUp={onPointerUp}
                   onPointerCancel={onPointerCancel} onLostPointerCapture={() => { if (drag.current?.id === part.id) onPointerCancel(); }}
                   onClick={() => { if (suppressClick.current) { suppressClick.current = false; return; } install([part.id]); }}>
                   {thumbnails[part.id] ? <img draggable={false} src={thumbnails[part.id]} alt="" /> : <div className="workshop-part-placeholder"><PackageCheck size={38} /></div>}
-                  <strong>{part.name}</strong><span className="workshop-part-price">{part.credits} cr · {part.massKg} kg</span>
-                  {part.category === 'rover' ? <span className="workshop-part-spec">{part.nominalPowerW} W · {'★'.repeat(part.terrainStars ?? 0)}<br />{part.reliabilityPercent}% reliability</span> : null}
+                  <strong>{part.id === 'nss' ? 'NSS · Ice clues' : part.id === 'nirvss' ? 'NIRVSS · Soil scan' : part.id === 'trident' ? 'TRIDENT · Drill' : part.name}</strong><span className="workshop-part-price">{part.credits} cr · {part.massKg} kg</span>
+                  {part.category === 'rover' ? <span className="workshop-part-spec">{part.nominalPowerW} W · {'★'.repeat(part.terrainStars ?? 0)}</span> : null}
                   {part.outputW ? <span className="workshop-part-spec">{part.outputW} W sunlight</span> : null}
                   {part.capacityWh ? <span className="workshop-part-spec">{part.capacityWh} Wh</span> : null}
-                  <span className="workshop-part-action">{installed ? 'Installed' : part.mandatory ? 'Required · install' : 'Install'}</span>
+                  <span className="workshop-part-action">{installed ? '✓ Installed' : comparison.replaces ? 'Replace' : 'Install'}</span>
                 </button>
+                {!installed && !multi ? <div className="part-comparison">{comparison.replaces ? <><span>Swap {comparison.replaces}</span><strong>{signed(comparison.credits)} cr · {signed(comparison.massKg)} kg</strong></> : null}<span>{part.category === 'rover' && comparison.replaces ? `${signed(comparison.peakW)} W peak · ` : ''}{optionBenefit(part.id, comparison.shadowMinutes)}</span></div> : null}
+                {installed ? <button className="part-remove" aria-label={`Remove ${part.name}`} onClick={() => { dispatch({ type: 'remove', id: part.id }); setMessage(`${part.name} returned to shelf`); setReaction('intro'); }}><Trash2 size={16}/>Remove</button> : null}
               </article>;
             })}</div></section> : null}
           {!depthOpen ? <nav className="workshop-part-pages" aria-label="Parts pages"><button className="conversation-icon" aria-label="Previous parts page" disabled={currentPage === 0} onClick={() => setShelfPage(currentPage - 1)}><ChevronLeft size={20} /></button><span>{currentPage + 1} / {pageCount}</span><button className="conversation-icon" aria-label="Next parts page" disabled={currentPage === pageCount - 1} onClick={() => setShelfPage(currentPage + 1)}><ChevronRight size={20} /></button></nav> : null}
-          {depthOpen && session.preparation.sciencePartIds.includes('trident') ? <div className="workshop-depth">
-            <label htmlFor="drill-depth">Drill depth <strong>{session.preparation.drillDepthCm} cm</strong></label>
+          {depthOpen && session.preparation.sciencePartIds.includes('trident') ? <div className={`workshop-depth ${repair?.action === 'depth' && !appliedRepair ? 'is-repair-target' : ''}`}>
+            <label htmlFor="drill-depth"><Term term="drill">Drill depth</Term> <strong>{session.preparation.drillDepthCm} cm</strong></label>
             <input id="drill-depth" type="range" min={10} max={100} step={10} value={session.preparation.drillDepthCm ?? 20} onChange={event => dispatch({ type: 'depth', cm: Number(event.target.value) })}
-              onPointerUp={() => { setReaction('depth'); setReactionToken(value => value + 1); }} onKeyUp={event => { if (event.key.startsWith('Arrow')) { setReaction('depth'); setReactionToken(value => value + 1); } }} />
-            <div><span>10 cm</span><span>100 cm</span></div><p>Potential +{drillPotential(session.preparation.drillDepthCm)} · {totals.drillRisk.toLowerCase()} risk</p><p>~{totals.drillMinutes} min · ~{totals.drillEnergyWh} Wh at peak load</p>
+              onPointerUp={() => { setReaction('depth'); setReactionToken(value => value + 1); }} onKeyUp={event => { if (event.key.startsWith('Arrow') || event.key === 'Home' || event.key === 'End') { setReaction('depth'); setReactionToken(value => value + 1); } }} />
+            <div><span>10 cm</span><span>100 cm</span></div><p>Potential +{drillPotential(session.preparation.drillDepthCm)} · {totals.drillRisk.toLowerCase()} risk</p><p role="status"><strong>{totals.drillEnergyWh} <Term term="wh">Wh</Term> needed</strong> · {totals.drillMinutes} min</p>
           </div> : depthOpen ? <p className="workshop-depth-empty">Install TRIDENT first, then choose your drill depth.</p> : null}
         </div>
-        <div className="workshop-feedback" role="status" aria-live="polite">{message || (stageReady(stage, session.preparation) ? 'Ready! Choose Next.' : 'Hold and drag, or tap to install.')}</div>
+        <div className="workshop-feedback" role="status" aria-live="polite">{repair ? appliedRepair ? 'Part changed! Retest mission.' : repair.action === 'depth' ? repair.label : repair.action === 'remove' ? 'Remove the yellow part.' : 'Pick the yellow part.' : nextAction?.kind === 'install' ? `Install ${nextAction.remaining === 1 ? 'a part' : `${nextAction.remaining} parts`}, then Next.` : nextAction?.kind === 'depth' ? 'Tools ready! Next: drill depth.' : nextAction?.kind === 'shelf' && !multi && !categoryParts.some(part => ids.includes(part.id)) ? 'Pick a part, or Next for more.' : message || 'Ready! Choose Next.'}</div>
       </section><section className="workshop-view-column" aria-label="Spacecraft assembly">
         {scene}
-        <div className="workshop-live-strip"><span><Check size={17} />{ids.length} installed</span><span><Sparkles size={17} />Science {totals.spentScience} <small>· potential +{totals.potentialScience}</small></span></div>
-        {(stage === 'power-build' || stage === 'survival-build') ? <div className="workshop-power-strip"><span><Sun size={20} />{totals.solarW} W solar</span><span><BatteryCharging size={20} />{totals.batteryWh} Wh stored</span><span>{totals.normalW} W normal · {totals.peakW} W peak</span>
-          <small>{session.progress.selections.site === 'permanent-shadow' ? 'Permanent shadow: no solar charging. Plan a return to sunlight.' : 'Shadow trips use the battery. Keep energy for the return.'}
-            {totals.batteryMinutes !== null ? ` ~${totals.batteryMinutes} min at steady load, with 20% reserve; drilling uses ~${totals.drillEnergyWh} Wh separately.` : ''}</small>
+        {!autoBuilding && !repair && (totals.credits > 1000 || totals.massKg > 350 || totals.peakW > 450) ? <RepairAlert session={session} dispatch={dispatch} problem={totals.massKg > 350 ? 'mass' : totals.peakW > 450 ? 'peak' : 'budget'}/> : null}
+        {autoBuilding ? <div className="auto-build-status" role="status"><WandSparkles size={19}/>Auto build <strong>{ids.length}/{autoBuildParts(session.progress.selections.site === 'permanent-shadow').length}</strong><progress max={15} value={ids.length}/></div> : null}
+        <div className="workshop-live-strip"><span><Check size={17} />{ids.length} installed</span><span><Sparkles size={17} />Potential +{totals.potentialScience}</span></div>
+        {(stage === 'power-build' || stage === 'survival-build') ? <div className="workshop-power-strip"><span><Sun size={20} />{totals.solarW} W solar</span><span><BatteryCharging size={20} />{totals.batteryWh} <Term term="wh">Wh</Term></span><span>{totals.peakW} <Term term="peak">W peak</Term></span>
+
         </div> : null}
         {meshError ? <small className="workshop-model-note">3D could not start. Every part still has a working Install button.</small> : null}
       </section></div>
       {dragging ? <div className="workshop-drag-ghost" style={{ left: dragging.x, top: dragging.y }} aria-hidden="true">{thumbnails[dragging.id] ? <img src={thumbnails[dragging.id]} alt="" /> : <PackageCheck />}</div> : null}
+      <span className="visually-hidden" role="status">{message}</span>
     </main>
+    {autoBuilding && stage ? <AutoBuildStage stage={stage} preparation={session.preparation} shadow={session.progress.selections.site === 'permanent-shadow'} thumbnails={thumbnails} dispatch={dispatch}
+      onFocus={id => { setAutoPart(id); const part = partById(id)!; setShelfTab(part.category); setShelfPage(Math.floor(WORKSHOP_PARTS.filter(p => p.category === part.category).findIndex(p => p.id === id) / pageSize)); }}
+      onDepthPreview={() => { setAutoPart(null); setShelfTab('depth'); }} onInstalled={id => { setAutoPart(null); setLastInstalled(id); setMessage(`${partById(id)?.name} installed!`); }} onDone={onStopAutoBuild}/> : null}
     {infoId ? <PartDetails part={partById(infoId)!} installed={ids.includes(infoId)} onClose={() => setInfoId(null)} onRemove={() => { dispatch({ type: 'remove', id: infoId }); setInfoId(null); setMessage('Part returned to the shelf.'); }} /> : null}
-    {quickConfirm ? <QuickBuildDialog onClose={() => setQuickConfirm(false)} onConfirm={() => { dispatch({ type: 'quick-build' }); setQuickConfirm(false); sound.setMuted(!frame.voiceEnabled); sound.playFanfare(); }} /> : null}
+    {quickConfirm ? <QuickBuildDialog onClose={() => setQuickConfirm(false)} onConfirm={() => { sound.setMuted(!effects); sound.playClick(); setQuickConfirm(false); onAutoBuild(); }} /> : null}
   </StoryShell>;
 }
 function PartDetails({ part, installed, onClose, onRemove }: { part: WorkshopPart; installed: boolean; onClose(): void; onRemove(): void }) {
   return <GameInfo title={part.name} onClose={onClose} pages={[
-    <div key="overview"><span className="selection-eyebrow">{categoryNames[part.category]}</span><p>{part.description}</p>
-      <dl><div><dt>Cost</dt><dd>{part.credits} credits</dd></div><div><dt>Mass</dt><dd>{part.massKg} kg</dd></div><div><dt>Electrical load</dt><dd>{part.nominalPowerW} W{part.peakPowerW ? ` / ${part.peakPowerW} W peak` : ''}</dd></div>
-      {part.outputW ? <div><dt>Sunlight output</dt><dd>{part.outputW} W · 0 W in shadow</dd></div> : null}{part.capacityWh ? <div><dt>Battery energy</dt><dd>{part.capacityWh} Wh</dd></div> : null}</dl>
+    <div key="overview"><div className="learning-part-intro"><span aria-hidden="true">{GLOSSARY[PART_TERMS[part.id]].icon}</span><p>{GLOSSARY[PART_TERMS[part.id]].text}</p><p className="learning-example">{GLOSSARY[PART_TERMS[part.id]].example}</p></div></div>,
+    <div key="specs"><dl><div><dt>Cost</dt><dd>{part.credits} credits</dd></div><div><dt><Term term="mass">Mass</Term></dt><dd>{part.massKg} kg</dd></div><div><dt><Term term="power">Power</Term></dt><dd>{part.nominalPowerW} W{part.peakPowerW ? ` / ${part.peakPowerW} W peak` : ''}</dd></div>
+      {part.outputW ? <div><dt>Sunlight output</dt><dd>{part.outputW} W · 0 W in shadow</dd></div> : null}{part.capacityWh ? <div><dt><Term term="energy">Stored energy</Term></dt><dd>{part.capacityWh} Wh</dd></div> : null}</dl>
       {installed ? <button className="workshop-remove" onClick={onRemove}>Remove part</button> : null}</div>,
-    <div key="notes"><p>Prices, masses, loads, reliability and bonus points are authored game values, not real hardware quotations.</p>{part.safetyBonus ? <p>Game safety bonus: +{part.safetyBonus}</p> : null}{part.assumption ? <p>{part.assumption}</p> : null}{part.source ? <a href={part.source} target="_blank" rel="noreferrer">NASA: learn about the real system ↗</a> : null}</div>
+    <div key="notes"><p>{part.description}</p><p>These prices and numbers are game values.</p>{part.safetyBonus ? <p>Game safety bonus: +{part.safetyBonus}</p> : null}{part.assumption ? <p>{part.assumption}</p> : null}{part.source ? <a href={part.source} target="_blank" rel="noreferrer">NASA: learn about the real system ↗</a> : null}</div>
   ]} />;
 }
 function QuickBuildDialog({ onClose, onConfirm }: { onClose(): void; onConfirm(): void }) {
   const dialog = useRef<HTMLDialogElement>(null);
   useEffect(() => { const target = dialog.current; target?.showModal(); return () => target?.close(); }, []);
   return <dialog className="workshop-dialog" ref={dialog} onCancel={onClose} onClose={event => { if (!event.currentTarget.open) onClose(); }} aria-labelledby="quick-build-title">
-    <span className="selection-eyebrow">QUICK PREVIEW</span><h2 id="quick-build-title">Auto-build this explorer?</h2><p>Replaces this design with a complete example. You can edit it afterward.</p>
+    <span className="selection-eyebrow">QUICK PREVIEW</span><h2 id="quick-build-title">Auto-build this explorer?</h2><p>Watch all five stages in about 12 seconds. Replaces your parts; you can edit afterward.</p>
     <div className="workshop-dialog-actions"><button onClick={onClose} autoFocus>Keep building</button><button className="conversation-next" onClick={onConfirm}>Auto-build</button></div>
   </dialog>;
 }

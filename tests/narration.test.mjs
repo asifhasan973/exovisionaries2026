@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { NarrationController } from '../src/game/story/narration.ts';
+import { NarrationController, NARRATION_SPEED } from '../src/game/story/narration.ts';
 
 function harness() {
   const utterances = [], timers = new Map();
@@ -18,6 +18,7 @@ test('mouth starts only on actual speech start, and closes on end or pause', () 
   const h = harness();
   h.controller.speak('My own mission?', 'commander');
   const utterance = h.utterances[0];
+  assert.equal(utterance.rate, 1.12);
   assert.equal(h.controller.getSnapshot().status, 'starting');
   utterance.onstart();
   assert.deepEqual(h.controller.getSnapshot(), { status: 'speaking', character: 'commander' });
@@ -103,9 +104,12 @@ test('recorded Chief and Commander clips use separate natural voices and cancel 
     setTimer: cb => { const id = timers.size + 1; timers.set(id,cb); return id; }, clearTimer: id => timers.delete(id),
   });
   controller.speak('Charlie, good to see you.','chief','appointment-01');
+  assert.equal(recordings[0].playbackRate, NARRATION_SPEED);
+  assert.equal(recordings[0].preservesPitch, true);
   const oldStart=recordings[0].onplaying; oldStart(); assert.equal(controller.getSnapshot().character,'chief');
   controller.speak('Thank you, Chief.','commander','appointment-02');
   assert.ok(recordings[0].pauses>0); oldStart(); assert.equal(controller.getSnapshot().status,'starting');
+  assert.equal(recordings[1].playbackRate, NARRATION_SPEED);
   recordings[1].onplaying(); assert.equal(controller.getSnapshot().character,'commander');
   const ended=recordings[1].onended; ended(); assert.equal(controller.getSnapshot().status,'idle');
   assert.equal(timers.size,0);
@@ -113,6 +117,24 @@ test('recorded Chief and Commander clips use separate natural voices and cancel 
   const credits=JSON.parse(readFileSync(new URL('../public/story/audio/credits.json',import.meta.url)));
   assert.equal(credits.voices.chief,'en-US-GuyNeural'); assert.equal(credits.voices.commander,'en-GB-SoniaNeural');
   for(const clip of credits.lines) assert.ok(readFileSync(new URL(`../public/story/audio/${clip.id}.mp3`,import.meta.url)).length>1000);
+});
+
+test('contextual installation replies vary without immediate repeats and have matching recordings', async () => {
+  const { ENGINEER_REPLIES, pickEngineerReply, VOICE_CLIPS } = await import('../src/game/story/voiceClips.ts');
+  const { readFileSync } = await import('node:fs');
+  for (const reaction of ['lander', 'rover', 'science', 'power', 'survival', 'complete']) {
+    let previous;
+    const seen = new Set();
+    for (let i = 0; i < 30; i++) {
+      const reply = pickEngineerReply(reaction, previous, () => (i % 10) / 10);
+      assert.notEqual(reply.id, previous);
+      assert.equal(VOICE_CLIPS[reply.id].text, reply.text);
+      assert.equal(VOICE_CLIPS[reply.id].character, 'commander');
+      assert.ok(readFileSync(new URL(`../public/story/audio/${reply.id}.mp3`, import.meta.url)).length > 1000);
+      seen.add(reply.id); previous = reply.id;
+    }
+    assert.equal(seen.size, ENGINEER_REPLIES[reaction].length);
+  }
 });
 
 test('voice selection prefers natural voices and does not reuse a female default for Chief', async () => {

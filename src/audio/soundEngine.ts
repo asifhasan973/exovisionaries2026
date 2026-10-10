@@ -8,6 +8,33 @@ class SoundEngine {
   private rocketGainNode: GainNode | null = null;
   private rocketFilterNode: BiquadFilterNode | null = null;
 
+  private roverNodes: { oscillator: OscillatorNode; noise: AudioBufferSourceNode; gain: GainNode; filter: BiquadFilterNode } | null = null;
+
+  /** Separate motor feedback for the practice game; never shares flight audio nodes. */
+  public startRoverSound(kind: 'drive' | 'drill') {
+    this.stopRoverSound();
+    if (this.isMuted) return;
+    this.initContext();
+    const ctx = this.ctx; if (!ctx) return;
+    const buffer = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
+    const samples = buffer.getChannelData(0);
+    for (let i = 0; i < samples.length; i++) samples[i] = (Math.random() * 2 - 1) * .35;
+    const noise = ctx.createBufferSource(); noise.buffer = buffer; noise.loop = true;
+    const filter = ctx.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.value = kind === 'drill' ? 1500 : 340;
+    const oscillator = ctx.createOscillator(); oscillator.type = 'triangle'; oscillator.frequency.value = kind === 'drill' ? 155 : 72;
+    const gain = ctx.createGain(); gain.gain.setValueAtTime(0, ctx.currentTime); gain.gain.linearRampToValueAtTime(kind === 'drill' ? .065 : .045, ctx.currentTime + .12);
+    noise.connect(filter); oscillator.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
+    this.roverNodes = { noise, oscillator, filter, gain }; noise.start(); oscillator.start();
+  }
+  public stopRoverSound() {
+    const nodes = this.roverNodes; if (!nodes || !this.ctx) return;
+    this.roverNodes = null;
+    nodes.gain.gain.cancelScheduledValues(this.ctx.currentTime);
+    nodes.gain.gain.setTargetAtTime(0, this.ctx.currentTime, .025);
+    nodes.noise.stop(this.ctx.currentTime + .12); nodes.oscillator.stop(this.ctx.currentTime + .12);
+    nodes.noise.onended = () => { nodes.noise.disconnect(); nodes.oscillator.disconnect(); nodes.filter.disconnect(); nodes.gain.disconnect(); };
+  }
+
   private initContext() {
     if (!this.ctx) {
       const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
@@ -22,6 +49,7 @@ class SoundEngine {
 
   public setMuted(muted: boolean) {
     this.isMuted = muted;
+    if (muted) this.stopRoverSound();
     if (muted && this.rocketGainNode) {
       this.rocketGainNode.gain.setValueAtTime(0, this.ctx?.currentTime || 0);
     }

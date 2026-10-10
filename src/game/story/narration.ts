@@ -2,6 +2,7 @@ import type { StoryCharacterId } from './types.ts';
 import { recordedVoiceURL } from './voiceClips.ts';
 
 export type NarrationStatus = 'idle' | 'starting' | 'speaking' | 'unavailable' | 'error';
+export const NARRATION_SPEED = 1.15;
 export interface NarrationSnapshot { status: NarrationStatus; character: StoryCharacterId | null }
 export interface NarrationEnvironment {
   synthesis: Pick<SpeechSynthesis, 'speak' | 'cancel' | 'getVoices'>;
@@ -56,7 +57,7 @@ export class NarrationController {
     if (owned) this.environment?.synthesis.cancel();
     this.update(this.environment ? 'idle' : 'unavailable');
   };
-  speak(text: string, character: StoryCharacterId, clipId?: string) {
+  speak(text: string, character: StoryCharacterId, clipId?: string, gender: 'male' | 'female' = 'female') {
     this.stop();
     const environment = this.environment;
     if (!environment) return;
@@ -82,10 +83,10 @@ export class NarrationController {
       const utterance = environment.createUtterance(text);
       this.utterance = utterance;
       utterance.lang = 'en-US';
-      utterance.rate = .98;
+      utterance.rate = 1.12;
       utterance.pitch = 1;
       const voices = environment.synthesis.getVoices().filter(voice => /^en[-_]/i.test(voice.lang));
-      const voice = selectCharacterVoice(voices, character);
+      const voice = selectCharacterVoice(voices, character, gender);
       if (voice) utterance.voice = voice;
       utterance.onstart = () => {
         if (!valid()) return;
@@ -110,10 +111,12 @@ export class NarrationController {
     } catch {
       this.stop(); this.update('error');
     } };
-    const recordingURL = environment.createRecording ? recordedVoiceURL(clipId, text, character) : null;
+    const recordingURL = environment.createRecording ? recordedVoiceURL(clipId, text, character, gender) : null;
     if (!recordingURL) { speech(); return; }
     try {
       const audio = environment.createRecording!(recordingURL);
+      audio.playbackRate = NARRATION_SPEED;
+      audio.preservesPitch = true;
       this.recording = audio;
       const current = () => valid() && this.recording === audio;
       this.update('starting');
@@ -134,11 +137,16 @@ export class NarrationController {
 }
 
 /** Prefer a natural voice and never select the same known female default for Chief. */
-export function selectCharacterVoice(voices: readonly SpeechSynthesisVoice[], character: StoryCharacterId) {
+export function selectCharacterVoice(voices: readonly SpeechSynthesisVoice[], character: StoryCharacterId, gender: 'male' | 'female' = 'female') {
   const male = /Guy|Andrew|Brian|Ryan|Daniel|Alex|David|Aaron|Arthur|Tom|Rishi|\bMale\b/i;
   const female = /Sonia|Aria|Jenny|Ava|Emma|Samantha|Karen|Serena|Victoria|Zira|Susan|\bFemale\b/i;
-  const matches = voices.filter(voice => (character === 'chief' ? male : female).test(voice.name));
+  const useMale = character === 'chief' || gender === 'male';
+  if (character === 'commander' && useMale) {
+    const distinctVoice = voices.find(voice => /Andrew|Ryan|Brian|Daniel|Alex/i.test(voice.name));
+    if (distinctVoice) return distinctVoice;
+  }
+  const matches = voices.filter(voice => (useMale ? male : female).test(voice.name));
   return matches.find(voice => /Natural|Neural|Enhanced|Premium/i.test(voice.name)) ?? matches[0]
-    ?? voices.find(voice => !(character === 'chief' ? female : male).test(voice.name) && voice.default)
-    ?? voices.find(voice => !(character === 'chief' ? female : male).test(voice.name)) ?? voices[character === 'chief' ? 0 : Math.min(1, voices.length - 1)];
+    ?? voices.find(voice => !(useMale ? female : male).test(voice.name) && voice.default)
+    ?? voices.find(voice => !(useMale ? female : male).test(voice.name)) ?? voices[useMale ? 0 : Math.min(1, voices.length - 1)];
 }

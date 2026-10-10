@@ -1,11 +1,13 @@
-import { useEffect, useRef, useState } from 'react';
+import { useGameSettings } from './gameSettingsContext.ts';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { characterAssetRoot, loadCharacterCompositor, requireCharacterPerformance } from './characterAssets.ts';
-import type { CharacterAssetCompositor, LoadedCharacterArt } from './characterAssets.ts';
-import type { CharacterCue, StoryCharacterId } from './types.ts';
+import type { CharacterArtId, CharacterAssetCompositor, LoadedCharacterArt } from './characterAssets.ts';
+import type { CharacterCue } from './types.ts';
+import { usePlayerGender } from './playerCharacter.tsx';
 
 // Actors share decoded atlases. Failed requests can be retried instead of caching rejection.
-const artwork = new Map<StoryCharacterId, Promise<{ compositor: CharacterAssetCompositor; art: LoadedCharacterArt }>>();
-function loadArtwork(character: StoryCharacterId) {
+const artwork = new Map<CharacterArtId, Promise<{ compositor: CharacterAssetCompositor; art: LoadedCharacterArt }>>();
+function loadArtwork(character: CharacterArtId) {
   let pending = artwork.get(character);
   if (!pending) {
     pending = loadCharacterCompositor().then(async compositor => ({
@@ -19,12 +21,15 @@ function loadArtwork(character: StoryCharacterId) {
 export function CharacterStage({ cue, speaking, active, label }: {
   cue: CharacterCue; speaking: boolean; active: boolean; label: string;
 }) {
+  const { gentle } = useGameSettings();
+  const gender = usePlayerGender();
+  const artCue = useMemo(() => ({ ...cue, character: cue.character === 'commander' && gender === 'male' ? 'commander-male' as const : cue.character }), [cue, gender]);
   const canvas = useRef<HTMLCanvasElement>(null);
-  const performance = useRef({ cue, speaking });
+  const performance = useRef({ cue: artCue, speaking });
   const repaint = useRef<() => void>(() => {});
   const [attempt, setAttempt] = useState(0);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
-  useEffect(() => { performance.current = { cue, speaking }; repaint.current(); }, [cue, speaking]);
+  useEffect(() => { performance.current = { cue: artCue, speaking }; repaint.current(); }, [artCue, speaking]);
 
   useEffect(() => {
     let disposed = false;
@@ -32,7 +37,7 @@ export function CharacterStage({ cue, speaking, active, label }: {
     let observer: ResizeObserver | undefined;
     let loaded: Awaited<ReturnType<typeof loadArtwork>> | undefined;
     const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
-    let reduced = preference.matches;
+    let reduced = gentle || preference.matches;
     const origin = window.performance.now();
     let lastPaint = -Infinity;
     const paint = (time: number) => {
@@ -44,6 +49,7 @@ export function CharacterStage({ cue, speaking, active, label }: {
         if (context) {
           context.clearRect(0, 0, context.canvas.width, context.canvas.height);
           const current = performance.current;
+          if (loaded.art.characterId !== current.cue.character) return;
           loaded.compositor.drawCharacterRig(context, loaded.art, current.cue,
             loaded.compositor.sampleRigMotion(time - origin, current.speaking, reduced));
         }
@@ -65,8 +71,8 @@ export function CharacterStage({ cue, speaking, active, label }: {
       target.height = Math.max(1, Math.round(bounds.height * ratio));
       redraw();
     };
-    const motionChanged = (event: MediaQueryListEvent) => { reduced = event.matches; redraw(); };
-    loadArtwork(cue.character).then(result => {
+    const motionChanged = (event: MediaQueryListEvent) => { reduced = gentle || event.matches; redraw(); };
+    loadArtwork(artCue.character).then(result => {
       if (disposed) return;
       requireCharacterPerformance(result.art.manifest, performance.current.cue);
       loaded = result;
@@ -83,9 +89,9 @@ export function CharacterStage({ cue, speaking, active, label }: {
       document.removeEventListener('visibilitychange', redraw);
       preference.removeEventListener('change', motionChanged);
     };
-  }, [cue.character, attempt]);
+  }, [artCue.character, attempt, gentle]);
 
-  return <figure className={`conversation-actor ${active ? 'is-active' : 'is-listening'}`} data-character={cue.character}
+  return <figure className={`conversation-actor ${active ? 'is-active' : 'is-listening'}`} data-character={artCue.character}
     data-expression={cue.expression} data-pose={cue.pose} data-speaking={speaking}>
     <canvas ref={canvas} role="img" aria-label={`${label}, ${cue.expression}`} />
     {status === 'loading' ? <span className="actor-status" role="status">Joining mission…</span> : null}

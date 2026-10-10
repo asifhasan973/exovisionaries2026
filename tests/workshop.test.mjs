@@ -5,6 +5,7 @@ import { installPart, removePart, restorePreparation, quickPreparation, preparat
 import { createWorkshopSession, reduceMission } from '../src/game/story/workshopSession.ts';
 import { createStoryProgress, STORY_SAVE_KEY } from '../src/game/story/progress.ts';
 import { readSelectionSession, writeSelectionSession } from '../src/game/story/selectionSession.ts';
+import { nextWorkshopAction } from '../src/game/story/workshopNavigation.ts';
 const workshop = (stepId = 'lander-build') => createWorkshopSession({ ...createStoryProgress(), playerName: 'Asha', stepId, selections: { destination: 'moon', objective: 'lunar-ice', site: 'crater-rim' } });
 
 test('empty workshop, real install gates and duplicate prevention', () => {
@@ -107,4 +108,42 @@ test('Back after removing an earlier part cannot jump into a falsely completed s
   session = reduceMission(session, { type: 'back' });
   assert.equal(session.progress.stepId, 'lander-build');
   assert.equal(session.progress.completedActivities.includes('lander-build'), false);
+});
+
+test('Next guides two-card and one-card lander shelves without bypassing required parts', () => {
+  const ids = SCRIPT_COMPONENTS.filter(part => part.category === 'lander').map(part => part.id);
+  for (const size of [1, 2]) {
+    let preparation = createPreparationSelection();
+    for (let page = 0; page < ids.length / size; page++) {
+      assert.deepEqual(nextWorkshopAction('lander-build', preparation, 'lander', page, size), { kind: 'install', remaining: size });
+      preparation = ids.slice(page * size, (page + 1) * size).reduce(installPart, preparation);
+      assert.deepEqual(nextWorkshopAction('lander-build', preparation, 'lander', page, size),
+        page === ids.length / size - 1 ? { kind: 'advance' } : { kind: 'shelf', category: 'lander', page: page + 1 });
+    }
+  }
+});
+
+test('Next covers power, survival and drill planning; optional science never blocks it', () => {
+  const empty = createPreparationSelection();
+  assert.deepEqual(nextWorkshopAction('rover-select', empty, 'rover', 0, 2), { kind: 'shelf', category: 'rover', page: 1 });
+  assert.deepEqual(nextWorkshopAction('rover-select', empty, 'rover', 1, 2), { kind: 'install', remaining: 1 });
+  assert.deepEqual(nextWorkshopAction('power-build', empty, 'battery', 0, 1), { kind: 'shelf', category: 'battery', page: 1 });
+  let preparation = installPart(createPreparationSelection(), 'standard-solar');
+  assert.deepEqual(nextWorkshopAction('power-build', preparation, 'solar', 0, 2), { kind: 'shelf', category: 'battery', page: 0 });
+  preparation = installPart(preparation, 'large-battery');
+  // An alternative selected on page 2 still completes a single-choice category.
+  assert.deepEqual(nextWorkshopAction('power-build', preparation, 'battery', 0, 2), { kind: 'advance' });
+  preparation = installPart(preparation, 'basic-navigation-camera');
+  assert.deepEqual(nextWorkshopAction('survival-build', preparation, 'navigation', 0, 2), { kind: 'shelf', category: 'thermal', page: 0 });
+  preparation = installPart(preparation, 'basic-thermal');
+  assert.deepEqual(nextWorkshopAction('survival-build', preparation, 'thermal', 0, 2), { kind: 'shelf', category: 'communication', page: 0 });
+  preparation = installPart(preparation, 'basic-communication');
+  assert.deepEqual(nextWorkshopAction('survival-build', preparation, 'communication', 0, 2), { kind: 'advance' });
+  preparation = ['nss', 'nirvss', 'trident'].reduce(installPart, preparation);
+  assert.deepEqual(nextWorkshopAction('science-build', preparation, 'science', 1, 2), { kind: 'depth' });
+  assert.deepEqual(nextWorkshopAction('science-build', preparation, 'science', 2, 1), { kind: 'shelf', category: 'science', page: 3 });
+  assert.deepEqual(nextWorkshopAction('science-build', preparation, 'science', 3, 1), { kind: 'depth' });
+  assert.deepEqual(nextWorkshopAction('science-build', preparation, 'science', 0, 2, true), { kind: 'advance' });
+  preparation = removePart(preparation, 'nss');
+  assert.deepEqual(nextWorkshopAction('science-build', preparation, 'science', 0, 2, true), { kind: 'shelf', category: 'science', page: 0 });
 });

@@ -1,0 +1,42 @@
+.conversation-game.conversation-game .mission-repair-alert{display:flex;align-items:center;gap:16px;min-width:0;padding:18px 22px;border:2px solid #ff8094;border-radius:18px;background:linear-gradient(115deg,#611d36,#39182e);box-shadow:0 0 22px #ff527520;color:#fff3f5;}
+.conversation-game.conversation-game .mission-repair-alert>div{min-width:0;flex:1;}
+.conversation-game.conversation-game .mission-repair-alert strong{display:block;font-size:clamp(20px,2vw,28px);font-weight:900;line-height:1.15;color:#ffb4c1;}
+.conversation-game.conversation-game .mission-repair-alert p{font-size:clamp(16px,1.4vw,20px);line-height:1.35;margin:5px 0 0;color:#fff3f5;}
+.repair-alert-icon{flex-shrink:0;color:#ff9aac;}
+.conversation-game.conversation-game .repair-fix{display:flex;align-items:center;justify-content:center;gap:10px;border:1px solid #ffbbc8;border-radius:13px;background:#ffb7c6;color:#451128;padding:13px 24px;font-size:20px;font-weight:900;min-height:48px;flex-shrink:0;cursor:pointer;}
+.repair-fix:focus-visible{outline:3px solid #ffe36c;outline-offset:4px;}
+.conversation-game.conversation-game .shadow-trial.is-failed .trial-command{background:#231329;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;padding:14px 20px;}
+.conversation-game.conversation-game .shadow-trial.is-failed .mission-repair-alert{width:100%;}
+.conversation-game.conversation-game .workshop-part.is-repair-target{border:3px solid #ffe36c;box-shadow:0 0 0 3px #ffe36c28,0 0 28px #ffe36c38;}
+.conversation-game.conversation-game .workshop-depth.is-repair-target{border:2px solid #ffe36c;border-radius:14px;padding:14px;}
+.conversation-game.conversation-game .repair-shelf-note{color:#ffe36c;font-weight:800;font-size:17px;margin:0;}
+@media(max-width:700px),(max-height:650px){
+.conversation-game.conversation-game .mission-repair-alert{padding:10px 12px;gap:9px;border-radius:12px;}
+.conversation-game.conversation-game .mission-repair-alert strong{font-size:20px;}
+.conversation-game.conversation-game .mission-repair-alert p{font-size:15px;}
+.conversation-game.conversation-game .repair-fix{padding:9px 13px;font-size:17px;min-height:44px;}
+.conversation-game.conversation-game .shadow-trial.is-failed .trial-command{grid-template-columns:1fr;padding:10px;gap:7px;}
+.conversation-game.conversation-game .shadow-trial.is-failed .trial-actions{justify-content:flex-end;}
+}
+
+.conversation-game.conversation-game .workshop-view-column{position:relative;}
+.conversation-game.conversation-game .workshop-view-column>.mission-repair-alert{position:absolute;bottom:58px;left:16px;right:16px;z-index:4;}
+.conversation-game.conversation-game .workshop-part.is-repair-target .part-badge{color:#ffe36c;font-weight:900;}
+
+.conversation-game.conversation-game .is-repairing .workshop-top-row{min-height:90px;height:auto;align-items:start;}
+.conversation-game.conversation-game .is-repairing .workshop-engineer{height:90px;overflow:hidden;}
+.conversation-game.conversation-game .is-repairing .engineer-bubble p{margin:4px 0;line-height:1.35;font-size:16px;}
+@media(max-width:700px){
+.conversation-game.conversation-game .is-repairing .workshop-top-row{display:block;min-height:92px;}
+.conversation-game.conversation-game .is-repairing .workshop-top-row .workshop-engineer{display:grid;height:60px;margin-top:4px;}
+.conversation-game.conversation-game .is-repairing .engineer-bubble p{font-size:14px;}
+}
+
+.conversation-game.conversation-game .workshop-part.is-repair-target .part-comparison span{display:none;}
+
+@media(max-height:760px),(max-width:1000px){
+.conversation-game.conversation-game .workshop-part.is-repair-target .workshop-pick{padding:30px 8px 6px;grid-template-columns:65px minmax(0,1fr);grid-template-rows:auto auto;gap:3px 8px;align-content:center;}
+.conversation-game.conversation-game .workshop-part.is-repair-target .workshop-pick>img{height:55px;width:65px;grid-row:1/3;}
+.conversation-game.conversation-game .workshop-part.is-repair-target .workshop-pick strong{font-size:16px;line-height:1.15;margin:0;}
+.conversation-game.conversation-game .workshop-part.is-repair-target .workshop-part-action{display:none;}
+}
