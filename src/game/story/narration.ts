@@ -2,7 +2,7 @@ import type { StoryCharacterId } from './types.ts';
 import { recordedVoiceURL } from './voiceClips.ts';
 
 export type NarrationStatus = 'idle' | 'starting' | 'speaking' | 'unavailable' | 'error';
-export const NARRATION_SPEED = 1.15;
+export const NARRATION_SPEED = 1.5;
 export interface NarrationSnapshot { status: NarrationStatus; character: StoryCharacterId | null }
 export interface NarrationEnvironment {
   synthesis: Pick<SpeechSynthesis, 'speak' | 'cancel' | 'getVoices'>;
@@ -83,7 +83,7 @@ export class NarrationController {
       const utterance = environment.createUtterance(text);
       this.utterance = utterance;
       utterance.lang = 'en-US';
-      utterance.rate = 1.12;
+      utterance.rate = NARRATION_SPEED;
       utterance.pitch = 1;
       const voices = environment.synthesis.getVoices().filter(voice => /^en[-_]/i.test(voice.lang));
       const voice = selectCharacterVoice(voices, character, gender);
