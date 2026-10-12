@@ -7,7 +7,7 @@ import { ConversationScene } from './ConversationScene.tsx';
 import { ChoiceScreen, MissionHome, NameScreen, RestartStoryDialog } from './SelectionScreens.tsx';
 import { getStoryStep } from './flow.ts';
 import { createStoryProgress } from './progress.ts';
-import { readBrowserSelectionSession, writeBrowserSelectionSession } from './selectionSession.ts';
+import { readBrowserSelectionSession, writeBrowserSelectionSession, readBrowserDemoSession, writeBrowserDemoSession } from './selectionSession.ts';
 import { FlightScreen } from './FlightScreen.tsx';
 import { ReadinessScreen } from './ReadinessScreen.tsx';
 import { WorkshopScreen } from './WorkshopScreen.tsx';
@@ -24,6 +24,7 @@ import { MobileGameProvider } from './MobileGame.tsx';
 import { trialActive } from './trial.ts';
 import { GameInfo } from './GameInfo.tsx';
 import type { MoonObjective } from './moon/catalog.ts';
+const HumanReadinessScreen = lazy(() => import('./moon/HumanReadinessScreen.tsx').then(module => ({ default: module.HumanReadinessScreen })));
 const CrewScreen = lazy(() => import('./moon/CrewScreen.tsx').then(module => ({ default: module.CrewScreen })));
 
 /** Exact dialogue and a real preparation manifest share one saved mission. */
@@ -39,6 +40,7 @@ export default function ExactStory() {
   const [autoplay, setAutoplay] = useState(true);
   const [restart, setRestart] = useState(false);
   const [demo, setDemo] = useState(false);
+  const [demoAvailable, setDemoAvailable] = useState(() => !!readBrowserDemoSession());
   const [demoGender, setDemoGender] = useState<PlayerGender | null>(null);
   const normalMission = useRef(mission);
   const step = getStoryStep(progress.stepId);
@@ -49,14 +51,13 @@ export default function ExactStory() {
   const trialCheckpoint = Math.floor(readiness.trial.progress * 10);
   useEffect(() => {
     const current = latest.current;
-    if (current.demo) return;
-    const saved = writeBrowserSelectionSession(current.progress, current.voiceEnabled, current.preparation, current.readiness, current.flight, current.moon);
+    const saved = current.demo ? writeBrowserDemoSession(current) : writeBrowserSelectionSession(current.progress, current.voiceEnabled, current.preparation, current.readiness, current.flight, current.moon);
     // Report external storage results after this render. Cancel obsolete status updates.
     const timer = setTimeout(() => setStorageAvailable(saved), 0);
     return () => clearTimeout(timer);
   }, [progress, voiceEnabled, preparation, moon, readiness.checks, readiness.packing, readiness.approved, readiness.radarConnected, trialCheckpoint, readiness.trial.phase, readiness.trial.paused, flightCheckpoint, flight.status, flight.speed, flight.events, flight.skipped, flight.mode, flight.missedWindow, demo]);
   useEffect(() => {
-    const save = () => { const current = latest.current; if (!current.demo) writeBrowserSelectionSession(current.progress, current.voiceEnabled, current.preparation, current.readiness, current.flight, current.moon); };
+    const save = () => { const current = latest.current; if (current.demo) writeBrowserDemoSession(current); else writeBrowserSelectionSession(current.progress, current.voiceEnabled, current.preparation, current.readiness, current.flight, current.moon); };
     window.addEventListener('pagehide', save);
     return () => window.removeEventListener('pagehide', save);
   }, []);
@@ -73,7 +74,8 @@ export default function ExactStory() {
     pausedFromMenu.current = { flight: false, trial: false };
   }, [dispatch]);
   const reset = () => { setAutoBuilding(false); setAutoplay(true); setMission(createWorkshopSession(createStoryProgress())); setDemo(false); setRestart(false); setHome(false); };
-  const startDemo = (objective: MoonObjective) => { setAutoBuilding(false); normalMission.current = mission; setDemo(true); setMission(createJudgeMission(demoGender ?? progress.playerGender, objective)); setDemoGender(null); setHome(false); };
+  const startDemo = (objective: MoonObjective) => { setAutoBuilding(false); normalMission.current = mission; setDemo(true); setDemoAvailable(true); setMission(createJudgeMission(demoGender ?? progress.playerGender, objective)); setDemoGender(null); setHome(false); };
+  const resumeDemo = () => { const saved = readBrowserDemoSession(); if (!saved) { setDemoAvailable(false); return; } normalMission.current = mission; setDemo(true); setAutoBuilding(false); setMission(createWorkshopSession(saved.progress,saved.preparation,saved.readiness,saved.flight,saved.moon)); setDemoGender(null); setHome(false); };
   const goHome = () => { setAutoBuilding(false); if (demo) { setMission(normalMission.current); setDemo(false); } setHome(true); };
   const requestRestart = () => { if (progress.playerName) setRestart(true); else reset(); };
   const back = () => { setAutoBuilding(false);
@@ -115,13 +117,14 @@ export default function ExactStory() {
     }); }} />;
   else if (step.module === 8) screen = <Suspense fallback={<div className="crew-loading" role="status">Opening crew selection…</div>}><CrewScreen key={progress.stepId} session={mission} dispatch={dispatch} onBack={back} frame={frame} /></Suspense>;
   else if (step.module === 7) screen = <FlightScreen session={mission} dispatch={dispatch} onBack={back} frame={frame} />;
+  else if (['crew-check','systems-check','stress-check','rocket-pack','launch-ready'].includes(step.id)) screen = <Suspense fallback={<div className="crew-loading" role="status">Opening mission checks…</div>}><HumanReadinessScreen key={step.id} session={mission} dispatch={dispatch} onBack={back} frame={frame}/></Suspense>;
   else if (step.module === 6) screen = <ReadinessScreen key={progress.stepId} session={mission} dispatch={dispatch} onBack={back} frame={frame} />;
   else screen = <WorkshopScreen key={progress.stepId} session={mission} dispatch={dispatch} onBack={back} frame={frame}
     autoBuilding={autoBuilding} onStopAutoBuild={() => setAutoBuilding(false)} onAutoBuild={() => { dispatch({ type: 'begin-auto-build' }); setAutoBuilding(true); }} />;
   return <PlayerCharacterProvider value={progress.playerGender}><GameSettingsProvider voiceEnabled={voiceEnabled} onToggleVoice={() => setVoiceEnabled(value => !value)} onRestart={requestRestart}><LearningProvider>
     <MobileGameProvider active={!home} voiceEnabled={voiceEnabled} onToggleVoice={() => setVoiceEnabled(value => !value)} onHome={goHome} onPause={pauseGame} onResume={resumeGame}>
-      {screen}<GestureGuide key={`${progress.stepId}-${home}`} step={progress.stepId} repair={mission.repair && !repairApplied(mission.repair, mission.preparation) ? mission.repair : undefined} hidden={home || restart || autoBuilding || demoGender !== null} /><RestartStoryDialog open={restart} onClose={() => setRestart(false)} onConfirm={reset} />
-    {demoGender !== null ? <GameInfo title="Choose a demo" onClose={() => setDemoGender(null)} pages={[<div key="objective"><p>Try a prepared kit, then choose your crew.</p><button className="conversation-next" onClick={() => startDemo('lunar-ice')}>Ice Explorer</button><button className="conversation-next" onClick={() => startDemo('lunar-geology')}>Geology Explorer</button><p>Your saved game stays safe.</p></div>]} /> : null}
+      {screen}<GestureGuide key={`${progress.stepId}-${home}`} step={progress.stepId} repair={mission.repair && !repairApplied(mission.repair, mission.preparation, mission.moon.crew) ? mission.repair : undefined} hidden={home || restart || autoBuilding || demoGender !== null} /><RestartStoryDialog open={restart} onClose={() => setRestart(false)} onConfirm={reset} />
+    {demoGender !== null ? <GameInfo title="Choose a demo" onClose={() => setDemoGender(null)} pages={[<div key="objective"><p>Try a prepared kit, then choose your crew.</p><button className="conversation-next" onClick={() => startDemo('lunar-ice')}>Ice Explorer</button><button className="conversation-next" onClick={() => startDemo('lunar-geology')}>Geology Explorer</button>{demoAvailable?<button className="game-info-trigger" onClick={resumeDemo}>Resume demo checkpoint</button>:null}<p>Your saved game stays safe.</p></div>]} /> : null}
     </MobileGameProvider>
   </LearningProvider></GameSettingsProvider></PlayerCharacterProvider>;
 }

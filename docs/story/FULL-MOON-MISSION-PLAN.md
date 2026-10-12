@@ -72,6 +72,8 @@ Back/Next positions stay fixed. Before launch, Back permits editing and invalida
 
 ## Implementation order and acceptance gates
 
+**Current local implementation:** Modules 1–3. Preparation now continues through crew supplies/cabin, equipment mass/power/budget, return hardware, four short decision exercises and ordered packing to a locked departure plan. Actual crewed launch/transfer remains Module 4. See [Module 3 review](moon-readiness-review/README.md) for verification and model limits.
+
 ### Module 1 — Mission foundation and science/resource contract
 
 - Snapshot the current version on a recoverable branch before changing gameplay. Use an isolated implementation branch; keep the current public deployment until a reviewed build is ready.

@@ -1,0 +1,1 @@
+export const CHECK_PATH=[['crew-check','Crew'],['mass-check','Mass'],['power-check','Power'],['budget-check','Budget'],['systems-check','Return'],['stress-check','Practice'],['rocket-pack','Pack'],['launch-ready','Ready']] as const;

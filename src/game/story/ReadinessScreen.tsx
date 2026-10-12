@@ -16,6 +16,10 @@ import { GameInfo } from './GameInfo.tsx';
 import { RadarRepair } from './RadarRepair.tsx';
 import { ShadowTrial } from './ShadowTrial.tsx';
 import { missionCardPNG } from './missionCard.ts';
+import { CHECK_PATH } from './moon/checkPathData.ts';
+import { CheckPath } from './moon/CheckPath.tsx';
+import { PLATFORM_NOTES } from './moon/platform.ts';
+import './moon/checks.css';
 import { Term } from './Learning.tsx';
 
 const PackingViewport = lazy(() => import('./PackingViewport.tsx').then(m => ({ default: m.PackingViewport })));
@@ -34,7 +38,7 @@ function EditDesign({ dispatch }: { dispatch(event: MissionEvent): void }) {
 function Notes() {
   const [open, setOpen] = useState(false);
   return <><button className="game-info-trigger" onClick={() => setOpen(true)}><Info size={16} />Science notes</button>{open ? <GameInfo title="Game rules & science" onClose={() => setOpen(false)} pages={[
-    ...READINESS_ASSUMPTIONS.map((note, index) => <p key={index}>{note}</p>),
+    ...[...READINESS_ASSUMPTIONS.slice(0,5),...PLATFORM_NOTES].map((note, index) => <p key={index}>{note}</p>),
     <div key="sources"><a href="https://science.nasa.gov/mission/viper/lunar-operations/" target="_blank" rel="noreferrer">NASA: lunar operations</a><a href={FAIRING_SOURCE} target="_blank" rel="noreferrer">NASA: payload fairings</a></div>
   ]} /> : null}</>;
 }
@@ -52,8 +56,8 @@ export function ReadinessScreen({ session, dispatch, frame, onBack }: { session:
   const { progress, preparation, readiness } = session;
   const id = progress.stepId as keyof typeof headings;
   const check = CHECK_IDS.find(check => check === id);
-  const result = evaluateReadiness(progress, preparation);
-  const accepted = !!check && checkAccepted(check, progress, preparation, readiness);
+  const result = evaluateReadiness(progress, preparation, session.moon);
+  const accepted = !!check && checkAccepted(check, progress, preparation, readiness, session.moon);
   const ready = id === 'launch-ready' ? !!readiness.approved && packingComplete(progress, preparation, readiness) : id === 'rocket-pack' ? packingComplete(progress, preparation, readiness) : accepted;
   const [card, setCard] = useState<string | null>(null);
   const [packImages, setPackImages] = useState<Record<string,string>>({});
@@ -63,7 +67,7 @@ export function ReadinessScreen({ session, dispatch, frame, onBack }: { session:
   useEffect(() => { const cancel = () => { drag.current = null; setDragging(null); }; window.addEventListener('blur', cancel); return () => window.removeEventListener('blur', cancel); }, []);
   const play = () => { sound.setMuted(!effects); sound.playSnap(); };
   const run = () => { setRan(true); dispatch({ type: 'run-check' }); sound.setMuted(!effects); if (check && result.pass[check]) sound.playFanfare(); else sound.playClick(); };
-  const pack = (action: PackingAction) => { if (action !== PACKING_ACTIONS[readiness.packing.length] || !allChecksAccepted(progress, preparation, readiness)) return;
+  const pack = (action: PackingAction) => { if (action !== PACKING_ACTIONS[readiness.packing.length] || !allChecksAccepted(progress, preparation, readiness, session.moon)) return;
     dispatch({ type: 'pack', action }); play(); setMessage(`${packLabels[action]} complete!`); };
   const cancelDrag = () => { suppress.current = true; drag.current = null; setDragging(null); };
   const download = () => {
@@ -75,15 +79,12 @@ export function ReadinessScreen({ session, dispatch, frame, onBack }: { session:
     {dragging ? <><span className="readiness-drop-beacon" aria-hidden="true" /><span className="packing-drop-label">{packLabels[dragging.action]} →</span></> : null}
   </div>;
   return <StoryShell {...frame} controls={<StoryControls onBack={onBack} onNext={() => { if (check && !accepted && check !== 'power-check') run(); else { play(); dispatch({ type: 'next' }); } }}
-    nextHint={!ready ? check === 'power-check' ? "Drive · Drill · Return" : id === 'rocket-pack' ? `${readiness.packing.length}/3 packed` : check === 'mass-check' && !readiness.radarConnected ? "Connect the flashing sensor" : undefined : "All set!"} nextDisabled={check === 'mass-check' && !accepted ? !readiness.radarConnected : check === 'budget-check' && !accepted ? !result.complete : !ready} nextLabel={check && !accepted && check !== 'power-check' ? check === 'mass-check' ? 'Weigh explorer' : 'Check budget' : id === 'launch-ready' ? 'Launch pad' : id === 'rocket-pack' ? 'Approve mission' : id === 'budget-check' ? 'Pack rocket' : 'Next'}
-    progress={<span>{id === 'launch-ready' ? 'READY' : check ? `Checks · ${CHECK_IDS.indexOf(check) + 1}/3` : 'PACKING'}</span>} />}>
+    nextHint={!ready ? check === 'power-check' ? "Drive · Drill · Return" : id === 'rocket-pack' ? `${readiness.packing.length}/3 packed` : check === 'mass-check' && !readiness.radarConnected ? "Connect the flashing sensor" : undefined : "All set!"} nextDisabled={check === 'mass-check' && !accepted ? !readiness.radarConnected : check === 'budget-check' && !accepted ? !result.complete : !ready} nextLabel={check && !accepted && check !== 'power-check' ? check === 'mass-check' ? 'Weigh explorer' : 'Check budget' : id === 'launch-ready' ? 'Launch pad' : id === 'rocket-pack' ? 'Approve mission' : id === 'budget-check' ? 'Check return' : 'Next'}
+    progress={<span>{id === 'launch-ready' ? 'READY' : check ? `Checks · ${CHECK_PATH.findIndex(([stage])=>stage===check)+1}/8` : 'PACKING'}</span>} />}>
     <main className={`workshop-main readiness-main ${id === 'power-check' ? 'is-power-check' : ''}`} id="story-content" tabIndex={-1} aria-labelledby="readiness-title">
       <div className="workshop-heading"><div><span className="selection-eyebrow">{id === 'rocket-pack' ? 'LAUNCH PREPARATION' : id === 'launch-ready' ? 'BUILT BY YOU' : 'MISSION CHECKS'}</span><h1 id="readiness-title">{headings[id]}</h1></div>
         <div className="readiness-heading-tools">{check === 'power-check' ? <><EditDesign dispatch={dispatch} /><Notes /></> : null}<span className="readiness-chip"><Rocket size={18} /><Term term="mission">Moon mission</Term></span></div></div>
-      <ol className="readiness-path" aria-label="Readiness stages">{['Mass', 'Power', 'Budget', 'Pack', 'Ready'].map((label, index) => {
-        const active = ['mass-check', 'power-check', 'budget-check', 'rocket-pack', 'launch-ready'].indexOf(id);
-        return <li key={label} aria-current={active === index ? 'step' : undefined} className={index < active ? 'done' : ''}><span>{index < active ? <Check size={16} /> : index + 1}</span>{label}</li>;
-      })}</ol>
+      <CheckPath step={id}/>
       {check ? <div className="readiness-check-layout">
         <section className={`readiness-lab ${ran || accepted ? 'is-scanned' : ''}`} aria-label="Live mission readings">
           {id === 'mass-check' ? <><Weight className="readiness-lab-icon" size={60} /><div className="readiness-dial"><strong>{result.massKg}<small>kg</small></strong><span>350 kg <Term term="mass">limit</Term></span></div>
@@ -104,6 +105,7 @@ export function ReadinessScreen({ session, dispatch, frame, onBack }: { session:
           <div className={`readiness-result ${accepted ? 'is-pass' : ''}`} role="status">
             {accepted ? <><Check size={24} />All set. Continue!</> : ran && !result.excessKg && result.remainingCredits >= 0 ? <><Info size={23} />Change a part and retry.</> : ''}
           </div>
+          {check === 'mass-check' && progress.selections.objective === 'lunar-geology' && result.scienceMassKg > 100 ? <RepairAlert problem="science-mass" session={session} dispatch={dispatch}/> : null}
           {check === 'mass-check' && result.excessKg > 0 ? <RepairAlert problem="mass" session={session} dispatch={dispatch}/> : null}
           {check === 'budget-check' && result.remainingCredits < 0 ? <RepairAlert problem="budget" session={session} dispatch={dispatch}/> : null}
           {!result.complete ? <p className="readiness-warning">Finish installing the required parts first.</p> : null}
@@ -116,7 +118,7 @@ export function ReadinessScreen({ session, dispatch, frame, onBack }: { session:
           <p className="readiness-end-note">Explorer packed.<br />Head to the launch pad!</p>
         </> : <><span className="selection-eyebrow">ALL THREE CHECKS PASSED</span><h2>Load your explorer.</h2>
           <div className="readiness-pack-actions">{PACKING_ACTIONS.map((action, index) => <article key={action} className={index < readiness.packing.length ? 'done' : ''}>
-            <button className="readiness-pack-button" disabled={index !== readiness.packing.length || !allChecksAccepted(progress, preparation, readiness)} aria-label={packLabels[action]}
+            <button className="readiness-pack-button" disabled={index !== readiness.packing.length || !allChecksAccepted(progress, preparation, readiness, session.moon)} aria-label={packLabels[action]}
               onPointerDown={event => { if (event.button !== 0 || !event.isPrimary) return; suppress.current = false; drag.current = { action, pointerId: event.pointerId, x: event.clientX, y: event.clientY, moved: false }; event.currentTarget.setPointerCapture(event.pointerId); }}
               onPointerMove={event => { const active = drag.current; if (!active || active.pointerId !== event.pointerId) return; if (Math.hypot(event.clientX - active.x, event.clientY - active.y) > 7) active.moved = true; if (active.moved) { suppress.current = true; setDragging({ action, x: event.clientX, y: event.clientY }); } }}
               onPointerUp={event => { const active = drag.current, bounds = bay.current?.getBoundingClientRect(); if (!active || active.pointerId !== event.pointerId) return;

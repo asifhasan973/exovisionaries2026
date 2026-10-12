@@ -1,3 +1,4 @@
+import { CHECK_LINES } from './moon/checkCopy.ts';
 import { CREW_ADVICE, CREW_BRIEFING } from './moon/crewDialogue.ts';
 import { STORY_DIALOGUE } from './dialogue.ts';
 import { GLOSSARY } from './glossary.ts';
@@ -68,6 +69,7 @@ export function flightVoiceId(text: string) {
   return Object.entries(FLIGHT_LINES).find(([,line]) => line === text)?.[0];
 }
 export const REPAIR_LINES = {
+  'repair-science-mass': 'Choose a lighter science tool or leave an extra one behind.',
   'repair-thermal': 'Advanced protection keeps us warm in cold shadows.',
   'repair-energy': 'A bigger battery saves enough energy to get home.',
   'repair-depth': 'A shorter drill uses less energy. Save enough for the trip home.',
@@ -79,6 +81,7 @@ export const REPAIR_LINES = {
   'repair-remove-peak': 'Leave this extra tool behind so we use less power at once.',
 } as const;
 export const VOICE_CLIPS: Record<string, { text: string; character: StoryCharacterId }> = Object.fromEntries([
+  ...Object.entries(CHECK_LINES).map(([id,text]) => [`check-${id}`, {text,character:'commander' as const}]),
   ...CREW_BRIEFING.map(line => [line.id, { text: line.text, character: line.speaker.character }]),
   ...Object.entries(CREW_ADVICE).map(([id,text]) => [`crew-advice-${id}`, {text,character:'commander' as const}]),
   ...Object.values(STORY_DIALOGUE).flat().map(line => [line.id, { text: line.text, character: line.speaker.character }]),

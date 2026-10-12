@@ -3,6 +3,10 @@ import type { StoryProgress } from '../types.ts';
 import { CREW_CANDIDATES, crewReport, crewCapabilities, emptyCrew, equipmentIds, equipmentReport, missingEquipment, moonPart } from './catalog.ts';
 import type { CrewAssignment, CrewId, MoonObjective } from './catalog.ts';
 import { MOON_IMPLEMENTED, MOON_RULES, CREW_PLATFORM } from './rules.ts';
+import { defaultFlightPlan, restoreFlightPlan, PLATFORM_MODEL } from './platform.ts';
+import type { FlightPlan } from './platform.ts';
+import { emptyHuman, restoreHuman, humanPacked } from './validation.ts';
+import type { HumanValidation } from './validation.ts';
 import { rehearsalBudget } from './resources.ts';
 
 export type MoonPhase = 'prepare' | 'validate' | 'earth-orbit' | 'transfer' | 'lunar-orbit' | 'descent' | 'surface' | 'ascent' | 'docking' | 'earth-return' | 'reentry' | 'debrief';
@@ -16,13 +20,13 @@ export interface ScienceObservation {
 }
 export interface MissionResources {
   batteryWh: number; capacityWh: number; roverHealth: number; elapsedMissionSeconds: number;
-  supportUnitsRemaining: number | null; ascentPropellantKg: number | null; returnPropellantKg: number | null;
+  descentPropellantKg: number | null; platformEnergyWh: number | null; supportUnitsRemaining: number | null; ascentPropellantKg: number | null; returnPropellantKg: number | null;
 }
 export interface MoonCheckpoint { id: string; phase: MoonPhase; designSignature: string; resources: MissionResources }
 export interface MoonSession {
-  version: 1; rulesVersion: 1; architecture: typeof CREW_PLATFORM.id;
+  version: 1; rulesVersion: number; architecture: typeof CREW_PLATFORM.id;
   objective: MoonObjective | null; site: MoonSite; phase: MoonPhase; designSignature: string;
-  crew: CrewAssignment; geologyPartIds: string[]; scenarioSeed: number;
+  crew: CrewAssignment; plan: FlightPlan; human: HumanValidation; geologyPartIds: string[]; scenarioSeed: number;
   trajectory: TrajectoryId | null; resources: MissionResources;
   navigation: { locationId: string; routeIds: string[]; communication: 'unknown' | 'connected' | 'blocked' };
   evidence: ScienceObservation[]; incidents: { id: string; kind: string; resolved: boolean }[];
@@ -47,22 +51,22 @@ function seedFor(progress: StoryProgress) {
   for (const char of `${progress.playerName}|${progress.selections.objective}|${progress.selections.site}`) seed = Math.imul(seed ^ char.charCodeAt(0), 16777619);
   return seed >>> 0;
 }
-export function moonDesignSignature(progress: StoryProgress, preparation: PreparationSelection, crew: CrewAssignment, geologyPartIds: string[]) {
+export function moonDesignSignature(progress: StoryProgress, preparation: PreparationSelection, crew: CrewAssignment, geologyPartIds: string[], plan: FlightPlan = defaultFlightPlan()) {
   const objective = planObjective(progress);
   return JSON.stringify({ rules: MOON_RULES.version, platform: CREW_PLATFORM.id, player: progress.playerName, gender: progress.playerGender,
     destination: progress.selections.destination ?? null, objective, site: planSite(progress),
     equipment: equipmentIds(preparation, objective ?? 'lunar-ice', geologyPartIds).sort(), depthCm: preparation.drillDepthCm,
-    crew: [crew.commander, crew.scientist, crew.support] });
+    crew: [crew.commander, crew.scientist, crew.support], plan, platformModel: PLATFORM_MODEL.id });
 }
 export function createMoonSession(progress: StoryProgress, preparation: PreparationSelection): MoonSession {
   const crew = emptyCrew(), objective = planObjective(progress);
   const geologyPartIds = preparation.sciencePartIds.filter(id => !!moonPart(id)?.tier);
   const report = equipmentReport(equipmentIds(preparation, objective ?? 'lunar-ice', []), objective ?? 'lunar-ice');
   const capacityWh = report.parts.find(part => part.category === 'battery')?.capacityWh ?? 0;
-  return { version: 1, rulesVersion: 1, architecture: CREW_PLATFORM.id, objective, site: planSite(progress), phase: 'prepare',
-    crew, geologyPartIds, designSignature: moonDesignSignature(progress, preparation, crew, geologyPartIds), scenarioSeed: seedFor(progress),
+  return { version: 1, rulesVersion: MOON_RULES.version, architecture: CREW_PLATFORM.id, objective, site: planSite(progress), phase: 'prepare',
+    crew, plan: defaultFlightPlan(), human: emptyHuman(), geologyPartIds, designSignature: moonDesignSignature(progress, preparation, crew, geologyPartIds), scenarioSeed: seedFor(progress),
     trajectory: null, resources: { batteryWh: capacityWh, capacityWh, roverHealth: 100, elapsedMissionSeconds: 0,
-      supportUnitsRemaining: null, ascentPropellantKg: null, returnPropellantKg: null },
+      descentPropellantKg: null, platformEnergyWh: null, supportUnitsRemaining: null, ascentPropellantKg: null, returnPropellantKg: null },
     navigation: { locationId: 'earth-workshop', routeIds: [], communication: 'unknown' },
     evidence: [], incidents: [], checkpoints: [], launchSnapshot: null, outcome: null, migration: 'fresh' };
 }
@@ -72,19 +76,21 @@ export function restoreMoonSession(raw: unknown, progress: StoryProgress, prepar
   const fresh = createMoonSession(progress, preparation);
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return fresh;
   const saved = raw as Partial<MoonSession>;
-  if (saved.version !== 1 || saved.rulesVersion !== MOON_RULES.version || saved.architecture !== CREW_PLATFORM.id) return fresh;
+  if (saved.version !== 1 || ![1,MOON_RULES.version].includes(saved.rulesVersion as number) || saved.architecture !== CREW_PLATFORM.id) return fresh;
   const crew = emptyCrew();
   for (const role of ['scientist', 'support'] as const) {
     const person = CREW_CANDIDATES.find(person => person.id === saved.crew?.[role]);
     if (person?.role === (role === 'scientist' ? 'science' : 'support')) crew[role] = person.id;
   }
   const geologyPartIds = preparation.sciencePartIds.filter(id => !!moonPart(id)?.tier);
-  const canonical = moonDesignSignature(progress, preparation, crew, geologyPartIds);
+  const plan = restoreFlightPlan(saved.plan);
+  const canonical = moonDesignSignature(progress, preparation, crew, geologyPartIds, plan);
   // Preserve valid role choices, but never restore old validation, flight or evidence.
-  if (saved.designSignature !== canonical) return { ...fresh, crew, designSignature: moonDesignSignature(progress, preparation, crew, geologyPartIds), migration: saved.migration === 'legacy-design-revalidation' ? saved.migration : 'fresh' };
+  if (saved.designSignature !== canonical) return { ...fresh, crew, plan, designSignature: canonical, migration: saved.migration === 'legacy-design-revalidation' ? saved.migration : 'fresh' };
   const report = equipmentReport(equipmentIds(preparation, fresh.objective ?? 'lunar-ice', geologyPartIds), fresh.objective ?? 'lunar-ice');
   if (report.errors.some(error => error.startsWith('Choose one option'))) return fresh;
-  return { ...fresh, crew, geologyPartIds, designSignature: canonical,
+  const restored = { ...fresh, crew, plan, geologyPartIds, designSignature: canonical };
+  return { ...restored, human: restoreHuman(saved.human, restored, preparation),
     migration: saved.migration === 'legacy-design-revalidation' ? saved.migration : 'fresh' };
 }
 
@@ -92,10 +98,10 @@ export function restoreMoonSession(raw: unknown, progress: StoryProgress, prepar
 export function syncMoonDesign(state: MoonSession, progress: StoryProgress, preparation: PreparationSelection): MoonSession {
   const site = planSite(progress);
   const geologyPartIds = preparation.sciencePartIds.filter(id => !!moonPart(id)?.tier);
-  const signature = moonDesignSignature(progress, preparation, state.crew, geologyPartIds);
+  const signature = moonDesignSignature(progress, preparation, state.crew, geologyPartIds, state.plan);
   if (signature === state.designSignature) return state;
   const fresh = createMoonSession(progress, preparation);
-  return { ...fresh, crew: state.crew, geologyPartIds, designSignature: signature, site,
+  return { ...fresh, crew: state.crew, plan: state.plan, geologyPartIds, designSignature: signature, site,
     migration: state.migration };
 }
 
@@ -114,28 +120,28 @@ export function moonDesignReport(state: MoonSession, preparation: PreparationSel
   if (!rehearsal.peakOK) issues.push('Battery cannot support the simultaneous peak load.');
   if (!rehearsal.energyOK) issues.push('Rehearsal needs more energy while preserving return reserve.');
   return { equipment, crew, rehearsal, issues, designReady: issues.length === 0,
-    crewedDepartureAuthorized: false as const,
-    platformIssues: ['Crewed departure awaits platform propellant, life-support duration, return validation and playable crew readiness.'],
+    crewedDepartureAuthorized: false as const, readinessApproved: !!state.human.approved && humanPacked(state, preparation),
+    platformIssues: state.human.approved ? ['Departure plan checked. Crewed journey gameplay is pending Module 4.'] : ['Complete crew, equipment, return and practice checks before locking the departure plan.'],
     earnedScience: state.evidence.reduce((sum, observation) => sum + observation.points, 0) };
 }
 
 export function canEnterMoonPhase(state: MoonSession, target: MoonPhase): boolean {
   const index = MOON_PHASE_ORDER.indexOf(state.phase);
   if (target !== MOON_PHASE_ORDER[index + 1]) return false;
-  const implemented = target === 'validate' ? MOON_IMPLEMENTED.crewDeparture
+  const implemented = target === 'validate' ? MOON_IMPLEMENTED.readiness
     : ['earth-orbit', 'transfer', 'lunar-orbit'].includes(target) ? MOON_IMPLEMENTED.journey
     : target === 'descent' ? MOON_IMPLEMENTED.landing
     : target === 'surface' ? MOON_IMPLEMENTED.surface : MOON_IMPLEMENTED.return;
   if (!implemented) return false;
   // A valid human manifest is required beyond preparation; legacy robotic flags cannot satisfy it.
-  return target === 'validate' ? crewReport(state.crew).complete
+  return target === 'validate' ? crewReport(state.crew).complete && !!state.human.approved && state.human.approved.signature === state.designSignature
     : !!state.launchSnapshot && state.launchSnapshot.signature === state.designSignature
-      && state.launchSnapshot.platformId === CREW_PLATFORM.id;
+      && state.launchSnapshot.platformId === PLATFORM_MODEL.id;
 }
 
 export function reduceMoonSession(state: MoonSession, event: MoonEvent, progress: StoryProgress, preparation: PreparationSelection): MoonSession {
   if (event.type === 'moon-request-phase') return canEnterMoonPhase(state, event.phase) ? { ...state, phase: event.phase } : state;
-  if (state.phase !== 'prepare') return state;
+  if (!['prepare','validate'].includes(state.phase)) return state;
   let next = state;
   if (event.type === 'moon-assign-crew') {
     const person = CREW_CANDIDATES.find(person => person.id === event.id);

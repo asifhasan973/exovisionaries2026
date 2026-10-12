@@ -31,12 +31,15 @@ export const STORY_FLOW: readonly StoryStep[] = [
   { id: 'survival-build', title: 'Survival', kind: 'activity', activity: 'survival-build', module: 5 },
   { id: 'crew-briefing', title: 'Meet your crew', kind: 'conversation', lines: CREW_BRIEFING, module: 8 },
   { id: 'crew-selection', title: 'Choose your crew', kind: 'activity', activity: 'crew-selection', module: 8 },
-  { id: 'crew-plan', title: 'Your crew is ready', kind: 'endpoint', module: 8 },
+  { id: 'crew-plan', title: 'Your crew is ready', kind: 'activity', activity: 'crew-plan', module: 8 },
+  { id: 'crew-check', title: 'Crew & supplies', kind: 'activity', activity: 'crew-check', module: 6 },
   { id: 'mass-check', title: 'MASS CHECK', kind: 'activity', activity: 'mass-check', module: 6 },
   { id: 'power-check', title: 'POWER CHECK', kind: 'activity', activity: 'power-check', module: 6 },
   { id: 'budget-check', title: 'BUDGET CHECK', kind: 'activity', activity: 'budget-check', module: 6 },
+  { id: 'systems-check', title: 'Check the return path', kind: 'activity', activity: 'systems-check', module: 6 },
+  { id: 'stress-check', title: 'Practice Moon decisions', kind: 'activity', activity: 'stress-check', module: 6 },
   { id: 'rocket-pack', title: 'Rocket Design', kind: 'activity', activity: 'rocket-pack', module: 6 },
-  { id: 'launch-ready', title: '🟢 MISSION APPROVED', kind: 'activity', activity: 'launch-ready', module: 6 },
+  { id: 'launch-ready', title: 'Departure plan ready', kind: 'endpoint', module: 6 },
   { id: 'liftoff', title: 'Launch your explorer', kind: 'activity', activity: 'liftoff', module: 7 },
   { id: 'earth-orbit', title: 'Earth orbit reached', kind: 'endpoint', module: 7 }
 ];

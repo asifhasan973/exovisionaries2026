@@ -61,7 +61,8 @@ export function rehearsalBudget(parts: readonly ElectricalPart[], depthCm: numbe
   const normal = operatingPower(parts, 'rehearsal', 0, [], crew);
   const drill = operatingPower(parts, 'rehearsal-drill');
   const hasDrill = parts.some(part => part.id === 'trident' || part.id.startsWith('geo-drill-'));
-  const drillSeconds = hasDrill ? drillDurationSeconds(depthCm ?? 20) : 0;
+  const hasScoop=parts.some(part=>part.id==='geo-scoop-basic');
+  const drillSeconds = hasDrill ? drillDurationSeconds(depthCm ?? 20) : hasScoop ? 60 : 0;
   const legWh = energyWh(normal.loadW, MOON_RULES.rehearsalTravelSeconds / 2);
   const drillWh = energyWh(drill.loadW, drillSeconds);
   const batteryWh = parts.find(part => part.category === 'battery')?.capacityWh ?? 0;

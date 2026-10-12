@@ -8,6 +8,141 @@
   "purpose": "Synthetic character narration",
   "lines": [
     {
+      "id": "check-crewIntro",
+      "character": "commander",
+      "text": "Seal the cabin. Pack enough supplies for everyone."
+    },
+    {
+      "id": "check-sealed",
+      "character": "commander",
+      "text": "Cabin sealed! Let\u2019s check our crew supplies."
+    },
+    {
+      "id": "check-supplies",
+      "character": "commander",
+      "text": "Extra day kits give our crew enough supplies."
+    },
+    {
+      "id": "check-suppliesFail",
+      "character": "commander",
+      "text": "Not enough day kits. Pack the extended supplies."
+    },
+    {
+      "id": "check-crewPass",
+      "character": "commander",
+      "text": "Crew check passed. Let\u2019s test the equipment!"
+    },
+    {
+      "id": "check-returnIntro",
+      "character": "commander",
+      "text": "Check our engines, return shield and Earth parachutes."
+    },
+    {
+      "id": "check-ascent",
+      "character": "commander",
+      "text": "Ascent engine connected. It brings our surface team back to orbit."
+    },
+    {
+      "id": "check-service",
+      "character": "commander",
+      "text": "Service engine connected. Keep fuel for the journey home."
+    },
+    {
+      "id": "check-shield",
+      "character": "commander",
+      "text": "Heat shield checked. It protects the capsule during Earth entry."
+    },
+    {
+      "id": "check-parachutes",
+      "character": "commander",
+      "text": "Parachutes checked. We use them at Earth, not on the Moon."
+    },
+    {
+      "id": "check-returnPass",
+      "character": "commander",
+      "text": "Return systems passed. Time for a little Moon practice!"
+    },
+    {
+      "id": "check-mobilityIntro",
+      "character": "commander",
+      "text": "Pick a route your rover can cross safely."
+    },
+    {
+      "id": "check-mobilityPass",
+      "character": "commander",
+      "text": "Route passed. Keep a return reserve."
+    },
+    {
+      "id": "check-mobilityFail",
+      "character": "commander",
+      "text": "Too steep for this rover. Take the gentle route."
+    },
+    {
+      "id": "check-dustIntro",
+      "character": "commander",
+      "text": "Dust hides the view. Clear the camera before driving."
+    },
+    {
+      "id": "check-dustPass",
+      "character": "commander",
+      "text": "Clear view! Now we can navigate."
+    },
+    {
+      "id": "check-dustFail",
+      "character": "commander",
+      "text": "Dust hides the rocks. Clean the lens before driving."
+    },
+    {
+      "id": "check-communicationIntro",
+      "character": "commander",
+      "text": "A hill blocks the signal. Get the lander back in view."
+    },
+    {
+      "id": "check-communicationPass",
+      "character": "commander",
+      "text": "Signal restored. The lander is in view."
+    },
+    {
+      "id": "check-communicationFail",
+      "character": "commander",
+      "text": "The hill blocks the signal. Move into view; more power cannot see through it."
+    },
+    {
+      "id": "check-radiationIntro",
+      "character": "commander",
+      "text": "Space-weather alert. Bring our surface team to shelter."
+    },
+    {
+      "id": "check-radiationPass",
+      "character": "commander",
+      "text": "Sheltered. Wait for the all-clear."
+    },
+    {
+      "id": "check-radiationFail",
+      "character": "commander",
+      "text": "Stop the Moon walk. Shelter reduces exposure."
+    },
+    {
+      "id": "check-practicePass",
+      "character": "commander",
+      "text": "Practice complete! You made safe choices."
+    },
+    {
+      "id": "check-packIntro",
+      "character": "commander",
+      "text": "Secure the capsule, lander and crew supplies."
+    },
+    {
+      "id": "check-packed",
+      "character": "commander",
+      "text": "Secured! Keep going, Commander."
+    },
+    {
+      "id": "check-ready",
+      "character": "commander",
+      "text": "Your departure plan is locked. Great teamwork!"
+    },
+    {
       "id": "crew-briefing-1",
       "character": "chief",
       "text": "Your explorer is built. Time to choose your crew."
@@ -598,6 +733,11 @@
       "text": "MSOLO. A tool that checks gases coming from the soil. It helps scientists look for clues of water and other gases."
     },
     {
+      "id": "repair-science-mass",
+      "character": "commander",
+      "text": "Choose a lighter science tool or leave an extra one behind."
+    },
+    {
       "id": "repair-thermal",
       "character": "commander",
       "text": "Advanced protection keeps us warm in cold shadows."
@@ -731,6 +871,141 @@
       "id": "greeting-welcome",
       "character": "chief",
       "text": "Good to see you, Commander."
+    },
+    {
+      "id": "male-check-crewIntro",
+      "character": "commander-male",
+      "text": "Seal the cabin. Pack enough supplies for everyone."
+    },
+    {
+      "id": "male-check-sealed",
+      "character": "commander-male",
+      "text": "Cabin sealed! Let\u2019s check our crew supplies."
+    },
+    {
+      "id": "male-check-supplies",
+      "character": "commander-male",
+      "text": "Extra day kits give our crew enough supplies."
+    },
+    {
+      "id": "male-check-suppliesFail",
+      "character": "commander-male",
+      "text": "Not enough day kits. Pack the extended supplies."
+    },
+    {
+      "id": "male-check-crewPass",
+      "character": "commander-male",
+      "text": "Crew check passed. Let\u2019s test the equipment!"
+    },
+    {
+      "id": "male-check-returnIntro",
+      "character": "commander-male",
+      "text": "Check our engines, return shield and Earth parachutes."
+    },
+    {
+      "id": "male-check-ascent",
+      "character": "commander-male",
+      "text": "Ascent engine connected. It brings our surface team back to orbit."
+    },
+    {
+      "id": "male-check-service",
+      "character": "commander-male",
+      "text": "Service engine connected. Keep fuel for the journey home."
+    },
+    {
+      "id": "male-check-shield",
+      "character": "commander-male",
+      "text": "Heat shield checked. It protects the capsule during Earth entry."
+    },
+    {
+      "id": "male-check-parachutes",
+      "character": "commander-male",
+      "text": "Parachutes checked. We use them at Earth, not on the Moon."
+    },
+    {
+      "id": "male-check-returnPass",
+      "character": "commander-male",
+      "text": "Return systems passed. Time for a little Moon practice!"
+    },
+    {
+      "id": "male-check-mobilityIntro",
+      "character": "commander-male",
+      "text": "Pick a route your rover can cross safely."
+    },
+    {
+      "id": "male-check-mobilityPass",
+      "character": "commander-male",
+      "text": "Route passed. Keep a return reserve."
+    },
+    {
+      "id": "male-check-mobilityFail",
+      "character": "commander-male",
+      "text": "Too steep for this rover. Take the gentle route."
+    },
+    {
+      "id": "male-check-dustIntro",
+      "character": "commander-male",
+      "text": "Dust hides the view. Clear the camera before driving."
+    },
+    {
+      "id": "male-check-dustPass",
+      "character": "commander-male",
+      "text": "Clear view! Now we can navigate."
+    },
+    {
+      "id": "male-check-dustFail",
+      "character": "commander-male",
+      "text": "Dust hides the rocks. Clean the lens before driving."
+    },
+    {
+      "id": "male-check-communicationIntro",
+      "character": "commander-male",
+      "text": "A hill blocks the signal. Get the lander back in view."
+    },
+    {
+      "id": "male-check-communicationPass",
+      "character": "commander-male",
+      "text": "Signal restored. The lander is in view."
+    },
+    {
+      "id": "male-check-communicationFail",
+      "character": "commander-male",
+      "text": "The hill blocks the signal. Move into view; more power cannot see through it."
+    },
+    {
+      "id": "male-check-radiationIntro",
+      "character": "commander-male",
+      "text": "Space-weather alert. Bring our surface team to shelter."
+    },
+    {
+      "id": "male-check-radiationPass",
+      "character": "commander-male",
+      "text": "Sheltered. Wait for the all-clear."
+    },
+    {
+      "id": "male-check-radiationFail",
+      "character": "commander-male",
+      "text": "Stop the Moon walk. Shelter reduces exposure."
+    },
+    {
+      "id": "male-check-practicePass",
+      "character": "commander-male",
+      "text": "Practice complete! You made safe choices."
+    },
+    {
+      "id": "male-check-packIntro",
+      "character": "commander-male",
+      "text": "Secure the capsule, lander and crew supplies."
+    },
+    {
+      "id": "male-check-packed",
+      "character": "commander-male",
+      "text": "Secured! Keep going, Commander."
+    },
+    {
+      "id": "male-check-ready",
+      "character": "commander-male",
+      "text": "Your departure plan is locked. Great teamwork!"
     },
     {
       "id": "male-crew-briefing-2",
@@ -1236,6 +1511,11 @@
       "id": "male-word-msolo",
       "character": "commander-male",
       "text": "MSOLO. A tool that checks gases coming from the soil. It helps scientists look for clues of water and other gases."
+    },
+    {
+      "id": "male-repair-science-mass",
+      "character": "commander-male",
+      "text": "Choose a lighter science tool or leave an extra one behind."
     },
     {
       "id": "male-repair-thermal",

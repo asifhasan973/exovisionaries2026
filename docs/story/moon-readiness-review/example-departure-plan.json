@@ -1,0 +1,209 @@
+{
+  "version": 1,
+  "status": "GAME DEPARTURE PLAN APPROVED",
+  "signature": "{\"rules\":2,\"platform\":\"apollo-inspired-game-platform-v1\",\"player\":\"Charlie\",\"gender\":\"male\",\"destination\":\"moon\",\"objective\":\"lunar-geology\",\"site\":\"crater-rim\",\"equipment\":[\"basic-communication\",\"basic-rover\",\"basic-thermal\",\"efficient-solar\",\"geo-camera-basic\",\"geo-drill-basic\",\"geo-ir-basic\",\"geo-xrf-basic\",\"lander-antenna\",\"lander-body\",\"landing-cameras\",\"landing-engines\",\"landing-radar\",\"medium-battery\",\"navigation-computer\",\"stereo-hazard-camera\"],\"depthCm\":20,\"crew\":[\"commander\",\"geologist\",\"robotics-specialist\"],\"plan\":{\"days\":8,\"supplyPack\":\"standard\"},\"platformModel\":\"moon-class-platform-v2\"}",
+  "platformId": "moon-class-platform-v2",
+  "objective": "lunar-geology",
+  "site": "crater-rim",
+  "crew": {
+    "commander": "commander",
+    "scientist": "geologist",
+    "support": "robotics-specialist"
+  },
+  "plan": {
+    "days": 8,
+    "supplyPack": "standard"
+  },
+  "equipment": [
+    {
+      "id": "basic-communication",
+      "name": "Basic",
+      "massKg": 2,
+      "credits": 25,
+      "nominalPowerW": 8
+    },
+    {
+      "id": "basic-rover",
+      "name": "Basic Rover",
+      "massKg": 55,
+      "credits": 120,
+      "nominalPowerW": 100
+    },
+    {
+      "id": "basic-thermal",
+      "name": "Basic thermal protection",
+      "massKg": 4,
+      "credits": 35,
+      "nominalPowerW": 10
+    },
+    {
+      "id": "efficient-solar",
+      "name": "High-efficiency",
+      "massKg": 12,
+      "credits": 75,
+      "nominalPowerW": 0
+    },
+    {
+      "id": "geo-camera-basic",
+      "name": "Basic Science camera",
+      "massKg": 2,
+      "credits": 20,
+      "nominalPowerW": 5
+    },
+    {
+      "id": "geo-drill-basic",
+      "name": "Basic Sample drill",
+      "massKg": 15,
+      "credits": 100,
+      "nominalPowerW": 30
+    },
+    {
+      "id": "geo-ir-basic",
+      "name": "Basic Rock scanner",
+      "massKg": 8,
+      "credits": 60,
+      "nominalPowerW": 20
+    },
+    {
+      "id": "geo-xrf-basic",
+      "name": "Basic Element scanner",
+      "massKg": 5,
+      "credits": 45,
+      "nominalPowerW": 15
+    },
+    {
+      "id": "lander-antenna",
+      "name": "Communication antenna",
+      "massKg": 10,
+      "credits": 40,
+      "nominalPowerW": 15
+    },
+    {
+      "id": "lander-body",
+      "name": "Lander body",
+      "massKg": 80,
+      "credits": 100,
+      "nominalPowerW": 0
+    },
+    {
+      "id": "landing-cameras",
+      "name": "Landing cameras",
+      "massKg": 5,
+      "credits": 20,
+      "nominalPowerW": 10
+    },
+    {
+      "id": "landing-engines",
+      "name": "Landing engines",
+      "massKg": 25,
+      "credits": 60,
+      "nominalPowerW": 0
+    },
+    {
+      "id": "landing-radar",
+      "name": "Landing radar/altimeter",
+      "massKg": 8,
+      "credits": 35,
+      "nominalPowerW": 15
+    },
+    {
+      "id": "medium-battery",
+      "name": "Medium",
+      "massKg": 12,
+      "credits": 60,
+      "nominalPowerW": 0
+    },
+    {
+      "id": "navigation-computer",
+      "name": "Navigation computer",
+      "massKg": 6,
+      "credits": 30,
+      "nominalPowerW": 20
+    },
+    {
+      "id": "stereo-hazard-camera",
+      "name": "Stereo Hazard Camera",
+      "massKg": 6,
+      "credits": 40,
+      "nominalPowerW": 15
+    }
+  ],
+  "accounting": {
+    "crew": {
+      "complete": true,
+      "massKg": 232,
+      "credits": 215,
+      "supportUnits": 275,
+      "account": "crew-allocation",
+      "surface": [
+        "commander",
+        "geologist"
+      ],
+      "orbit": "robotics-specialist"
+    },
+    "requiredCrewDays": 30,
+    "capacityCrewDays": 30,
+    "suppliesKg": 120,
+    "supportWh": 144000,
+    "usableSupportWh": 240000,
+    "ascent": {
+      "dryKg": 2370,
+      "propellantKg": 2600,
+      "availableMS": 2178.635218907301,
+      "requiredMS": 2100,
+      "marginMS": 78.6352189073009,
+      "pass": true
+    },
+    "descent": {
+      "dryKg": 6715,
+      "propellantKg": 8500,
+      "availableMS": 2406.369369135757,
+      "requiredMS": 2205,
+      "marginMS": 201.3693691357571,
+      "pass": true
+    },
+    "service": {
+      "dryKg": 6262,
+      "propellantKg": 8000,
+      "availableMS": 2542.6309068277005,
+      "requiredMS": 2415,
+      "marginMS": 127.63090682770053,
+      "pass": true
+    },
+    "grossSpacecraftKg": 29307,
+    "suppliesOK": true,
+    "energyOK": true,
+    "propulsionOK": true,
+    "capacityOK": true
+  },
+  "stress": [
+    {
+      "id": "mobility",
+      "action": "safe-route"
+    },
+    {
+      "id": "dust",
+      "action": "clean-lens"
+    },
+    {
+      "id": "communication",
+      "action": "move-ridge"
+    },
+    {
+      "id": "radiation",
+      "action": "shelter"
+    }
+  ],
+  "assisted": true,
+  "assumptions": [
+    "The 8–14-day range is this game scenario, not a universal lunar mission limit. Two spare days are included in the supply calculation.",
+    "Crew-days mean one person supported for one day. The 30/48 crew-day packs, 4 kg per crew-day, 600 W cabin load and 300 kWh platform supply are authored game allocations, not a nutrition or life-support certification.",
+    "Empty masses, fuel masses, specific impulses and maneuver allowances are illustrative Moon-class game inputs. Ideal delta-v uses g₀ × Isp × ln(wet mass / dry mass), with an authored 5% maneuver margin.",
+    "The descent calculation carries the equipment kit. That kit stays on the Moon; the ascent calculation carries two crew and a 10-kg return-sample allowance. The command spacecraft carries all three crew home.",
+    "Service fuel covers an authored lunar insertion, Earth-departure and correction budget. TLI propulsion belongs to the launch stage and will be validated with trajectory gameplay in Module 4.",
+    "This review does not certify temperature survival, structural strength, crew radiation dose, entry heating or launch performance. It locks a consistent educational game design for later flight.",
+    "The capsule, lander, crew and equipment are separate accounts. No real flight or science has happened during these rehearsals."
+  ],
+  "scienceEarned": 0,
+  "flightExecuted": false
+}

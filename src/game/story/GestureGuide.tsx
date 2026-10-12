@@ -6,7 +6,7 @@ import type { CSSProperties } from 'react';
 import type { StoryStepId } from './types.ts';
 
 type Demo = { key: string; from: string; to?: string; label: string; depthCm?: number };
-function lesson(step: StoryStepId, repair?: RepairGuide): Demo {
+function lesson(step: StoryStepId, repair?: RepairGuide, replaying = false): Demo {
   if (repair && step === repair.stage) {
     const key = `fix-${repair.problem}-${repair.partId ?? repair.depthCm}`;
     if (repair.action === 'depth') return { key, from: '#drill-depth', to: '#drill-depth', label: repair.label, depthCm: repair.depthCm };
@@ -26,8 +26,15 @@ function lesson(step: StoryStepId, repair?: RepairGuide): Demo {
     const scientist = document.querySelector('.crew-main')?.getAttribute('data-moon-objective') === 'lunar-geology' ? 'geologist' : 'astrobiologist';
     return !scienceFilled ? { key: 'crew-scientist', from: `[data-crew-id="${scientist}"]`, to: '[data-crew-role="scientist"]', label: 'Match a science expert' } : { key: 'crew-support', from: '[data-crew-id="robotics-specialist"]', to: '[data-crew-role="support"]', label: 'Match a support expert' };
   }
+  if(step==='crew-check'){
+    if(document.querySelector('.human-hatch:not(.is-sealed)'))return {key:'seal-cabin',from:'.human-hatch:not(.is-sealed)',label:'Seal the cabin'};
+    if(document.querySelector('.human-supply.is-required'))return {key:'load-kits',from:'.human-supply.is-required',label:'Pack more day kits'};
+  }
+  if(step==='systems-check')return {key:'return-connections',from:'.human-connect:not(.is-connected)',label:'Check each return system'};
+  if(step==='stress-check'&&document.querySelector('.human-stress-actions'))return document.querySelector('.human-main')?.getAttribute('data-stress-mode')==='challenge'&&!replaying?{key:'challenge-choice',from:'.human-stress-actions',label:'Pick a safe action'}:{key:'stress-choice',from:'[data-stress-hint="true"]',label:'Try this safe action'};
   if (step === 'mass-check' && document.querySelector('.readiness-connectors .is-unplugged')) return { key: 'repair', from: '.readiness-connectors .is-unplugged', label: 'Tap to fix' };
   if (step === 'power-check') return document.querySelector('.repair-fix') ? { key: 'fix-alert', from: '.repair-fix', label: 'Tap Fix' } : { key: 'trial', from: '.trial-actions button:not(:disabled)', label: 'Tap to test' };
+  if(step==='rocket-pack'&&document.querySelector('.human-pack-list'))return {key:'secure-ship',from:'.human-pack-item:not(:disabled)',label:'Secure each flight item'};
   if (step === 'rocket-pack') return { key: 'pack', from: '.readiness-pack-button:not(:disabled)', to: '.readiness-bay', label: 'Drag to pack' };
   if (step === 'liftoff') {
     if (document.querySelector('.flight-window')) return document.querySelector('.flight-window.is-safe') ? { key: 'release', from: '.flight-window.is-safe .flight-action:not(:disabled)', label: 'Tap in green' } : { key: 'wait-green', from: '.flight-window-track', label: 'Wait for green' };
@@ -44,13 +51,14 @@ interface GuideFrame { from: { x: number; y: number }; to: { x: number; y: numbe
 export function GestureGuide({ step, hidden, repair }: { step: StoryStepId; hidden: boolean; repair?: RepairGuide }) {
   const [guide, setGuide] = useState<GuideFrame | null>(null);
   useEffect(() => {
-    setGuide(null);
+    // The parent keys this component by stage/home. Input and observer callbacks
+    // clear a gesture; stage changes already create a fresh null guide.
     if (hidden) return;
     let timer: ReturnType<typeof setTimeout>, finish: ReturnType<typeof setTimeout>, started = false, cancelled = false, replaying = !!repair;
     const stop = () => { cancelled = true; clearTimeout(timer); clearTimeout(finish); setGuide(null); };
     const show = () => {
       if (cancelled || started || document.querySelector('dialog[open]') || document.hidden) return;
-      const demo = lesson(step, repair);
+      const demo = lesson(step, repair, replaying);
       if (!replaying && (hasSeen(demo.key) || window.matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
       const source = document.querySelector<HTMLElement>(demo.from), target = demo.to ? document.querySelector<HTMLElement>(demo.to) : source;
       if (!source || !target) return;

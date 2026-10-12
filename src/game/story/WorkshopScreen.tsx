@@ -80,7 +80,7 @@ export function WorkshopScreen({ session, dispatch, frame, onBack, autoBuilding,
   const suppressClick = useRef(false);
   const dropZone = useRef<HTMLDivElement>(null);
   const repair = session.repair?.stage === stage ? session.repair : undefined;
-  const appliedRepair = !!repair && repairApplied(repair, session.preparation);
+  const appliedRepair = !!repair && repairApplied(repair, session.preparation, session.moon.crew);
   const retestReady = appliedRepair && WORKSHOP_STAGES.every(id => ready(id));
   const [scienceFamily,setScienceFamily] = useState<ScienceFamily>('camera');
   const [shelfTab, setShelfTab] = useState<DesignCategory | 'depth' | null>(() => repair?.category ?? null);

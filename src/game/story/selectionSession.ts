@@ -1,4 +1,4 @@
-import { emptyFlight, restoreFlight, launchAuthorized, flightComplete } from './flight.ts';
+import { emptyFlight, launchAuthorized, flightComplete } from './flight.ts';
 import type { FlightState } from './flight.ts';
 import { missionSignature } from './readiness.ts';
 import { createStoryProgress, restoreStoryProgress, STORY_SAVE_KEY } from './progress.ts';
@@ -10,12 +10,14 @@ import type { ReadinessState } from './readiness.ts';
 import type { StoryProgress } from './types.ts';
 import { createMoonSession, restoreMoonSession, syncMoonDesign } from './moon/session.ts';
 import type { MoonSession } from './moon/session.ts';
+import { allChecksAccepted } from './readiness.ts';
+import { humanPacked, humanManifest, departureResources, humanCheckAccepted } from './moon/validation.ts';
 import { crewReport } from './moon/catalog.ts';
 
 export const STORY_VOICE_KEY = 'zero_to_beyond_story_voice_v1';
-export const FULL_MOON_SAVE_KEY = 'zero_to_beyond_full_moon_v3';
-export const PREVIOUS_MOON_SAVE_KEY = 'zero_to_beyond_full_moon_v2';
-export const FULL_MOON_SAVE_VERSION = 3;
+export const FULL_MOON_SAVE_KEY = 'zero_to_beyond_full_moon_v4';
+export const PREVIOUS_MOON_SAVE_KEY = 'zero_to_beyond_full_moon_v3';
+export const FULL_MOON_SAVE_VERSION = 4;
 export type StoryStorage = Pick<Storage, 'getItem' | 'setItem'>;
 export interface SelectionSession { progress: StoryProgress; preparation: PreparationSelection; readiness: ReadinessState; flight: FlightState; moon: MoonSession; voiceEnabled: boolean; storageAvailable: boolean }
 function readSaved(raw: string | null) {
@@ -25,16 +27,27 @@ function readSaved(raw: string | null) {
   const preparation = normalizeObjective(data.preparationVersion === 1 ? restorePreparation(data.preparation) : createPreparationSelection(), (data.selections as Record<string,string> | undefined)?.objective ?? 'lunar-ice');
   const buildActivities = verifiedActivities(preparation, (data.selections as Record<string,string> | undefined)?.objective);
   const base = restoreStoryProgress(JSON.stringify({ ...data, completedActivities: buildActivities }));
-  const readiness = data.readinessVersion === 1 ? restoreReadiness(data.readiness, base, preparation) : emptyReadiness();
-  const moon = [2,3].includes(data.sessionVersion as number) && data.moonVersion === 1
+  let moon = [2,3,4].includes(data.sessionVersion as number) && data.moonVersion === 1
     ? restoreMoonSession(data.moon, base, preparation) : { ...createMoonSession(base, preparation), migration: 'legacy-design-revalidation' as const };
-  const valid = missionActivities(base, preparation, readiness);
-  if (crewReport(moon.crew).complete && verifiedActivities(preparation, base.selections.objective).length === 6) valid.push('crew-selection');
-  const flight = data.flightVersion === 1 ? restoreFlight(data.flight, missionSignature(base, preparation), launchAuthorized(base, preparation, readiness)) : emptyFlight();
-  if (flightComplete(flight, missionSignature(base, preparation))) valid.push('liftoff');
+  const readiness = data.readinessVersion === 1 ? restoreReadiness(data.readiness, base, preparation, moon) : emptyReadiness();
+  if (allChecksAccepted(base,preparation,readiness,moon)&&humanPacked(moon,preparation)) {
+    const manifest=humanManifest(moon,preparation);
+    const saved=(data.moon as MoonSession|undefined)?.human?.approved;
+    if(JSON.stringify(saved)===JSON.stringify(manifest)) {
+      const resources=departureResources(moon,preparation);
+      moon={...moon,phase:'validate',resources,human:{...moon.human,approved:manifest},
+        launchSnapshot:Object.freeze({signature:moon.designSignature,platformId:manifest.platformId,equipmentIds:manifest.equipment.map(p=>p.id),crew:{...manifest.crew}}),
+        checkpoints:[Object.freeze({id:'pre-departure',phase:'validate',designSignature:moon.designSignature,resources:Object.freeze({...resources})})]};
+    }
+  }
+  const valid = missionActivities(base, preparation, readiness, moon);
+  const flight = emptyFlight(); // Human journey gameplay is implemented in Module 4; legacy flights cannot substitute.
   const completedActivities = Array.isArray(data.completedActivities) ? data.completedActivities.filter(id => valid.includes(id)) : [];
+  // A recalculated crew-check receipt proves the role matching and review were
+  // completed, including saves made after an equipment-repair shortcut.
+  if(humanCheckAccepted('crew-check',moon,preparation)) for(const id of ['crew-selection','crew-plan'] as const) if(!completedActivities.includes(id)) completedActivities.push(id);
   const progress = restoreStoryProgress(JSON.stringify({ ...data, completedActivities,
-    ...(['launch-ready', 'liftoff', 'earth-orbit'].includes(data.stepId as string) && !readiness.approved ? { stepId: 'rocket-pack', lineIndex: 0 } : {}) }));
+    ...(['launch-ready', 'liftoff', 'earth-orbit'].includes(data.stepId as string) && !moon.human.approved ? { stepId: 'rocket-pack', lineIndex: 0 } : {}) }));
   return { progress, preparation, readiness, flight, moon: syncMoonDesign(moon, progress, preparation) };
 }
 /** Saved progress is bounded by live hardware, check acknowledgements and the approved snapshot. */
@@ -52,10 +65,10 @@ function validEnvelope(raw: string | null) {
 }
 export function readSelectionSession(storage: StoryStorage): SelectionSession {
   try {
-    const current = storage.getItem(FULL_MOON_SAVE_KEY), previous = storage.getItem(PREVIOUS_MOON_SAVE_KEY);
+    const current = storage.getItem(FULL_MOON_SAVE_KEY), previous = storage.getItem(PREVIOUS_MOON_SAVE_KEY) ?? storage.getItem('zero_to_beyond_full_moon_v2');
     const modern = validEnvelope(current)?.sessionVersion === FULL_MOON_SAVE_VERSION ? current : previous;
     const envelope = validEnvelope(modern);
-    const valid = envelope !== null && [2,3].includes(envelope.sessionVersion as number) && envelope.version === 1
+    const valid = envelope !== null && [2,3,4].includes(envelope.sessionVersion as number) && envelope.version === 1
       && typeof envelope.playerName === 'string' && envelope.preparationVersion === 1;
     const legacy = storage.getItem(STORY_SAVE_KEY);
     const raw = valid ? modern : legacy;
@@ -70,7 +83,7 @@ export function writeSelectionSession(storage: StoryStorage, progress: StoryProg
   try {
     const existing = validEnvelope(storage.getItem(FULL_MOON_SAVE_KEY));
     if (typeof existing?.sessionVersion === 'number' && existing.sessionVersion > FULL_MOON_SAVE_VERSION) return false;
-    const valid = missionActivities(progress, preparation, readiness);
+    const valid = missionActivities(progress, preparation, readiness, moon);
     if (crewReport(moon.crew).complete && verifiedActivities(preparation, progress.selections.objective).length === 6) valid.push('crew-selection');
     if (launchAuthorized(progress, preparation, readiness) && flightComplete(flight, missionSignature(progress, preparation))) valid.push('liftoff');
     // One atomic payload prevents progress and hardware becoming separate stale saves.
@@ -86,4 +99,24 @@ export function readBrowserSelectionSession(): SelectionSession {
 }
 export function writeBrowserSelectionSession(progress: StoryProgress, voiceEnabled: boolean, preparation = createPreparationSelection(), readiness = emptyReadiness(), flight = emptyFlight(), moon = createMoonSession(progress, preparation)): boolean {
   try { return writeSelectionSession(window.localStorage, progress, voiceEnabled, preparation, readiness, flight, moon); } catch { return false; }
+}
+
+// A tab-local demo checkpoint uses the same validation as a real save, without touching it.
+const DEMO_CHECKPOINT_KEY = 'zero_to_beyond_demo_checkpoint_v4';
+export function readBrowserDemoSession(): SelectionSession | null {
+  try {
+    const raw = window.sessionStorage.getItem(DEMO_CHECKPOINT_KEY);
+    const envelope = validEnvelope(raw);
+    if (envelope?.sessionVersion !== FULL_MOON_SAVE_VERSION) return null;
+    return { ...readSaved(raw), voiceEnabled: envelope.voiceEnabled !== false, storageAvailable: true };
+  } catch { return null; }
+}
+export function writeBrowserDemoSession(session: Omit<SelectionSession, 'storageAvailable'>): boolean {
+  try {
+    const storage: StoryStorage = {
+      getItem: key => key === FULL_MOON_SAVE_KEY ? window.sessionStorage.getItem(DEMO_CHECKPOINT_KEY) : null,
+      setItem: (_key, value) => window.sessionStorage.setItem(DEMO_CHECKPOINT_KEY, value),
+    };
+    return writeSelectionSession(storage, session.progress, session.voiceEnabled, session.preparation, session.readiness, session.flight, session.moon);
+  } catch { return false; }
 }
