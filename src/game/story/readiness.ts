@@ -2,16 +2,17 @@ import { SCRIPT_RESOURCES } from './design.ts';
 import type { PreparationSelection } from './design.ts';
 import { installedIds, partById, preparationTotals, verifiedActivities, WORKSHOP_STAGES, stageReady } from './preparation.ts';
 import type { ActivityId, StoryProgress } from './types.ts';
-import { emptyTrial, restoreTrial, trialPassed } from './trial.ts';
+import { emptyTrial, restoreTrial, trialPassed, trialPlan } from './trial.ts';
 import type { TrialState } from './trial.ts';
+import { MOON_RULES } from './moon/rules.ts';
 
 export const CHECK_IDS = ['mass-check', 'power-check', 'budget-check'] as const;
 export type CheckId = typeof CHECK_IDS[number];
 export const PACKING_ACTIONS = ['adapter', 'payload', 'fairing'] as const;
 export type PackingAction = typeof PACKING_ACTIONS[number];
 export const READINESS_RULES_VERSION = 2;
-export const SHADOW_REHEARSAL_MINUTES = 15;
-export const RESERVE_FRACTION = .2;
+export const SHADOW_REHEARSAL_MINUTES = MOON_RULES.rehearsalTravelSeconds / 60;
+export const RESERVE_FRACTION = MOON_RULES.reserveFraction;
 export const FAIRING_SOURCE = 'https://science.nasa.gov/blogs/dart/2021/11/22/nasas-dart-spacecraft-secured-in-payload-fairing-flight-readiness-review-complete/';
 export const LAUNCH_CONFIGURATION = Object.freeze({ id: 'robotic-payload-v1', name: 'Robotic launch carrier', included: true,
   allowanceKg: SCRIPT_RESOURCES.payloadMassLimitKg, description: 'Illustrative two-stage carrier with payload adapter and fairing. Launch hardware is supplied outside the equipment budget and mass allowance. Display scale is illustrative; no real vehicle performance or dimensional fit is certified.' });
@@ -30,11 +31,12 @@ export function evaluateReadiness(progress: StoryProgress, preparation: Preparat
     && ['lunar-ice', 'lunar-geology'].includes(progress.selections.objective ?? '') && ['crater-rim', 'permanent-shadow'].includes(progress.selections.site ?? '');
   // Conservative rover-only rehearsal: 15 min of other operations plus drilling at full peak, zero solar.
   // No claim about lander battery sizing, mission duration, temperature survival or orbital mechanics.
-  const rehearsalWh = Math.round((totals.normalW * SHADOW_REHEARSAL_MINUTES / 60 + totals.drillEnergyWh) * 10) / 10;
-  const usableWh = totals.batteryWh * (1 - RESERVE_FRACTION);
-  const batteryOK = rehearsalWh <= usableWh;
+  const budget = trialPlan(preparation, shadow);
+  const rehearsalWh = Math.round(budget.requiredWh * 10) / 10;
+  const usableWh = budget.usableWh;
+  const batteryOK = budget.energyOK;
   const thermalOK = !shadow || preparation.thermalId === 'advanced-thermal';
-  const availableW = Math.min(SCRIPT_RESOURCES.peakPowerLimitW, partById(preparation.batteryId)?.dischargeLimitW ?? 0);
+  const availableW = budget.availableW;
   return { ...totals, complete, availableW, marginW: availableW - totals.peakW, rehearsalWh, usableWh,
     remainingWh: Math.round((totals.batteryWh - rehearsalWh) * 10) / 10, batteryOK, thermalOK,
     remainingCredits: SCRIPT_RESOURCES.budgetCredits - totals.credits,

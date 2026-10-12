@@ -13,12 +13,15 @@ import { emptyReadiness, CHECK_IDS, checkAccepted, allChecksAccepted, evaluateRe
 import type { ReadinessState, PackingAction } from './readiness.ts';
 import { reduceTrial, trialPassed } from './trial.ts';
 import type { TrialEvent } from './trial.ts';
+import { createMoonSession, reduceMoonSession, syncMoonDesign } from './moon/session.ts';
+import type { MoonEvent, MoonSession } from './moon/session.ts';
 
-export interface WorkshopSession { repair?: RepairGuide; progress: StoryProgress; preparation: PreparationSelection; past: PreparationSelection[]; future: PreparationSelection[]; readiness: ReadinessState; flight: FlightState }
-export type MissionEvent = StoryEvent | FlightEvent | TrialEvent | { type: 'connect-radar' } | { type: 'install'; ids: string[] } | { type: 'remove'; id: string } | { type: 'depth'; cm: number }
+export interface WorkshopSession { repair?: RepairGuide; progress: StoryProgress; preparation: PreparationSelection; past: PreparationSelection[]; future: PreparationSelection[]; readiness: ReadinessState; flight: FlightState; moon: MoonSession }
+type WorkshopEvent = StoryEvent | FlightEvent | TrialEvent | { type: 'connect-radar' } | { type: 'install'; ids: string[] } | { type: 'remove'; id: string } | { type: 'depth'; cm: number }
   | { type: 'fix-problem'; problem: RepairProblem } | { type: 'repair-recheck' } | { type: 'run-check' } | { type: 'pack'; action: PackingAction } | { type: 'undo' } | { type: 'redo' } | { type: 'quick-build' } | { type: 'begin-auto-build' } | { type: 'visit-stage'; stage: WorkshopStage };
-export function createWorkshopSession(progress: StoryProgress, preparation = createPreparationSelection(), readiness = emptyReadiness(), flight = emptyFlight()): WorkshopSession {
-  const session: WorkshopSession = { progress, preparation, readiness, flight, past: [], future: [] };
+export type MissionEvent = WorkshopEvent | MoonEvent;
+export function createWorkshopSession(progress: StoryProgress, preparation = createPreparationSelection(), readiness = emptyReadiness(), flight = emptyFlight(), moon = createMoonSession(progress, preparation)): WorkshopSession {
+  const session: WorkshopSession = { progress, preparation, readiness, flight, moon: syncMoonDesign(moon, progress, preparation), past: [], future: [] };
   return progress.stepId === 'power-check' && trialPassed(readiness.trial, missionSignature(progress, preparation), preparation, progress.selections.site === 'permanent-shadow')
     ? reduceMission(session, { type: 'run-check' }) : session;
 }
@@ -29,6 +32,15 @@ function withPreparation(session: WorkshopSession, preparation: PreparationSelec
     past: record ? [...session.past.slice(-29), session.preparation] : session.past, future: record ? [] : session.future };
 }
 export function reduceMission(session: WorkshopSession, event: MissionEvent): WorkshopSession {
+  if (event.type.startsWith('moon-')) {
+    const moon = reduceMoonSession(session.moon, event as MoonEvent, session.progress, session.preparation);
+    return moon === session.moon ? session : { ...session, moon };
+  }
+  const next = reduceWorkshopMission(session, event as WorkshopEvent);
+  const moon = syncMoonDesign(next.moon, next.progress, next.preparation);
+  return moon === next.moon ? next : { ...next, moon };
+}
+function reduceWorkshopMission(session: WorkshopSession, event: WorkshopEvent): WorkshopSession {
   const step = getStoryStep(session.progress.stepId);
   const stage = WORKSHOP_STAGES.find(id => id === step.id);
   if (event.type === 'fix-problem') {

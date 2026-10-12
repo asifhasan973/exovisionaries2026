@@ -1,5 +1,7 @@
-import { preparationTotals } from './preparation.ts';
+import { installedIds, partById } from './preparation.ts';
+import type { WorkshopPart } from './preparation.ts';
 import type { PreparationSelection } from './design.ts';
+import { rehearsalBudget } from './moon/resources.ts';
 
 export type TrialPhase = 'ready' | 'outbound' | 'at-sample' | 'drilling' | 'sampled' | 'returning' | 'complete' | 'failed';
 export type TrialFault = 'energy' | 'thermal' | 'peak' | null;
@@ -9,11 +11,10 @@ export const emptyTrial = (): TrialState => ({ signature: null, phase: 'ready', 
 export const trialActive = (state: TrialState) => ['outbound', 'drilling', 'returning'].includes(state.phase);
 /** Zero solar, 7.5 minutes each way, selected drilling depth, 20% reserve. Game rehearsal only. */
 export function trialPlan(preparation: PreparationSelection, shadowSite: boolean) {
-  const totals = preparationTotals(preparation, true);
-  return { batteryWh: totals.batteryWh, usableWh: totals.batteryWh * .8, legWh: totals.normalW / 8,
-    drillWh: totals.peakW * totals.drillMinutes / 60, drillSeconds: Math.max(1, totals.drillMinutes),
-    thermalOK: !shadowSite || preparation.thermalId === 'advanced-thermal', peakOK: totals.peakW <= 450,
-    requiredWh: totals.normalW / 4 + totals.peakW * totals.drillMinutes / 60 };
+  const parts = installedIds(preparation).map(partById).filter((part): part is WorkshopPart => !!part);
+  const budget = rehearsalBudget(parts, preparation.drillDepthCm);
+  return { ...budget, drillSeconds: Math.max(1, budget.drillSeconds / 60),
+    thermalOK: !shadowSite || preparation.thermalId === 'advanced-thermal' };
 }
 function phaseEnergy(state: TrialState, plan: ReturnType<typeof trialPlan>) {
   switch (state.phase) {

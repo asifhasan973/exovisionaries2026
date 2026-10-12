@@ -26,8 +26,8 @@ import { trialActive } from './trial.ts';
 /** Exact dialogue and a real preparation manifest share one saved mission. */
 export default function ExactStory() {
   const [session] = useState(readBrowserSelectionSession);
-  const [mission, setMission] = useState(() => createWorkshopSession(session.progress, session.preparation, session.readiness, session.flight));
-  const { progress, preparation, readiness, flight } = mission;
+  const [mission, setMission] = useState(() => createWorkshopSession(session.progress, session.preparation, session.readiness, session.flight, session.moon));
+  const { progress, preparation, readiness, flight, moon } = mission;
   const [voiceEnabled, setVoiceEnabled] = useState(session.voiceEnabled);
   const [storageAvailable, setStorageAvailable] = useState(session.storageAvailable);
   // A user gesture resumes saved narration; reloading cannot queue unsolicited speech.
@@ -39,20 +39,20 @@ export default function ExactStory() {
   const normalMission = useRef(mission);
   const step = getStoryStep(progress.stepId);
   useEffect(() => { window.scrollTo({ top: 0, behavior: 'instant' }); }, [progress.stepId, home]);
-  const latest = useRef({ progress, voiceEnabled, preparation, readiness, flight, demo });
-  useEffect(() => { latest.current = { progress, voiceEnabled, preparation, readiness, flight, demo }; }, [progress, voiceEnabled, preparation, readiness, flight, demo]);
+  const latest = useRef({ progress, voiceEnabled, preparation, readiness, flight, moon, demo });
+  useEffect(() => { latest.current = { progress, voiceEnabled, preparation, readiness, flight, moon, demo }; }, [progress, voiceEnabled, preparation, readiness, flight, moon, demo]);
   const flightCheckpoint = Math.floor(flight.t * 2);
   const trialCheckpoint = Math.floor(readiness.trial.progress * 10);
   useEffect(() => {
     const current = latest.current;
     if (current.demo) return;
-    const saved = writeBrowserSelectionSession(current.progress, current.voiceEnabled, current.preparation, current.readiness, current.flight);
+    const saved = writeBrowserSelectionSession(current.progress, current.voiceEnabled, current.preparation, current.readiness, current.flight, current.moon);
     // Report external storage results after this render. Cancel obsolete status updates.
     const timer = setTimeout(() => setStorageAvailable(saved), 0);
     return () => clearTimeout(timer);
-  }, [progress, voiceEnabled, preparation, readiness.checks, readiness.packing, readiness.approved, readiness.radarConnected, trialCheckpoint, readiness.trial.phase, readiness.trial.paused, flightCheckpoint, flight.status, flight.speed, flight.events, flight.skipped, flight.mode, flight.missedWindow, demo]);
+  }, [progress, voiceEnabled, preparation, moon, readiness.checks, readiness.packing, readiness.approved, readiness.radarConnected, trialCheckpoint, readiness.trial.phase, readiness.trial.paused, flightCheckpoint, flight.status, flight.speed, flight.events, flight.skipped, flight.mode, flight.missedWindow, demo]);
   useEffect(() => {
-    const save = () => { const current = latest.current; if (!current.demo) writeBrowserSelectionSession(current.progress, current.voiceEnabled, current.preparation, current.readiness, current.flight); };
+    const save = () => { const current = latest.current; if (!current.demo) writeBrowserSelectionSession(current.progress, current.voiceEnabled, current.preparation, current.readiness, current.flight, current.moon); };
     window.addEventListener('pagehide', save);
     return () => window.removeEventListener('pagehide', save);
   }, []);

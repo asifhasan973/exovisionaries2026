@@ -1,6 +1,8 @@
 import { SCRIPT_COMPONENTS, SCRIPT_DRILL_DEPTHS_CM, SCRIPT_RESOURCES, createPreparationSelection } from './design.ts';
 import type { DesignCategory, PreparationSelection, ScriptComponent } from './design.ts';
 import type { ActivityId, StoryStepId } from './types.ts';
+import { MOON_RULES } from './moon/rules.ts';
+import { drillDurationSeconds, energyWh, operatingPower } from './moon/resources.ts';
 
 export const NASA_INSTRUMENTS = 'https://science.nasa.gov/mission/viper/rover-and-instruments/';
 export const NASA_OPERATIONS = 'https://science.nasa.gov/mission/viper/lunar-operations/';
@@ -29,9 +31,9 @@ const extras: Record<string, Partial<WorkshopPart>> = {
   'stereo-hazard-camera': { description: 'Two views help the rover judge nearby obstacles.' },
   'standard-solar': { massKg: 8, nominalPowerW: 0, description: 'Makes up to 150 W in sunlight. Makes 0 W in permanent shadow.', assumption: '8 kg is a game estimate. Output is ideal sunlight output, not constant lunar generation.', source: NASA_OPERATIONS },
   'efficient-solar': { massKg: 12, nominalPowerW: 0, description: 'Makes up to 250 W in sunlight. Makes 0 W in permanent shadow.', assumption: '12 kg is a game estimate. The script’s +250 W is interpreted as 250 W total, replacing the Standard array.', source: NASA_OPERATIONS },
-  'small-battery': { nominalPowerW: 0, capacityWh: 100, dischargeLimitW: 450, description: 'A light battery for short trips into shadow.', assumption: 'Script capacity is interpreted as Wh. The 450 W discharge ceiling is a game rule.' },
-  'medium-battery': { nominalPowerW: 0, capacityWh: 220, dischargeLimitW: 450, description: 'More energy for longer trips into shadow.', assumption: 'Script capacity is interpreted as Wh. The 450 W discharge ceiling is a game rule.' },
-  'large-battery': { nominalPowerW: 0, capacityWh: 400, dischargeLimitW: 450, description: 'Most stored energy. Also the heaviest battery.', assumption: 'Script capacity is interpreted as Wh. The 450 W discharge ceiling is a game rule.' },
+  'small-battery': { nominalPowerW: 0, capacityWh: 100, dischargeLimitW: MOON_RULES.equipmentPeakW, description: 'A light battery for short trips into shadow.', assumption: 'Script capacity is interpreted as Wh. The 450 W discharge ceiling is a game rule.' },
+  'medium-battery': { nominalPowerW: 0, capacityWh: 220, dischargeLimitW: MOON_RULES.equipmentPeakW, description: 'More energy for longer trips into shadow.', assumption: 'Script capacity is interpreted as Wh. The 450 W discharge ceiling is a game rule.' },
+  'large-battery': { nominalPowerW: 0, capacityWh: 400, dischargeLimitW: MOON_RULES.equipmentPeakW, description: 'Most stored energy. Also the heaviest battery.', assumption: 'Script capacity is interpreted as Wh. The 450 W discharge ceiling is a game rule.' },
   'basic-thermal': { massKg: 4, nominalPowerW: 10, description: 'Insulation and a small heater. Limited protection in deep cold.', assumption: '4 kg and 10 W heater load are game estimates.' },
   'advanced-thermal': { massKg: 8, nominalPowerW: 15, description: 'Better insulation, heaters and temperature monitoring.', assumption: '8 kg and 15 W heater load are game estimates. This does not guarantee survival in a shadowed crater.' },
   'basic-communication': { massKg: 2, nominalPowerW: 8, description: 'A simple rover radio link to the lander.', assumption: '2 kg and 8 W are game estimates. This is the rover radio, separate from the mandatory lander antenna.' },
@@ -116,23 +118,22 @@ export function drillPotential(depth: number | null): number {
 }
 export function preparationTotals(preparation: PreparationSelection, shadow = false) {
   const parts = installedIds(preparation).map(partById).filter((p): p is WorkshopPart => !!p);
-  const roverParts = parts.filter(part => part.category !== 'lander');
-  const normalW = roverParts.reduce((sum, part) => sum + part.nominalPowerW, 0);
+  const normalW = operatingPower(parts, 'rehearsal').loadW;
   const drill = parts.find(p => p.id === 'trident');
-  // Conservative simultaneous rover loads; 175 W replaces the drill's 20 W.
-  const peakW = normalW + (drill ? (drill.peakPowerW ?? 175) - drill.nominalPowerW : 0);
-  const solarW = shadow ? 0 : partById(preparation.solarId)?.outputW ?? 0;
+  const peakW = operatingPower(parts, 'rehearsal-drill').loadW;
+  const solarW = operatingPower(parts, 'rehearsal', shadow ? 0 : 1).solarW;
   const batteryWh = partById(preparation.batteryId)?.capacityWh ?? 0;
   const deficitW = Math.max(0, normalW - solarW);
-  const drillMinutes = drill ? (preparation.drillDepthCm ?? 20) / 20 : 0;
-  const drillEnergyWh = Math.round(peakW * drillMinutes / 60 * 10) / 10;
-  const landerW = parts.filter(p => p.category === 'lander').reduce((sum, part) => sum + part.nominalPowerW, 0);
+  const drillSeconds = drill ? drillDurationSeconds(preparation.drillDepthCm ?? 20) : 0;
+  const drillMinutes = drillSeconds / 60;
+  const drillEnergyWh = Math.round(energyWh(peakW, drillSeconds) * 10) / 10;
+  const landerW = operatingPower(parts, 'descent').loadW;
   return {
     credits: parts.reduce((sum, p) => sum + p.credits, 0), massKg: parts.reduce((sum, p) => sum + p.massKg, 0), normalW, peakW, landerW,
     solarW, batteryWh, deficitW, drillMinutes, drillEnergyWh,
     drillRisk: !drill ? 'None' : (preparation.drillDepthCm ?? 20) <= 30 ? 'Low' : (preparation.drillDepthCm ?? 20) <= 60 ? 'Medium' : 'High',
     // 20% energy reserve; ideal arithmetic, not flight-qualified runtime.
-    batteryMinutes: batteryWh && deficitW ? Math.floor(batteryWh * .8 / deficitW * 60) : null,
+    batteryMinutes: batteryWh && deficitW ? Math.floor(batteryWh * (1 - MOON_RULES.reserveFraction) / deficitW * 60) : null,
     potentialScience: parts.reduce((sum, p) => sum + (p.id === 'trident' ? drillPotential(preparation.drillDepthCm) : p.scienceBonus ?? 0), 0),
     spentScience: SCRIPT_RESOURCES.initialScienceScore,
   };
