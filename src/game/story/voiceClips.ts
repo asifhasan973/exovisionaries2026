@@ -1,3 +1,4 @@
+import { CREW_ADVICE, CREW_BRIEFING } from './moon/crewDialogue.ts';
 import { STORY_DIALOGUE } from './dialogue.ts';
 import { GLOSSARY } from './glossary.ts';
 import { COMPACT_DIALOGUE } from './compactCopy.ts';
@@ -78,6 +79,8 @@ export const REPAIR_LINES = {
   'repair-remove-peak': 'Leave this extra tool behind so we use less power at once.',
 } as const;
 export const VOICE_CLIPS: Record<string, { text: string; character: StoryCharacterId }> = Object.fromEntries([
+  ...CREW_BRIEFING.map(line => [line.id, { text: line.text, character: line.speaker.character }]),
+  ...Object.entries(CREW_ADVICE).map(([id,text]) => [`crew-advice-${id}`, {text,character:'commander' as const}]),
   ...Object.values(STORY_DIALOGUE).flat().map(line => [line.id, { text: line.text, character: line.speaker.character }]),
   ...Object.values(STORY_DIALOGUE).flat().filter(line => COMPACT_DIALOGUE[line.id]).map(line => [`short-${line.id}`, { text: COMPACT_DIALOGUE[line.id], character: line.speaker.character }]),
   ...Object.values(ENGINEER_REPLIES).flat().map(({ id, text }) => [id, { text, character: 'commander' as const }]),

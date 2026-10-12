@@ -5,7 +5,9 @@ import type { FlightState, FlightEvent } from './flight.ts';
 import { createPreparationSelection } from './design.ts';
 import type { PreparationSelection } from './design.ts';
 import { getStoryStep } from './flow.ts';
-import { installPart, partById, quickPreparation, removePart, stageReady, STAGE_CATEGORIES, verifiedActivities, WORKSHOP_STAGES } from './preparation.ts';
+import { installPart, partById, quickPreparation, removePart, stageReady, STAGE_CATEGORIES, verifiedActivities, WORKSHOP_STAGES, partsForObjective, normalizeObjective, selectedDrill } from './preparation.ts';
+import { crewReport } from './moon/catalog.ts';
+import { MOON_IMPLEMENTED } from './moon/rules.ts';
 import { reduceStoryProgress } from './progress.ts';
 import type { StoryEvent, StoryProgress } from './types.ts';
 import type { WorkshopStage } from './preparation.ts';
@@ -27,21 +29,27 @@ export function createWorkshopSession(progress: StoryProgress, preparation = cre
 }
 function withPreparation(session: WorkshopSession, preparation: PreparationSelection, record = true): WorkshopSession {
   if (preparation === session.preparation || JSON.stringify(preparation) === JSON.stringify(session.preparation)) return session;
-  const valid = verifiedActivities(preparation);
+  const valid = verifiedActivities(preparation, session.progress.selections.objective);
   return { ...session, preparation, readiness: emptyReadiness(), flight: emptyFlight(), progress: { ...session.progress, completedActivities: session.progress.completedActivities.filter(id => valid.includes(id)) },
     past: record ? [...session.past.slice(-29), session.preparation] : session.past, future: record ? [] : session.future };
 }
 export function reduceMission(session: WorkshopSession, event: MissionEvent): WorkshopSession {
   if (event.type.startsWith('moon-')) {
+    if (session.progress.stepId !== 'crew-selection') return session;
     const moon = reduceMoonSession(session.moon, event as MoonEvent, session.progress, session.preparation);
-    return moon === session.moon ? session : { ...session, moon };
+    return moon === session.moon ? session : { ...session, moon, readiness: emptyReadiness(), flight: emptyFlight(), progress: { ...session.progress, completedActivities: session.progress.completedActivities.filter(id => verifiedActivities(session.preparation, session.progress.selections.objective).includes(id)) } };
   }
-  const next = reduceWorkshopMission(session, event as WorkshopEvent);
+  let next = reduceWorkshopMission(session, event as WorkshopEvent);
+  if (event.type === 'select' && next.progress.selections.objective !== session.progress.selections.objective) {
+    next = withPreparation(next, normalizeObjective(next.preparation, next.progress.selections.objective ?? 'lunar-ice'));
+  }
   const moon = syncMoonDesign(next.moon, next.progress, next.preparation);
   return moon === next.moon ? next : { ...next, moon };
 }
 function reduceWorkshopMission(session: WorkshopSession, event: WorkshopEvent): WorkshopSession {
   const step = getStoryStep(session.progress.stepId);
+  const objective = session.progress.selections.objective ?? 'lunar-ice';
+  const ready = (id: Parameters<typeof stageReady>[0], preparation = session.preparation) => stageReady(id, preparation, objective);
   const stage = WORKSHOP_STAGES.find(id => id === step.id);
   if (event.type === 'fix-problem') {
     if (step.module !== 6 && !stage) return session;
@@ -51,8 +59,9 @@ function reduceWorkshopMission(session: WorkshopSession, event: WorkshopEvent): 
       history: [...session.progress.history, { stepId: step.id, lineIndex: session.progress.lineIndex }] } };
   }
   if (event.type === 'repair-recheck') {
-    if (!stage || !session.repair || !repairApplied(session.repair, session.preparation) || !WORKSHOP_STAGES.every(id => stageReady(id, session.preparation))) return session;
-    return { ...session, repair: undefined, progress: { ...session.progress, stepId: 'mass-check', lineIndex: 0,
+    if (!stage || !session.repair || !repairApplied(session.repair, session.preparation) || !WORKSHOP_STAGES.every(id => ready(id))) return session;
+    const target = MOON_IMPLEMENTED.crewDeparture && crewReport(session.moon.crew).complete ? 'mass-check' : 'crew-briefing';
+    return { ...session, repair: undefined, progress: { ...session.progress, stepId: target, lineIndex: 0,
       history: [...session.progress.history, { stepId: step.id, lineIndex: 0 }] } };
   }
   if (event.type === 'connect-radar') return step.id === 'mass-check' ? { ...session, readiness: { ...session.readiness, radarConnected: true } } : session;
@@ -72,7 +81,8 @@ function reduceWorkshopMission(session: WorkshopSession, event: WorkshopEvent): 
   }
   if (event.type === 'install') {
     if (!stage) return session;
-    const allowed = event.ids.filter(id => { const p = partById(id); return p && STAGE_CATEGORIES[stage].includes(p.category); });
+    const options = new Set(partsForObjective(objective).map(part => part.id));
+    const allowed = event.ids.filter(id => { const p = partById(id); return p && options.has(id) && STAGE_CATEGORIES[stage].includes(p.category); });
     return withPreparation(session, allowed.reduce(installPart, session.preparation));
   }
   if (event.type === 'remove') {
@@ -81,7 +91,8 @@ function reduceWorkshopMission(session: WorkshopSession, event: WorkshopEvent): 
     return withPreparation(session, removePart(session.preparation, event.id));
   }
   if (event.type === 'depth') {
-    if (stage !== 'science-build' || !session.preparation.sciencePartIds.includes('trident') || !Number.isInteger(event.cm) || event.cm < 10 || event.cm > 100 || event.cm % 10) return session;
+    const drill = selectedDrill(session.preparation);
+    if (stage !== 'science-build' || !drill || !Number.isInteger(event.cm) || event.cm < 10 || event.cm > (drill.maxDepthCm ?? 100) || event.cm % 10) return session;
     return withPreparation(session, { ...session.preparation, drillDepthCm: event.cm });
   }
   if (event.type === 'undo' || event.type === 'redo') {
@@ -92,7 +103,7 @@ function reduceWorkshopMission(session: WorkshopSession, event: WorkshopEvent): 
     const restored = withPreparation(session, snapshot, false);
     // Keep navigation on the earliest now-incomplete assembly stage.
     const currentIndex = WORKSHOP_STAGES.indexOf(stage);
-    const earlier = WORKSHOP_STAGES.find((id, index) => index < currentIndex && !stageReady(id, snapshot));
+    const earlier = WORKSHOP_STAGES.find((id, index) => index < currentIndex && !ready(id, snapshot));
     return { ...restored, progress: earlier ? { ...restored.progress, stepId: earlier, lineIndex: 0 } : restored.progress,
       past: event.type === 'undo' ? session.past.slice(0, -1) : [...session.past, session.preparation],
       future: event.type === 'redo' ? session.future.slice(0, -1) : [...session.future, session.preparation] };
@@ -105,18 +116,18 @@ function reduceWorkshopMission(session: WorkshopSession, event: WorkshopEvent): 
   }
   if (event.type === 'quick-build') {
     if (!stage && step.id !== 'resource-limits') return session;
-    const updated = withPreparation(session, quickPreparation());
-    let progress = { ...updated.progress, completedActivities: verifiedActivities(updated.preparation) };
-    // Traverse real gates, retaining normal Back history. Stop before Module 6 checks.
-    while (progress.stepId !== 'mass-check') {
-      const next = reduceStoryProgress(progress, { type: 'next' });
+    const updated = withPreparation(session, quickPreparation(objective));
+    let progress = { ...updated.progress, completedActivities: verifiedActivities(updated.preparation, objective) };
+    // Traverse real gates, retaining Back history. Leave crew assignment to the player.
+    while (progress.stepId !== 'crew-selection') {
+      const next = reduceStoryProgress(progress, { type: getStoryStep(progress.stepId).kind === 'conversation' ? 'skip-briefing' : 'next' });
       if (next.stepId === progress.stepId) break;
       progress = next;
     }
     return { ...updated, progress };
   }
   if (event.type === 'visit-stage') {
-    if (getStoryStep(step.id).module !== 6 && !stage) return session;
+    if (![6,8].includes(getStoryStep(step.id).module) && !stage) return session;
     const currentIndex = stage ? WORKSHOP_STAGES.indexOf(stage) : WORKSHOP_STAGES.length;
     const targetIndex = WORKSHOP_STAGES.indexOf(event.stage);
     if (targetIndex > currentIndex) return session;
@@ -143,7 +154,8 @@ function reduceWorkshopMission(session: WorkshopSession, event: WorkshopEvent): 
     const valid = id ? checkAccepted(id, session.progress, session.preparation, session.readiness)
       : step.id === 'launch-ready' ? launchAuthorized(session.progress, session.preparation, session.readiness)
       : step.id === 'liftoff' ? launchAuthorized(session.progress, session.preparation, session.readiness) && flightComplete(session.flight, missionSignature(session.progress, session.preparation))
-      : step.id === 'rocket-pack' ? packingComplete(session.progress, session.preparation, session.readiness) : stageReady(step.id, session.preparation);
+      : step.id === 'rocket-pack' ? packingComplete(session.progress, session.preparation, session.readiness)
+      : step.id === 'crew-selection' ? crewReport(session.moon.crew).complete && WORKSHOP_STAGES.every(id => ready(id)) : ready(step.id);
     if (!valid) return session;
     const completed = reduceStoryProgress(session.progress, { type: 'complete-activity', activity: step.activity });
     return { ...session, progress: reduceStoryProgress(completed, { type: 'next' }), readiness: step.id === 'rocket-pack'
@@ -153,7 +165,7 @@ function reduceWorkshopMission(session: WorkshopSession, event: WorkshopEvent): 
   if (event.type === 'back') {
     const index = WORKSHOP_STAGES.findIndex(id => id === progress.stepId);
     const boundary = getStoryStep(progress.stepId).module >= 6 ? WORKSHOP_STAGES.length : index;
-    const missing = WORKSHOP_STAGES.find((id, i) => i < boundary && !stageReady(id, session.preparation));
+    const missing = WORKSHOP_STAGES.find((id, i) => i < boundary && !ready(id));
     if (missing) return { ...session, progress: { ...progress, stepId: missing, lineIndex: 0 } };
     if (getStoryStep(progress.stepId).module >= 6) {
       const valid = missionActivities(progress, session.preparation, session.readiness);
@@ -164,6 +176,6 @@ function reduceWorkshopMission(session: WorkshopSession, event: WorkshopEvent): 
     }
   }
   const changedMission = missionSignature(progress, session.preparation) !== missionSignature(session.progress, session.preparation);
-  return { ...session, progress: changedMission ? { ...progress, completedActivities: progress.completedActivities.filter(id => verifiedActivities(session.preparation).includes(id)) } : progress,
+  return { ...session, progress: changedMission ? { ...progress, completedActivities: progress.completedActivities.filter(id => verifiedActivities(session.preparation, objective).includes(id)) } : progress,
     readiness: changedMission ? emptyReadiness() : session.readiness, flight: changedMission ? emptyFlight() : session.flight };
 }

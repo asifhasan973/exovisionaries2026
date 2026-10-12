@@ -12,8 +12,8 @@ import { sound } from '../../audio/soundEngine.ts';
 
 type Ghost = { id: string; fromX: number; fromY: number; toX: number; toY: number };
 /** Runs the same install and Next events as the player, one visible part at a time. */
-export function AutoBuildStage({ stage, preparation, shadow, thumbnails, dispatch, onFocus, onInstalled, onDepthPreview, onDone }: {
-  stage: WorkshopStage; preparation: PreparationSelection; shadow: boolean; thumbnails: Record<string, string>;
+export function AutoBuildStage({ stage, preparation, shadow, objective, thumbnails, dispatch, onFocus, onInstalled, onDepthPreview, onDone }: {
+  stage: WorkshopStage; preparation: PreparationSelection; shadow: boolean; objective: string; thumbnails: Record<string, string>;
   dispatch(event: MissionEvent): void; onFocus(id: string): void; onInstalled(id: string): void; onDepthPreview(): void; onDone(): void;
 }) {
   const { effects, gentle } = useGameSettings();
@@ -22,7 +22,7 @@ export function AutoBuildStage({ stage, preparation, shadow, thumbnails, dispatc
   const callbacks = useRef({ dispatch, onFocus, onInstalled, onDepthPreview, onDone });
   useEffect(() => { callbacks.current = { dispatch, onFocus, onInstalled, onDepthPreview, onDone }; });
   const installed = installedIds(preparation);
-  const nextId = autoBuildParts(shadow).find(id => STAGE_CATEGORIES[stage].includes(partById(id)!.category) && !installed.includes(id));
+  const nextId = autoBuildParts(shadow,objective).find(id => STAGE_CATEGORIES[stage].includes(partById(id)!.category) && !installed.includes(id));
   useEffect(() => { const visibility = () => setPaused(document.hidden); document.addEventListener('visibilitychange', visibility); return () => document.removeEventListener('visibilitychange', visibility); }, []);
   useEffect(() => {
     if (paused) return;

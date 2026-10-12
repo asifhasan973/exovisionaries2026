@@ -30,10 +30,10 @@ export interface StoryChoice {
   available: boolean;
 }
 
-export type StoryStepId = 'player-name' | 'appointment' | 'companion-intro' | 'destination' | 'objective-briefing' | 'objective' | 'site-briefing' | 'site' | 'resource-briefing' | 'resource-limits' | 'lander-build' | 'rover-select' | 'science-build' | 'power-build' | 'survival-build' | 'mass-check' | 'power-check' | 'budget-check' | 'rocket-pack' | 'launch-ready' | 'liftoff' | 'earth-orbit';
-export type ActivityId = 'resource-limits' | 'lander-build' | 'rover-select' | 'science-build' | 'power-build' | 'survival-build' | 'mass-check' | 'power-check' | 'budget-check' | 'rocket-pack' | 'launch-ready' | 'liftoff';
+export type StoryStepId = 'player-name' | 'appointment' | 'companion-intro' | 'destination' | 'objective-briefing' | 'objective' | 'site-briefing' | 'site' | 'resource-briefing' | 'resource-limits' | 'lander-build' | 'rover-select' | 'science-build' | 'power-build' | 'survival-build' | 'crew-briefing' | 'crew-selection' | 'crew-plan' | 'mass-check' | 'power-check' | 'budget-check' | 'rocket-pack' | 'launch-ready' | 'liftoff' | 'earth-orbit';
+export type ActivityId = 'resource-limits' | 'lander-build' | 'rover-select' | 'science-build' | 'power-build' | 'survival-build' | 'crew-selection' | 'mass-check' | 'power-check' | 'budget-check' | 'rocket-pack' | 'launch-ready' | 'liftoff';
 
-interface BaseStep { id: StoryStepId; title: string; module: 4 | 5 | 6 | 7 }
+interface BaseStep { id: StoryStepId; title: string; module: 4 | 5 | 6 | 7 | 8 }
 export type StoryStep =
   | (BaseStep & { kind: 'name' })
   | (BaseStep & { kind: 'conversation'; lines: readonly StoryLine[] })

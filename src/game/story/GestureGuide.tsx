@@ -19,6 +19,13 @@ function lesson(step: StoryStepId, repair?: RepairGuide): Demo {
     if (document.querySelector('.workshop-pick:not(:disabled)')) return { key: 'install', from: '.workshop-pick:not(:disabled)', to: '.workshop-drop-zone', label: 'Drag or tap' };
     return { key: 'next', from: '.conversation-controls .conversation-next:not(:disabled)', label: 'Tap Next' };
   }
+  if (step === 'crew-selection') {
+    const scienceFilled = document.querySelector('[data-crew-role="scientist"]')?.closest('.crew-role')?.classList.contains('is-filled');
+    const supportFilled = document.querySelector('[data-crew-role="support"]')?.closest('.crew-role')?.classList.contains('is-filled');
+    if (scienceFilled && supportFilled) return { key: 'crew-save', from: '[data-primary-action]:not(:disabled)', label: 'Save your crew' };
+    const scientist = document.querySelector('.crew-main')?.getAttribute('data-moon-objective') === 'lunar-geology' ? 'geologist' : 'astrobiologist';
+    return !scienceFilled ? { key: 'crew-scientist', from: `[data-crew-id="${scientist}"]`, to: '[data-crew-role="scientist"]', label: 'Match a science expert' } : { key: 'crew-support', from: '[data-crew-id="robotics-specialist"]', to: '[data-crew-role="support"]', label: 'Match a support expert' };
+  }
   if (step === 'mass-check' && document.querySelector('.readiness-connectors .is-unplugged')) return { key: 'repair', from: '.readiness-connectors .is-unplugged', label: 'Tap to fix' };
   if (step === 'power-check') return document.querySelector('.repair-fix') ? { key: 'fix-alert', from: '.repair-fix', label: 'Tap Fix' } : { key: 'trial', from: '.trial-actions button:not(:disabled)', label: 'Tap to test' };
   if (step === 'rocket-pack') return { key: 'pack', from: '.readiness-pack-button:not(:disabled)', to: '.readiness-bay', label: 'Drag to pack' };

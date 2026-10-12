@@ -1,6 +1,6 @@
 import { SCRIPT_RESOURCES } from './design.ts';
 import type { DesignCategory, PreparationSelection } from './design.ts';
-import { installedIds, installPart, partById, preparationTotals, removePart, STAGE_CATEGORIES, WORKSHOP_PARTS, WORKSHOP_STAGES } from './preparation.ts';
+import { installedIds, installPart, partById, preparationTotals, removePart, STAGE_CATEGORIES, WORKSHOP_PARTS, WORKSHOP_STAGES, partsForObjective, stageReady } from './preparation.ts';
 import type { WorkshopStage } from './preparation.ts';
 import type { WorkshopSession } from './workshopSession.ts';
 import { trialPlan } from './trial.ts';
@@ -52,13 +52,19 @@ export function recommendRepair(session: WorkshopSession, problem: RepairProblem
   const limit = problem === 'mass' ? SCRIPT_RESOURCES.payloadMassLimitKg : problem === 'budget' ? SCRIPT_RESOURCES.budgetCredits : SCRIPT_RESOURCES.peakPowerLimitW;
   if (totals[metric] <= limit) return null;
   const installed = installedIds(preparation);
+  const objective = session.progress.selections.objective ?? 'lunar-ice';
+  const currentStageIndex = WORKSHOP_STAGES.findIndex(stage => stage === session.progress.stepId);
   const candidates: { id: string; action: 'install' | 'remove'; value: number; loss: number; energySafe: boolean }[] = [];
-  for (const part of WORKSHOP_PARTS) {
-    const remove = part.id === 'msolo' && installed.includes(part.id);
-    const replace = !['science', 'lander'].includes(part.category) && !installed.includes(part.id)
-      && installed.some(id => partById(id)?.category === part.category);
+  for (const part of partsForObjective(objective)) {
+    const partStageIndex = WORKSHOP_STAGES.findIndex(stage => STAGE_CATEGORIES[stage].includes(part.category));
+    if (currentStageIndex >= 0 && partStageIndex > currentStageIndex) continue;
+    const remove = (part.id === 'msolo' || !!part.objective) && installed.includes(part.id);
+    const replace = !installed.includes(part.id) && (part.replaceGroup
+      ? installed.some(id => partById(id)?.replaceGroup === part.replaceGroup)
+      : !['science', 'lander'].includes(part.category) && installed.some(id => partById(id)?.category === part.category));
     if (!remove && !replace || shadow && part.id === 'basic-thermal') continue;
     const changed = remove ? removePart(preparation, part.id) : installPart(preparation, part.id);
+    if (part.objective && !stageReady('science-build', changed, objective)) continue;
     const next = preparationTotals(changed, shadow), nextPlan = trialPlan(changed, shadow);
     if (next[metric] >= totals[metric]) continue;
     candidates.push({ id: part.id, action: remove ? 'remove' : 'install', value: next[metric], loss: Math.max(0, totals.potentialScience - next.potentialScience), energySafe: nextPlan.requiredWh <= nextPlan.usableWh });

@@ -8,6 +8,86 @@
   "purpose": "Synthetic character narration",
   "lines": [
     {
+      "id": "crew-briefing-1",
+      "character": "chief",
+      "text": "Your explorer is built. Time to choose your crew."
+    },
+    {
+      "id": "crew-briefing-2",
+      "character": "commander",
+      "text": "Who should come with us?"
+    },
+    {
+      "id": "crew-briefing-3",
+      "character": "chief",
+      "text": "Take one science expert and one support expert."
+    },
+    {
+      "id": "crew-briefing-4",
+      "character": "commander",
+      "text": "Two of us land. Our support expert stays in orbit."
+    },
+    {
+      "id": "crew-briefing-5",
+      "character": "chief",
+      "text": "Match each expert to the right job. You have this, Commander!"
+    },
+    {
+      "id": "crew-advice-intro",
+      "character": "commander",
+      "text": "Match a scientist and a support expert."
+    },
+    {
+      "id": "crew-advice-complete",
+      "character": "commander",
+      "text": "Great team! Our flight checks come next."
+    },
+    {
+      "id": "crew-advice-scienceSeat",
+      "character": "commander",
+      "text": "Now tap the science seat."
+    },
+    {
+      "id": "crew-advice-supportSeat",
+      "character": "commander",
+      "text": "Now tap the support seat."
+    },
+    {
+      "id": "crew-advice-wrongScience",
+      "character": "commander",
+      "text": "That job needs a scientist. Try a science expert!"
+    },
+    {
+      "id": "crew-advice-wrongSupport",
+      "character": "commander",
+      "text": "That job needs a support expert. Try the other seat!"
+    },
+    {
+      "id": "crew-advice-robotics",
+      "character": "commander",
+      "text": "Our robotics expert helps save drive energy."
+    },
+    {
+      "id": "crew-advice-systems",
+      "character": "commander",
+      "text": "Our engineer can help with power, heat and radio repairs."
+    },
+    {
+      "id": "crew-advice-geologist",
+      "character": "commander",
+      "text": "Our geologist will help read rock clues."
+    },
+    {
+      "id": "crew-advice-astrobiologist",
+      "character": "commander",
+      "text": "Our astrobiologist will help read water clues."
+    },
+    {
+      "id": "crew-advice-open",
+      "character": "commander",
+      "text": "Seat open. Try another expert."
+    },
+    {
       "id": "appointment-01",
       "character": "chief",
       "text": "Charlie, good to see you."
@@ -651,6 +731,71 @@
       "id": "greeting-welcome",
       "character": "chief",
       "text": "Good to see you, Commander."
+    },
+    {
+      "id": "male-crew-briefing-2",
+      "character": "commander-male",
+      "text": "Who should come with us?"
+    },
+    {
+      "id": "male-crew-briefing-4",
+      "character": "commander-male",
+      "text": "Two of us land. Our support expert stays in orbit."
+    },
+    {
+      "id": "male-crew-advice-intro",
+      "character": "commander-male",
+      "text": "Match a scientist and a support expert."
+    },
+    {
+      "id": "male-crew-advice-complete",
+      "character": "commander-male",
+      "text": "Great team! Our flight checks come next."
+    },
+    {
+      "id": "male-crew-advice-scienceSeat",
+      "character": "commander-male",
+      "text": "Now tap the science seat."
+    },
+    {
+      "id": "male-crew-advice-supportSeat",
+      "character": "commander-male",
+      "text": "Now tap the support seat."
+    },
+    {
+      "id": "male-crew-advice-wrongScience",
+      "character": "commander-male",
+      "text": "That job needs a scientist. Try a science expert!"
+    },
+    {
+      "id": "male-crew-advice-wrongSupport",
+      "character": "commander-male",
+      "text": "That job needs a support expert. Try the other seat!"
+    },
+    {
+      "id": "male-crew-advice-robotics",
+      "character": "commander-male",
+      "text": "Our robotics expert helps save drive energy."
+    },
+    {
+      "id": "male-crew-advice-systems",
+      "character": "commander-male",
+      "text": "Our engineer can help with power, heat and radio repairs."
+    },
+    {
+      "id": "male-crew-advice-geologist",
+      "character": "commander-male",
+      "text": "Our geologist will help read rock clues."
+    },
+    {
+      "id": "male-crew-advice-astrobiologist",
+      "character": "commander-male",
+      "text": "Our astrobiologist will help read water clues."
+    },
+    {
+      "id": "male-crew-advice-open",
+      "character": "commander-male",
+      "text": "Seat open. Try another expert."
     },
     {
       "id": "male-appointment-02",

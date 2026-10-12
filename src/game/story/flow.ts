@@ -1,5 +1,6 @@
 import { STORY_DIALOGUE } from './dialogue.ts';
 import type { StoryLine, StoryStep, StoryStepId } from './types.ts';
+import { CREW_BRIEFING } from './moon/crewDialogue.ts';
 
 /** Ordered screen contract; the later modules implement these screens. */
 export const STORY_FLOW: readonly StoryStep[] = [
@@ -28,6 +29,9 @@ export const STORY_FLOW: readonly StoryStep[] = [
   { id: 'science-build', title: 'Choose science package - Mandatory', kind: 'activity', activity: 'science-build', module: 5 },
   { id: 'power-build', title: 'Power management', kind: 'activity', activity: 'power-build', module: 5 },
   { id: 'survival-build', title: 'Survival', kind: 'activity', activity: 'survival-build', module: 5 },
+  { id: 'crew-briefing', title: 'Meet your crew', kind: 'conversation', lines: CREW_BRIEFING, module: 8 },
+  { id: 'crew-selection', title: 'Choose your crew', kind: 'activity', activity: 'crew-selection', module: 8 },
+  { id: 'crew-plan', title: 'Your crew is ready', kind: 'endpoint', module: 8 },
   { id: 'mass-check', title: 'MASS CHECK', kind: 'activity', activity: 'mass-check', module: 6 },
   { id: 'power-check', title: 'POWER CHECK', kind: 'activity', activity: 'power-check', module: 6 },
   { id: 'budget-check', title: 'BUDGET CHECK', kind: 'activity', activity: 'budget-check', module: 6 },

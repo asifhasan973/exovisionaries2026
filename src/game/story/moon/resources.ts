@@ -18,7 +18,9 @@ export function drillDurationSeconds(depthCm: number): number {
 }
 
 /** Illumination is a usable fraction; a blocked/PSR Sun gives zero regardless of array tier. */
-export function operatingPower(parts: readonly ElectricalPart[], mode: OperatingMode, illumination = 0, activeScienceIds: readonly string[] = []) {
+export interface CrewPowerProfile { driveLoadMultiplier: 1 | .9 }
+export const NO_CREW_POWER: CrewPowerProfile = { driveLoadMultiplier: 1 };
+export function operatingPower(parts: readonly ElectricalPart[], mode: OperatingMode, illumination = 0, activeScienceIds: readonly string[] = [], crew: CrewPowerProfile = NO_CREW_POWER) {
   if (!finiteNonnegative(illumination) || illumination > 1) throw new RangeError('Illumination must be between zero and one.');
   const active = parts.filter(part => {
     if (mode === 'descent') return part.category === 'lander';
@@ -32,8 +34,10 @@ export function operatingPower(parts: readonly ElectricalPart[], mode: Operating
       : mode === 'analysis' && activeScienceIds.includes(part.id);
     return part.category === 'thermal' || part.category === 'communication';
   });
-  const loadW = active.reduce((sum, part) => sum + (['drilling', 'rehearsal-drill'].includes(mode)
-    && (part.id === 'trident' || part.id.startsWith('geo-drill-')) ? part.peakPowerW ?? part.nominalPowerW : part.nominalPowerW), 0);
+  const loadW = active.reduce((sum, part) => {
+    const watts = ['drilling', 'rehearsal-drill'].includes(mode) && (part.id === 'trident' || part.id.startsWith('geo-drill-')) ? part.peakPowerW ?? part.nominalPowerW : part.nominalPowerW;
+    return sum + watts * (part.category === 'rover' && ['traverse','rehearsal'].includes(mode) ? crew.driveLoadMultiplier : 1);
+  }, 0);
   const solarW = mode === 'descent' || mode === 'crew-return' ? 0 : parts.reduce((sum, part) => sum + (part.outputW ?? 0), 0) * illumination;
   const battery = parts.find(part => part.category === 'battery');
   const dischargeLimitW = Math.min(MOON_RULES.equipmentPeakW, battery?.dischargeLimitW ?? 0);
@@ -53,8 +57,8 @@ export function batteryStep(currentWh: number, capacityWh: number, loadW: number
     reserveOK: remainingWh + 1e-9 >= capacityWh * MOON_RULES.reserveFraction };
 }
 
-export function rehearsalBudget(parts: readonly ElectricalPart[], depthCm: number | null) {
-  const normal = operatingPower(parts, 'rehearsal');
+export function rehearsalBudget(parts: readonly ElectricalPart[], depthCm: number | null, crew: CrewPowerProfile = NO_CREW_POWER) {
+  const normal = operatingPower(parts, 'rehearsal', 0, [], crew);
   const drill = operatingPower(parts, 'rehearsal-drill');
   const hasDrill = parts.some(part => part.id === 'trident' || part.id.startsWith('geo-drill-'));
   const drillSeconds = hasDrill ? drillDurationSeconds(depthCm ?? 20) : 0;

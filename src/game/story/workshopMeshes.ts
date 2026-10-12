@@ -16,7 +16,7 @@ export function createPartMesh(id: string): THREE.Group {
     const piece = cylinder(radius, radius, direction.length(), mat);
     piece.position.copy(a.clone().add(b).multiplyScalar(.5)); piece.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.normalize());
   };
-  const category = partById(id)?.category;
+  const part = partById(id), category = part?.category;
   if (id === 'lander-body') {
     cylinder(1.1, 1.2, .75, gold, 0, 1.25); cylinder(1.22, 1.22, .09, dark, 0, .83); cylinder(1.15, 1.15, .1, silver, 0, 1.65);
     box(.75, .65, .6, white, 0, 1.9);
@@ -48,7 +48,7 @@ export function createPartMesh(id: string): THREE.Group {
     for (const x of [-.12, .12]) { const eye = cylinder(.06, .06, .035, blue, x, 1.84, -.44); eye.rotation.x = Math.PI / 2; }
   } else if (id === 'landing-engines') {
     for (const x of [-.3, .3]) { cylinder(.09, .23, .45, dark, x, .15); cylinder(.1, .1, .19, silver, x, .47); cylinder(.035, .035, .35, gold, x + .13, .4); }
-  } else if (id === 'landing-radar' || category === 'navigation' || id === 'landing-cameras') {
+  } else if (id === 'landing-radar' || category === 'navigation' || id === 'landing-cameras' || part?.scienceFamily === 'camera') {
     box(.48, .24, .3, silver); const count = id === 'stereo-hazard-camera' ? 2 : 1;
     for (let i = 0; i < count; i++) { const lens = cylinder(.09, .09, .15, dark, count === 2 ? (i - .5) * .24 : 0, 0, .19); lens.rotation.x = Math.PI / 2; const glass = cylinder(.065, .065, .16, blue, count === 2 ? (i - .5) * .24 : 0, 0, .2); glass.rotation.x = Math.PI / 2; }
     box(.06, .22, .06, dark, 0, -.2);
@@ -56,7 +56,7 @@ export function createPartMesh(id: string): THREE.Group {
     cylinder(.035, .04, .5, silver, 0, .12);
     if (id === 'basic-communication') { cylinder(.018, .018, .45, gold, 0, .55); box(.23, .18, .18, white, 0, -.15); }
     else { const dish = mesh(new THREE.SphereGeometry(.33, 28, 16, 0, Math.PI * 2, 0, .9), white, 0, .5); dish.rotation.x = .8; rod(new THREE.Vector3(0, .45, 0), new THREE.Vector3(0, .68, .25), .025, gold); }
-  } else if (id === 'trident') {
+  } else if (id === 'trident' || id.startsWith('geo-drill-')) {
     box(.32, .42, .3, gold, 0, .3); box(.18, 1, .16, silver, .2, -.05);
     const start = group.children.length;
     cylinder(.07, .07, 1, dark, 0, -.45);
@@ -65,8 +65,21 @@ export function createPartMesh(id: string): THREE.Group {
     const pieces = group.children.slice(start), bit = new THREE.Group(); bit.name = 'drill-bit'; group.add(bit); pieces.forEach(piece => bit.add(piece));
   } else if (id === 'nss') {
     cylinder(.14, .14, .5, gold); cylinder(.15, .15, .07, silver, 0, .28); box(.35, .08, .35, dark, 0, -.3);
-  } else if (id === 'nirvss') {
+  } else if (id === 'nirvss' || part?.scienceFamily === 'ir') {
     box(.4, .25, .3, silver); const lens = cylinder(.08, .08, .22, gold, 0, 0, .24); lens.rotation.x = Math.PI / 2; box(.06, .2, .06, dark, 0, -.2);
+  } else if (id === 'geo-scoop-basic') {
+    rod(new THREE.Vector3(0,.3,0),new THREE.Vector3(.4,-.15,.2),.045,silver);
+    box(.25,.26,.23,gold,0,.35); const scoop = mesh(new THREE.SphereGeometry(.18,20,10,0,Math.PI*2,0,Math.PI/2),silver,.4,-.2,.2); scoop.rotation.z=Math.PI;
+  } else if (part?.scienceFamily === 'xrf' || part?.scienceFamily === 'xrd') {
+    box(.5,.3,.38,white); box(.42,.03,.3,gold,0,.17);
+    cylinder(.12,.12,.24,dark,0,.05,.22); cylinder(.09,.09,.05,blue,0,.19,.22);
+    if(part.scienceFamily==='xrd') { box(.22,.14,.18,silver,.28,0); cylinder(.07,.07,.16,gold,.28,.15); }
+  } else if (part?.scienceFamily === 'gpr') {
+    box(.55,.1,.48,silver); for(const x of [-.22,.22]) { rod(new THREE.Vector3(x,0,-.4),new THREE.Vector3(x,0,.4),.045,gold); }
+    box(.24,.18,.2,white,0,.14);
+  } else if (part?.scienceFamily === 'seismometer') {
+    cylinder(.23,.3,.16,white); cylinder(.11,.11,.2,gold,0,.18);
+    for(const angle of [0,2.1,4.2]) rod(new THREE.Vector3(0,0,0),new THREE.Vector3(Math.sin(angle)*.4,-.12,Math.cos(angle)*.4),.03,silver);
   } else if (id === 'msolo') {
     cylinder(.14, .14, .4, silver); cylinder(.045, .045, .22, gold, 0, .3); box(.35, .13, .3, dark, 0, -.25);
   } else if (category === 'solar') {
@@ -88,6 +101,7 @@ export function createPartMesh(id: string): THREE.Group {
   } else { box(.42, .24, .35, silver); box(.3, .02, .27, blue, 0, .14); for (let i = 0; i < 3; i++) box(.03, .25, .36, gold, (i - 1) * .13); }
   // Unused materials are also owned by the group for deterministic disposal.
   group.userData.materials = [silver, dark, gold, blue, white];
+  if(part?.tier) group.scale.setScalar(part.tier === 'advanced' ? 1.16 : part.tier === 'balanced' ? 1.05 : .9);
   return group;
 }
 export function disposeGroup(group: THREE.Object3D) {
@@ -108,6 +122,10 @@ export function attachmentPosition(id: string): THREE.Vector3 {
     nss: [1.36, 1.02, -.5], nirvss: [2.62, 1.35, -.2], trident: [2.72, 1.15, .6], msolo: [1.65, 1.38, .1],
   };
   const categories: Record<string, number[]> = { rover: [2.1, 0, 0], navigation: [2.1, 2.04, -.3], solar: [2.1, 1.6, .55], battery: [2.1, .74, .76], thermal: [2.12, 1.28, .13], communication: [1.55, 1.35, .3] };
+  if(part?.scienceFamily) {
+    const scienceSlots: Record<string,number[]> = { camera:[2.35,1.5,-.6], ir:[2.66,1.32,-.15], xrf:[1.5,1.34,-.1], sample:[2.85,1.15,.6], xrd:[1.75,1.38,.42], gpr:[2.1,.56,-.72], seismometer:[1.5,.87,.55] };
+    return new THREE.Vector3(...scienceSlots[part.scienceFamily] as [number,number,number]);
+  }
   return new THREE.Vector3(...(positions[id] ?? categories[part?.category ?? ''] ?? [0, 1, 0]) as [number, number, number]);
 }
 export function buildAssembly(preparation: PreparationSelection) {

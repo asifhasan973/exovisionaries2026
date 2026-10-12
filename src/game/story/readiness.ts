@@ -27,7 +27,7 @@ export function missionSignature(progress: StoryProgress, preparation: Preparati
 export function evaluateReadiness(progress: StoryProgress, preparation: PreparationSelection) {
   const shadow = progress.selections.site === 'permanent-shadow';
   const totals = preparationTotals(preparation, shadow);
-  const complete = WORKSHOP_STAGES.every(stage => stageReady(stage, preparation)) && progress.selections.destination === 'moon'
+  const complete = WORKSHOP_STAGES.every(stage => stageReady(stage, preparation, progress.selections.objective)) && progress.selections.destination === 'moon'
     && ['lunar-ice', 'lunar-geology'].includes(progress.selections.objective ?? '') && ['crater-rim', 'permanent-shadow'].includes(progress.selections.site ?? '');
   // Conservative rover-only rehearsal: 15 min of other operations plus drilling at full peak, zero solar.
   // No claim about lander battery sizing, mission duration, temperature survival or orbital mechanics.
@@ -58,7 +58,7 @@ export function packingComplete(progress: StoryProgress, preparation: Preparatio
     && PACKING_ACTIONS.every((action, i) => readiness.packing[i] === action) && readiness.packing.length === 3;
 }
 export function missionActivities(progress: StoryProgress, preparation: PreparationSelection, readiness: ReadinessState): ActivityId[] {
-  const valid = verifiedActivities(preparation);
+  const valid = verifiedActivities(preparation, progress.selections.objective);
   for (const id of CHECK_IDS) { if (!checkAccepted(id, progress, preparation, readiness)) return valid; valid.push(id); }
   if (packingComplete(progress, preparation, readiness)) { valid.push('rocket-pack'); if (readiness.approved?.signature === missionSignature(progress, preparation)) valid.push('launch-ready'); }
   return valid;

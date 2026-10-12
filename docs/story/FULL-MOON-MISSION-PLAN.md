@@ -1,6 +1,6 @@
 # Zero To Beyond — full Moon mission implementation plan
 
-Planning date: 2026-10-12, Asia/Dhaka. Status: Module 1 foundation implemented on `feat/full-moon-foundation`; Modules 2–12 remain pending. See `moon-foundation-review/README.md` for the actual delivery, accounting boundary and verification.
+Planning date: 2026-10-12, Asia/Dhaka. Status: Modules 1–2 implemented on `feat/full-moon-foundation`; Modules 3–12 remain pending. See `moon-foundation-review/README.md` and `moon-preparation-review/README.md` for delivery boundaries and verification.
 
 ## Authority and intended outcome
 

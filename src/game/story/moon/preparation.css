@@ -1,0 +1,103 @@
+.conversation-game .geology-families{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;flex-shrink:0;}
+.geology-families button{display:flex;align-items:center;justify-content:center;gap:4px;border:1px solid #704584;border-radius:9px;background:#281c3d;color:#dfcce8;padding:6px 3px;font:inherit;font-size:11px;min-height:30px;cursor:pointer;}
+.geology-families button[aria-pressed=true]{background:#8d35a8;border-color:#eda0f4;color:#fff;}
+.geology-science-mass{display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:8px 12px;border:1px solid #417e77;border-radius:12px;background:#193d3b;color:#beefe2;font-size:12px;}.geology-science-mass span{margin-left:auto;font-size:10px;}.geology-science-mass.is-over{background:#582335;border-color:#ed6e8b;color:#fff;}
+.conversation-game .crew-main{display:flex;flex-direction:column;min-height:0;gap:12px;max-width:1800px;width:100%;margin:0 auto;flex:1;padding:18px 24px;overflow:hidden;}
+.conversation-game .crew-top{height:88px;flex-shrink:0;}.crew-top .workshop-heading h1{margin:0 0 6px;font-size:clamp(25px,3vw,40px);}.crew-top .workshop-heading p{margin:0;color:#d4bcde;font-size:15px;line-height:1.35;}
+.crew-layout{display:grid;grid-template-columns:minmax(280px,.9fr) minmax(0,1.3fr);gap:16px;flex:1;min-height:0;}
+.crew-roster,.crew-mission-board{min-width:0;min-height:0;border:1px solid #795292;border-radius:22px;background:#1b1330c9;padding:14px;display:flex;flex-direction:column;gap:10px;overflow:hidden;}
+.crew-command{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:14px;background:#263d45;border:1px solid #538c92;color:#c9f0e6;flex-shrink:0;}.crew-command>div{display:flex;flex-direction:column;gap:4px;flex:1;min-width:0;}.crew-command strong{font-size:18px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}.crew-command span{font-size:12px;}.crew-command-icon{padding:7px;border-radius:12px;background:#336270;}
+.crew-candidate-grid{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:9px;min-height:0;flex:1;}
+.crew-candidate{min-height:0;position:relative;border:1px solid #624475;border-radius:16px;background:#30203f;overflow:hidden;}.crew-candidate.is-picked{outline:3px solid #ffdb6f;outline-offset:-3px;background:#453342;}.crew-candidate.is-assigned{border-color:#72d3b4;background:#193f3b;}
+.moon-crew-pick{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;width:100%;height:100%;padding:10px 8px;background:none;border:0;color:#f6ecff;cursor:grab;touch-action:none;user-select:none;}.moon-crew-pick:disabled{cursor:default;}.moon-crew-pick>svg{width:clamp(40px,9vh,88px);height:clamp(40px,9vh,88px);flex-shrink:1;min-height:28px;}.moon-crew-pick strong{font-size:clamp(12px,1.25vw,17px);}.moon-crew-pick span{display:flex;align-items:center;gap:4px;color:#d1bddb;font-size:12px;}.moon-crew-pick small{color:#c3efe0;font-size:11px;}.crew-candidate-info{position:absolute;right:7px;top:7px;z-index:1;background:#211329;border:1px solid #775488;color:#e8c6f4;border-radius:9px;width:26px;height:26px;display:grid;place-items:center;cursor:pointer;}
+.crew-accounts{display:flex;flex-direction:column;gap:6px;flex-shrink:0;color:#cbe6dc;font-size:12px;}.crew-accounts>div{display:flex;align-items:center;gap:6px;}.crew-accounts strong{margin-left:auto;}.crew-accounts button,.crew-platform-info{border:0;background:#402a52;color:#e9d2f4;border-radius:8px;padding:5px;cursor:pointer;}
+.crew-role-slots{display:grid;grid-template-columns:1fr 1fr;gap:10px;flex-shrink:0;}.crew-role{border:1px dashed #9872a7;background:#30203f;border-radius:15px;position:relative;}.crew-role.is-target{border-color:#ffda72;}.crew-role.is-filled{border-style:solid;border-color:#66cbb2;background:#193b37;}
+.moon-crew-seat{display:grid;grid-template-columns:28px 1fr;gap:4px 8px;align-items:center;width:100%;padding:13px;background:none;border:0;color:#f6eaff;text-align:left;min-height:104px;cursor:pointer;}.moon-crew-seat>svg:first-child{grid-row:1/4;color:#e296ed;}.moon-crew-seat>span{font-size:11px;letter-spacing:.5px;text-transform:uppercase;color:#dcaee8;}.moon-crew-seat strong{font-size:15px;}.moon-crew-seat small{color:#c5b4cf;font-size:11px;}.moon-crew-seat>svg:last-child:not(:first-child){position:absolute;right:9px;top:9px;color:#72dfbb;}.moon-crew-seat:disabled{cursor:default;}.crew-unassign{position:absolute;right:6px;bottom:6px;display:grid;place-items:center;padding:4px;background:#203f3b;color:#bce9d7;border:0;border-radius:6px;cursor:pointer;}
+.crew-platform-bay{flex:1;min-height:100px;position:relative;border:1px solid #644377;border-radius:17px;background:radial-gradient(ellipse at 50% 80%,#37355388,transparent 70%);overflow:hidden;}.crew-spacecraft{position:absolute;inset:0;}.crew-spacecraft canvas{display:block;width:100%;height:100%;}.crew-platform-badge{position:absolute;top:12px;left:12px;z-index:1;color:#d0b2e6;font-size:10px;font-weight:800;letter-spacing:1px;}.crew-platform-info{position:absolute;right:9px;top:9px;z-index:1;}.crew-platform-labels{position:absolute;bottom:10px;left:10px;right:10px;display:flex;justify-content:space-between;gap:8px;pointer-events:none;}.crew-platform-labels span{font-size:10px;background:#20152eee;color:#f1dfbc;padding:6px 8px;border-radius:8px;}.crew-model-fallback{position:absolute;inset:0;display:grid;place-content:center;text-align:center;color:#dec3ed;line-height:1.6;font-size:14px;}
+.crew-skills{display:flex;flex-direction:column;gap:5px;flex-shrink:0;background:#2d2243;border-radius:12px;padding:10px;color:#d6eddd;font-size:13px;}.crew-skills>div{display:flex;align-items:center;gap:8px;}.crew-skills small{font-size:10px;color:#b8a3c8;}
+.crew-drag-ghost{position:fixed;z-index:150;transform:translate(-50%,-50%);pointer-events:none;width:120px;border:2px solid #ffdf76;border-radius:18px;background:#322341e8;box-shadow:0 10px 30px #0007;padding:8px;text-align:center;color:#fff;font-size:12px;}.crew-drag-ghost svg{height:70px;width:70px;}.crew-drag-ghost strong{display:block;}
+.crew-main button:focus-visible{outline:3px solid #ffdf76;outline-offset:2px;}
+@media(max-height:760px){.conversation-game .crew-main{padding:10px 18px;gap:8px;}.conversation-game .crew-top{height:70px;}.crew-roster,.crew-mission-board{padding:10px;gap:7px;}.crew-command{padding:7px 10px;}.moon-crew-seat{padding:9px;min-height:88px;}.moon-crew-pick{padding:6px;}.crew-accounts{font-size:11px;gap:4px;}.crew-skills{padding:7px;font-size:12px;}}
+@media(max-width:700px){.conversation-game .crew-main{padding:8px 10px;}.crew-layout{gap:8px;grid-template-columns:minmax(180px,.85fr) minmax(0,1.15fr);}.crew-roster,.crew-mission-board{padding:7px;border-radius:14px;}.crew-candidate-grid{gap:5px;}.moon-crew-pick strong{font-size:11px;}.moon-crew-pick span{font-size:10px;}.crew-role-slots{grid-template-columns:1fr;gap:5px;}.moon-crew-seat{min-height:65px;padding:7px;grid-template-columns:22px 1fr;}.moon-crew-seat strong{font-size:12px;}.moon-crew-seat>span,.moon-crew-seat small{font-size:10px;}.moon-crew-seat>svg:first-child{width:19px;}.crew-accounts strong{font-size:10px;}.crew-command strong{font-size:14px;}.crew-command span{font-size:10px;}.crew-platform-labels span{font-size:8px;padding:4px;}.crew-platform-badge{font-size:8px;}.crew-skills{font-size:10px;}.crew-skills small{font-size:8px;}.crew-top .workshop-heading p{font-size:12px;}}
+@media(max-height:550px){.conversation-game .crew-main{padding:5px 12px;gap:5px;}.conversation-game .crew-top{height:48px;}.crew-top .workshop-heading h1{font-size:22px;}.crew-top .workshop-heading p{font-size:11px;}.crew-layout{gap:8px;grid-template-columns:minmax(250px,.9fr) minmax(0,1.3fr);}.crew-command{padding:4px 8px;}.crew-command-icon{padding:3px;}.crew-command strong{font-size:13px;}.crew-command span{font-size:10px;}.crew-candidate-grid{gap:5px;}.moon-crew-pick{display:grid;grid-template-columns:40px 1fr;gap:2px 4px;padding:6px;text-align:left;}.moon-crew-pick>svg{grid-row:1/4;width:40px;height:40px;}.moon-crew-pick strong{font-size:11px;}.moon-crew-pick span,.moon-crew-pick small{font-size:9px;}.crew-candidate-info{right:3px;top:3px;width:20px;height:20px;}.crew-candidate-info svg{width:12px;}.crew-role-slots{grid-template-columns:1fr 1fr;}.moon-crew-seat{min-height:63px;padding:5px;gap:2px 5px;}.moon-crew-seat strong{font-size:11px;}.moon-crew-seat small,.moon-crew-seat>span{font-size:9px;}.crew-accounts{font-size:10px;}.crew-skills{padding:5px;font-size:10px;}.crew-skills small{display:none;}.crew-platform-badge{font-size:8px;top:7px;left:7px;}.crew-platform-labels{bottom:5px;}.crew-platform-labels span{font-size:8px;padding:3px;}.geology-families button{font-size:9px;min-height:24px;padding:3px;}}
+@media(max-width:440px) and (min-height:551px){.crew-layout{grid-template-columns:1fr;grid-template-rows:1fr 1fr;}.crew-candidate-grid{grid-template-columns:repeat(4,1fr);grid-template-rows:1fr;}.moon-crew-pick>svg{height:35px;width:35px;}.moon-crew-pick span{display:none;}.crew-role-slots{grid-template-columns:1fr 1fr;}.crew-command{padding:5px;}.crew-accounts{flex-direction:row;flex-wrap:wrap;gap:3px 10px;}.crew-accounts>div:last-child{width:100%;}.crew-mission-board{gap:5px;}.crew-platform-bay{min-height:65px;}.crew-skills{font-size:10px;}}
+
+.moon-crew-seat>svg:first-child{width:23px;height:23px;}
+.moon-crew-pick strong{line-height:1.1;}.moon-crew-pick span{line-height:1.2;}.moon-crew-pick small{line-height:1.2;}
+
+@media(max-height:760px) and (min-height:551px) and (min-width:701px){
+ .conversation-game.conversation-game .workshop-top-row .workshop-heading{position:relative;display:block;min-height:0;height:76px;padding-right:84px;}
+ .conversation-game.conversation-game .workshop-top-row .workshop-heading h1{font-size:25px;line-height:1.15;margin:4px 0 5px;}
+ .conversation-game.conversation-game .workshop-top-row .workshop-heading p{font-size:12px;line-height:1.25;}
+ .conversation-game.conversation-game .workshop-top-row .workshop-quick{position:absolute;right:0;top:9px;font-size:11px;padding:7px;gap:4px;min-height:32px;}
+ .conversation-game.conversation-game .workshop-top-row .workshop-quick svg{width:15px;}
+ .conversation-game.conversation-game .is-geology .workshop-pick{grid-template-columns:50px minmax(0,1fr);grid-template-rows:repeat(3,auto);padding:32px 8px 5px;column-gap:6px;row-gap:1px;}
+ .conversation-game.conversation-game .is-geology .workshop-pick>img{width:50px;height:48px;grid-row:1/4;min-height:0;}
+ .conversation-game.conversation-game .is-geology .workshop-pick strong{font-size:13px;line-height:1.15;margin:0;}
+ .conversation-game.conversation-game .is-geology .workshop-part-price{font-size:12px;}
+ .conversation-game.conversation-game .is-geology .workshop-part-spec{font-size:10px;line-height:1.15;margin:0;}
+ .conversation-game.conversation-game .is-geology .workshop-part-action{display:none;}
+ .conversation-game.conversation-game .is-geology .part-comparison{font-size:10px;padding:3px 8px;line-height:1.1;gap:1px;}
+ .conversation-game.conversation-game .is-geology .part-remove{min-height:24px;padding:3px;}
+}
+
+.geology-compact-family{display:none;}
+@media(max-height:550px){
+ .conversation-game.conversation-game.is-mobile-game:has(.workshop-main.is-geology),.conversation-game.conversation-game.is-mobile-game:has(.crew-main){--mobile-top:6px;}
+ .conversation-game.conversation-game .is-geology .geology-families,.conversation-game.conversation-game .is-geology .workshop-category-tabs{display:none;}
+ .geology-compact-family{display:block;flex-shrink:0;}
+ .geology-compact-family select{width:100%;height:28px;min-width:0;background:#4a2861;color:#f5e2ff;border:1px solid #ae75c4;border-radius:8px;padding:2px 6px;font:inherit;font-size:12px;}
+ .conversation-game.conversation-game .is-geology .workshop-pick{grid-template-columns:48px minmax(0,1fr);grid-template-rows:repeat(3,auto);padding:23px 6px 3px;column-gap:5px;row-gap:0;}
+ .conversation-game.conversation-game .is-geology .workshop-pick>img{width:48px;height:43px;grid-row:1/4;min-height:0;}
+ .conversation-game.conversation-game .is-geology .workshop-pick strong{font-size:12px;line-height:1.1;}
+ .conversation-game.conversation-game .is-geology .workshop-part-price{font-size:11px;line-height:1.1;}
+ .conversation-game.conversation-game .is-geology .workshop-part-spec{font-size:10px;line-height:1.1;}
+ .conversation-game.conversation-game .is-geology .workshop-part-action{display:none;}
+ .conversation-game.conversation-game .is-geology .part-comparison{font-size:10px;padding:2px 6px;line-height:1.1;gap:1px;}
+ .conversation-game.conversation-game .is-geology .part-remove{min-height:23px;padding:3px;font-size:11px;}
+ .conversation-game.conversation-game .is-geology .workshop-depth{padding:5px;gap:3px;justify-content:center;flex:1;min-height:0;}
+ .conversation-game.conversation-game .is-geology .workshop-depth label{font-size:13px;}
+ .conversation-game.conversation-game .is-geology .workshop-depth strong{font-size:14px;}
+ .conversation-game.conversation-game .is-geology .workshop-depth p{font-size:11px;line-height:1.15;margin:0;}
+ .conversation-game.conversation-game .is-geology .workshop-depth input{margin:5px 0;}
+ .conversation-game.conversation-game .is-geology .workshop-depth>div{font-size:10px;}
+ .conversation-game.conversation-game.is-mobile-game .is-geology .workshop-quick{right:110px;top:0;}
+ .conversation-game.conversation-game .is-geology .geology-science-mass{padding:3px 8px;font-size:10px;}
+ .conversation-game.conversation-game .is-geology .geology-science-mass span{display:none;}
+}
+@media(max-height:550px){
+ .conversation-game.conversation-game .workshop-main.is-geology .workshop-depth{padding:5px;gap:3px;justify-content:flex-start;}
+ .conversation-game.conversation-game .workshop-main.is-geology .workshop-depth label{font-size:12px;min-height:32px;line-height:1.1;}
+ .conversation-game.conversation-game .workshop-main.is-geology .workshop-depth input{min-height:24px;height:24px;margin:2px 0;}
+ .conversation-game.conversation-game .workshop-main.is-geology .workshop-depth p{font-size:10px;line-height:1.1;margin:0;}
+ .conversation-game.conversation-game .workshop-main.is-geology .workshop-depth p:last-child{display:none;}
+ .conversation-game.conversation-game .workshop-main.is-geology .workshop-depth>div{line-height:1;font-size:10px;}
+}
+@media(max-height:550px){
+ .conversation-game.conversation-game .workshop-main.is-geology .workshop-part .part-badge,.conversation-game.conversation-game .workshop-main.is-geology .workshop-part-top>span{display:none;}
+ .conversation-game.conversation-game .workshop-main.is-geology .workshop-pick{padding:5px 6px;grid-template-columns:35px minmax(0,1fr);grid-template-rows:auto auto;gap:1px 5px;}
+ .conversation-game.conversation-game .workshop-main.is-geology .workshop-pick>img{width:35px;height:34px;grid-row:1/3;}
+ .conversation-game.conversation-game .workshop-main.is-geology .workshop-pick strong{font-size:11px;line-height:1.1;padding-right:20px;}
+ .conversation-game.conversation-game .workshop-main.is-geology .workshop-part-price{font-size:10px;line-height:1.1;}
+ .conversation-game.conversation-game .workshop-main.is-geology .workshop-part-spec{display:none;}
+ .conversation-game.conversation-game .workshop-main.is-geology .workshop-part-top{top:4px;right:4px;left:auto;}
+}
+@media(max-height:550px){
+ .conversation-game.conversation-game .crew-top{height:28px;display:block;}
+ .conversation-game.conversation-game .crew-top .workshop-engineer{display:none;}
+ .conversation-game.conversation-game .crew-top .workshop-heading{height:28px;padding:0;}
+ .conversation-game.conversation-game .crew-top .workshop-heading h1{font-size:20px;line-height:1.1;margin:0;}
+ .conversation-game.conversation-game .crew-top .workshop-heading p{display:none;}
+}
+@media(max-height:400px){
+ .moon-crew-pick>span,.moon-crew-pick>small{display:none;}
+ .moon-crew-pick{grid-template-columns:32px minmax(0,1fr);grid-template-rows:1fr;padding:5px;}
+ .moon-crew-pick>svg{grid-row:auto;width:32px;height:32px;}
+ .moon-crew-pick strong{font-size:11px;line-height:1.15;padding-right:15px;}
+ .crew-candidate-info{width:24px;height:24px;}
+ .crew-command{gap:7px;}
+ .crew-platform-bay{min-height:55px;}
+ .crew-skills{line-height:1.1;gap:2px;}
+ .crew-skills>div{min-height:15px;}
+ .crew-accounts{line-height:1.1;}
+}

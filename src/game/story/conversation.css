@@ -89,3 +89,5 @@
   .conversation-exit{font-size:12px;}.conversation-preview-badge{font-size:10px;}
 }
 @media(prefers-reduced-motion:reduce){.conversation-game *{animation:none!important;transition:none!important;}}
+
+.crew-loading{display:grid;place-content:center;min-height:100dvh;background:#121027;color:#eedbff;font-size:18px;}

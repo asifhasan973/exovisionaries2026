@@ -3,6 +3,8 @@ import type { DesignCategory, PreparationSelection, ScriptComponent } from './de
 import type { ActivityId, StoryStepId } from './types.ts';
 import { MOON_RULES } from './moon/rules.ts';
 import { drillDurationSeconds, energyWh, operatingPower } from './moon/resources.ts';
+import { GEOLOGY_PARTS, geologyMissing } from './moon/geology.ts';
+import type { ScienceFamily } from './moon/geology.ts';
 
 export const NASA_INSTRUMENTS = 'https://science.nasa.gov/mission/viper/rover-and-instruments/';
 export const NASA_OPERATIONS = 'https://science.nasa.gov/mission/viper/lunar-operations/';
@@ -10,6 +12,8 @@ export interface WorkshopPart extends Omit<ScriptComponent, 'massKg' | 'credits'
   massKg: number; credits: number; nominalPowerW: number;
   description: string; assumption?: string; source?: string;
   capacityWh?: number; dischargeLimitW?: number;
+  objective?: 'lunar-ice' | 'lunar-geology'; scienceFamily?: ScienceFamily; replaceGroup?: string;
+  tier?: 'basic' | 'balanced' | 'advanced'; detailLevel?: number; capability?: string; needsSample?: boolean;
 }
 // The source catalogue stays untouched. These are explicit authored balancing rules,
 // never NASA mass measurements, vendor prices or certification of a lunar mission.
@@ -39,10 +43,21 @@ const extras: Record<string, Partial<WorkshopPart>> = {
   'basic-communication': { massKg: 2, nominalPowerW: 8, description: 'A simple rover radio link to the lander.', assumption: '2 kg and 8 W are game estimates. This is the rover radio, separate from the mandatory lander antenna.' },
   'high-gain-communication': { massKg: 4, nominalPowerW: 15, description: 'A stronger rover radio link for science data.', assumption: '4 kg and 15 W are game estimates. Terrain can still block a radio link.' },
 };
-export const WORKSHOP_PARTS: readonly WorkshopPart[] = SCRIPT_COMPONENTS.map(part => ({
+export const WORKSHOP_PARTS: readonly WorkshopPart[] = [...SCRIPT_COMPONENTS.map(part => ({
   ...part, massKg: part.massKg ?? 0, credits: part.credits ?? 0, nominalPowerW: part.nominalPowerW ?? 0,
   description: '', ...extras[part.id],
-}));
+})), ...GEOLOGY_PARTS];
+export function partsForObjective(objective: string = 'lunar-ice') {
+  return WORKSHOP_PARTS.filter(part => part.category !== 'science' || (objective === 'lunar-geology' ? part.objective === objective : !part.objective));
+}
+export function selectedDrill(preparation: PreparationSelection) { return preparation.sciencePartIds.map(partById).find(part => part?.id === 'trident' || part?.id.startsWith('geo-drill-')); }
+export function normalizeObjective(preparation: PreparationSelection, objective: string): PreparationSelection {
+  const allowed = new Set(partsForObjective(objective).map(part => part.id));
+  const sciencePartIds = preparation.sciencePartIds.filter(id => allowed.has(id));
+  if (sciencePartIds.length === preparation.sciencePartIds.length) return preparation;
+  const next = { ...preparation, sciencePartIds };
+  return { ...next, drillDepthCm: selectedDrill(next) ? next.drillDepthCm : null };
+}
 export const partById = (id: string | null | undefined) => WORKSHOP_PARTS.find(part => part.id === id);
 export const WORKSHOP_STAGES = ['lander-build', 'rover-select', 'science-build', 'power-build', 'survival-build'] as const;
 export type WorkshopStage = typeof WORKSHOP_STAGES[number];
@@ -62,7 +77,10 @@ export function installPart(current: PreparationSelection, id: string): Preparat
   if (part.category === 'lander' || part.category === 'science') {
     const key = part.category === 'lander' ? 'landerPartIds' : 'sciencePartIds';
     if (current[key].includes(id)) return current;
-    return { ...current, [key]: [...current[key], id], drillDepthCm: id === 'trident' ? current.drillDepthCm ?? 20 : current.drillDepthCm };
+    const existing = part.replaceGroup ? current[key].filter(value => partById(value)?.replaceGroup !== part.replaceGroup) : current[key];
+    const next = { ...current, [key]: [...existing, id] };
+    const drill = selectedDrill(next);
+    return { ...next, drillDepthCm: drill ? Math.min(current.drillDepthCm ?? 20, drill.maxDepthCm ?? 100) : null };
   }
   const key = singleFields[part.category];
   return current[key] === id ? current : { ...current, [key]: id };
@@ -72,7 +90,8 @@ export function removePart(current: PreparationSelection, id: string): Preparati
   const part = partById(id)!;
   if (part.category === 'lander' || part.category === 'science') {
     const key = part.category === 'lander' ? 'landerPartIds' : 'sciencePartIds';
-    return { ...current, [key]: current[key].filter(value => value !== id), drillDepthCm: id === 'trident' ? null : current.drillDepthCm };
+    const next = { ...current, [key]: current[key].filter(value => value !== id) };
+    return { ...next, drillDepthCm: selectedDrill(next) ? current.drillDepthCm : null };
   }
   return { ...current, [singleFields[part.category]]: null };
 }
@@ -88,24 +107,29 @@ export function restorePreparation(raw: unknown): PreparationSelection {
     const value = saved[field];
     if (typeof value === 'string' && partById(value)?.category === category) clean[field as typeof singleFields[keyof typeof singleFields]] = value;
   }
-  if (clean.sciencePartIds.includes('trident')) {
-    clean.drillDepthCm = typeof saved.drillDepthCm === 'number' && SCRIPT_DRILL_DEPTHS_CM.some(depth => depth === saved.drillDepthCm) ? saved.drillDepthCm : 20;
+  // Keep one upgrade per geology family, even for hand-edited or older saves.
+  const canonicalScience = clean.sciencePartIds.reduce((state,id) => installPart(state,id), createPreparationSelection());
+  clean.sciencePartIds = canonicalScience.sciencePartIds;
+  const drill = selectedDrill(clean);
+  if (drill) {
+    clean.drillDepthCm = typeof saved.drillDepthCm === 'number' && SCRIPT_DRILL_DEPTHS_CM.some(depth => depth === saved.drillDepthCm) ? Math.min(saved.drillDepthCm,drill.maxDepthCm ?? 100) : 20;
   }
   return clean;
 }
-export function stageReady(id: StoryStepId, preparation: PreparationSelection): boolean {
+export function stageReady(id: StoryStepId, preparation: PreparationSelection, objective: string = 'lunar-ice'): boolean {
   switch (id) {
     case 'resource-limits': return true;
     case 'lander-build': return WORKSHOP_PARTS.filter(p => p.category === 'lander').every(p => preparation.landerPartIds.includes(p.id));
     case 'rover-select': return !!preparation.roverId;
-    case 'science-build': return ['nss', 'nirvss', 'trident'].every(id => preparation.sciencePartIds.includes(id)) && preparation.drillDepthCm !== null;
+    case 'science-build': return objective === 'lunar-geology' ? !geologyMissing(preparation.sciencePartIds).length && (!selectedDrill(preparation) || preparation.drillDepthCm !== null)
+      : ['nss', 'nirvss', 'trident'].every(id => preparation.sciencePartIds.includes(id)) && preparation.drillDepthCm !== null;
     case 'power-build': return !!preparation.solarId && !!preparation.batteryId;
     case 'survival-build': return !!preparation.navigationId && !!preparation.thermalId && !!preparation.communicationId;
     default: return false; // Approval and packing belong to Module 6.
   }
 }
-export function verifiedActivities(preparation: PreparationSelection): ActivityId[] {
-  return ['resource-limits' as const, ...WORKSHOP_STAGES].filter(id => stageReady(id, preparation));
+export function verifiedActivities(preparation: PreparationSelection, objective: string = 'lunar-ice'): ActivityId[] {
+  return ['resource-limits' as const, ...WORKSHOP_STAGES].filter(id => stageReady(id, preparation, objective));
 }
 /** Potential points only: no science has been conducted in the workshop. */
 export function drillPotential(depth: number | null): number {
@@ -119,7 +143,7 @@ export function drillPotential(depth: number | null): number {
 export function preparationTotals(preparation: PreparationSelection, shadow = false) {
   const parts = installedIds(preparation).map(partById).filter((p): p is WorkshopPart => !!p);
   const normalW = operatingPower(parts, 'rehearsal').loadW;
-  const drill = parts.find(p => p.id === 'trident');
+  const drill = selectedDrill(preparation);
   const peakW = operatingPower(parts, 'rehearsal-drill').loadW;
   const solarW = operatingPower(parts, 'rehearsal', shadow ? 0 : 1).solarW;
   const batteryWh = partById(preparation.batteryId)?.capacityWh ?? 0;
@@ -135,11 +159,14 @@ export function preparationTotals(preparation: PreparationSelection, shadow = fa
     // 20% energy reserve; ideal arithmetic, not flight-qualified runtime.
     batteryMinutes: batteryWh && deficitW ? Math.floor(batteryWh * (1 - MOON_RULES.reserveFraction) / deficitW * 60) : null,
     potentialScience: parts.reduce((sum, p) => sum + (p.id === 'trident' ? drillPotential(preparation.drillDepthCm) : p.scienceBonus ?? 0), 0),
+    scienceMassKg: parts.filter(part => part.category === 'science').reduce((sum,part) => sum + part.massKg,0),
     spentScience: SCRIPT_RESOURCES.initialScienceScore,
   };
 }
-export function quickPreparation(): PreparationSelection {
+export function quickPreparation(objective: string = 'lunar-ice'): PreparationSelection {
   const ids = ['lander-body', 'landing-engines', 'landing-radar', 'navigation-computer', 'lander-antenna', 'landing-cameras',
     'polar-rover', 'nss', 'nirvss', 'trident', 'stereo-hazard-camera', 'efficient-solar', 'medium-battery', 'basic-thermal', 'basic-communication'];
-  return ids.reduce(installPart, createPreparationSelection());
+  const plan = objective === 'lunar-geology' ? ids.filter(id => !['nss','nirvss','trident'].includes(id)).map(id => id === 'polar-rover' ? 'basic-rover' : id)
+    .concat(['geo-camera-basic','geo-ir-basic','geo-xrf-basic','geo-drill-basic']) : ids;
+  return plan.reduce(installPart, createPreparationSelection());
 }

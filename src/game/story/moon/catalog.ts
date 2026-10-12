@@ -9,32 +9,17 @@ export interface MoonPart extends ElectricalPart {
   name: string; massKg: number; credits: number; potentialSP: number;
   objectives: readonly MoonObjective[]; family: string; tier?: 'basic' | 'balanced' | 'advanced';
   needsSample?: boolean;
+  replaceGroup?: string;
   provenance: { values: DataOrigin; reference: string; assumptions: readonly string[]; capabilitySource?: string };
 }
 
-const families = [
-  ['ir', 'Infrared spectrometer', [[8,60,20,8],[12,100,35,15],[16,160,50,22]], false],
-  ['xrf', 'XRF spectrometer', [[5,45,15,6],[8,80,25,12],[12,130,40,18]], false],
-  ['xrd', 'X-ray diffraction', [[7,75,25,10],[10,120,40,18],[14,190,60,26]], true],
-  ['seismometer', 'Seismometer', [[4,50,4,8],[6,90,8,16],[9,150,12,23]], false],
-  ['gpr', 'Ground-penetrating radar', [[12,90,35,11],[18,150,60,20],[25,230,90,29]], false],
-  ['camera', 'Science camera', [[2,20,5,4],[4,40,12,8],[7,75,20,13]], false],
-  ['drill', 'Drill and sample collector', [[15,100,30,10],[25,170,50,18],[35,260,80,27]], false],
-] as const;
-const tiers = ['basic', 'balanced', 'advanced'] as const;
 const shared = WORKSHOP_PARTS.map((part): MoonPart => ({
-  ...part, potentialSP: part.scienceBonus ?? 0, family: part.category,
-  objectives: part.category === 'science' ? ['lunar-ice'] : ['lunar-ice', 'lunar-geology'],
-  provenance: { values: part.specGaps?.length ? 'game-estimate' : 'script-game-value', reference: MOON_SOURCES.script,
+  ...part, potentialSP: part.scienceBonus ?? 0, family: part.id.startsWith('geo-drill-') ? 'drill' : part.scienceFamily ?? part.category,
+  objectives: part.category === 'science' ? [part.objective ?? 'lunar-ice'] : ['lunar-ice', 'lunar-geology'],
+  provenance: { values: part.specGaps?.length || part.id === 'geo-scoop-basic' ? 'game-estimate' : 'script-game-value', reference: MOON_SOURCES.script,
     capabilitySource: part.source, assumptions: [part.assumption ?? 'Numeric values are illustrative game allocations, not measured flight hardware.'] },
 }));
-const geology = families.flatMap(([family, name, rows, needsSample]) => rows.map(([massKg, credits, nominalPowerW, potentialSP], index): MoonPart => ({
-  id: `geo-${family}-${tiers[index]}`, name: `${tiers[index]} ${name}`, family, tier: tiers[index],
-  category: 'science', massKg, credits, nominalPowerW, potentialSP, needsSample, objectives: ['lunar-geology'],
-  provenance: { values: 'script-game-value', reference: MOON_SOURCES.script,
-    assumptions: ['Tier values and maximum potential points are authored game upgrades. Science is earned only from successful observations.'] },
-})));
-export const MOON_PARTS: readonly MoonPart[] = [...shared, ...geology];
+export const MOON_PARTS: readonly MoonPart[] = shared;
 export const moonPart = (id: string) => MOON_PARTS.find(part => part.id === id);
 
 export interface EquipmentReport {
@@ -50,7 +35,7 @@ export function equipmentReport(ids: readonly string[], objective: MoonObjective
     seen.add(id);
     if (!part.objectives.includes(objective)) errors.push(`Wrong objective: ${id}`);
     const single = part.tier || !['lander', 'science'].includes(part.category);
-    const family = part.tier ? `geo-${part.family}` : part.category;
+    const family = part.replaceGroup ?? (part.tier ? `geo-${part.family}` : part.category);
     if (single && familiesSeen.has(family)) errors.push(`Choose one option for ${family}`);
     if (single) familiesSeen.add(family);
     parts.push(part);
@@ -64,9 +49,9 @@ export function equipmentReport(ids: readonly string[], objective: MoonObjective
   return { parts, credits, massKg, scienceMassKg, potentialSP: parts.reduce((sum, part) => sum + part.potentialSP, 0), errors };
 }
 
-export function equipmentIds(preparation: PreparationSelection, objective: MoonObjective, geologyIds: readonly string[]) {
+export function equipmentIds(preparation: PreparationSelection, objective: MoonObjective, _legacyGeologyIds: readonly string[] = []) {
   const installed = installedIds(preparation);
-  return objective === 'lunar-geology' ? [...installed.filter(id => moonPart(id)?.category !== 'science'), ...geologyIds] : installed;
+  return installed.filter(id => moonPart(id)?.objectives.includes(objective));
 }
 export function missingEquipment(report: EquipmentReport, objective: MoonObjective) {
   const ids = new Set(report.parts.map(part => part.id));
@@ -79,7 +64,7 @@ export function missingEquipment(report: EquipmentReport, objective: MoonObjecti
   } else {
     if (!report.parts.some(part => part.id.startsWith('geo-camera-'))) missing.push('geology-camera');
     if (!report.parts.some(part => ['ir', 'xrf', 'xrd'].includes(part.family) && part.tier)) missing.push('geology-analysis');
-    if (report.parts.some(part => part.needsSample) && !report.parts.some(part => part.family === 'drill' && part.tier)) missing.push('sample-collector');
+    if (!report.parts.some(part => ['drill','sample'].includes(part.family) && part.tier)) missing.push('sample-collector');
   }
   return missing;
 }
@@ -108,4 +93,10 @@ export function crewReport(crew: CrewAssignment) {
     credits: members.reduce((sum, person) => sum + (person?.credits ?? 0), 0),
     supportUnits: members.reduce((sum, person) => sum + (person?.supportUnits ?? 0), 0),
     account: 'crew-allocation' as const, surface: [crew.commander, crew.scientist], orbit: crew.support };
+}
+/** Bounded authored abilities; they never override physical resource limits or scientific evidence. */
+export function crewCapabilities(crew: CrewAssignment) {
+  return { driveLoadMultiplier: crew.support === 'robotics-specialist' ? .9 as const : 1 as const,
+    repairAdvice: crew.support === 'systems-engineer' ? ['power','thermal','communication'] as const : ['communication'] as const,
+    interpretation: crew.scientist === 'geologist' ? 'minerals' as const : crew.scientist === 'astrobiologist' ? 'volatiles' as const : null };
 }

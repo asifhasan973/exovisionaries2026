@@ -1,5 +1,5 @@
 import { repairApplied } from './repairGuidance.ts';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { PlayerCharacterProvider } from './playerCharacter.tsx';
 import type { PlayerGender } from './types.ts';
 import { GameSettingsProvider } from './GameSettings.tsx';
@@ -22,6 +22,9 @@ import { LearningProvider } from './Learning.tsx';
 import { GestureGuide } from './GestureGuide.tsx';
 import { MobileGameProvider } from './MobileGame.tsx';
 import { trialActive } from './trial.ts';
+import { GameInfo } from './GameInfo.tsx';
+import type { MoonObjective } from './moon/catalog.ts';
+const CrewScreen = lazy(() => import('./moon/CrewScreen.tsx').then(module => ({ default: module.CrewScreen })));
 
 /** Exact dialogue and a real preparation manifest share one saved mission. */
 export default function ExactStory() {
@@ -36,6 +39,7 @@ export default function ExactStory() {
   const [autoplay, setAutoplay] = useState(true);
   const [restart, setRestart] = useState(false);
   const [demo, setDemo] = useState(false);
+  const [demoGender, setDemoGender] = useState<PlayerGender | null>(null);
   const normalMission = useRef(mission);
   const step = getStoryStep(progress.stepId);
   useEffect(() => { window.scrollTo({ top: 0, behavior: 'instant' }); }, [progress.stepId, home]);
@@ -69,7 +73,7 @@ export default function ExactStory() {
     pausedFromMenu.current = { flight: false, trial: false };
   }, [dispatch]);
   const reset = () => { setAutoBuilding(false); setAutoplay(true); setMission(createWorkshopSession(createStoryProgress())); setDemo(false); setRestart(false); setHome(false); };
-  const startDemo = (gender: PlayerGender = progress.playerGender) => { setAutoBuilding(false); normalMission.current = mission; setDemo(true); setMission(createJudgeMission(gender)); setHome(false); };
+  const startDemo = (objective: MoonObjective) => { setAutoBuilding(false); normalMission.current = mission; setDemo(true); setMission(createJudgeMission(demoGender ?? progress.playerGender, objective)); setDemoGender(null); setHome(false); };
   const goHome = () => { setAutoBuilding(false); if (demo) { setMission(normalMission.current); setDemo(false); } setHome(true); };
   const requestRestart = () => { if (progress.playerName) setRestart(true); else reset(); };
   const back = () => { setAutoBuilding(false);
@@ -91,8 +95,8 @@ export default function ExactStory() {
     </>,
   };
   let screen;
-  if (home) screen = <MissionHome progress={progress} onContinue={() => { setAutoplay(true); setHome(false); }} onBack={() => setHome(false)} onRestart={requestRestart} onDemo={() => startDemo()} frame={frame} />;
-  else if (step.kind === 'name') screen = <NameScreen playerName={progress.playerName} playerGender={progress.playerGender} frame={frame} onBack={back} onDemo={startDemo}
+  if (home) screen = <MissionHome progress={progress} onContinue={() => { setAutoplay(true); setHome(false); }} onBack={() => setHome(false)} onRestart={requestRestart} onDemo={() => setDemoGender(progress.playerGender)} frame={frame} />;
+  else if (step.kind === 'name') screen = <NameScreen playerName={progress.playerName} playerGender={progress.playerGender} frame={frame} onBack={back} onDemo={gender => setDemoGender(gender)}
     onSubmit={(name, gender) => { setAutoplay(true); setMission(current => {
       if (current.progress.stepId !== 'player-name') return current;
       return reduceMission(reduceMission(current, { type: 'set-name', name, gender }), { type: 'next' });
@@ -109,13 +113,15 @@ export default function ExactStory() {
       return step.choiceKey === 'destination' && selected.progress.selections.destination === 'moon'
         ? reduceMission(selected, { type: 'next' }) : selected;
     }); }} />;
+  else if (step.module === 8) screen = <Suspense fallback={<div className="crew-loading" role="status">Opening crew selection…</div>}><CrewScreen key={progress.stepId} session={mission} dispatch={dispatch} onBack={back} frame={frame} /></Suspense>;
   else if (step.module === 7) screen = <FlightScreen session={mission} dispatch={dispatch} onBack={back} frame={frame} />;
   else if (step.module === 6) screen = <ReadinessScreen key={progress.stepId} session={mission} dispatch={dispatch} onBack={back} frame={frame} />;
   else screen = <WorkshopScreen key={progress.stepId} session={mission} dispatch={dispatch} onBack={back} frame={frame}
     autoBuilding={autoBuilding} onStopAutoBuild={() => setAutoBuilding(false)} onAutoBuild={() => { dispatch({ type: 'begin-auto-build' }); setAutoBuilding(true); }} />;
   return <PlayerCharacterProvider value={progress.playerGender}><GameSettingsProvider voiceEnabled={voiceEnabled} onToggleVoice={() => setVoiceEnabled(value => !value)} onRestart={requestRestart}><LearningProvider>
     <MobileGameProvider active={!home} voiceEnabled={voiceEnabled} onToggleVoice={() => setVoiceEnabled(value => !value)} onHome={goHome} onPause={pauseGame} onResume={resumeGame}>
-      {screen}<GestureGuide key={`${progress.stepId}-${home}`} step={progress.stepId} repair={mission.repair && !repairApplied(mission.repair, mission.preparation) ? mission.repair : undefined} hidden={home || restart || autoBuilding} /><RestartStoryDialog open={restart} onClose={() => setRestart(false)} onConfirm={reset} />
+      {screen}<GestureGuide key={`${progress.stepId}-${home}`} step={progress.stepId} repair={mission.repair && !repairApplied(mission.repair, mission.preparation) ? mission.repair : undefined} hidden={home || restart || autoBuilding || demoGender !== null} /><RestartStoryDialog open={restart} onClose={() => setRestart(false)} onConfirm={reset} />
+    {demoGender !== null ? <GameInfo title="Choose a demo" onClose={() => setDemoGender(null)} pages={[<div key="objective"><p>Try a prepared kit, then choose your crew.</p><button className="conversation-next" onClick={() => startDemo('lunar-ice')}>Ice Explorer</button><button className="conversation-next" onClick={() => startDemo('lunar-geology')}>Geology Explorer</button><p>Your saved game stays safe.</p></div>]} /> : null}
     </MobileGameProvider>
   </LearningProvider></GameSettingsProvider></PlayerCharacterProvider>;
 }
