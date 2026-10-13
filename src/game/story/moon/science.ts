@@ -274,7 +274,7 @@ function startRecovery(s:ScienceState,surface:SurfaceState,kind:'brush'|'calibra
   const h=s.hazards,base=chooseIncident(h,h.pending??(kind==='wait'?'radiation':'dust'),kind==='brush'?'brush':kind==='calibrate'?'calibrate':'shelter-wait',surface.elapsedSeconds);
   return {science:{...s,phase:'recovering' as const,frame:0,paused:false,hazards:{...base,roverParked:kind==='brush'?false:base.roverParked,crewChecked:kind==='brush'?false:base.crewChecked,pending:null,recovery:kind,recoveryFrame:0,recoverySeconds:seconds,resumePhase:s.phase,resumeFrame:s.frame,feedback:kind==='brush'?'brush' as const:kind==='calibrate'?'calibration' as const:'wait' as const}},surface:kind==='brush'?{...surface,crewSheltered:false}:surface};
 }
-function applyIncident(s:ScienceState,surface:SurfaceState,action:IncidentAction,moon:MoonSession,prep:PreparationSelection){
+function applyIncident(s:ScienceState,surface:SurfaceState,action:IncidentAction,moon:MoonSession,prep:PreparationSelection):{science:ScienceState;surface:SurfaceState}{
   const h=s.hazards,kind=h.pending,context={...moon,surface,science:s},point=surfacePosition(surface),linked=surfaceLink(point.x,point.z,prep)==='connected',same={science:s,surface};
   const feedback=(key:keyof typeof import('./incidentCopy.ts').INCIDENT_LINES)=>({...same,science:{...s,hazards:{...h,feedback:key}}});
   if(action==='eva')return feedback(h.evaBlocked?'evaBlocked':'kit');

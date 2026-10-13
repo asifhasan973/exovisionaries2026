@@ -88,7 +88,7 @@ export function routeReport(s:SurfaceState,id:SurfaceEdgeId,moon:MoonSession,pre
   const remainingCabin=(account.platformEnergyWh??0)-PLATFORM_MODEL.lifeSupportLoadW*futureSeconds/3600;
   const returnDays=TRANSFER_MODEL.returnDays+PLATFORM_MODEL.contingencyDays;
   const required=wh+(home?.wh??Infinity)+capacity*SURFACE_MODEL.baseReserve;
-  const reason=hardwareReason(edge,prep)??(!p.peakOK?'reserve':s.coldSeconds+cold>coldLimit?'thermal':autonomous&&!s.autonomyArmed?'autonomy':!home||s.batteryWh+1e-6<required||remainingSupport<3*returnDays||remainingCabin<PLATFORM_MODEL.lifeSupportLoadW*returnDays*24?'reserve':null);
+  const reason:SurfaceState['feedback']=hardwareReason(edge,prep)??(!p.peakOK?'reserve':s.coldSeconds+cold>coldLimit?'thermal':autonomous&&!s.autonomyArmed?'autonomy':!home||s.batteryWh+1e-6<required||remainingSupport<3*returnDays||remainingCabin<PLATFORM_MODEL.lifeSupportLoadW*returnDays*24?'reserve':null);
   return {leg,legs,home,wh,seconds,required,autonomous,reason,feasible:!reason,to};
 }
 export function crewTimeOK(s:SurfaceState,moon:MoonSession,seconds:number){const r=surfaceResources(moon,s),days=TRANSFER_MODEL.returnDays+PLATFORM_MODEL.contingencyDays;return (r.supportUnitsRemaining??0)-3*seconds/86400>=3*days&&(r.platformEnergyWh??0)-PLATFORM_MODEL.lifeSupportLoadW*seconds/3600>=PLATFORM_MODEL.lifeSupportLoadW*days*24;}

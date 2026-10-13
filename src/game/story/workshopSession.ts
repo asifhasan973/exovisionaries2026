@@ -170,7 +170,7 @@ function reduceWorkshopMission(session: WorkshopSession, event: WorkshopEvent): 
   if (event.type === 'quick-build') {
     if (!stage && step.id !== 'resource-limits') return session;
     const updated = withPreparation(session, quickPreparation(objective));
-    let progress = { ...updated.progress, assistance: [...new Set([...(updated.progress.assistance ?? []), 'auto-build' as const])], completedActivities: verifiedActivities(updated.preparation, objective) };
+    let progress: StoryProgress = { ...updated.progress, assistance: [...new Set([...(updated.progress.assistance ?? []), 'auto-build' as const])], completedActivities: verifiedActivities(updated.preparation, objective) };
     // Traverse real gates, retaining Back history. Leave crew assignment to the player.
     while (progress.stepId !== 'crew-selection') {
       const next = reduceStoryProgress(progress, { type: getStoryStep(progress.stepId).kind === 'conversation' ? 'skip-briefing' : 'next' });
