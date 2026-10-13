@@ -1,3 +1,5 @@
+import {GEOLOGY_LINES,GEOLOGY_SITE_BRIEFING} from './moon/geologyCopy.ts';
+import {RETURN_LINES} from './moon/returnCopy.ts';
 import { CHECK_LINES } from './moon/checkCopy.ts';
 import { CREW_ADVICE, CREW_BRIEFING } from './moon/crewDialogue.ts';
 import { STORY_DIALOGUE } from './dialogue.ts';
@@ -47,6 +49,7 @@ export function pickEngineerReply(reaction: EngineerReaction, previousId?: strin
   return pool[Math.min(pool.length - 1, Math.max(0, Math.floor(random() * pool.length)))];
 }
 export const FLIGHT_LINES = {
+  'flight-crewed-orbit-burn':'Crew spacecraft uncovered. Next stop: Earth orbit!',
   'flight-ready-guided': 'All systems go! We’ll pause when it’s your turn.',
   'flight-ready-challenge': 'Release when the band turns green. Ready?',
   'flight-retry': 'Missed it? Retry this stage. You’ve got this!',
@@ -80,7 +83,21 @@ export const REPAIR_LINES = {
   'repair-remove-budget': 'Leave this extra tool behind to save credits.',
   'repair-remove-peak': 'Leave this extra tool behind so we use less power at once.',
 } as const;
+import { INCIDENT_LINES } from './moon/incidentCopy.ts';
+import { SCIENCE_LINES } from './moon/scienceCopy.ts';
+import { SURFACE_LINES } from './moon/surfaceCopy.ts';
+import { LANDING_LINES } from './moon/landingCopy.ts';
+import { JOURNEY_LINES } from './moon/journeyCopy.ts';
 export const VOICE_CLIPS: Record<string, { text: string; character: StoryCharacterId }> = Object.fromEntries([
+  ...GEOLOGY_SITE_BRIEFING.map(line=>[line.id,{text:line.text,character:'commander' as const}]),
+  ['geo-scout',{text:'Visit the rock patch, then return to Base.',character:'commander' as const}],
+  ...Object.entries(GEOLOGY_LINES).map(([id,text])=>[`geo-${id}`,{text,character:'commander' as const}]),
+  ...Object.entries(RETURN_LINES).map(([id,text])=>[`return-${id}`,{text,character:'commander' as const}]),
+  ...Object.entries(INCIDENT_LINES).map(([id,text])=>[`incident-${id}`,{text,character:'commander' as const}]),
+  ...Object.entries(SCIENCE_LINES).map(([id,text])=>[`science-${id}`,{text,character:'commander' as const}]),
+  ...Object.entries(SURFACE_LINES).map(([id,text])=>[`surface-${id}`,{text,character:'commander' as const}]),
+  ...Object.entries(LANDING_LINES).map(([id,text])=>[`landing-${id}`,{text,character:'commander' as const}]),
+  ...Object.entries(JOURNEY_LINES).map(([id,text])=>[`journey-${id}`,{text,character:'commander' as const}]),
   ...Object.entries(CHECK_LINES).map(([id,text]) => [`check-${id}`, {text,character:'commander' as const}]),
   ...CREW_BRIEFING.map(line => [line.id, { text: line.text, character: line.speaker.character }]),
   ...Object.entries(CREW_ADVICE).map(([id,text]) => [`crew-advice-${id}`, {text,character:'commander' as const}]),

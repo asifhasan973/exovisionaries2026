@@ -5,6 +5,7 @@ import './viewport.css';
 import { SettingsButton } from './GameSettings.tsx';
 import { HintButton, LearningControls } from './Learning.tsx';
 import { useMobileGame } from './mobileGameContext.ts';
+import { SourcesButton } from './MissionSources.tsx';
 
 export interface StoryShellProps {
   children: ReactNode;
@@ -43,7 +44,7 @@ export function StoryShell({ children, controls, headerExtra, onHome, exitURL = 
         : <a className="conversation-brand" href={exitURL}>{brand}</a>}
       <nav aria-label="Mission controls">
         {headerExtra}
-        <LearningControls /><SettingsButton />
+        <LearningControls /><SourcesButton /><SettingsButton />
         {onToggleVoice ? <button className="conversation-icon labeled-control" onClick={onToggleVoice} disabled={!voiceAvailable}
           aria-label={!voiceAvailable ? 'Narration unavailable' : voiceEnabled ? 'Mute narration' : 'Enable narration'}
           aria-pressed={voiceEnabled && voiceAvailable} title={!voiceAvailable ? 'Narration unavailable' : voiceEnabled ? 'Mute narration' : 'Enable narration'}>

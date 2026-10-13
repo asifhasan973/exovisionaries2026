@@ -7,26 +7,39 @@ import { defaultFlightPlan, restoreFlightPlan, PLATFORM_MODEL } from './platform
 import type { FlightPlan } from './platform.ts';
 import { emptyHuman, restoreHuman, humanPacked } from './validation.ts';
 import type { HumanValidation } from './validation.ts';
+import { emptyJourney, TRANSFER_MODEL } from './journey.ts';
+import type { JourneyState } from './journey.ts';
+import { emptyLanding } from './landing.ts';
+import type { LandingState } from './landing.ts';
+import { emptySurface } from './surface.ts';
+import type { SurfaceState } from './surface.ts';
+import { emptyScience } from './science.ts';
+import type { ScienceState } from './science.ts';
+import {emptyReturn} from './return.ts';
+import type {ReturnState} from './return.ts';
 import { rehearsalBudget } from './resources.ts';
 
 export type MoonPhase = 'prepare' | 'validate' | 'earth-orbit' | 'transfer' | 'lunar-orbit' | 'descent' | 'surface' | 'ascent' | 'docking' | 'earth-return' | 'reentry' | 'debrief';
 export const MOON_PHASE_ORDER: readonly MoonPhase[] = ['prepare', 'validate', 'earth-orbit', 'transfer', 'lunar-orbit', 'descent', 'surface', 'ascent', 'docking', 'earth-return', 'reentry', 'debrief'];
-export type MoonSite = 'crater-rim' | 'permanent-shadow' | null;
+export type MoonSite = 'crater-rim' | 'permanent-shadow' | 'lunar-highlands' | 'ancient-crater' | null;
 export type TrajectoryId = 'fast' | 'balanced' | 'efficient';
 export interface ScienceObservation {
   id: string; objective: MoonObjective; locationId: string; instrumentId: string; depthCm: number | null;
-  kind: 'hydrogen-clue' | 'water-evidence' | 'mineral-evidence' | 'subsurface' | 'seismic';
+  kind: 'hydrogen-clue' | 'water-evidence' | 'mineral-evidence' | 'subsurface' | 'seismic' | 'texture';
   confidence: 'low' | 'medium' | 'high'; points: number; transmitted: boolean;
+  quality?: 'low' | 'medium' | 'high'; signal?: string; result?: 'confirmed' | 'inconclusive' | 'negative';
+  classification?: 'anorthosite'|'basalt'|'breccia'|'inconclusive';
+  missionSeconds?: number; sampleId?: string | null; depthRangeCm?: [number,number] | null;
 }
 export interface MissionResources {
   batteryWh: number; capacityWh: number; roverHealth: number; elapsedMissionSeconds: number;
-  descentPropellantKg: number | null; platformEnergyWh: number | null; supportUnitsRemaining: number | null; ascentPropellantKg: number | null; returnPropellantKg: number | null;
+  upperStagePropellantKg: number | null; descentPropellantKg: number | null; platformEnergyWh: number | null; supportUnitsRemaining: number | null; ascentPropellantKg: number | null; returnPropellantKg: number | null;
 }
 export interface MoonCheckpoint { id: string; phase: MoonPhase; designSignature: string; resources: MissionResources }
 export interface MoonSession {
   version: 1; rulesVersion: number; architecture: typeof CREW_PLATFORM.id;
   objective: MoonObjective | null; site: MoonSite; phase: MoonPhase; designSignature: string;
-  crew: CrewAssignment; plan: FlightPlan; human: HumanValidation; geologyPartIds: string[]; scenarioSeed: number;
+  crew: CrewAssignment; plan: FlightPlan; human: HumanValidation; journey: JourneyState; landing: LandingState; surface: SurfaceState; science: ScienceState; returnFlight: ReturnState; geologyPartIds: string[]; scenarioSeed: number;
   trajectory: TrajectoryId | null; resources: MissionResources;
   navigation: { locationId: string; routeIds: string[]; communication: 'unknown' | 'connected' | 'blocked' };
   evidence: ScienceObservation[]; incidents: { id: string; kind: string; resolved: boolean }[];
@@ -43,7 +56,7 @@ function planObjective(progress: StoryProgress): MoonObjective | null {
   return progress.selections.objective === 'lunar-ice' || progress.selections.objective === 'lunar-geology' ? progress.selections.objective : null;
 }
 function planSite(progress: StoryProgress): MoonSite {
-  return progress.selections.site === 'crater-rim' || progress.selections.site === 'permanent-shadow' ? progress.selections.site : null;
+  return progress.selections.site === 'crater-rim' || progress.selections.site === 'permanent-shadow' || progress.selections.site === 'lunar-highlands' || progress.selections.site === 'ancient-crater' ? progress.selections.site : null;
 }
 function seedFor(progress: StoryProgress) {
   // Stable across reloads. Not wall-clock or Math.random-based incident rerolling.
@@ -56,7 +69,7 @@ export function moonDesignSignature(progress: StoryProgress, preparation: Prepar
   return JSON.stringify({ rules: MOON_RULES.version, platform: CREW_PLATFORM.id, player: progress.playerName, gender: progress.playerGender,
     destination: progress.selections.destination ?? null, objective, site: planSite(progress),
     equipment: equipmentIds(preparation, objective ?? 'lunar-ice', geologyPartIds).sort(), depthCm: preparation.drillDepthCm,
-    crew: [crew.commander, crew.scientist, crew.support], plan, platformModel: PLATFORM_MODEL.id });
+    crew: [crew.commander, crew.scientist, crew.support], plan, platformModel: PLATFORM_MODEL.id, transferModel:TRANSFER_MODEL.id });
 }
 export function createMoonSession(progress: StoryProgress, preparation: PreparationSelection): MoonSession {
   const crew = emptyCrew(), objective = planObjective(progress);
@@ -64,9 +77,9 @@ export function createMoonSession(progress: StoryProgress, preparation: Preparat
   const report = equipmentReport(equipmentIds(preparation, objective ?? 'lunar-ice', []), objective ?? 'lunar-ice');
   const capacityWh = report.parts.find(part => part.category === 'battery')?.capacityWh ?? 0;
   return { version: 1, rulesVersion: MOON_RULES.version, architecture: CREW_PLATFORM.id, objective, site: planSite(progress), phase: 'prepare',
-    crew, plan: defaultFlightPlan(), human: emptyHuman(), geologyPartIds, designSignature: moonDesignSignature(progress, preparation, crew, geologyPartIds), scenarioSeed: seedFor(progress),
+    crew, plan: defaultFlightPlan(), human: emptyHuman(), journey: emptyJourney(), landing: emptyLanding(), surface: emptySurface(), science: emptyScience(), returnFlight: emptyReturn(), geologyPartIds, designSignature: moonDesignSignature(progress, preparation, crew, geologyPartIds), scenarioSeed: seedFor(progress),
     trajectory: null, resources: { batteryWh: capacityWh, capacityWh, roverHealth: 100, elapsedMissionSeconds: 0,
-      descentPropellantKg: null, platformEnergyWh: null, supportUnitsRemaining: null, ascentPropellantKg: null, returnPropellantKg: null },
+      upperStagePropellantKg: null, descentPropellantKg: null, platformEnergyWh: null, supportUnitsRemaining: null, ascentPropellantKg: null, returnPropellantKg: null },
     navigation: { locationId: 'earth-workshop', routeIds: [], communication: 'unknown' },
     evidence: [], incidents: [], checkpoints: [], launchSnapshot: null, outcome: null, migration: 'fresh' };
 }
@@ -120,8 +133,8 @@ export function moonDesignReport(state: MoonSession, preparation: PreparationSel
   if (!rehearsal.peakOK) issues.push('Battery cannot support the simultaneous peak load.');
   if (!rehearsal.energyOK) issues.push('Rehearsal needs more energy while preserving return reserve.');
   return { equipment, crew, rehearsal, issues, designReady: issues.length === 0,
-    crewedDepartureAuthorized: false as const, readinessApproved: !!state.human.approved && humanPacked(state, preparation),
-    platformIssues: state.human.approved ? ['Departure plan checked. Crewed journey gameplay is pending Module 4.'] : ['Complete crew, equipment, return and practice checks before locking the departure plan.'],
+    crewedDepartureAuthorized: !!state.human.approved && humanPacked(state, preparation), readinessApproved: !!state.human.approved && humanPacked(state, preparation),
+    platformIssues: state.human.approved ? ['Departure plan checked. Route feasibility still gates the Moon-bound burns.'] : ['Complete crew, equipment, return and practice checks before locking the departure plan.'],
     earnedScience: state.evidence.reduce((sum, observation) => sum + observation.points, 0) };
 }
 

@@ -5,22 +5,26 @@ export type NarrationStatus = 'idle' | 'starting' | 'speaking' | 'unavailable' |
 export const NARRATION_SPEED = 1.5;
 export interface NarrationSnapshot { status: NarrationStatus; character: StoryCharacterId | null }
 export interface NarrationEnvironment {
-  synthesis: Pick<SpeechSynthesis, 'speak' | 'cancel' | 'getVoices'>;
-  createUtterance(text: string): SpeechSynthesisUtterance;
+  synthesis?: Pick<SpeechSynthesis, 'speak' | 'cancel' | 'getVoices'>;
+  createUtterance?(text: string): SpeechSynthesisUtterance;
   setTimer(callback: () => void, ms: number): ReturnType<typeof setTimeout>;
   clearTimer(timer: ReturnType<typeof setTimeout>): void;
   createRecording?(url: string): HTMLAudioElement;
 }
 export function browserNarrationEnvironment(): NarrationEnvironment | null {
-  if (typeof window === 'undefined' || !window.speechSynthesis || !window.SpeechSynthesisUtterance) return null;
+  if (typeof window === 'undefined' || typeof Audio === 'undefined') return null;
   return {
     synthesis: window.speechSynthesis,
-    createUtterance: text => new SpeechSynthesisUtterance(text),
+    createUtterance: window.SpeechSynthesisUtterance ? text => new SpeechSynthesisUtterance(text) : undefined,
     setTimer: (callback, ms) => setTimeout(callback, ms),
     clearTimer: timer => clearTimeout(timer),
     createRecording: url => new Audio(url),
   };
 }
+
+// One radio channel across scenes, companions and the glossary. A new message
+// interrupts the old owner; it never queues behind an obsolete instruction.
+let activeNarrator: NarrationController | null = null;
 
 /** Owns one utterance. Late callbacks from cancelled lines cannot animate the next line. */
 export class NarrationController {
@@ -30,6 +34,7 @@ export class NarrationController {
   private timer: ReturnType<typeof setTimeout> | undefined;
   private utterance: SpeechSynthesisUtterance | null = null;
   private recording: HTMLAudioElement | null = null;
+  private speechStartedAt = 0;
   private environment: NarrationEnvironment | null;
   constructor(environment: NarrationEnvironment | null) {
     this.environment = environment;
@@ -37,6 +42,10 @@ export class NarrationController {
   }
   getSnapshot = () => this.snapshot;
   subscribe = (listener: () => void) => { this.listeners.add(listener); return () => { this.listeners.delete(listener); }; };
+  /** Sampled by canvas, without causing React renders for every audio frame. */
+  getSpeechTime = () => this.snapshot.status !== 'speaking' ? 0 : this.recording
+    ? this.recording.currentTime * 1000
+    : Math.max(0, performance.now() - this.speechStartedAt) * NARRATION_SPEED;
   private update(status: NarrationStatus, character: StoryCharacterId | null = null) {
     this.snapshot = { status, character };
     this.listeners.forEach(listener => listener());
@@ -46,33 +55,41 @@ export class NarrationController {
     this.timer = undefined;
   }
   stop = () => {
+    if (activeNarrator === this) activeNarrator = null;
     this.generation++;
     this.clearTimer();
     const owned = this.utterance;
     this.utterance = null;
     if (this.recording) {
-      this.recording.onplaying = this.recording.onended = this.recording.onerror = null;
+      this.recording.onplaying = this.recording.onended = this.recording.onerror = this.recording.onwaiting = this.recording.onstalled = this.recording.onpause = null;
       this.recording.pause(); this.recording = null;
     }
-    if (owned) this.environment?.synthesis.cancel();
+    if (owned) this.environment?.synthesis?.cancel();
     this.update(this.environment ? 'idle' : 'unavailable');
   };
   speak(text: string, character: StoryCharacterId, clipId?: string, gender: 'male' | 'female' = 'female') {
     this.stop();
     const environment = this.environment;
     if (!environment) return;
+    activeNarrator?.stop();
+    activeNarrator = this;
     const generation = this.generation;
     const valid = () => generation === this.generation;
     const finish = (status: 'idle' | 'error') => {
       if (!valid()) return;
       this.generation++;
+      if (activeNarrator === this) activeNarrator = null;
       this.clearTimer();
       this.utterance = null;
-      if (this.recording) { this.recording.pause(); this.recording = null; }
+      if (this.recording) {
+        this.recording.onplaying = this.recording.onended = this.recording.onerror = this.recording.onwaiting = this.recording.onstalled = this.recording.onpause = null;
+        this.recording.pause(); this.recording = null;
+      }
       this.update(status);
     };
     const speech = (voiceWait = 0) => { try {
       if (!valid()) return;
+      if (!environment.synthesis || !environment.createUtterance) { finish('error'); return; }
       // Chromium loads system voices asynchronously. Do not accidentally speak Chief
       // with the female default before the male voice inventory arrives.
       if (environment.createRecording && !environment.synthesis.getVoices().length && voiceWait < 15) {
@@ -91,6 +108,7 @@ export class NarrationController {
       utterance.onstart = () => {
         if (!valid()) return;
         this.clearTimer();
+        this.speechStartedAt = performance.now();
         this.update('speaking', character);
         // Safety net for speech services which disappear or never send an end event.
         this.timer = environment.setTimer(() => {
@@ -126,6 +144,9 @@ export class NarrationController {
         this.timer = environment.setTimer(() => { if (current()) finish('error'); }, Math.max(15000, text.length * 180 + 10000));
       };
       audio.onended = () => { if (current()) finish('idle'); };
+      // Buffering and pause are not speech: keep the actor's mouth closed until
+      // the browser confirms that audio is actually playing again.
+      audio.onwaiting = audio.onstalled = audio.onpause = () => { if (current()) this.update('starting'); };
       audio.onerror = () => {
         if (!current()) return;
         this.clearTimer(); audio.pause(); this.recording = null; speech();
@@ -141,6 +162,10 @@ export function selectCharacterVoice(voices: readonly SpeechSynthesisVoice[], ch
   const male = /Guy|Andrew|Brian|Ryan|Daniel|Alex|David|Aaron|Arthur|Tom|Rishi|\bMale\b/i;
   const female = /Sonia|Aria|Jenny|Ava|Emma|Samantha|Karen|Serena|Victoria|Zira|Susan|\bFemale\b/i;
   const useMale = character === 'chief' || gender === 'male';
+  if (character === 'chief') {
+    const directorVoice = voices.find(voice => /Guy|David|Arthur|Aaron/i.test(voice.name));
+    if (directorVoice) return directorVoice;
+  }
   if (character === 'commander' && useMale) {
     const distinctVoice = voices.find(voice => /Andrew|Ryan|Brian|Daniel|Alex/i.test(voice.name));
     if (distinctVoice) return distinctVoice;

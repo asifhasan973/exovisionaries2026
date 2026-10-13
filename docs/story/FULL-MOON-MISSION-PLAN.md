@@ -1,6 +1,6 @@
 # Zero To Beyond — full Moon mission implementation plan
 
-Planning date: 2026-10-12, Asia/Dhaka. Status: Modules 1–2 implemented on `feat/full-moon-foundation`; Modules 3–12 remain pending. See `moon-foundation-review/README.md` and `moon-preparation-review/README.md` for delivery boundaries and verification.
+Planning date: 2026-10-12, Asia/Dhaka. Status: Modules 1–12 have local laptop implementations on `feat/full-moon-foundation`. Fresh full integration/production verification and release are not claimed; mobile and publishing are deferred at the user’s request. See `moon-integration-review/README.md` for the scoped Module 12 delivery. Follow-up return/export/refresh checks and fixes are recorded in `moon-final-review/README.md`; both assisted endings were manually completed, with their different outcomes preserved. See `moon-foundation-review/README.md` and `moon-preparation-review/README.md` for delivery boundaries and verification.
 
 ## Authority and intended outcome
 
@@ -72,7 +72,7 @@ Back/Next positions stay fixed. Before launch, Back permits editing and invalida
 
 ## Implementation order and acceptance gates
 
-**Current local implementation:** Modules 1–3. Preparation now continues through crew supplies/cabin, equipment mass/power/budget, return hardware, four short decision exercises and ordered packing to a locked departure plan. Actual crewed launch/transfer remains Module 4. See [Module 3 review](moon-readiness-review/README.md) for verification and model limits.
+**Current local implementation:** Modules 1–10. Preparation continues through crew readiness, launch, transfer, capture, powered descent, rover deployment and a bounded surface scout with energy, communications and a safe return path. Ice science now includes NSS survey, depth-dependent drilling, on-site analysis, evidence interpretation and transmitted records. Adaptive science-time incidents, repairs and surface recovery are implemented; crew ascent, docking, Earth return, re-entry, parachutes, splashdown and the evidence-derived Ice debrief are now implemented. Geology now has separate sites, rock survey/collection/testing, ground sensor traces, sealed sample return and a distinct debrief. See [Module 10 model](moon-geology-review/README.md). See [Module 9 model](moon-return-review/README.md). See [Module 8 model](moon-incidents-review/README.md). See [Module 7 model](moon-science-review/README.md). See [Module 3 review](moon-readiness-review/README.md) and [Module 4 model](moon-journey-review/README.md). Modules 4–10 currently target laptop layouts only. See [Module 5 model](moon-landing-review/README.md) and [Module 6 model](moon-surface-review/README.md).
 
 ### Module 1 — Mission foundation and science/resource contract
 
@@ -159,7 +159,7 @@ Back/Next positions stay fixed. Before launch, Back permits editing and invalida
 
 **Done when:** identical saved designs face reproducible incidents; every offered action has an effect and reason; bad preparation can be improved through an explicit retry, not magical in-flight shopping.
 
-### Module 9 — Crew ascent, Earth return and Ice ending
+### Module 9 — Crew ascent, Earth return and Ice ending (implemented locally)
 
 - Require surface tasks to reach a safe stop: crew aboard, needed data transmitted, samples stowed if collected, rover left safely on the Moon and reserved ascent fuel intact.
 - Launch the lunar ascent stage, rendezvous/dock with the orbiting support specialist and command spacecraft, then execute Earth-return departure.
@@ -169,7 +169,7 @@ Back/Next positions stay fixed. Before launch, Back permits editing and invalida
 
 **Done when:** a full Ice mission reaches a defensible ending from Home without developer tools; all crew are accounted for; the result derives from recorded actions rather than prewritten percentages.
 
-### Module 10 — Complete Geology Explorer
+### Module 10 — Complete Geology Explorer (implemented locally)
 
 - Reuse preparation, crew, validation, flight, landing, events and return. Provide the documented highland/crater site options and geological targets rather than ice-only sites.
 - Add camera/spectral survey, sample selection/collection, XRF elemental evidence, XRD crystalline-mineral evidence, GPR subsurface interpretation and seismometer deployment appropriate to selected equipment.
@@ -181,6 +181,8 @@ Back/Next positions stay fixed. Before launch, Back permits editing and invalida
 **Done when:** Geology is a genuinely different scientific objective with valid equipment choices and a full return/debrief, not Ice gameplay with a changed title.
 
 ### Module 11 — Characters, voice, visual polish and onboarding completion
+
+Laptop delivery: see `moon-polish-review/README.md`. This is illustrated talking animation, not phoneme-accurate lip sync; no mobile or release verification is claimed.
 
 These standards apply from Module 1; this module closes gaps after the complete flow is playable.
 
@@ -195,6 +197,8 @@ These standards apply from Module 1; this module closes gaps after the complete 
 **Done when:** an unfamiliar player understands the next action without a text wall; the same character/voice/UI is recognizable throughout; complete play remains possible without audio, WebGL or supported fullscreen APIs.
 
 ### Module 12 — Judge experience, verification and release
+
+Laptop implementation delivered: grouped chapters, real battery comparison, provenance, save/repair recovery, source register and chapter error handling. Limited manual check and source review completed. Full replay/build/mobile/release portions remain unverified or deferred under the user’s current instructions; see `moon-integration-review/README.md`.
 
 - Keep normal Play/Continue and an isolated Judge demo. Add chapter checkpoints for developers and a quick, self-contained comparison: a constrained design exposes a fault, an improved design completes a useful observation and safe return.
 - Assisted skip/auto-build changes are labeled and recorded, never confused with earned player skill. Demo saves never replace the player's mission.

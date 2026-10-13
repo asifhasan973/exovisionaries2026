@@ -1,0 +1,21 @@
+/** Authored short continuation prompts; no discovery is awarded by scouting. */
+export const SURFACE_LINES={
+  stowed:'Deploy your rover. Let’s check the path!',
+  deploying:'Rover coming down. Our crew will return inside.',
+  ready:'Visit a lookout, then the shadow edge.',
+  drive:'Keep going. Save enough energy to come back!',
+  hold:'Hold W to drive. Let go to pause.',
+  shade:'Solar is off here. Our battery keeps us moving.',
+  blocked:'Radio blocked. The rover is following its return plan.',
+  charge:'Sunlight is filling the battery. Nice parking spot!',
+  pause:'Trip paused. Continue when you’re ready.',
+  reserve:'Not enough for the return. Charge in sunlight first.',
+  terrain:'Take the smooth path. This shortcut needs better wheels and cameras.',
+  thermal:'That deep cold needs advanced thermal protection.',
+  autonomy:'Plan the return loop before going behind the ridge.',
+  full:'Battery full. Pick your next path!',
+  dark:'No sunlight here. Go to the sunny ridge to charge.',
+  failed:'Rover stopped. Retry from the surface checkpoint.',
+  arrived:'Waypoint reached! Pick the next path.',
+  complete:'Route scouted! Ready for science.',
+} as const;

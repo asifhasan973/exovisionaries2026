@@ -63,6 +63,8 @@ export function createPartMesh(id: string): THREE.Group {
     for (let i = 0; i < 9; i++) { const ring = mesh(new THREE.TorusGeometry(.075, .019, 6, 18), silver, 0, -.08 - i * .09); ring.rotation.x = Math.PI / 2 + .25; }
     mesh(new THREE.ConeGeometry(.08, .15, 16), silver, 0, -.99).rotation.z = Math.PI;
     const pieces = group.children.slice(start), bit = new THREE.Group(); bit.name = 'drill-bit'; group.add(bit); pieces.forEach(piece => bit.add(piece));
+  } else if (id === 'field-care-kit') {
+    box(.45,.3,.28,blue);box(.49,.04,.32,silver,0,.18);box(.22,.04,.09,gold,0,.23);box(.09,.13,.02,white,0,0,.15);box(.13,.05,.02,white,0,.04,.15);
   } else if (id === 'nss') {
     cylinder(.14, .14, .5, gold); cylinder(.15, .15, .07, silver, 0, .28); box(.35, .08, .35, dark, 0, -.3);
   } else if (id === 'nirvss' || part?.scienceFamily === 'ir') {
@@ -117,6 +119,7 @@ export function disposeGroup(group: THREE.Object3D) {
 export function attachmentPosition(id: string): THREE.Vector3 {
   const part = partById(id);
   const positions: Record<string, number[]> = {
+    'field-care-kit': [1.85,.88,-.9],
     'lander-body': [-2.1, 1.2, 0], 'landing-engines': [-2.1, .43, 0], 'landing-radar': [-1.38, 1.6, .6],
     'navigation-computer': [-2.7, 1.7, .5], 'lander-antenna': [-2.65, 2.1, -.5], 'landing-cameras': [-1.5, 1.65, -.6],
     nss: [1.36, 1.02, -.5], nirvss: [2.62, 1.35, -.2], trident: [2.72, 1.15, .6], msolo: [1.65, 1.38, .1],

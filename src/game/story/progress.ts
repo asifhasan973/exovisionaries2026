@@ -1,5 +1,5 @@
 import { getStoryStep, STORY_FLOW } from './flow.ts';
-import type { StoryEvent, StoryProgress, StoryStepId } from './types.ts';
+import type { ActivityId, StoryEvent, StoryProgress, StoryStepId } from './types.ts';
 
 export const STORY_SAVE_KEY = 'zero_to_beyond_script_story_v1';
 
@@ -18,7 +18,7 @@ function advanceStep(progress: StoryProgress): StoryProgress {
 
 /** A click advances one full source line. Selection and activity gates cannot be skipped. */
 export function reduceStoryProgress(progress: StoryProgress, event: StoryEvent): StoryProgress {
-  const step = getStoryStep(progress.stepId);
+  const step = getStoryStep(progress.stepId,progress.selections.objective);
   switch (event.type) {
     case 'set-name': {
       if (step.kind !== 'name') return progress;
@@ -74,14 +74,18 @@ export function restoreStoryProgress(raw: string | null): StoryProgress {
     const target = STORY_FLOW.find(step => step.id === saved.stepId);
     if (!target) return fresh;
     let progress = reduceStoryProgress(fresh, { type: 'set-name', name: saved.playerName, gender: saved.playerGender === 'male' ? 'male' : 'female' });
+    progress = { ...progress, assistance: Array.isArray(saved.assistance)
+      ? [...new Set(saved.assistance.filter((id: unknown) => id === 'auto-build' || id === 'judge-demo'))] as NonNullable<StoryProgress['assistance']> : [] };
     // Back navigation may leave valid later choices in the save. Keep them across reloads,
     // while validating each option and still reconstructing the current cursor through gates.
-    for (const step of STORY_FLOW) {
+    for (const baseStep of STORY_FLOW) {
+      const step=getStoryStep(baseStep.id,saved.selections?.objective);
       if (step.kind !== 'choice') continue;
       const option = step.options.find(option => option.available && option.id === saved.selections?.[step.choiceKey]);
       if (option) progress.selections[step.choiceKey] = option.id;
     }
-    for (const step of STORY_FLOW) {
+    for (const baseStep of STORY_FLOW) {
+      const step=getStoryStep(baseStep.id,saved.selections?.objective);
       if (step.id === target.id) {
         const maxLine = step.kind === 'conversation' ? step.lines.length - 1 : 0;
         const lineIndex = Number.isInteger(saved.lineIndex) ? Math.max(0, Math.min(maxLine, saved.lineIndex)) : 0;
@@ -108,6 +112,17 @@ export function restoreStoryProgress(raw: string | null): StoryProgress {
 
 export function serializeStoryProgress(progress: StoryProgress): string {
   return JSON.stringify(progress);
+}
+
+/** Keep the blueprint's real preparation path, never the old flight's history.
+ * Reconstructing through the normal gates also gives replay's first Back a
+ * valid rover/lander destination instead of leaving it with empty history. */
+export function createBlueprintReplayProgress(previous: StoryProgress, verifiedBuild: ActivityId[]): StoryProgress {
+  return restoreStoryProgress(JSON.stringify({
+    ...createStoryProgress(), playerName: previous.playerName, playerGender: previous.playerGender,
+    selections: { ...previous.selections }, assistance: [...(previous.assistance ?? [])],
+    stepId: 'science-build', completedActivities: verifiedBuild,
+  }));
 }
 
 export function isStoryStepId(value: unknown): value is StoryStepId {

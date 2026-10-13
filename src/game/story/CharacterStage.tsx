@@ -18,18 +18,18 @@ function loadArtwork(character: CharacterArtId) {
   return pending;
 }
 
-export function CharacterStage({ cue, speaking, active, label }: {
-  cue: CharacterCue; speaking: boolean; active: boolean; label: string;
+export function CharacterStage({ cue, speaking, active, label, speechTime }: {
+  cue: CharacterCue; speaking: boolean; active: boolean; label: string; speechTime?: () => number;
 }) {
   const { gentle } = useGameSettings();
   const gender = usePlayerGender();
   const artCue = useMemo(() => ({ ...cue, character: cue.character === 'commander' && gender === 'male' ? 'commander-male' as const : cue.character }), [cue, gender]);
   const canvas = useRef<HTMLCanvasElement>(null);
-  const performance = useRef({ cue: artCue, speaking });
+  const performance = useRef({ cue: artCue, speaking, speechTime });
   const repaint = useRef<() => void>(() => {});
   const [attempt, setAttempt] = useState(0);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
-  useEffect(() => { performance.current = { cue: artCue, speaking }; repaint.current(); }, [artCue, speaking]);
+  useEffect(() => { performance.current = { cue: artCue, speaking, speechTime }; repaint.current(); }, [artCue, speaking, speechTime]);
 
   useEffect(() => {
     let disposed = false;
@@ -39,6 +39,8 @@ export function CharacterStage({ cue, speaking, active, label }: {
     const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
     let reduced = gentle || preference.matches;
     const origin = window.performance.now();
+    // Different blink clocks stop two people from blinking in perfect unison.
+    const blinkOffset = artCue.character === 'chief' ? 1780 : artCue.character === 'commander-male' ? 940 : 0;
     let lastPaint = -Infinity;
     const paint = (time: number) => {
       frame = 0;
@@ -50,8 +52,9 @@ export function CharacterStage({ cue, speaking, active, label }: {
           context.clearRect(0, 0, context.canvas.width, context.canvas.height);
           const current = performance.current;
           if (loaded.art.characterId !== current.cue.character) return;
-          loaded.compositor.drawCharacterRig(context, loaded.art, current.cue,
-            loaded.compositor.sampleRigMotion(time - origin, current.speaking, reduced));
+          const motion = loaded.compositor.sampleRigMotion(time - origin + blinkOffset, current.speaking, reduced, current.speechTime?.());
+          // A listening character stays calm; only the speaking actor gestures.
+          loaded.compositor.drawCharacterRig(context, loaded.art, current.cue, motion);
         }
         lastPaint = time;
       }

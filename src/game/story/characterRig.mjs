@@ -25,14 +25,17 @@ export async function loadRigAssets(characterId, baseURL = new URL('./', import.
 }
 
 /** Rhythmic talking sample, not audio/phoneme-accurate lip sync. */
-export function sampleRigMotion(elapsedMs, speaking = false, reducedMotion = false) {
+export function sampleRigMotion(elapsedMs, speaking = false, reducedMotion = false, speechMs) {
   if (reducedMotion) return { mouth: 'closed', blink: false, gesture: 0, nod: 0, breath: 0 };
   const time = Math.max(0, elapsedMs);
   const mouthCycle = [
     ['closed', 110], ['ah', 155], ['oo', 115], ['ah', 135],
     ['closed', 170], ['ah', 130], ['closed', 120], ['oo', 125], ['closed', 200],
   ];
-  let phase = time % 1260;
+  // Audio playback drives the talking rhythm, including playback speed changes.
+  // This is still illustrated talking animation, not timed phoneme lip sync.
+  const speechTime = Math.max(0, speechMs ?? time);
+  let phase = speechTime % 1260;
   let mouth = 'closed';
   if (speaking) for (const [frame, duration] of mouthCycle) {
     if (phase < duration) { mouth = frame; break; }
@@ -42,8 +45,8 @@ export function sampleRigMotion(elapsedMs, speaking = false, reducedMotion = fal
   return {
     mouth,
     blink: (blinkPhase >= 2630 && blinkPhase < 2750) || (blinkPhase >= 6920 && blinkPhase < 7020),
-    gesture: speaking ? Math.sin(time / 420) * Math.max(0, Math.sin(time / 1150)) : 0,
-    nod: speaking ? Math.sin(time / 770) * .008 : 0,
+    gesture: speaking ? Math.sin(speechTime / 420) * Math.max(0, Math.sin(speechTime / 1150)) : 0,
+    nod: speaking ? Math.sin(speechTime / 770) * .008 : 0,
     breath: Math.sin(time / 1900) * .85,
   };
 }
@@ -93,7 +96,12 @@ function drawFaceLayers(context, assets, face, motion) {
   context.drawImage(image, ...face.closed, 0, 0, width, height);
   if (motion.mouth === 'ah' || motion.mouth === 'oo') {
     const patch = featurePatch(image, face, face.mouth, motion.mouth);
-    context.drawImage(patch.image, face.mouth[0], face.mouth[1]);
+    // Replace the closed lips instead of painting an open mouth over them.
+    // The same feather mask keeps skin edges continuous between frames.
+    context.save(); context.globalCompositeOperation = 'destination-out';
+    context.drawImage(patch.mask, face.mouth[0], face.mouth[1]);
+    context.globalCompositeOperation = 'lighter';
+    context.drawImage(patch.image, face.mouth[0], face.mouth[1]); context.restore();
   }
   if (motion.blink) {
     for (const region of face.eyelids ?? [face.eyes]) {

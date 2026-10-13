@@ -81,9 +81,9 @@ export function ConversationScene({ title, lines, lineIndex, playerName, onNext,
         <div className="conversation-stage-orbit orbit-one" /><div className="conversation-stage-orbit orbit-two" />
         <span className="conversation-stage-label">MISSION CONTROL</span>
         {twoActors ? <CharacterStage cue={chief} active={line.speaker.character === 'chief'} label="Chief"
-          speaking={narration.status === 'speaking' && narration.character === 'chief'} /> : null}
+          speechTime={controller.getSpeechTime} speaking={narration.status === 'speaking' && narration.character === 'chief'} /> : null}
         <CharacterStage cue={commander} active={line.speaker.character === 'commander'} label="Commander"
-          speaking={narration.status === 'speaking' && narration.character === 'commander'} />
+          speechTime={controller.getSpeechTime} speaking={narration.status === 'speaking' && narration.character === 'commander'} />
       </div>
       <section className="conversation-panel" aria-labelledby="conversation-title">
         <div className="conversation-scene-heading"><span>MISSION BRIEFING</span><h1 id="conversation-title">{title}</h1></div>

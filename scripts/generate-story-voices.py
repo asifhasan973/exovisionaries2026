@@ -19,14 +19,22 @@ async def main():
     ], cwd=ROOT, text=True))
     lines = [(key, clip['text'], clip['character']) for key, clip in catalogue.items()]
     lines += [('male-' + key, clip['text'], 'commander-male') for key, clip in catalogue.items() if clip['character'] == 'commander']
-    semaphore = asyncio.Semaphore(3)
+    semaphore = asyncio.Semaphore(1)
     async def build(item):
         key, text, character = item
         path = OUT / (key + '.mp3')
         if path.exists() and path.stat().st_size > 1000:
             return
         async with semaphore:
-            await edge_tts.Communicate(text, VOICES[character], rate='-3%', pitch='+0Hz').save(str(path))
+            for attempt in range(4):
+                try:
+                    await edge_tts.Communicate(text, VOICES[character], rate='-3%', pitch='+0Hz').save(str(path))
+                    break
+                except edge_tts.exceptions.NoAudioReceived:
+                    path.unlink(missing_ok=True)  # Do not cache a partial failed clip.
+                    if attempt == 3:
+                        raise
+                    await asyncio.sleep(2 * (attempt + 1))
             print('Recorded', key, flush=True)
     await asyncio.gather(*(build(item) for item in lines))
     (OUT / 'credits.json').write_text(json.dumps({'voices': VOICES, 'format': 'MP3', 'purpose': 'Synthetic character narration', 'lines': [{'id': key, 'character': actor, 'text': text} for key, text, actor in lines]}, indent=2))

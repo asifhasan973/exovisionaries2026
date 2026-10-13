@@ -46,9 +46,9 @@ const extras: Record<string, Partial<WorkshopPart>> = {
 export const WORKSHOP_PARTS: readonly WorkshopPart[] = [...SCRIPT_COMPONENTS.map(part => ({
   ...part, massKg: part.massKg ?? 0, credits: part.credits ?? 0, nominalPowerW: part.nominalPowerW ?? 0,
   description: '', ...extras[part.id],
-})), ...GEOLOGY_PARTS];
+})), ...GEOLOGY_PARTS, {id:'field-care-kit',name:'Surface care kit',category:'science',credits:20,massKg:3,nominalPowerW:0,scienceBonus:0,description:'A packed brush and cleaning supplies for a short crew repair at Base.',assumption:'20 credits, 3 kg and one cleaning use are authored game allocations. Brushing improves visibility but does not remove all lunar dust.',source:'https://science.nasa.gov/science-research/science-enabling-technology/technology-highlights/new-moon-duster-will-help-clean-nasa-assets-in-space/'}];
 export function partsForObjective(objective: string = 'lunar-ice') {
-  return WORKSHOP_PARTS.filter(part => part.category !== 'science' || (objective === 'lunar-geology' ? part.objective === objective : !part.objective));
+  return WORKSHOP_PARTS.filter(part => part.id==='field-care-kit'||part.category !== 'science' || (objective === 'lunar-geology' ? part.objective === objective : !part.objective));
 }
 export function selectedDrill(preparation: PreparationSelection) { return preparation.sciencePartIds.map(partById).find(part => part?.id === 'trident' || part?.id.startsWith('geo-drill-')); }
 export function normalizeObjective(preparation: PreparationSelection, objective: string): PreparationSelection {
@@ -165,7 +165,7 @@ export function preparationTotals(preparation: PreparationSelection, shadow = fa
 }
 export function quickPreparation(objective: string = 'lunar-ice'): PreparationSelection {
   const ids = ['lander-body', 'landing-engines', 'landing-radar', 'navigation-computer', 'lander-antenna', 'landing-cameras',
-    'polar-rover', 'nss', 'nirvss', 'trident', 'stereo-hazard-camera', 'efficient-solar', 'medium-battery', 'basic-thermal', 'basic-communication'];
+    'polar-rover', 'nss', 'nirvss', 'trident', 'stereo-hazard-camera', 'efficient-solar', 'medium-battery', 'basic-thermal', 'basic-communication','field-care-kit'];
   const plan = objective === 'lunar-geology' ? ids.filter(id => !['nss','nirvss','trident'].includes(id)).map(id => id === 'polar-rover' ? 'basic-rover' : id)
     .concat(['geo-camera-basic','geo-ir-basic','geo-xrf-basic','geo-drill-basic']) : ids;
   return plan.reduce(installPart, createPreparationSelection());

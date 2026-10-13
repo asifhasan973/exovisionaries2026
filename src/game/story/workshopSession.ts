@@ -1,3 +1,13 @@
+import {enterReturn,reduceReturnMission,advanceReturn} from './moon/returnSession.ts';
+import type {ReturnEvent} from './moon/return.ts';
+import { enterScience, reduceScienceMission, advanceScience, advanceRecovery } from './moon/scienceSession.ts';
+import type { ScienceEvent } from './moon/science.ts';
+import { enterSurface, reduceSurfaceMission, advanceSurface } from './moon/surfaceSession.ts';
+import type { SurfaceMissionEvent } from './moon/surfaceSession.ts';
+import { enterLanding, reduceLandingMission, finishLanding } from './moon/landingSession.ts';
+import type { LandingMissionEvent } from './moon/landingSession.ts';
+import { reduceJourneyMission, enterEarthOrbit, resetDeparture } from './moon/journeySession.ts';
+import type { JourneyMissionEvent } from './moon/journeySession.ts';
 import { recommendRepair, repairApplied } from './repairGuidance.ts';
 import type { RepairGuide, RepairProblem } from './repairGuidance.ts';
 import { emptyFlight, reduceFlight, launchAuthorized, flightComplete } from './flight.ts';
@@ -25,9 +35,9 @@ import type { MoonEvent, MoonSession } from './moon/session.ts';
 export interface WorkshopSession { repair?: RepairGuide; progress: StoryProgress; preparation: PreparationSelection; past: PreparationSelection[]; future: PreparationSelection[]; readiness: ReadinessState; flight: FlightState; moon: MoonSession }
 type WorkshopEvent = StoryEvent | FlightEvent | TrialEvent | { type: 'connect-radar' } | { type: 'install'; ids: string[] } | { type: 'remove'; id: string } | { type: 'depth'; cm: number }
   | { type: 'fix-problem'; problem: RepairProblem } | { type: 'repair-recheck' } | { type: 'run-check' } | { type: 'pack'; action: PackingAction } | { type: 'undo' } | { type: 'redo' } | { type: 'quick-build' } | { type: 'begin-auto-build' } | { type: 'visit-stage'; stage: WorkshopStage };
-export type MissionEvent = WorkshopEvent | MoonEvent | HumanEvent;
-export function createWorkshopSession(progress: StoryProgress, preparation = createPreparationSelection(), readiness = emptyReadiness(), flight = emptyFlight(), moon = createMoonSession(progress, preparation)): WorkshopSession {
-  const session: WorkshopSession = { progress, preparation, readiness, flight, moon: syncMoonDesign(moon, progress, preparation), past: [], future: [] };
+export type MissionEvent = WorkshopEvent | MoonEvent | HumanEvent | JourneyMissionEvent | LandingMissionEvent | SurfaceMissionEvent | ScienceEvent | ReturnEvent;
+export function createWorkshopSession(progress: StoryProgress, preparation = createPreparationSelection(), readiness = emptyReadiness(), flight = emptyFlight(), moon = createMoonSession(progress, preparation), repair?: RepairGuide): WorkshopSession {
+  const session: WorkshopSession = { repair, progress, preparation, readiness, flight, moon: syncMoonDesign(moon, progress, preparation), past: [], future: [] };
   return progress.stepId === 'power-check' && trialPassed(readiness.trial, missionSignature(progress, preparation, session.moon), preparation, progress.selections.site === 'permanent-shadow', crewCapabilities(session.moon.crew))
     ? reduceMission(session, { type: 'run-check' }) : session;
 }
@@ -44,6 +54,34 @@ function withPreparation(session: WorkshopSession, preparation: PreparationSelec
   return updated;
 }
 export function reduceMission(session: WorkshopSession, event: MissionEvent): WorkshopSession {
+  if(event.type.startsWith('return-'))return reduceReturnMission(session,event as ReturnEvent);
+  if(event.type==='next'&&session.progress.stepId==='surface-secured')return enterReturn(session);
+  if(event.type==='next'&&session.progress.stepId==='crew-return')return advanceReturn(session);
+  if(event.type==='moon-request-phase')return session; // Only verified launch/burn receipts advance a flying spacecraft.
+  if(event.type.startsWith('science-'))return reduceScienceMission(session,event as ScienceEvent);
+  if(event.type==='next'&&['science-ready','surface-recovery'].includes(session.progress.stepId))return advanceRecovery(session);
+  if(event.type==='next'&&session.progress.stepId==='ice-science')return advanceScience(session);
+  if(event.type==='next'&&session.progress.stepId==='surface-ready'){
+    const entered=enterScience(session);if(entered===session)return session;return {...entered,progress:{...entered.progress,stepId:'ice-science',lineIndex:0}};
+  }
+  if(event.type.startsWith('surface-'))return reduceSurfaceMission(session,event as SurfaceMissionEvent);
+  if(event.type==='next'&&['lunar-surface','surface-explore'].includes(session.progress.stepId))return advanceSurface(session);
+  if(event.type.startsWith('landing-'))return reduceLandingMission(session,event as LandingMissionEvent);
+  if(event.type==='next'&&session.progress.stepId==='lunar-orbit'){
+    const entered=enterLanding(session);if(entered===session)return session;
+    const completed=reduceStoryProgress(session.progress,{type:'complete-activity',activity:'lunar-orbit'});return {...entered,progress:reduceStoryProgress(completed,{type:'next'})};
+  }
+  if(event.type==='next'&&session.progress.stepId==='lunar-descent'){const landed=finishLanding(session);return landed===session?session:enterSurface(landed);}
+  if(event.type.startsWith('journey-'))return reduceJourneyMission(session,event as JourneyMissionEvent);
+  if(!['prepare','validate'].includes(session.moon.phase)&&['install','remove','depth','undo','redo','quick-build','begin-auto-build','visit-stage','visit-crew','select','set-name'].includes(event.type))return session;
+  if(event.type==='back'&&(session.flight.t>0||!['prepare','validate'].includes(session.moon.phase)))return session;
+  if(event.type==='next'&&session.progress.stepId==='liftoff'&&launchAuthorized(session.progress,session.preparation,session.readiness,session.moon)&&flightComplete(session.flight,session.moon.designSignature)){
+    const completed=reduceStoryProgress(session.progress,{type:'complete-activity',activity:'liftoff'});return enterEarthOrbit({...session,progress:reduceStoryProgress(completed,{type:'next'})});
+  }
+  if(event.type==='next'&&session.progress.stepId==='moon-transfer'){
+    if(session.moon.journey.stage!=='complete'||session.moon.journey.signature!==session.moon.designSignature)return session;
+    const completed=reduceStoryProgress(session.progress,{type:'complete-activity',activity:'moon-transfer'});return {...session,progress:reduceStoryProgress(completed,{type:'next'})};
+  }
   if (event.type.startsWith('human-') || event.type === 'visit-crew') return reduceHumanEvent(session,event as HumanEvent);
   if (event.type.startsWith('moon-')) {
     if (session.progress.stepId !== 'crew-selection') return session;
@@ -86,10 +124,10 @@ function reduceWorkshopMission(session: WorkshopSession, event: WorkshopEvent): 
       ? reduceMission(updated, { type: 'run-check' }) : updated;
   }
   if (event.type.startsWith('flight-')) {
-    if (!['liftoff', 'earth-orbit'].includes(step.id) || !launchAuthorized(session.progress, session.preparation, session.readiness)) return session;
+    if (!['liftoff', 'earth-orbit'].includes(step.id) || !launchAuthorized(session.progress, session.preparation, session.readiness, session.moon)) return session;
     if (step.id === 'earth-orbit' && event.type !== 'flight-replay') return session;
     const flight = reduceFlight(session.flight, event as FlightEvent, missionSignature(session.progress, session.preparation, session.moon));
-    return { ...session, flight, progress: event.type === 'flight-replay' ? { ...session.progress, stepId: 'liftoff', history: session.progress.history.filter(cursor => cursor.stepId !== 'liftoff' && cursor.stepId !== 'earth-orbit'), completedActivities: session.progress.completedActivities.filter(id => id !== 'liftoff') } : session.progress };
+    return { ...session, flight, moon:event.type==='flight-replay'?resetDeparture(session):session.moon, progress: event.type === 'flight-replay' ? { ...session.progress, stepId: 'liftoff', history: session.progress.history.filter(cursor => cursor.stepId !== 'liftoff' && cursor.stepId !== 'earth-orbit'), completedActivities: session.progress.completedActivities.filter(id => id !== 'liftoff') } : session.progress };
   }
   if (event.type === 'install') {
     if (!stage) return session;
@@ -122,14 +160,17 @@ function reduceWorkshopMission(session: WorkshopSession, event: WorkshopEvent): 
   }
   if (event.type === 'begin-auto-build') {
     if (!stage && step.id !== 'resource-limits') return session;
-    return { ...session, repair: undefined, preparation: createPreparationSelection(), past: [], future: [], readiness: emptyReadiness(), flight: emptyFlight(),
-      progress: { ...session.progress, stepId: 'lander-build', lineIndex: 0, completedActivities: ['resource-limits'],
-        history: session.progress.history.filter(cursor => getStoryStep(cursor.stepId).module < 5) } };
+    const preparation = createPreparationSelection();
+    const progress: StoryProgress = { ...session.progress, stepId: 'lander-build', lineIndex: 0, completedActivities: ['resource-limits'],
+      assistance: [...new Set([...(session.progress.assistance ?? []), 'auto-build' as const])],
+      history: session.progress.history.filter(cursor => getStoryStep(cursor.stepId).module < 5) };
+    return { ...session, repair: undefined, preparation, progress, moon: syncMoonDesign(session.moon, progress, preparation),
+      past: [], future: [], readiness: emptyReadiness(), flight: emptyFlight() };
   }
   if (event.type === 'quick-build') {
     if (!stage && step.id !== 'resource-limits') return session;
     const updated = withPreparation(session, quickPreparation(objective));
-    let progress = { ...updated.progress, completedActivities: verifiedActivities(updated.preparation, objective) };
+    let progress = { ...updated.progress, assistance: [...new Set([...(updated.progress.assistance ?? []), 'auto-build' as const])], completedActivities: verifiedActivities(updated.preparation, objective) };
     // Traverse real gates, retaining Back history. Leave crew assignment to the player.
     while (progress.stepId !== 'crew-selection') {
       const next = reduceStoryProgress(progress, { type: getStoryStep(progress.stepId).kind === 'conversation' ? 'skip-briefing' : 'next' });
@@ -171,8 +212,8 @@ function reduceWorkshopMission(session: WorkshopSession, event: WorkshopEvent): 
     }
     const id = CHECK_IDS.find(id => id === step.id);
     const valid = id ? checkAccepted(id, session.progress, session.preparation, session.readiness, session.moon)
-      : step.id === 'launch-ready' ? launchAuthorized(session.progress, session.preparation, session.readiness)
-      : step.id === 'liftoff' ? launchAuthorized(session.progress, session.preparation, session.readiness) && flightComplete(session.flight, missionSignature(session.progress, session.preparation, session.moon))
+      : step.id === 'launch-ready' ? launchAuthorized(session.progress, session.preparation, session.readiness, session.moon)
+      : step.id === 'liftoff' ? launchAuthorized(session.progress, session.preparation, session.readiness, session.moon) && flightComplete(session.flight, missionSignature(session.progress, session.preparation, session.moon))
       : ['crew-check','systems-check','stress-check'].includes(step.id) ? humanCheckAccepted(step.id as 'crew-check'|'systems-check'|'stress-check',session.moon,session.preparation)
       : ['crew-selection','crew-plan'].includes(step.id) ? crewReport(session.moon.crew).complete && WORKSHOP_STAGES.every(id => ready(id)) : ready(step.id);
     if (!valid) return session;

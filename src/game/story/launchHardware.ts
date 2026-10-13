@@ -1,10 +1,11 @@
 import * as THREE from 'three';
+import { createCrewedPlatform } from './moon/crewedMeshes.ts';
 import { buildAssembly } from './workshopMeshes.ts';
 import { partById } from './preparation.ts';
 import type { PreparationSelection } from './design.ts';
 
 /** A generic two-stage robotic launcher. Dimensions are illustrative, not a vehicle replica. */
-export function createLaunchHardware(preparation: PreparationSelection) {
+export function createLaunchHardware(preparation: PreparationSelection, crewed = false) {
   const white = new THREE.MeshStandardMaterial({ color: 0xe8e9eb, metalness: .18, roughness: .46 });
   const silver = new THREE.MeshStandardMaterial({ color: 0xa7adb6, metalness: .82, roughness: .34 });
   const dark = new THREE.MeshStandardMaterial({ color: 0x20252c, metalness: .5, roughness: .43 });
@@ -66,8 +67,10 @@ export function createLaunchHardware(preparation: PreparationSelection) {
   cylinder(.74,.85,.13,8.1,gold,adapter);
   ring(1.086,8.075,adapter,.019,dark);
 
-  const payload = buildAssembly(preparation); root.add(payload);
-  for (const child of payload.children) {
+  const payload = crewed ? new THREE.Group() : buildAssembly(preparation); root.add(payload);
+  if(crewed){const crew=createCrewedPlatform();crew.capsule.position.set(0,2.1,0);crew.capsule.scale.setScalar(.5);crew.lander.position.set(0,0,0);crew.lander.scale.setScalar(.55);payload.add(crew.capsule,crew.lander);}
+
+  for (const child of crewed ? [] : payload.children) {
     const lander = partById(child.name)?.category === 'lander';
     child.position.x += lander ? 2.1 : -2.1;
     if (!lander) { child.position.multiplyScalar(.5); child.position.y += 2.05; child.scale.multiplyScalar(.5); }
@@ -76,7 +79,7 @@ export function createLaunchHardware(preparation: PreparationSelection) {
   const bounds = new THREE.Box3().setFromObject(payload);
   if (!bounds.isEmpty()) {
     const size = bounds.getSize(new THREE.Vector3()), centre = bounds.getCenter(new THREE.Vector3());
-    const scale = Math.min(1, 1.82 / Math.hypot(size.x,size.z), 2.15 / Math.max(size.y,.001));
+    const scale = Math.min(1, (crewed?2.2:1.82) / Math.hypot(size.x,size.z), (crewed?3.5:2.15) / Math.max(size.y,.001));
     for (const child of payload.children) {
       child.position.sub(new THREE.Vector3(centre.x,bounds.min.y,centre.z)).multiplyScalar(scale);
       child.scale.multiplyScalar(scale);
@@ -130,9 +133,12 @@ export function createLaunchHardware(preparation: PreparationSelection) {
       decal.position.y = 2.74; booster.add(decal);
     }
   }
+  const escapeTower=new THREE.Group();root.add(escapeTower);escapeTower.visible=crewed;
+  cylinder(.075,.075,.8,13.4,dark,escapeTower);cylinder(.15,.1,.4,13.94,white,escapeTower);
+  for(const x of [-.16,.16]){const strut=new THREE.Mesh(new THREE.BoxGeometry(.025,.65,.025),silver);strut.position.set(x,13.13,0);strut.rotation.z=x>0?-.15:.15;escapeTower.add(strut);}
   const platform = new THREE.Mesh(new THREE.CylinderGeometry(2.55,2.65,.15,64),dark);
   platform.position.y = -.37; root.add(platform); platform.name = 'launch-platform';
   const platformRing = new THREE.Mesh(new THREE.TorusGeometry(2.35,.015,6,64),silver);
   platformRing.rotation.x = Math.PI / 2; platformRing.position.y = .08; platform.add(platformRing);
-  return { root,booster,upper,adapter,payload,halves,platform };
+  return { root,booster,upper,adapter,payload,halves,platform,escapeTower };
 }

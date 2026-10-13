@@ -88,9 +88,9 @@ export function ChoiceScreen({ step, progress, onSelect, onNext, onBack, frame }
               {option.description ? <span className="selection-card-description">{option.id === 'crater-rim' ? 'More light · safer route' : option.id === 'permanent-shadow' ? 'Dark & cold · harder route' : option.description}</span> : null}
               {!option.available && option.id === 'mars' ? <span className="selection-card-lock">Coming soon</span> : null}
             </span>
-          </button><div className="selection-choice-hint">{option.id === 'moon' ? 'Tap to start →' : option.id === 'crater-rim' ? <Term term="crater">Sunlit start · solar can work</Term> : option.id === 'permanent-shadow' ? <Term term="shadow">No solar · better warmth needed</Term> : option.id === 'lunar-ice' ? <Term term="nss">Look for water clues</Term> : option.id === 'lunar-geology' ? <Term term="geology">Study rocks & soil</Term> : 'Locked'}</div></article>)}
+          </button><div className="selection-choice-hint">{option.id === 'moon' ? 'Tap to start →' : option.id === 'crater-rim' ? <Term term="crater">Sunlit start · solar can work</Term> : option.id === 'permanent-shadow' ? <Term term="shadow">No solar · better warmth needed</Term> : option.id === 'lunar-ice' ? <Term term="nss">Look for water clues</Term> : option.id === 'lunar-geology' ? <Term term="geology">Study rocks & soil</Term> : option.id==='lunar-highlands'?<Term term="geology">Explore old crust</Term>:option.id==='ancient-crater'?<Term term="crater">Explore impact clues</Term>:'Locked'}</div></article>)}
         </div>
-        <div className="selection-word-help">{step.choiceKey === 'site' ? <><Term term="crater">Crater rim</Term><Term term="shadow">Permanent shadow</Term></> : step.choiceKey === 'objective' ? <Term term="geology">Geology</Term> : null}</div>
+        <div className="selection-word-help">{step.choiceKey === 'site'&&progress.selections.objective==='lunar-geology'?<Term term="geology">Rock origins</Term>:step.choiceKey === 'site' ? <><Term term="crater">Crater rim</Term><Term term="shadow">Permanent shadow</Term></> : step.choiceKey === 'objective' ? <Term term="geology">Geology</Term> : null}</div>
       </section>
     </main>
   </StoryShell>;

@@ -1,4 +1,6 @@
-import { missionSignature, packingComplete } from './readiness.ts';
+import { missionSignature, packingComplete, allChecksAccepted } from './readiness.ts';
+import { humanPacked } from './moon/validation.ts';
+import type { MoonSession } from './moon/session.ts';
 import type { ReadinessState } from './readiness.ts';
 import type { PreparationSelection } from './design.ts';
 import type { StoryProgress } from './types.ts';
@@ -13,7 +15,8 @@ export type FlightEvent = { type: 'flight-start' } | { type: 'flight-tick'; seco
   | { type: 'flight-speed'; speed: number } | { type: 'flight-action'; action: FlightAction } | { type: 'flight-skip' } | { type: 'flight-replay' }
   | { type: 'flight-mode'; mode: FlightMode } | { type: 'flight-retry-window' };
 export function emptyFlight(): FlightState { return { version: 1, signature: null, t: 0, status: 'ready', speed: 1, events: [], skipped: false, mode: 'guided', missedWindow: false, attempts: 0, feedback: null }; }
-export function launchAuthorized(progress: StoryProgress, preparation: PreparationSelection, readiness: ReadinessState) {
+export function launchAuthorized(progress: StoryProgress, preparation: PreparationSelection, readiness: ReadinessState, moon?: MoonSession) {
+  if(moon)return !!moon.human.approved&&moon.human.approved.signature===moon.designSignature&&humanPacked(moon,preparation)&&allChecksAccepted(progress,preparation,readiness,moon);
   return !!readiness.approved && readiness.approved.signature === missionSignature(progress, preparation) && packingComplete(progress, preparation, readiness);
 }
 export function pendingFlightAction(state: FlightState) { return FLIGHT_GATES.find(gate => state.t >= gate.t && !state.events.includes(gate.event)); }

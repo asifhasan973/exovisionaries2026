@@ -48,15 +48,15 @@ export function FlightScreen({ session, dispatch, frame, onBack }: { session: Wo
   },[effects,telemetry.countdown,flight.events.length,complete,flight.skipped,flight.status,flight.t]);
   useEffect(() => { const pause = () => dispatch({ type: 'flight-pause' }); window.addEventListener('game-help-open',pause); return () => window.removeEventListener('game-help-open',pause); },[dispatch]);
   const act = (event: MissionEvent) => { sound.setMuted(!effects); if (event.type !== 'flight-action') sound.playRadioBeep(); dispatch(event); };
-  const back = () => { dispatch({ type: 'flight-pause' }); onBack(); };
-  const next = () => { if (orbit) frame.onHome?.(); else dispatch({ type: 'next' }); };
+  const back = () => { dispatch({ type:'flight-pause' }); if(flight.t>0)setNotesOpen(true);else onBack(); };
+  const next = () => dispatch({ type: 'next' });
   const phase = complete ? 'orbit' : ready ? `ready-${flight.mode}` : flight.missedWindow ? `retry-${flight.attempts}` : flight.status === 'paused' ? 'paused'
     : flight.status === 'awaiting' ? `release-${gate?.event}` : safe ? `safe-${nextGate?.event}` : incorrect ? `feedback-${flight.attempts}-${flight.events.length}` : telemetry.countdown ? 'countdown' : `burn-${flight.events.length}`;
   const advice = complete ? 'We made it! Earth orbit!' : ready ? challenge ? 'Release when the band turns green. Ready?' : 'All systems go! We’ll pause when it’s your turn.'
     : flight.missedWindow ? 'Missed it? Retry this stage. You’ve got this!' : flight.status === 'paused' ? 'Flight paused. Continue when you’re ready.'
     : flight.status === 'awaiting' ? gate?.event === 'booster' ? 'Empty booster! Let’s drop that extra weight.' : 'Clear of thick air. Open the cover!'
-    : safe ? nextGate?.event === 'booster' ? 'Green! Separate the empty booster now.' : 'Green! Release the fairing now.' : incorrect ? flight.feedback! : telemetry.countdown ? 'Countdown started. Here we go!' : flight.events.includes('fairing') ? 'Explorer uncovered. Next stop: Earth orbit!' : flight.events.includes('booster') ? 'Clean release! Our upper stage is pushing.' : 'Liftoff! Watch Earth fall away.';
-  const action = complete ? <button data-primary-action className="conversation-next launch-primary" onClick={next}>{orbit ? 'Mission home' : 'View result'}<ArrowRight size={21}/></button>
+    : safe ? nextGate?.event === 'booster' ? 'Green! Separate the empty booster now.' : 'Green! Release the fairing now.' : incorrect ? flight.feedback! : telemetry.countdown ? 'Countdown started. Here we go!' : flight.events.includes('fairing') ? 'Crew spacecraft uncovered. Next stop: Earth orbit!' : flight.events.includes('booster') ? 'Clean release! Our upper stage is pushing.' : 'Liftoff! Watch Earth fall away.';
+  const action = complete ? <button data-primary-action className="conversation-next launch-primary" onClick={next}>{orbit ? 'Mission home' : 'Choose Moon route'}<ArrowRight size={21}/></button>
     : ready ? <button data-primary-action className="conversation-next launch-primary is-start" onClick={() => { sound.setMuted(!effects); sound.playCountdownBeep(); dispatch({ type: 'flight-start' }); }}><Rocket size={22}/>Start countdown</button>
     : challenge && nextGate ? <div className="launch-release"><ReleaseWindow flight={flight} act={act} compact/></div>
     : flight.status === 'awaiting' && gate ? <button data-primary-action className="conversation-next launch-primary is-release" onClick={() => act({ type:'flight-action',action:gate.event })}><Rocket size={21}/>{gate.label}</button>
@@ -77,8 +77,8 @@ export function FlightScreen({ session, dispatch, frame, onBack }: { session: Wo
   return <StoryShell {...frame} controls={footer}>
     <main className="workshop-main launch-main" id="story-content" tabIndex={-1} aria-labelledby="flight-title">
       <section className="launch-stage" aria-label="Mission flight">
-        <Suspense fallback={<div className="workshop-render-fallback">Preparing launchpad…</div>}><FlightViewport preparation={preparation} flight={flight} reducedMotion={gentle}/></Suspense>
-        <div className="launch-topline"><div className="launch-title"><span>MISSION 01 · EARTH TO ORBIT</span><h1 id="flight-title">{orbit ? 'Milestone 1 complete!' : telemetry.title}</h1></div><span className={`launch-status ${flight.status === 'awaiting' ? 'is-turn' : ''}`}><i/>{complete ? 'IN ORBIT' : ready ? 'READY' : flight.status === 'awaiting' ? 'YOUR TURN' : flight.status === 'paused' ? 'PAUSED' : 'LIVE'}</span></div>
+        <Suspense fallback={<div className="workshop-render-fallback">Preparing launchpad…</div>}><FlightViewport preparation={preparation} flight={flight} reducedMotion={gentle} crewed/></Suspense>
+        <div className="launch-topline"><div className="launch-title"><span>MISSION 01 · EARTH TO ORBIT</span><h1 id="flight-title">{orbit ? 'Earth parking orbit' : telemetry.title}</h1></div><span className={`launch-status ${flight.status === 'awaiting' ? 'is-turn' : ''}`}><i/>{complete ? 'IN ORBIT' : ready ? 'READY' : flight.status === 'awaiting' ? 'YOUR TURN' : flight.status === 'paused' ? 'PAUSED' : 'LIVE'}</span></div>
         <div className="launch-hud"><div className="launch-readings" aria-label="Live flight readings"><div><span>Above Earth</span><strong>{Math.round(telemetry.altitudeKm)}<small> km</small></strong></div><div><span>Speed</span><strong>{telemetry.speedKmS.toFixed(2)}<small> km/s</small></strong></div></div>
           <ol className="launch-milestones" aria-label="Flight stages">{['Launch','Separate','Orbit'].map((name,index) => {
             const done = index === 0 ? flight.events.includes('booster') : index === 1 ? flight.events.includes('fairing') : complete;
@@ -91,7 +91,7 @@ export function FlightScreen({ session, dispatch, frame, onBack }: { session: Wo
         {complete ? <div className="launch-orbit"><Trophy size={29}/><div><strong>Earth orbit reached!</strong><span>{flight.skipped ? 'Preview complete' : 'Built · tested · launched'}</span></div></div> : null}
       </section>
       {notesOpen ? <GameInfo title="Flight notes" onClose={() => setNotesOpen(false)} pages={[
-        <div key="stages"><p><Term term="booster">Booster</Term> gives the first push. Drop it when empty.</p><p><Term term="fairing">Fairing</Term> protects the explorer. Release it above the thick air.</p><p><Term term="orbit">Orbit</Term> means moving sideways fast enough to keep falling around Earth.</p></div>,
+        <div key="stages">{flight.t>0?<button className="game-info-trigger" onClick={()=>{dispatch({type:'flight-replay'});setNotesOpen(false);}}>Restart from launchpad</button>:null}<p><Term term="booster">Booster</Term> gives the first push. Drop it when empty.</p><p><Term term="fairing">Fairing</Term> protects the explorer. Release it above the thick air.</p><p><Term term="orbit">Orbit</Term> means moving sideways fast enough to keep falling around Earth.</p></div>,
         <div key="orbit"><p>This is a compressed game flight, not a trajectory solver. Example orbit: 200 km, about 7.79 km/s. No ISS stop; a later burn heads toward the Moon.</p><a href="https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/flight-to-orbit/" target="_blank" rel="noreferrer">NASA: flight to orbit</a></div>,
         <p key="credits">Scales are illustrative. The Sun stays roughly 150 million km away. Audio is a game effect; sound cannot travel through a vacuum. Earth imagery: NASA Earth Observatory · Reto Stöckli / Robert Simmon.</p>
       ]}/> : null}

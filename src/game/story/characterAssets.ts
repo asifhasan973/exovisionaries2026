@@ -64,7 +64,7 @@ export interface LoadedCharacterArt {
 
 export interface CharacterAssetCompositor {
   loadRigAssets(characterId: CharacterArtId, baseURL?: string | URL, signal?: AbortSignal): Promise<LoadedCharacterArt>;
-  sampleRigMotion(elapsedMs: number, speaking?: boolean, reducedMotion?: boolean): CharacterMotion;
+  sampleRigMotion(elapsedMs: number, speaking?: boolean, reducedMotion?: boolean, speechMs?: number): CharacterMotion;
   drawCharacterRig(context: CanvasRenderingContext2D, assets: LoadedCharacterArt, cue: PerformanceCue, motion?: CharacterMotion): void;
   drawCharacterPortrait(context: CanvasRenderingContext2D, assets: LoadedCharacterArt, expression: StoryExpression, motion?: CharacterMotion): void;
 }

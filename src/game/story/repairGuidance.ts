@@ -30,6 +30,21 @@ export function repairApplied(guide: RepairGuide, preparation: PreparationSelect
   return guide.action === 'depth' ? (preparation.drillDepthCm ?? 100) <= guide.depthCm! && plan.requiredWh <= plan.usableWh
     : ['budget','mass','energy','peak'].includes(guide.problem) ? false : guide.action === 'remove' ? !installedIds(preparation).includes(guide.partId!) : installedIds(preparation).includes(guide.partId!);
 }
+/** Restore the pointer target, never an approval. All labels/voice come from code. */
+export function restoreRepairGuide(raw: unknown, session: WorkshopSession): RepairGuide | undefined {
+  if (!raw || typeof raw !== 'object' || !['prepare','validate'].includes(session.moon.phase)) return;
+  const saved = raw as Partial<RepairGuide>;
+  if (!['thermal','energy','peak','mass','budget','depth','science-mass'].includes(saved.problem ?? '')) return;
+  let guide: RepairGuide | undefined;
+  if (saved.action === 'depth' && Number.isInteger(saved.depthCm) && saved.depthCm! >= 10 && saved.depthCm! <= 100 && saved.depthCm! % 10 === 0) {
+    guide = { problem: saved.problem!, action: 'depth', stage: 'science-build', category: 'depth', depthCm: saved.depthCm,
+      label: `Drill ${saved.depthCm} cm or less`, ...speech('repair-depth') };
+  } else if (saved.partId && ['install','remove'].includes(saved.action ?? '') && partsForObjective(session.progress.selections.objective ?? 'lunar-ice').some(part => part.id === saved.partId)) {
+    guide = partGuide(saved.problem!, saved.partId, saved.action as 'install' | 'remove');
+  }
+  if (!guide || guide.stage !== session.progress.stepId || !guide.text) return;
+  return { ...guide, fromChecks: saved.fromChecks === true };
+}
 /** Recompute from the current build. Never remove required instruments or downgrade shadow protection. */
 export function recommendRepair(session: WorkshopSession, problem: RepairProblem): RepairGuide | null {
   const { preparation } = session;

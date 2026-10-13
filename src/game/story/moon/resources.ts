@@ -30,7 +30,7 @@ export function operatingPower(parts: readonly ElectricalPart[], mode: Operating
     if (part.category === 'rover') return mode === 'traverse';
     if (part.category === 'navigation') return mode === 'traverse';
     if (part.category === 'science') return mode === 'drilling'
-      ? part.id === 'trident' || part.id.startsWith('geo-drill-')
+      ? part.id === 'trident' || part.id.startsWith('geo-drill-') || activeScienceIds.includes(part.id)
       : mode === 'analysis' && activeScienceIds.includes(part.id);
     return part.category === 'thermal' || part.category === 'communication';
   });

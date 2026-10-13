@@ -1,0 +1,81 @@
+import { SceneFallback } from './SceneFallback.tsx';
+import {useEffect,useRef,useState} from 'react';
+import * as THREE from 'three';
+import {buildAssembly,disposeGroup} from '../workshopMeshes.ts';
+import {partById} from '../preparation.ts';
+import type {PreparationSelection} from '../design.ts';
+import type {MoonSession} from './session.ts';
+import {createCrewedPlatform} from './crewedMeshes.ts';
+import {SURFACE_NODES,SURFACE_EDGES,SURFACE_MODEL,surfacePosition,surfaceLight,legPoint,surfaceNode,surfaceNodeName} from './surface.ts';
+import type {SurfaceState} from './surface.ts';
+
+interface ScienceAnimation {geology?:boolean;scoop?:boolean;seismometerSite?:'lookout'|'edge'|'target'|null;sampleCount?:number;target:'lookout'|'edge'|'target';phase:string;frame:number;frameLimit:number;depthCm:number;paused:boolean;dust?:number;recovery?:'brush'|'calibrate'|'wait'|null;radiation?:boolean}
+export function SurfaceViewport({surface,preparation,moon,gentle,science}:{surface:SurfaceState;preparation:PreparationSelection;moon:MoonSession;gentle:boolean;science?:ScienceAnimation}){
+  const scienceRef=useRef(science);
+  useEffect(()=>{scienceRef.current=science;redraw.current();},[science]);
+  const host=useRef<HTMLDivElement>(null),latest=useRef(surface),redraw=useRef(()=>{}),[view,setView]=useState<'follow'|'map'>('follow'),viewRef=useRef(view),[failed,setFailed]=useState(false);
+  useEffect(()=>{latest.current=surface;redraw.current();},[surface]);useEffect(()=>{viewRef.current=view;redraw.current();},[view]);
+  useEffect(()=>{
+    const mount=host.current;if(!mount)return;let disposed=false,frame=0,last=0,renderer:THREE.WebGLRenderer;
+    try{renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:'low-power'});}catch{queueMicrotask(()=>setFailed(true));return;}
+    renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.5));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;mount.append(renderer.domElement);
+    const scene=new THREE.Scene();scene.background=new THREE.Color('#0e0b1c');scene.fog=new THREE.Fog('#0e0b1c',48,85);const camera=new THREE.PerspectiveCamera(40,1,.1,150);
+    scene.add(new THREE.HemisphereLight(0xd0c6e6,0x241732,1.6));const sun=new THREE.DirectionalLight(0xffedd1,3);sun.position.set(-15,9,-18);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-22;sun.shadow.camera.right=35;sun.shadow.camera.top=20;sun.shadow.camera.bottom=-20;scene.add(sun);
+    const ground=new THREE.Mesh(new THREE.PlaneGeometry(100,65),new THREE.MeshStandardMaterial({color:0x797181,roughness:1}));ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
+    const shadowPatch=new THREE.Mesh(new THREE.PlaneGeometry(35,28),new THREE.MeshStandardMaterial({color:0x292134,roughness:1}));shadowPatch.rotation.x=-Math.PI/2;shadowPatch.position.set(22.5,.012,-12.67);shadowPatch.receiveShadow=true;scene.add(shadowPatch);
+    if(moon.site==='permanent-shadow'){const patch=new THREE.Mesh(new THREE.CircleGeometry(3.4,48),new THREE.MeshStandardMaterial({color:0x292134,roughness:1}));patch.rotation.x=-Math.PI/2;patch.position.set(-35/6,.02,0);patch.receiveShadow=true;scene.add(patch);}
+    // Authored ridge: visible relief and a line-of-sight obstacle, not a NASA terrain product.
+    const terrain=new THREE.PlaneGeometry(19,9,38,18);terrain.rotateX(-Math.PI/2);const vertices=terrain.attributes.position;
+    for(let i=0;i<vertices.count;i++){const x=vertices.getX(i),z=vertices.getZ(i);vertices.setY(i,Math.exp(-Math.pow(z/2,2))*(2.3+Math.sin(x*.6)*.5)+Math.sin(x*3+z)*.03);}terrain.computeVertexNormals();
+    const ridge=new THREE.Mesh(terrain,new THREE.MeshStandardMaterial({color:0x54495f,roughness:1,side:THREE.DoubleSide}));ridge.position.set(15,0,-9);ridge.castShadow=true;ridge.receiveShadow=true;scene.add(ridge);
+    for(let i=0;i<24;i++){const rock=new THREE.Mesh(new THREE.DodecahedronGeometry(.15+(i%4)*.07),new THREE.MeshStandardMaterial({color:i%2?0x71647c:0x44374f,roughness:1}));rock.position.set(Math.sin(i*7)*2,.12,-2+Math.cos(i*3)*1.1);rock.rotation.set(i*.4,i*1.7,i*.9);rock.castShadow=true;scene.add(rock);}
+    const labels:THREE.Sprite[]=[],routeLines:THREE.Line[]=[];
+    SURFACE_EDGES.forEach(e=>{const leg={edge:e.id,from:e.a,to:e.b},points=Array.from({length:30},(_,i)=>{const p=legPoint(leg,i/29);return new THREE.Vector3(p.x/6,.05,p.z/6);});const line=new THREE.Line(new THREE.BufferGeometry().setFromPoints(points),new THREE.LineDashedMaterial({color:e.rough?0xeaa180:0xa58dbb,dashSize:.23,gapSize:.18,transparent:true,opacity:.65}));line.computeLineDistances();scene.add(line);routeLines.push(line);});
+    for(const node of SURFACE_NODES){const marker=new THREE.Mesh(new THREE.RingGeometry(.5,.56,48),new THREE.MeshBasicMaterial({color:node.id==='target'?0xffd56a:0x92dfbb,side:THREE.DoubleSide,toneMapped:false}));marker.rotation.x=-Math.PI/2;marker.position.set(node.x/6,.06,node.z/6);scene.add(marker);
+      const canvas=document.createElement('canvas');canvas.width=256;canvas.height=64;const ctx=canvas.getContext('2d');if(ctx){ctx.fillStyle='#21112ee8';ctx.fillRect(0,0,256,64);ctx.font='bold 27px sans-serif';ctx.textAlign='center';ctx.fillStyle='#fff1ca';ctx.fillText(surfaceNodeName(node.id,moon),128,42);}const label=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(canvas),depthTest:false}));label.position.set(node.x/6,2.6,node.z/6-.7);label.scale.set(2.8,.7,1);scene.add(label);labels.push(label);}
+    const crew=createCrewedPlatform();crew.capsule.visible=false;crew.lander.position.set(0,0,0);crew.root.position.set(-35/6-3,0,0);crew.lander.scale.setScalar(1.7);scene.add(crew.root);
+    const ramp=new THREE.Mesh(new THREE.BoxGeometry(3,.08,1.2),new THREE.MeshStandardMaterial({color:0x91929d,metalness:.5,roughness:.5}));ramp.rotation.z=-.28;ramp.position.set(-35/6-1.7,.5,0);ramp.receiveShadow=true;scene.add(ramp);
+    const rover=new THREE.Group(),assembly=buildAssembly(preparation);scene.add(rover);
+    for(const part of [...assembly.children]){if(partById(part.name)?.category==='lander')continue;rover.add(part);part.position.x-=2.1;}
+    disposeGroup(assembly);
+    if(moon.objective==='lunar-geology')for(const [i,id] of (['lookout','edge','target'] as const).entries()){
+      const point=surfaceNode(id),patch=new THREE.Group();patch.position.set(point.x/6,.08,point.z/6);
+      const colors=id==='edge'?[0x3e3b47,0x55505c]:id==='target'||moon.site==='ancient-crater'?[0x9e979d,0x494650]:[0xd5d1c8,0xb6b1b4];
+      for(let j=0;j<9;j++){const fragment=new THREE.Mesh(new THREE.DodecahedronGeometry(.18+(j%3)*.05),new THREE.MeshStandardMaterial({color:colors[j%2],roughness:.95}));fragment.position.set(Math.sin(j*2.3)*.65,.16,Math.cos(j*2.3)*.65);fragment.rotation.set(i+j*.2,j,j*.5);fragment.castShadow=true;patch.add(fragment);}scene.add(patch);
+    }
+    const scoopArm=new THREE.Group();rover.add(scoopArm);scoopArm.position.set(.5,.8,.3);const armBar=new THREE.Mesh(new THREE.BoxGeometry(.12,.12,.8),new THREE.MeshStandardMaterial({color:0xc3cbd5,metalness:.6,roughness:.4}));armBar.position.z=.4;scoopArm.add(armBar);const scoopBowl=new THREE.Mesh(new THREE.BoxGeometry(.35,.18,.3),new THREE.MeshStandardMaterial({color:0xbba677,metalness:.4,roughness:.6}));scoopBowl.position.z=.88;scoopArm.add(scoopBowl);
+    const sensor=new THREE.Group();const sensorBase=new THREE.Mesh(new THREE.CylinderGeometry(.22,.3,.12,24),new THREE.MeshStandardMaterial({color:0xc5a346,metalness:.55,roughness:.5}));sensorBase.position.y=.08;sensor.add(sensorBase);const sensorTop=new THREE.Mesh(new THREE.BoxGeometry(.27,.22,.27),new THREE.MeshStandardMaterial({color:0xbac3cb,metalness:.5,roughness:.5}));sensorTop.position.y=.21;sensor.add(sensorTop);scene.add(sensor);
+    const scan=new THREE.Mesh(new THREE.RingGeometry(.6,.66,64),new THREE.MeshBasicMaterial({color:0x8feec9,transparent:true,opacity:.8,side:THREE.DoubleSide,toneMapped:false}));scan.rotation.x=-Math.PI/2;scene.add(scan);
+    const drill=new THREE.Group(),shaft=new THREE.Mesh(new THREE.CylinderGeometry(.055,.055,1.2,16),new THREE.MeshStandardMaterial({color:0xd2d8df,metalness:.85,roughness:.3}));drill.add(shaft);
+    for(let i=0;i<12;i++){const tooth=new THREE.Mesh(new THREE.TorusGeometry(.09,.018,6,12,Math.PI*1.5),shaft.material);tooth.position.y=-.55+i*.09;tooth.rotation.y=i*.7;drill.add(tooth);}rover.add(drill);drill.position.set(.2,.5,.4);
+    const cuttings=new THREE.Group();for(let i=0;i<14;i++){const chip=new THREE.Mesh(new THREE.DodecahedronGeometry(.04+(i%3)*.015),new THREE.MeshStandardMaterial({color:0x968d9e,roughness:1}));chip.position.set(Math.sin(i*5)*.35,.06,Math.cos(i*7)*.35);cuttings.add(chip);}scene.add(cuttings);
+    const scienceGlow=new THREE.PointLight(0x9cffce,0,3);scienceGlow.position.set(0,.8,0);rover.add(scienceGlow);
+    const lamp=new THREE.SpotLight(0xc7e8ff,24,14,.55,.5,1);lamp.position.set(0,1.7,-.7);rover.add(lamp);const lampTarget=new THREE.Object3D();scene.add(lampTarget);lamp.target=lampTarget;
+    const astronaut=(x:number)=>{const group=new THREE.Group(),white=new THREE.MeshStandardMaterial({color:0xe6e2da,roughness:.6}),gold=new THREE.MeshStandardMaterial({color:0x976b20,metalness:.7,roughness:.2}),body=new THREE.Mesh(new THREE.BoxGeometry(.4,.5,.26),white);body.position.y=.65;group.add(body);const helmet=new THREE.Mesh(new THREE.SphereGeometry(.24,20,12),white);helmet.position.y=1.1;group.add(helmet);const visor=new THREE.Mesh(new THREE.SphereGeometry(.205,20,12,0,Math.PI),gold);visor.position.set(0,1.1,.1);group.add(visor);for(const side of [-1,1]){const limb=new THREE.Mesh(new THREE.BoxGeometry(.12,.45,.15),white);limb.position.set(side*.13,.24,0);group.add(limb);const arm=new THREE.Mesh(new THREE.CapsuleGeometry(.065,.33,4,8),white);arm.position.set(side*.28,.69,0);group.add(arm);}group.position.set(x,0,1.6);scene.add(group);return group;};const astronauts=[astronaut(-8.2),astronaut(-7.1)];
+    const dustColour=new THREE.Color(0x8a8084),paint=new Map<THREE.MeshStandardMaterial,THREE.Color>();rover.traverse(o=>{if(o instanceof THREE.Mesh){const materials=Array.isArray(o.material)?o.material:[o.material];materials.forEach(m=>{if(m instanceof THREE.MeshStandardMaterial&&!paint.has(m))paint.set(m,m.color.clone());});}});
+    rover.position.set(-35/6,0,0);let oldPosition=rover.position.clone();
+    const draw=(snap=false)=>{
+      if(disposed||document.hidden)return;const s=latest.current,activity=scienceRef.current,p=surfacePosition(s),deployment=s.stage==='stowed'?0:s.stage==='deploying'?s.phaseFrame/SURFACE_MODEL.deployFrames:1;
+      const target=new THREE.Vector3(s.deployed?p.x/6:-35/6-2.5*(1-deployment),s.deployed?0:1.3*(1-deployment),s.deployed?p.z/6:0);
+      if(snap||gentle||s.paused)rover.position.copy(target);else rover.position.lerp(target,.35);
+      const delta=rover.position.clone().sub(oldPosition);oldPosition.copy(rover.position);if(delta.length()>.005&&!gentle){rover.rotation.y=Math.atan2(-delta.x,-delta.z);rover.traverse(o=>{if(o.userData.wheelPivot)o.rotation.x+=delta.length()/.32;});}
+      paint.forEach((color,material)=>material.color.copy(color).lerp(dustColour,(activity?.dust??0)*.45));
+      const working=activity&&!activity.paused,progress=activity?Math.min(1,activity.frame/Math.max(1,activity.frameLimit)):0;
+      scan.visible=!!activity&&!!working&&['survey','analysis','transmitting','listening'].includes(activity.phase);scan.position.set(rover.position.x,.08,rover.position.z);scan.scale.setScalar(1+((activity?.frame??0)%12)/5);(scan.material as THREE.MeshBasicMaterial).opacity=.8*(1-((activity?.frame??0)%12)/14);
+      drill.visible=activity?.phase==='drilling'&&!activity.scoop;scoopArm.visible=!!activity?.geology&&!!activity.scoop&&activity.phase==='drilling';scoopArm.rotation.x=activity?.phase==='drilling'?Math.sin(progress*Math.PI)*.75:0;
+      sensor.visible=!!activity?.geology&&!!activity.seismometerSite;if(activity?.seismometerSite){const place=surfaceNode(activity.seismometerSite);sensor.position.set(place.x/6-.6,0,place.z/6-.8);}drill.position.y=.9-progress*Math.min(100,activity?.depthCm??20)/100;drill.rotation.y=working?(activity?.frame??0)*1.8:drill.rotation.y;
+      cuttings.visible=!!activity&&['drilling','analysis','report','ready'].includes(activity.phase);const samplePlace=activity?surfaceNode(activity.target):p;cuttings.position.set(samplePlace.x/6+.2,.01,samplePlace.z/6+.4);cuttings.scale.setScalar(activity?.phase==='drilling'?Math.max(.1,progress):1);
+      scienceGlow.intensity=working&&['survey','analysis'].includes(activity.phase)?2:0;
+      astronauts.forEach((a,i)=>{a.visible=!s.crewSheltered;a.position.x=activity?.recovery==='brush'?-6.5+i*1.5:-8.2+i*1.1+Math.sin(deployment*Math.PI)*1.5;a.rotation.y=activity?.recovery==='brush'?Math.PI/2:0;if(activity?.recovery==='brush')a.children.slice(-2).forEach(arm=>{arm.rotation.z=Math.sin((activity.frame??0)*.65)*.45;});});ramp.visible=!s.deployed;
+      const light=surfaceLight(p.x,p.z,moon);lamp.visible=s.deployed&&light===0;const forward=new THREE.Vector3(0,0,-1).applyQuaternion(rover.quaternion);lampTarget.position.copy(rover.position).add(forward.multiplyScalar(6));lampTarget.position.y=.05;
+      labels.forEach((label,i)=>{label.visible=viewRef.current==='map'||Math.hypot(label.position.x-rover.position.x,label.position.z-rover.position.z)<8;label.material.opacity=SURFACE_NODES[i].id===s.location?1:.85;});
+      if(viewRef.current==='map'){camera.position.set(10,28,35);camera.lookAt(7,0,-2);}else{camera.position.copy(rover.position).add(new THREE.Vector3(9,7,10));camera.lookAt(rover.position.x,1,rover.position.z);}renderer.render(scene,camera);
+    };
+    const animate=(time:number)=>{if(disposed||document.hidden)return;if(time-last>32){draw();last=time;}if((['driving','deploying'].includes(latest.current.stage)&&!latest.current.paused)||(!!scienceRef.current&&!scienceRef.current.paused&&['survey','drilling','analysis','transmitting','recovering','listening'].includes(scienceRef.current.phase)))frame=requestAnimationFrame(animate);};
+    const wake=()=>{cancelAnimationFrame(frame);const moving=(['driving','deploying'].includes(latest.current.stage)&&!latest.current.paused)||(!!scienceRef.current&&!scienceRef.current.paused&&['survey','drilling','analysis','transmitting','recovering','listening'].includes(scienceRef.current.phase));draw(!moving);if(moving&&!document.hidden)frame=requestAnimationFrame(animate);};redraw.current=wake;
+    const resize=()=>{renderer.setSize(Math.max(1,mount.clientWidth),Math.max(1,mount.clientHeight),false);camera.aspect=mount.clientWidth/Math.max(1,mount.clientHeight);camera.updateProjectionMatrix();wake();};const observer=new ResizeObserver(resize);observer.observe(mount);
+    const lost=(e:Event)=>{e.preventDefault();disposed=true;cancelAnimationFrame(frame);redraw.current=()=>{};setFailed(true);};renderer.domElement.addEventListener('webglcontextlost',lost);document.addEventListener('visibilitychange',wake);resize();
+    return()=>{disposed=true;cancelAnimationFrame(frame);observer.disconnect();redraw.current=()=>{};document.removeEventListener('visibilitychange',wake);renderer.domElement.removeEventListener('webglcontextlost',lost);labels.forEach(l=>{l.material.map?.dispose();l.material.dispose();});routeLines.forEach(l=>{l.geometry.dispose();(l.material as THREE.Material).dispose();});disposeGroup(scene);renderer.dispose();renderer.forceContextLoss();renderer.domElement.remove();};
+  },[preparation,moon.site,moon.objective,gentle]);
+  return <><div className="surface-canvas" ref={host} role="img" aria-label="Your selected rover and equipment exploring a lunar route with sunlight, shadow, rocks and a crewed lander">{failed?<SceneFallback scene="surface" label={`At ${surface.location}`} detail={science?.phase ?? surface.stage} position={surface.location==='base'?0:surface.location==='lookout'?.35:surface.location==='edge'?.65:1}/>:null}</div><div className="surface-view-switch"><button aria-pressed={view==='follow'} onClick={()=>setView('follow')}>Follow rover</button><button aria-pressed={view==='map'} onClick={()=>setView('map')}>Map view</button></div></>;
+}

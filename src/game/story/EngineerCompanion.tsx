@@ -18,7 +18,7 @@ export function EngineerCompanion({ reaction, token, voiceEnabled, statusText, s
   const selection = useRef({ reaction, token, reply });
   const previousReplies = useRef<Partial<Record<EngineerReaction, string>>>({});
   const celebrate = reaction === 'complete' || reaction === 'trialPass';
-  const cue = engineerCue(reaction);
+  const cue = engineerCue(reaction, scriptedReply?.id);
   useEffect(() => {
     if (selection.current.reaction !== reaction || selection.current.token !== token) {
       const chosen = pickEngineerReply(reaction, previousReplies.current[reaction]);
@@ -27,14 +27,16 @@ export function EngineerCompanion({ reaction, token, voiceEnabled, statusText, s
       setReply(chosen);
     }
     const chosen = scriptedReply ?? selection.current.reply;
-    const timer = (token || scriptedReply) && voiceEnabled ? setTimeout(() => controller.speak(chosen.text, 'commander', chosen.id, gender), 0) : undefined;
+    const timer = (token || scriptedReply) && voiceEnabled && !statusText ? setTimeout(() => {
+      if (!document.hidden) controller.speak(chosen.text, 'commander', chosen.id, gender);
+    }, 0) : undefined;
     const hide = () => { if (document.hidden) controller.stop(); };
     document.addEventListener('visibilitychange', hide);
     const pause = () => controller.stop(); window.addEventListener('game-help-open', pause);
     return () => { clearTimeout(timer); controller.stop(); document.removeEventListener('visibilitychange', hide); window.removeEventListener('game-help-open', pause); };
-  }, [controller, reaction, token, voiceEnabled, gender, scriptedReply?.id, scriptedReply?.text]);
-  return <aside className={`workshop-engineer ${celebrate ? 'is-celebrating' : ''}`} aria-label="Mission engineer">
-    <div className="engineer-character"><CharacterStage cue={cue} active speaking={narration.status === 'speaking'} label="Commander" /></div>
+  }, [controller, reaction, token, voiceEnabled, gender, scriptedReply?.id, scriptedReply?.text, statusText]);
+  return <aside className={`workshop-engineer ${celebrate ? 'is-celebrating' : reaction === 'warning' || reaction === 'trialFail' ? 'is-warning' : ''}`} data-speaking={narration.status === 'speaking'} aria-label="Mission engineer">
+    <div className="engineer-character"><CharacterStage cue={cue} active speechTime={controller.getSpeechTime} speaking={narration.status === 'speaking'} label="Commander" /></div>
     <div className="engineer-bubble"><span>COMMANDER · MISSION ENGINEER</span><p role="status" aria-live="polite"><LearningText text={statusText ?? scriptedReply?.text ?? reply.text} /></p></div>
     <button className="conversation-icon" disabled={!voiceEnabled || !!statusText} aria-label="Replay engineer advice" onClick={() => controller.speak(scriptedReply?.text ?? reply.text, 'commander', scriptedReply?.id ?? reply.id, gender)}><Volume2 size={19} /></button>
   </aside>;

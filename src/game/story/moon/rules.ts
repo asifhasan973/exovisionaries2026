@@ -30,11 +30,11 @@ export const CREW_PLATFORM = Object.freeze({
   surfaceCapacity: 2,
   included: ['command-service-spacecraft', 'crewed-descent-stage', 'lunar-ascent-stage',
     'life-support', 'return-heat-shield', 'earth-parachutes'] as const,
-  explanation: 'Supplied game architecture, separately accounted from the equipment kit. Module 3 accounts for its mass, propellant and life support using the authored model in platform.ts; actual crewed journey gameplay is still pending.',
+  explanation: 'Supplied game architecture, separately accounted from the equipment kit. Module 3 accounts for its mass, propellant and life support using the authored model in platform.ts; crewed journey and terminal landing now use separately declared game models.',
 });
 
 /** Later modules enable their own gates only after implementing and validating their gameplay. */
-export const MOON_IMPLEMENTED = Object.freeze({ readiness: true, crewDeparture: false, journey: false, landing: false, surface: false, return: false });
+export const MOON_IMPLEMENTED = Object.freeze({ readiness: true, crewDeparture: true, journey: true, landing: true, surface: true, iceScience: true, geologyScience: true, incidents: true, return: true });
 
 export const MOON_ASSUMPTIONS = [
   'Credits, lightweight equipment allocations, crew support units and upgrade tiers are authored game values.',

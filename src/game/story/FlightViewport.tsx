@@ -7,7 +7,7 @@ import type { PreparationSelection } from './design.ts';
 import { flightTelemetry } from './flight.ts';
 import type { FlightState } from './flight.ts';
 
-export function FlightViewport({ preparation, flight, reducedMotion }: { preparation: PreparationSelection; flight: FlightState; reducedMotion: boolean }) {
+export function FlightViewport({ preparation, flight, reducedMotion, crewed = false }: { preparation: PreparationSelection; flight: FlightState; reducedMotion: boolean; crewed?: boolean }) {
   const host = useRef<HTMLDivElement>(null), model = useRef({ flight, reducedMotion }), repaint = useRef(() => {});
   const [failed, setFailed] = useState(false);
   useEffect(() => { model.current = { flight, reducedMotion }; repaint.current(); }, [flight, reducedMotion]);
@@ -22,7 +22,7 @@ export function FlightViewport({ preparation, flight, reducedMotion }: { prepara
     scene.add(new THREE.HemisphereLight(0xc2def4, 0x263348, 1.4));
     const sunlight = new THREE.DirectionalLight(0xfff4da, 4); sunlight.position.set(-18, 26, -8); sunlight.castShadow = true; sunlight.shadow.mapSize.set(1024,1024); sunlight.shadow.camera.left = -13; sunlight.shadow.camera.right = 13; sunlight.shadow.camera.top = 18; sunlight.shadow.camera.bottom = -10; sunlight.shadow.camera.far = 80; sunlight.shadow.normalBias = .035; scene.add(sunlight);
     const rim = new THREE.DirectionalLight(0x96c7ff, 2); rim.position.set(8, 3, -5); scene.add(rim);
-    const hardware = createLaunchHardware(preparation); scene.add(hardware.root);
+    const hardware = createLaunchHardware(preparation,crewed); scene.add(hardware.root);
     hardware.root.traverse(object => { if (object instanceof THREE.Mesh) object.castShadow = true; });
     const site = createLaunchSite(); scene.add(site.root);
     site.root.add(hardware.platform); hardware.platform.visible = false;
@@ -65,6 +65,7 @@ export function FlightViewport({ preparation, flight, reducedMotion }: { prepara
       hardware.booster.rotation.z = state.events.includes('booster') ? -fall * .04 : 0; hardware.booster.visible = fall < 10;
       const opening = state.events.includes('fairing') ? Math.min(9, Math.max(0, visualT - 24) * 1.1 + .1) : 0;
       hardware.halves.forEach((half, i) => { half.position.x = (i ? -1 : 1) * opening; half.position.y = -opening * .25; half.rotation.z = (i ? 1 : -1) * opening * .08; half.visible = opening < 8; });
+      hardware.escapeTower.visible=crewed&&visualT<21;hardware.escapeTower.position.set(Math.max(0,visualT-18)*.6,Math.max(0,visualT-18)*1.2,0);
       const upperBurn = state.events.includes('booster'); plume.position.y = upperBurn ? 5.4 : 0;
       plume.visible = telemetry.engineOn && (state.status === 'running' || state.status === 'paused' || state.status === 'awaiting'); flameMaterial.uniforms.time.value = quiet ? 0 : visualT * 2;
       const spread = 1 + progress * .9; plume.scale.set(spread, 1 + progress * .3, spread);
@@ -99,7 +100,7 @@ export function FlightViewport({ preparation, flight, reducedMotion }: { prepara
     renderer.domElement.addEventListener('webglcontextlost', lost); document.addEventListener('visibilitychange', wake); resize();
     return () => { disposed = true; cancelAnimationFrame(frame); observer.disconnect(); document.removeEventListener('visibilitychange', wake); renderer.domElement.removeEventListener('webglcontextlost', lost);
       repaint.current = () => {}; disposeGroup(scene); map.dispose(); sunlight.shadow.map?.dispose(); renderer.dispose(); renderer.forceContextLoss(); renderer.domElement.remove(); };
-  }, [preparation]);
+  }, [preparation,crewed]);
   return <div className="flight-viewport"><div ref={host} className="flight-canvas" role="img" aria-label={`${flightTelemetry(flight).title} — Earth ascent scene`} />
     {failed ? <div className="flight-fallback" role="status"><span>3D unavailable</span><RocketFallback /><p>Flight controls and telemetry still work.</p></div> : null}
     <span className="story-flight-scene-note">ILLUSTRATIVE FLIGHT · TIME COMPRESSED</span>{flight.t > 10 ? <span className="flight-sun-note">SUN · ≈150 million km away</span> : null}

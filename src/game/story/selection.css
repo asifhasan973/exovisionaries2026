@@ -92,3 +92,5 @@
 .player-gender-picker label svg{margin-left:auto;}
 .player-gender-picker label:focus-within{outline:3px solid #ffe063;outline-offset:3px;}
 @media(max-height:650px){.name-main .selection-name-panel{padding:18px 24px;}.selection-name-panel h1{margin:8px 0 14px;}.selection-name-panel input{padding:10px 14px;}.player-gender-picker{margin-top:0;}}
+
+.story-demo-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.story-demo-grid button.conversation-next{font-size:15px;padding:12px;min-width:0;width:100%;margin:0}

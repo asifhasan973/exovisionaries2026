@@ -4,10 +4,10 @@ import type { CrewAssignment } from './catalog.ts';
 
 /** Authored platform inputs; the equation is physical, the numeric design is not certified Apollo hardware. */
 export const PLATFORM_MODEL = Object.freeze({
-  id: 'moon-class-platform-v2', capacity: 3, surfaceCapacity: 2,
+  id: 'moon-class-platform-v3', capacity: 3, surfaceCapacity: 2,
   ascentDryKg: 2200, ascentPropellantKg: 2600, ascentIspSeconds: 300, ascentRequiredMS: 2000,
   descentDryKg: 1500, descentPropellantKg: 8500, descentIspSeconds: 300, descentRequiredMS: 2100,
-  serviceDryKg: 5900, servicePropellantKg: 8000, serviceIspSeconds: 315,
+  serviceDryKg: 5900, servicePropellantKg: 18000, serviceIspSeconds: 315,
   // Lunar insertion + Earth departure + course correction allowance; TLI belongs to the supplied launch stage.
   serviceRequiredMS: 2300, maneuverMargin: .05, sampleReturnKg: 10,
   lifeSupportLoadW: 600, lifeSupportCapacityWh: 300000, lifeSupportReserve: .2,
@@ -44,6 +44,6 @@ export const PLATFORM_NOTES=[
   'Crew-days mean one person supported for one day. The 30/48 crew-day packs, 4 kg per crew-day, 600 W cabin load and 300 kWh platform supply are authored game allocations, not a nutrition or life-support certification.',
   'Empty masses, fuel masses, specific impulses and maneuver allowances are illustrative Moon-class game inputs. Ideal delta-v uses g₀ × Isp × ln(wet mass / dry mass), with an authored 5% maneuver margin.',
   'The descent calculation carries the equipment kit. That kit stays on the Moon; the ascent calculation carries two crew and a 10-kg return-sample allowance. The command spacecraft carries all three crew home.',
-  'Service fuel covers an authored lunar insertion, Earth-departure and correction budget. TLI propulsion belongs to the launch stage and will be validated with trajectory gameplay in Module 4.',
+  'Service fuel is sized separately for arrival with the full fueled lander attached, course corrections and a reserved Earth-return burn. TLI uses the supplied upper stage; these are authored game budgets.',
   'This review does not certify temperature survival, structural strength, crew radiation dose, entry heating or launch performance. It locks a consistent educational game design for later flight.',
 ] as const;

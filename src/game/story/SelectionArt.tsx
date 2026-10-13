@@ -1,6 +1,6 @@
 import { useId } from 'react';
 
-export type SelectionArtKind = 'moon' | 'mars' | 'coming-soon' | 'lunar-ice' | 'lunar-geology' | 'crater-rim' | 'permanent-shadow';
+export type SelectionArtKind = 'moon' | 'mars' | 'coming-soon' | 'lunar-ice' | 'lunar-geology' | 'crater-rim' | 'permanent-shadow' | 'lunar-highlands' | 'ancient-crater';
 
 /** Lightweight illustrative mission art, not an orbital map or a surveyed landing site. */
 export function SelectionArt({ kind }: { kind: SelectionArtKind }) {
@@ -39,7 +39,7 @@ export function SelectionArt({ kind }: { kind: SelectionArtKind }) {
       <g fill={paint('ice')} stroke="#c4fff5" strokeWidth="2"><path d="M134 203L121 128L148 93L184 148L178 208Z" /><path d="M167 210L165 95L204 51L237 105L231 209Z" /><path d="M223 210L232 139L260 107L284 163L267 212Z" /></g>
       <g fill="none" stroke="#e4fffa" opacity=".7"><path d="M165 95L198 117L204 51M198 117L197 211M204 51L222 119L237 105M148 93L149 207M260 107L250 160L267 212" /></g>
       <circle cx="298" cy="58" r="24" fill="#79d9dc" opacity=".12" /><path d="M298 40V76M282 49L314 67M282 67L314 49" stroke="#9ae6e1" strokeWidth="3" />
-    </> : kind === 'lunar-geology' ? <>
+    </> : ['lunar-geology','lunar-highlands','ancient-crater'].includes(kind) ? <>
       <ellipse cx="200" cy="220" rx="105" ry="15" fill="#080d26" opacity=".5" />
       <path d="M108 191L126 146L165 126L198 150L213 215L130 221Z" fill={paint('gold')} stroke="#c5a38b" strokeWidth="2" />
       <path d="M172 137L199 94L254 112L286 162L268 215L208 223Z" fill="#8c7f88" stroke="#b4a2a4" strokeWidth="2" />

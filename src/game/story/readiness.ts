@@ -32,7 +32,7 @@ export function evaluateReadiness(progress: StoryProgress, preparation: Preparat
   const shadow = progress.selections.site === 'permanent-shadow';
   const totals = preparationTotals(preparation, shadow);
   const complete = WORKSHOP_STAGES.every(stage => stageReady(stage, preparation, progress.selections.objective)) && progress.selections.destination === 'moon'
-    && ['lunar-ice', 'lunar-geology'].includes(progress.selections.objective ?? '') && ['crater-rim', 'permanent-shadow'].includes(progress.selections.site ?? '');
+    && ['lunar-ice', 'lunar-geology'].includes(progress.selections.objective ?? '') && (progress.selections.objective==='lunar-geology'?['lunar-highlands','ancient-crater']:['crater-rim','permanent-shadow']).includes(progress.selections.site ?? '');
   // Conservative rover-only rehearsal: 15 min of other operations plus drilling at full peak, zero solar.
   // No claim about lander battery sizing, mission duration, temperature survival or orbital mechanics.
   const budget = trialPlan(preparation, shadow, moon ? crewCapabilities(moon.crew) : undefined);

@@ -15,8 +15,8 @@ export interface MoonPart extends ElectricalPart {
 
 const shared = WORKSHOP_PARTS.map((part): MoonPart => ({
   ...part, potentialSP: part.scienceBonus ?? 0, family: part.id.startsWith('geo-drill-') ? 'drill' : part.scienceFamily ?? part.category,
-  objectives: part.category === 'science' ? [part.objective ?? 'lunar-ice'] : ['lunar-ice', 'lunar-geology'],
-  provenance: { values: part.specGaps?.length || part.id === 'geo-scoop-basic' ? 'game-estimate' : 'script-game-value', reference: MOON_SOURCES.script,
+  objectives: part.id==='field-care-kit'?['lunar-ice','lunar-geology']:part.category === 'science' ? [part.objective ?? 'lunar-ice'] : ['lunar-ice', 'lunar-geology'],
+  provenance: { values: part.specGaps?.length || ['geo-scoop-basic','field-care-kit'].includes(part.id) ? 'game-estimate' : 'script-game-value', reference: MOON_SOURCES.script,
     capabilitySource: part.source, assumptions: [part.assumption ?? 'Numeric values are illustrative game allocations, not measured flight hardware.'] },
 }));
 export const MOON_PARTS: readonly MoonPart[] = shared;
@@ -72,7 +72,7 @@ export function missingEquipment(report: EquipmentReport, objective: MoonObjecti
 /** Examples use arithmetic from their parts, never the incorrect totals in the source table. */
 export const GEOLOGY_LOADOUTS = Object.freeze({
   budget: ['geo-camera-basic','geo-ir-basic','geo-xrf-basic','geo-drill-basic'],
-  balanced: ['geo-camera-balanced','geo-ir-balanced','geo-xrf-balanced','geo-xrd-balanced','geo-seismometer-basic'],
+  balanced: ['geo-camera-balanced','geo-ir-balanced','geo-xrf-balanced','geo-xrd-balanced','geo-seismometer-basic','geo-scoop-basic'],
   deep: ['geo-ir-advanced','geo-xrf-advanced','geo-xrd-advanced','geo-gpr-balanced','geo-drill-advanced','geo-camera-balanced'],
 });
 

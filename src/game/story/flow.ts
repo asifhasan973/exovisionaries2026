@@ -1,3 +1,4 @@
+import {GEOLOGY_SITE_BRIEFING} from './moon/geologyCopy.ts';
 import { STORY_DIALOGUE } from './dialogue.ts';
 import type { StoryLine, StoryStep, StoryStepId } from './types.ts';
 import { CREW_BRIEFING } from './moon/crewDialogue.ts';
@@ -39,14 +40,28 @@ export const STORY_FLOW: readonly StoryStep[] = [
   { id: 'systems-check', title: 'Check the return path', kind: 'activity', activity: 'systems-check', module: 6 },
   { id: 'stress-check', title: 'Practice Moon decisions', kind: 'activity', activity: 'stress-check', module: 6 },
   { id: 'rocket-pack', title: 'Rocket Design', kind: 'activity', activity: 'rocket-pack', module: 6 },
-  { id: 'launch-ready', title: 'Departure plan ready', kind: 'endpoint', module: 6 },
+  { id: 'launch-ready', title: 'Departure plan ready', kind: 'activity', activity: 'launch-ready', module: 6 },
   { id: 'liftoff', title: 'Launch your explorer', kind: 'activity', activity: 'liftoff', module: 7 },
-  { id: 'earth-orbit', title: 'Earth orbit reached', kind: 'endpoint', module: 7 }
+  { id: 'earth-orbit', title: 'Choose your Moon route', kind: 'activity', activity: 'earth-orbit', module: 9 },
+  { id: 'moon-transfer', title: 'Journey to the Moon', kind: 'activity', activity: 'moon-transfer', module: 9 },
+  { id: 'lunar-orbit', title: 'Lunar orbit reached', kind: 'activity', activity: 'lunar-orbit', module: 9 },
+  { id: 'lunar-descent', title: 'Land on the Moon', kind: 'activity', activity: 'lunar-descent', module: 10 },
+  { id: 'lunar-surface', title: 'Deploy your rover', kind: 'activity', activity: 'surface-deploy', module: 11 },
+  { id: 'surface-explore', title: 'Explore your Moon route', kind: 'activity', activity: 'surface-explore', module: 11 },
+  { id: 'surface-ready', title: 'Your surface route is ready', kind: 'activity', activity: 'surface-explore', module: 11 },
+  { id: 'ice-science', title: 'Find the evidence', kind: 'activity', activity: 'ice-science', module: 12 },
+  { id: 'science-ready', title: 'Science delivered', kind: 'activity', activity: 'ice-science', module: 12 },
+  { id: 'surface-recovery', title: 'Secure the surface', kind: 'activity', activity: 'surface-recovery', module: 13 },
+  { id: 'surface-secured', title: 'Surface secured', kind: 'activity', activity:'surface-recovery', module: 13 },
+  {id:'crew-return',title:'Bring our crew home',kind:'activity',activity:'crew-return',module:14},
+  {id:'mission-debrief',title:'Mission complete',kind:'endpoint',module:14}
 ];
 
-export function getStoryStep(id: StoryStepId): StoryStep {
+export function getStoryStep(id: StoryStepId, objective?:string): StoryStep {
   const step = STORY_FLOW.find(item => item.id === id);
   if (!step) throw new Error(`Unknown story step: ${id}`);
+  if(objective==='lunar-geology'&&step.kind==='choice'&&step.choiceKey==='site')return {...step,options:[{id:'lunar-highlands',label:'Lunar highlands',description:'Ancient crust · sunlit camp',available:true},{id:'ancient-crater',label:'Ancient impact crater',description:'Mixed rocks · impact clues',available:true}]};
+  if(objective==='lunar-geology'&&step.id==='site-briefing'&&step.kind==='conversation')return {...step,lines:GEOLOGY_SITE_BRIEFING};
   return step;
 }
 
