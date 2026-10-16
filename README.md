@@ -39,6 +39,15 @@ The active game now stays within one viewport: the header and Back/Next bar rema
 
 Adjust the layout in `src/game/story/viewport.css`; equipment pagination is in `WorkshopScreen.tsx`, and shared paged overlays are in `GameInfo.tsx`. The preserved legacy experience keeps its separate layout.
 
+## Landscape mode enforcement
+
+The mission flight deck, 3D workshop, and interactive launch screens require landscape orientation. Root-level orientation enforcement is provided by `OrientationGuard` (`src/components/common/OrientationGuard.tsx`).
+
+- **Automatic detection**: Portrait viewports and vertical screen orientations trigger a full-screen cosmic advisory overlay.
+- **State safety**: Game components are safely set to `inert` during orientation lock, preventing accidental taps while preserving all active state.
+- **Quick action**: Provides an **Enter Landscape Fullscreen** button that requests fullscreen and attempts orientation locking where supported.
+- **Testing**: Append `?forcePortrait=true` to any URL to simulate portrait mode on desktop displays. See [Orientation Guard documentation](docs/orientation-guard.md) for full details.
+
 ## Project layout
 
 - `src/game/story/`: the active exact-script story, character renderer, shared frame, five workshop stages, procedural lander/rover/part meshes, validated preparation reducer, resource calculations, correctable readiness checks, lazy 3D packing, immutable approval snapshots, gated interactive flight and atomic saved progress.

@@ -12,25 +12,21 @@ worktree. Do not reset the current checkout unless its newer changes have been s
 
 ## Behavior
 
-- On a phone, Play now and Judge demo request fullscreen from the user click,
-  then try landscape orientation locking where supported.
-- If rotation cannot be locked, a rotate-phone guide appears. Play upright is
-  always available; browser API failures do not prevent playing.
-- The in-game website navbar is replaced by compact Pause and Voice controls.
-  Words, Settings, Fullscreen, Turn phone and Mission home are in Pause.
-- Next and Hint stay in the bottom action dock. Landscape layouts use a compact
-  paged parts tray alongside the 3D workshop, with shorter controls and dialogue.
-- Opening Pause or rotation guidance pauses a running rover rehearsal or flight.
-  Back to game restores the previously running activity. Help drawers leave it
-  paused until the player resumes. Returning home releases fullscreen/orientation
-  owned by this game and restores the normal website navbar.
+- At the application root, the `OrientationGuard` component monitors orientation in real time across all views (`src/App.tsx`). When portrait orientation is detected, interaction is paused and an advisory screen instructs the user to rotate to landscape. Full documentation is available in `docs/orientation-guard.md`.
+- On mobile devices, Play now and Judge demo request fullscreen from the user click, then attempt landscape orientation locking where supported.
+- If rotation cannot be programmatically locked, guidance informs the user to rotate manually. The blocker overlay also provides an **Enter Landscape Fullscreen** button.
+- The in-game website navbar is replaced by compact Pause and Voice controls. Words, Settings, Fullscreen, Turn phone and Mission home are in Pause.
+- Next and Hint stay in the bottom action dock. Landscape layouts use a compact paged parts tray alongside the 3D workshop, with shorter controls and dialogue.
+- Opening Pause or rotation guidance pauses a running rover rehearsal or flight. Back to game restores the previously running activity. Help drawers leave it paused until the player resumes. Returning home releases fullscreen/orientation owned by this game and restores the normal website navbar.
 - Safe-area padding leaves room for phone cutouts and the bottom home indicator.
 
 ## Adjust the implementation
 
+- `src/components/common/OrientationGuard.tsx`: application-wide landscape orientation enforcement and blocker overlay.
+- `src/components/common/orientationGuard.css`: cosmic blocker overlay styles, device rotation animation, and responsive layout.
 - `src/game/story/mobileGame.css`: mobile sizes, layout, action dock and dialogs.
 - `src/game/story/mobileGameContext.ts`: device/viewport detection.
-- `src/game/story/MobileGame.tsx`: fullscreen, rotation guide and Pause menu.
+- `src/game/story/MobileGame.tsx`: fullscreen, in-game controls and Pause menu.
 - `src/game/story/ExactStory.tsx`: integration with flight/rover pause and resume.
 - `src/game/story/SelectionScreens.tsx`: Play entry points and mobile name input.
 - `src/game/story/StoryShell.tsx`: desktop versus mobile navigation.
