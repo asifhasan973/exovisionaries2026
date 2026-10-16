@@ -25,6 +25,8 @@ import { LearningProvider } from './Learning.tsx';
 import { GestureGuide } from './GestureGuide.tsx';
 import { MobileGameProvider } from './MobileGame.tsx';
 import { trialActive } from './trial.ts';
+import { useLoadingStore } from '../../state/loadingStore';
+import { isEngineFrozen } from '../../state/orientationLifecycleStore';
 const ReturnScreen=lazy(()=>import('./moon/ReturnScreen.tsx').then(m=>({default:m.ReturnScreen})));
 const RecoveryScreen=lazy(()=>import('./moon/RecoveryScreen.tsx').then(m=>({default:m.RecoveryScreen})));
 const ScienceScreen=lazy(()=>import('./moon/ScienceScreen.tsx').then(m=>({default:m.ScienceScreen})));
@@ -83,26 +85,79 @@ export default function ExactStory() {
   const pausedFromMenu = useRef({ flight: false, trial: false, journey:false,landing:false,surface:false,science:false,returning:false });
   const pauseGame = useCallback(() => {
     const current = latest.current;
-    pausedFromMenu.current = { flight: current.flight.status === 'running', trial: trialActive(current.readiness.trial) && !current.readiness.trial.paused, returning:current.progress.stepId==='crew-return'&&!current.moon.returnFlight.paused, science:['ice-science','surface-recovery'].includes(current.progress.stepId)&&!current.moon.science.paused, surface:['lunar-surface','surface-explore'].includes(current.progress.stepId)&&!current.moon.surface.paused, landing:current.progress.stepId==='lunar-descent'&&!current.moon.landing.paused, journey:['moon-transfer'].includes(current.progress.stepId)&&!current.moon.journey.paused&&current.moon.journey.stage!=='complete' };
+    const shouldPause = {
+      flight: current.flight.status === 'running',
+      trial: trialActive(current.readiness.trial) && !current.readiness.trial.paused,
+      returning: current.progress.stepId === 'crew-return' && !current.moon.returnFlight.paused,
+      science: ['ice-science', 'surface-recovery'].includes(current.progress.stepId) && !current.moon.science.paused,
+      surface: ['lunar-surface', 'surface-explore'].includes(current.progress.stepId) && !current.moon.surface.paused,
+      landing: current.progress.stepId === 'lunar-descent' && !current.moon.landing.paused,
+      journey: ['moon-transfer'].includes(current.progress.stepId) && !current.moon.journey.paused && current.moon.journey.stage !== 'complete',
+    };
+
+    if (shouldPause.flight) pausedFromMenu.current.flight = true;
+    if (shouldPause.trial) pausedFromMenu.current.trial = true;
+    if (shouldPause.returning) pausedFromMenu.current.returning = true;
+    if (shouldPause.science) pausedFromMenu.current.science = true;
+    if (shouldPause.surface) pausedFromMenu.current.surface = true;
+    if (shouldPause.landing) pausedFromMenu.current.landing = true;
+    if (shouldPause.journey) pausedFromMenu.current.journey = true;
+
+    if (shouldPause.flight) dispatch({ type: 'flight-pause' });
+    if (shouldPause.trial) dispatch({ type: 'trial-pause' });
+    if (shouldPause.returning) dispatch({ type: 'return-pause' });
+    if (shouldPause.science) dispatch({ type: 'science-pause' });
+    if (shouldPause.surface) dispatch({ type: 'surface-pause' });
+    if (shouldPause.landing) dispatch({ type: 'landing-pause' });
+    if (shouldPause.journey) dispatch({ type: 'journey-pause' });
+
     window.dispatchEvent(new Event('game-help-open'));
-  }, []);
+  }, [dispatch]);
   const resumeGame = useCallback(() => {
     if (pausedFromMenu.current.flight) dispatch({ type: 'flight-resume' });
-    if(pausedFromMenu.current.returning)dispatch({type:'return-resume'});
-    if(pausedFromMenu.current.science)dispatch({type:'science-resume'});
-    if(pausedFromMenu.current.surface)dispatch({type:'surface-resume'});
-    if(pausedFromMenu.current.landing)dispatch({type:'landing-resume'});
-    if(pausedFromMenu.current.journey)dispatch({type:'journey-resume'});
+    if (pausedFromMenu.current.returning) dispatch({ type: 'return-resume' });
+    if (pausedFromMenu.current.science) dispatch({ type: 'science-resume' });
+    if (pausedFromMenu.current.surface) dispatch({ type: 'surface-resume' });
+    if (pausedFromMenu.current.landing) dispatch({ type: 'landing-resume' });
+    if (pausedFromMenu.current.journey) dispatch({ type: 'journey-resume' });
     if (pausedFromMenu.current.trial) dispatch({ type: 'trial-resume' });
     pausedFromMenu.current = { flight: false, trial: false, journey:false,landing:false,surface:false,science:false,returning:false };
   }, [dispatch]);
-  const reset = () => { setAutoBuilding(false); setAutoplay(true); setMission(createWorkshopSession(createStoryProgress())); setDemo(false); setRestart(false); setHome(false); };
+
+  useEffect(() => {
+    window.addEventListener('game-orientation-pause', pauseGame);
+    window.addEventListener('game-orientation-resume', resumeGame);
+    if (isEngineFrozen()) {
+      pauseGame();
+    }
+    return () => {
+      window.removeEventListener('game-orientation-pause', pauseGame);
+      window.removeEventListener('game-orientation-resume', resumeGame);
+    };
+  }, [pauseGame, resumeGame]);
+  const enterMission = () => {
+    pauseGame();
+    useLoadingStore.getState().startLoading('mission_start');
+    setAutoplay(true);
+    setHome(false);
+  };
+  const reset = () => {
+    pauseGame();
+    useLoadingStore.getState().startLoading('mission_start', 'Preparing fresh mission…');
+    setAutoBuilding(false);
+    setAutoplay(true);
+    setMission(createWorkshopSession(createStoryProgress()));
+    setDemo(false);
+    setRestart(false);
+    setHome(false);
+  };
   const closeDemo = () => { demoRequest.current++; setDemoGender(null); setDemoBusy(false); setDemoError(null); };
   const startDemo = async (chapter: DemoChapterId) => {
     const request = ++demoRequest.current;
     setDemoBusy(true); setDemoError(null);
     try {
       // Show loading before executing a reducer-based chapter replay.
+      useLoadingStore.getState().startLoading('mission_start', `Preparing ${chapter} demo…`);
       await new Promise(resolve => setTimeout(resolve, 0));
       const prepared = await createDemoChapter(chapter, demoGender ?? progress.playerGender);
       if (request !== demoRequest.current) return;
@@ -113,7 +168,17 @@ export default function ExactStory() {
       if (request === demoRequest.current) setDemoError('Chapter unavailable. Try Start here. Your saved game is safe.');
     } finally { if (request === demoRequest.current) setDemoBusy(false); }
   };
-  const resumeDemo = () => { const saved = readBrowserDemoSession(); if (!saved) { setDemoAvailable(false); return; } normalMission.current = mission; setDemo(true); setAutoBuilding(false); setMission(createWorkshopSession(saved.progress,saved.preparation,saved.readiness,saved.flight,saved.moon,saved.repair)); setDemoGender(null); setHome(false); };
+  const resumeDemo = () => {
+    const saved = readBrowserDemoSession();
+    if (!saved) { setDemoAvailable(false); return; }
+    useLoadingStore.getState().startLoading('mission_start', 'Resuming demo mission…');
+    normalMission.current = mission;
+    setDemo(true);
+    setAutoBuilding(false);
+    setMission(createWorkshopSession(saved.progress,saved.preparation,saved.readiness,saved.flight,saved.moon,saved.repair));
+    setDemoGender(null);
+    setHome(false);
+  };
   const goHome = () => { setAutoBuilding(false); if (demo) { setMission(normalMission.current); setDemo(false); } setHome(true); };
   const requestRestart = () => { if (progress.playerName) setRestart(true); else reset(); };
   const back = () => { setAutoBuilding(false);
@@ -135,7 +200,7 @@ export default function ExactStory() {
     </>,
   };
   let screen;
-  if (home) screen = <MissionHome progress={progress} onContinue={() => { setAutoplay(true); setHome(false); }} onBack={() => setHome(false)} onRestart={requestRestart} onDemo={() => setDemoGender(progress.playerGender)} frame={frame} />;
+  if (home) screen = <MissionHome progress={progress} onContinue={enterMission} onBack={() => setHome(false)} onRestart={requestRestart} onDemo={() => setDemoGender(progress.playerGender)} frame={frame} />;
   else if (step.kind === 'name') screen = <NameScreen playerName={progress.playerName} playerGender={progress.playerGender} frame={frame} onBack={back} onDemo={gender => setDemoGender(gender)}
     onSubmit={(name, gender) => { setAutoplay(true); setMission(current => {
       if (current.progress.stepId !== 'player-name') return current;

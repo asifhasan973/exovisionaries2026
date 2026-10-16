@@ -46,9 +46,9 @@ export function ConversationScene({ title, lines, lineIndex, playerName, onNext,
     return () => { clearTimeout(timer); controller.stop(); };
   }, [controller, text, line.id, line.speaker.character, enabled, autoplay, gender]);
   useEffect(() => {
-    const hide = () => { if (document.hidden) controller.stop(); };
+    const hide = () => { if (document.hidden) controller.pause(); };
     document.addEventListener('visibilitychange', hide);
-    const pause = () => controller.stop(); window.addEventListener('game-help-open', pause);
+    const pause = () => controller.pause(); window.addEventListener('game-help-open', pause);
     return () => { document.removeEventListener('visibilitychange', hide); window.removeEventListener('game-help-open', pause); controller.stop(); };
   }, [controller]);
   const next = () => { controller.stop(); onNext(); };

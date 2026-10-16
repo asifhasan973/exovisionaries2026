@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { RotateCw, Sparkles, Expand, Compass } from 'lucide-react';
+import { useOrientationLifecycleStore } from '../../state/orientationLifecycleStore';
 import './orientationGuard.css';
 
 interface OrientationGuardProps {
@@ -141,6 +142,11 @@ export function OrientationGuard({ children, forceBlock = false }: OrientationGu
   };
 
   const isBlocked = !isLandscape;
+
+  useEffect(() => {
+    // Centrally halt or resume all application states from the lifecycle store
+    useOrientationLifecycleStore.getState().setOrientationBlocked(isBlocked);
+  }, [isBlocked]);
 
   return (
     <>

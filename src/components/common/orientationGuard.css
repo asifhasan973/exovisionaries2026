@@ -11,6 +11,12 @@
   overflow: hidden !important;
 }
 
+/* Freeze all active CSS animations across the entire application instantly */
+.orientation-guard-wrapper.is-blocked,
+.orientation-guard-wrapper.is-blocked * {
+  animation-play-state: paused !important;
+}
+
 /* Fullscreen blocking overlay */
 .orientation-blocker-overlay {
   position: fixed;

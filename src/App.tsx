@@ -1,5 +1,7 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { OrientationGuard } from './components/common/OrientationGuard';
+import { LoadingScreen } from './components/common/LoadingScreen';
+import { useLoadingStore } from './state/loadingStore';
 
 const StoryGame = lazy(() => import('./game/StoryGame').then(module => ({ default: module.StoryGame })));
 const ConversationPreview = lazy(() => import('./game/story/ConversationPreview'));
@@ -11,11 +13,18 @@ export default function App() {
   const legacy = query.get('experience') === 'legacy';
   const forceBlock = query.get('forcePortrait') === 'true';
 
+  useEffect(() => {
+    // Trigger loading screen upon landing into the project
+    useLoadingStore.getState().startLoading('landing');
+  }, []);
+
   return (
     <OrientationGuard forceBlock={forceBlock}>
-      <Suspense fallback={<p role="status" style={{ padding: 32 }}>Loading mission…</p>}>
+      <LoadingScreen />
+      <Suspense>
         {preview ? <ConversationPreview /> : legacy ? <StoryGame /> : <ExactStory />}
       </Suspense>
     </OrientationGuard>
   );
 }
+

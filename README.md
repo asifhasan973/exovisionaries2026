@@ -48,6 +48,16 @@ The mission flight deck, 3D workshop, and interactive launch screens require lan
 - **Quick action**: Provides an **Enter Landscape Fullscreen** button that requests fullscreen and attempts orientation locking where supported.
 - **Testing**: Append `?forcePortrait=true` to any URL to simulate portrait mode on desktop displays. See [Orientation Guard documentation](docs/orientation-guard.md) for full details.
 
+## Space-themed loading screen & asset preloader
+
+A high-performance cinematic loading screen (`src/components/common/LoadingScreen.tsx`) displays upon initial application landing and prior to launching any mission.
+
+- **Cinematic entry**: Displays an exclusive pitch-black `"ExoVisionaries-2k26 Presents"` intro splash on the user's first visit of the day/session, fading into a continuous looping carousel of authentic NASA space exploration imagery.
+- **Real engineering preloader**: Progress tracks actual background subsystem preparation (`src/engine/assetPreloader.ts`)—dynamic JS modules, Three.js 3D Moon & rocket meshes, textures, and audio synthesis—dismissing immediately when backend tasks hit 100%.
+- **Orientation pause synchronization**: Carousel cycling and asset loading automatically pause when orientation is locked by `OrientationGuard`, and underlying game views remain inert during loading.
+- **Browser-managed cache with 7-day purge**: Leverages the browser's Cache Storage API (`caches.open('exovisionaries-assets-v1')`) and automatically purges cached assets if inactive for longer than 7 days.
+- **Developer delay**: Includes a prominent `__DEV_LOADING_TEST_DELAY__` configuration at the top of `LoadingScreen.tsx` for easy visual verification and removal. See [Loading Screen documentation](docs/loading-screen.md).
+
 ## Project layout
 
 - `src/game/story/`: the active exact-script story, character renderer, shared frame, five workshop stages, procedural lander/rover/part meshes, validated preparation reducer, resource calculations, correctable readiness checks, lazy 3D packing, immutable approval snapshots, gated interactive flight and atomic saved progress.
