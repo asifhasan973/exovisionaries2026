@@ -3,7 +3,7 @@ import { repairApplied } from './repairGuidance.ts';
 import './repair.css';
 import { useGameSettings } from './gameSettingsContext.ts';
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
-import { BatteryCharging, ChevronLeft, ChevronRight, Check, CheckCheck, Coins, Info, PackageCheck, Plus, Sparkles, Sun, WandSparkles, Weight, Zap, Trash2 } from 'lucide-react';
+import { BatteryCharging, ChevronLeft, ChevronRight, Check, CheckCheck, Coins, Info, PackageCheck, Plus, Sparkles, Sun, WandSparkles, Weight, Zap, Trash2, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { sound } from '../../audio/soundEngine.ts';
 import { CharacterStage } from './CharacterStage.tsx';
 import { StoryControls, StoryShell } from './StoryShell.tsx';
@@ -86,6 +86,23 @@ export function WorkshopScreen({ session, dispatch, frame, onBack, autoBuilding,
   const [shelfTab, setShelfTab] = useState<DesignCategory | 'depth' | null>(() => repair?.category ?? null);
   const [shelfPage, setShelfPage] = useState(0);
   const [shortScreen, setShortScreen] = useState(() => window.matchMedia('(max-height: 760px), (max-width: 700px)').matches);
+  const [shelfOpen, setShelfOpen] = useState(true);
+  const [stageMaximized, setStageMaximized] = useState(false);
+  const toggleMaximize = () => {
+    setStageMaximized(prev => {
+      const next = !prev;
+      if (next) setShelfOpen(false);
+      else setShelfOpen(true);
+      return next;
+    });
+  };
+  const toggleShelf = () => {
+    setShelfOpen(prev => {
+      const next = !prev;
+      if (next && stageMaximized) setStageMaximized(false);
+      return next;
+    });
+  };
   const ids = installedIds(session.preparation);
   const totals = preparationTotals(session.preparation, session.progress.selections.site === 'permanent-shadow');
   const categories = stage ? STAGE_CATEGORIES[stage] : [];
@@ -175,11 +192,26 @@ export function WorkshopScreen({ session, dispatch, frame, onBack, autoBuilding,
     if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
   };
   const onPointerCancel = () => { suppressClick.current = true; drag.current = null; setDragging(null); };
-  const scene = <div className={`workshop-drop-zone ${dragging || autoBuilding && autoPart ? 'is-dragging' : ''}`} ref={dropZone} data-testid="workshop-drop-zone">
+  const scene = <div className={`workshop-drop-zone ${dragging || autoBuilding && autoPart ? 'is-dragging' : ''} ${stageMaximized ? 'is-maximized' : ''}`} ref={dropZone} data-testid="workshop-drop-zone">
+    <div className="workshop-telemetry-pill-wrapper">
+      <ManifestMeters session={session} />
+    </div>
+    {!shelfOpen ? (
+      <button
+        className="workshop-drawer-toggle"
+        onClick={toggleShelf}
+        aria-label="Open parts shelf"
+        title="Open parts shelf"
+      >
+        <PanelLeftOpen size={18} />
+        <span>Parts ({ids.length}/{parts.length})</span>
+      </button>
+    ) : null}
     <Suspense fallback={<div className="workshop-render-fallback">Opening the workshop…</div>}>
       <WorkshopViewport preparation={session.preparation} draggingId={dragging?.id ?? (autoBuilding ? autoPart : null)} lastInstalled={lastInstalled}
         canUndo={!autoBuilding && !!stage && !!session.past.length} canRedo={!autoBuilding && !!stage && !!session.future.length} onUndo={() => dispatch({ type: 'undo' })} onRedo={() => dispatch({ type: 'redo' })}
-        onThumbnails={setThumbnails} onMeshError={() => setMeshError(true)} />
+        onThumbnails={setThumbnails} onMeshError={() => setMeshError(true)}
+        isMaximized={stageMaximized} onToggleMaximize={toggleMaximize} />
     </Suspense>
   </div>;
   if (session.progress.stepId === 'resource-limits') return <StoryShell {...frame} controls={<StoryControls onBack={onBack} onNext={() => dispatch({ type: 'next' })} nextLabel="Build" progress={<span>WORKSHOP</span>} />}>
@@ -210,7 +242,13 @@ export function WorkshopScreen({ session, dispatch, frame, onBack, autoBuilding,
       </div><EngineerCompanion scriptedReply={repair && !appliedRepair ? { id: repair.voiceId, text: repair.text } : undefined} statusText={autoBuilding ? `Watch your ${stageNames[stageIndex].toLowerCase()} system come together!` : undefined} reaction={repair && !appliedRepair ? 'warning' : autoBuilding || reaction === 'complete' && !ready(stage) ? 'intro' : reaction} token={reactionToken} voiceEnabled={!autoBuilding && (frame.voiceEnabled ?? true)} /></div>
       <nav className="workshop-stage-tabs" inert={autoBuilding} aria-label="Build stages">{WORKSHOP_STAGES.map((id, index) => <button key={id} aria-current={id === stage ? 'step' : undefined} disabled={index > stageIndex}
         onClick={() => dispatch({ type: 'visit-stage', stage: id })}><span>{ready(id) ? <Check size={14} /> : index + 1}</span>{stageNames[index]}</button>)}</nav>
-      <ManifestMeters session={session} /><div className="workshop-layout" inert={autoBuilding}><section className="workshop-shelf" aria-label="Parts shelf">
+      <div className={`workshop-layout ${stageMaximized ? 'is-stage-maximized' : ''} ${!shelfOpen ? 'is-shelf-collapsed' : ''}`} inert={autoBuilding}><section className={`workshop-shelf ${!shelfOpen ? 'is-collapsed' : ''}`} aria-label="Parts shelf">
+        <div className="workshop-shelf-header">
+          <span className="workshop-shelf-title">PARTS INVENTORY</span>
+          <button className="workshop-shelf-close" onClick={toggleShelf} aria-label="Collapse parts shelf" title="Collapse parts shelf">
+            <PanelLeftClose size={18} />
+          </button>
+        </div>
         {geology && stage === 'science-build' ? <label className="geology-compact-family"><span className="visually-hidden">Science tool family</span><select aria-label="Science tool family" value={depthOpen ? 'depth' : scienceFamily} onChange={event => { if(event.target.value === 'depth') setShelfTab('depth'); else { setScienceFamily(event.target.value as ScienceFamily); setShelfTab('science'); } setShelfPage(0); }}>{GEOLOGY_FAMILIES.map(family => <option value={family} key={family}>{SCIENCE_FAMILY_NAMES[family]}{parts.some(part => ids.includes(part.id) && part.scienceFamily === family) ? ' ✓' : ''}</option>)}{drill ? <option value="depth">Drill plan</option> : null}</select></label> : null}
         {geology && stage === 'science-build' ? <nav className="geology-families" aria-label="Geology tool families">{GEOLOGY_FAMILIES.map(family => <button key={family} aria-pressed={scienceFamily === family && !depthOpen} onClick={() => { setScienceFamily(family); setShelfTab('science'); setShelfPage(0); }}>{SCIENCE_FAMILY_NAMES[family]}{ids.some(id => partById(id)?.scienceFamily === family) ? <Check size={12}/> : null}</button>)}</nav> : null}
         <nav className="workshop-category-tabs" aria-label="Equipment categories">{categories.map(category => <button key={category} aria-pressed={!depthOpen && activeCategory === category} onClick={() => { setShelfTab(category); setShelfPage(0); }}>{categoryNames[category]}</button>)}{stage === 'science-build' && (!geology || !!drill) ? <button aria-pressed={depthOpen} onClick={() => { setShelfTab('depth'); setShelfPage(0); }}>Drill plan</button> : null}</nav>

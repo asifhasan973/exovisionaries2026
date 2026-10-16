@@ -30,9 +30,9 @@ export function EngineerCompanion({ reaction, token, voiceEnabled, statusText, s
     const timer = (token || scriptedReply) && voiceEnabled && !statusText ? setTimeout(() => {
       if (!document.hidden) controller.speak(chosen.text, 'commander', chosen.id, gender);
     }, 0) : undefined;
-    const hide = () => { if (document.hidden) controller.stop(); };
+    const hide = () => { if (document.hidden) controller.pause(); };
     document.addEventListener('visibilitychange', hide);
-    const pause = () => controller.stop(); window.addEventListener('game-help-open', pause);
+    const pause = () => controller.pause(); window.addEventListener('game-help-open', pause);
     return () => { clearTimeout(timer); controller.stop(); document.removeEventListener('visibilitychange', hide); window.removeEventListener('game-help-open', pause); };
   }, [controller, reaction, token, voiceEnabled, gender, scriptedReply?.id, scriptedReply?.text, statusText]);
   return <aside className={`workshop-engineer ${celebrate ? 'is-celebrating' : reaction === 'warning' || reaction === 'trialFail' ? 'is-warning' : ''}`} data-speaking={narration.status === 'speaking'} aria-label="Mission engineer">

@@ -1,0 +1,42 @@
+[
+  {
+    "id": "sls-night-launch",
+    "image": "/assets/loading/artemis_launch.jpg",
+    "title": "Ignition in the Night",
+    "caption": "NASA’s Space Launch System roars to life from Pad 39B, generating 8.8 million pounds of thrust to propel humanity toward deep space.",
+    "credit": "NASA / Bill Ingalls",
+    "tag": "PROPULSION & LAUNCH"
+  },
+  {
+    "id": "orion-earth-view",
+    "image": "/assets/loading/orion_earth_view.jpg",
+    "title": "Homeworld in the Deep",
+    "caption": "Looking back from the Orion spacecraft as it glides past lunar orbit, witnessing our fragile blue oasis suspended in cosmic silence.",
+    "credit": "NASA / Orion Optical Navigation",
+    "tag": "EARTH & MOON"
+  },
+  {
+    "id": "carina-cosmic-cliffs",
+    "image": "/assets/loading/carina_nebula.png",
+    "title": "The Cosmic Cliffs",
+    "caption": "The James Webb Space Telescope peers through dense stellar dust, unveiling baby stars bursting to life in the Carina Nebula.",
+    "credit": "NASA / ESA / CSA / STScI",
+    "tag": "DEEP SPACE DISCOVERY"
+  },
+  {
+    "id": "apollo-bootprint",
+    "image": "/assets/loading/apollo_bootprint.jpg",
+    "title": "First Footsteps on Another World",
+    "caption": "A lone bootprint pressed firmly into lunar regolith—a lasting testament that curiosity and human ingenuity know no bounds.",
+    "credit": "NASA / Apollo 11",
+    "tag": "LUNAR HERITAGE"
+  },
+  {
+    "id": "mars-perseverance",
+    "image": "/assets/loading/mars_perseverance.jpg",
+    "title": "Frontier at Jezero Crater",
+    "caption": "The Perseverance rover navigates the rugged ancient river delta of Mars, searching for biosignatures and preparing future paths.",
+    "credit": "NASA / JPL-Caltech",
+    "tag": "MARTIAN EXPLORATION"
+  }
+]

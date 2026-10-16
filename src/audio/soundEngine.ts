@@ -35,6 +35,26 @@ class SoundEngine {
     nodes.noise.onended = () => { nodes.noise.disconnect(); nodes.oscillator.disconnect(); nodes.filter.disconnect(); nodes.gain.disconnect(); };
   }
 
+  private wasSuspendedByOrientation: boolean = false;
+
+  public pauseAll() {
+    this.wasSuspendedByOrientation = true;
+    if (this.ctx && this.ctx.state === 'running') {
+      this.ctx.suspend().catch(() => {});
+    }
+  }
+
+  public resumeAll() {
+    this.wasSuspendedByOrientation = false;
+    if (this.ctx && this.ctx.state === 'suspended' && !this.isMuted) {
+      this.ctx.resume().catch(() => {});
+    }
+  }
+
+  public isSuspended(): boolean {
+    return this.wasSuspendedByOrientation;
+  }
+
   private initContext() {
     if (!this.ctx) {
       const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
@@ -42,7 +62,7 @@ class SoundEngine {
         this.ctx = new AudioCtx();
       }
     }
-    if (this.ctx && this.ctx.state === 'suspended') {
+    if (this.ctx && this.ctx.state === 'suspended' && !this.wasSuspendedByOrientation) {
       this.ctx.resume().catch(() => {});
     }
   }
