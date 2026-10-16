@@ -1,18 +1,20 @@
 import { useEffect, useRef, useState } from 'react';
-import { Expand, RotateCcw, RotateCw, Undo2, Redo2 } from 'lucide-react';
+import { Expand, RotateCcw, RotateCw, Undo2, Redo2, Maximize2, Minimize2 } from 'lucide-react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import type { PreparationSelection } from './design.ts';
 import { WORKSHOP_PARTS, installedIds, partById } from './preparation.ts';
 import { attachmentPosition, buildAssembly, createPartMesh, disposeGroup } from './workshopMeshes.ts';
 import { useGameSettings } from './gameSettingsContext.ts';
+import { isEngineFrozen } from '../../state/orientationLifecycleStore';
 
 let thumbnailCache: Record<string, string> | undefined;
 
-export function WorkshopViewport({ preparation, draggingId, lastInstalled, canUndo, canRedo, onUndo, onRedo, onThumbnails, onMeshError }: {
+export function WorkshopViewport({ preparation, draggingId, lastInstalled, canUndo, canRedo, onUndo, onRedo, onThumbnails, onMeshError, isMaximized = false, onToggleMaximize }: {
   preparation: PreparationSelection; draggingId: string | null; lastInstalled: string | null;
   canUndo: boolean; canRedo: boolean; onUndo(): void; onRedo(): void;
   onThumbnails(images: Record<string, string>): void; onMeshError(): void;
+  isMaximized?: boolean; onToggleMaximize?: () => void;
 }) {
   const { gentle } = useGameSettings();
   const gentleMotion = useRef(gentle);
@@ -90,7 +92,7 @@ export function WorkshopViewport({ preparation, draggingId, lastInstalled, canUn
       render(performance.now());
     };
     const render = (time: number) => {
-      if (disposed || document.hidden) return;
+      if (disposed || document.hidden || isEngineFrozen()) return;
       if (time - lastFrame > 30) {
         controls.enableDamping = !gentleMotion.current && !reduced.matches;
         controls.update();
@@ -100,8 +102,9 @@ export function WorkshopViewport({ preparation, draggingId, lastInstalled, canUn
         renderer.render(scene, camera); lastFrame = time; dirty = false;
       }
     };
-    const animate = (time: number) => { render(time); if (!disposed && !document.hidden) frame = requestAnimationFrame(animate); };
-    const resume = () => { cancelAnimationFrame(frame); if (!disposed && !document.hidden) frame = requestAnimationFrame(animate); };
+    const animate = (time: number) => { render(time); if (!disposed && !document.hidden && !isEngineFrozen()) frame = requestAnimationFrame(animate); };
+    const resume = () => { cancelAnimationFrame(frame); if (!disposed && !document.hidden && !isEngineFrozen()) frame = requestAnimationFrame(animate); };
+    const pause = () => { cancelAnimationFrame(frame); };
     repaint.current = update;
     const resize = () => { const width = Math.max(1, mount.clientWidth), height = Math.max(1, mount.clientHeight); renderer.setSize(width, height, false); camera.aspect = width / height; camera.updateProjectionMatrix();
       // Preserve the viewing angle and user zoom when a tall/narrow bay is resized.
@@ -112,27 +115,42 @@ export function WorkshopViewport({ preparation, draggingId, lastInstalled, canUn
     const contextLost = (event: Event) => { event.preventDefault(); cancelAnimationFrame(frame); setFailed(true); errorCallback.current(); };
     renderer.domElement.addEventListener('webglcontextlost', contextLost);
     document.addEventListener('visibilitychange', resume);
+    window.addEventListener('game-orientation-pause', pause);
+    window.addEventListener('game-orientation-resume', resume);
     resize(); update(); resume();
     return () => {
       disposed = true; cancelAnimationFrame(frame); observer.disconnect(); controls.removeEventListener('change', changed); controls.dispose();
-      document.removeEventListener('visibilitychange', resume); renderer.domElement.removeEventListener('webglcontextlost', contextLost);
+      document.removeEventListener('visibilitychange', resume);
+      window.removeEventListener('game-orientation-pause', pause);
+      window.removeEventListener('game-orientation-resume', resume);
+      renderer.domElement.removeEventListener('webglcontextlost', contextLost);
       repaint.current = () => {}; fit.current = () => {}; rotate.current = () => {};
       disposeGroup(scene); renderer.dispose(); renderer.forceContextLoss(); renderer.domElement.remove();
     };
   }, []);
-  return <div className="workshop-viewport">
+  return <div className={`workshop-viewport ${isMaximized ? 'is-maximized' : ''}`}>
     <div className="workshop-canvas" ref={host} role="img" aria-label={`3D assembly with ${installedIds(preparation).length} installed parts`} />
     {failed ? <div className="workshop-render-fallback" role="status">3D unavailable. Use the Install buttons to keep building.</div> : null}
     <span className="workshop-viewport-badge">3D WORKSHOP</span>
     <div className="workshop-camera-controls">
-      <button className="conversation-icon" onClick={onUndo} disabled={!canUndo} aria-label="Undo installation" title="Undo"><Undo2 size={19} /></button>
-      <button className="conversation-icon" onClick={onRedo} disabled={!canRedo} aria-label="Redo installation" title="Redo"><Redo2 size={19} /></button>
-      <button className="conversation-icon" onClick={() => fit.current()} aria-label="Fit spacecraft" title="Fit spacecraft"><Expand size={19} /></button>
+      <button className="conversation-icon" onClick={onUndo} disabled={!canUndo} aria-label="Undo installation" title="Undo"><Undo2 size={18} /></button>
+      <button className="conversation-icon" onClick={onRedo} disabled={!canRedo} aria-label="Redo installation" title="Redo"><Redo2 size={18} /></button>
+      <button className="conversation-icon" onClick={() => fit.current()} aria-label="Reset camera angle" title="Reset camera angle"><RotateCcw size={18} /></button>
+      {onToggleMaximize ? (
+        <button
+          className={`conversation-icon ${isMaximized ? 'is-active' : ''}`}
+          onClick={onToggleMaximize}
+          aria-label={isMaximized ? "Restore workshop shelf" : "Maximize 3D stage"}
+          title={isMaximized ? "Restore workshop shelf" : "Maximize 3D stage"}
+        >
+          {isMaximized ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+        </button>
+      ) : null}
     </div>
     <div className="workshop-orbit-controls">
-      <button className="conversation-icon" onClick={() => rotate.current(-1)} aria-label="Rotate view left"><RotateCcw size={18} /></button>
-      <span>Drag to rotate · scroll to zoom</span>
-      <button className="conversation-icon" onClick={() => rotate.current(1)} aria-label="Rotate view right"><RotateCw size={18} /></button>
+      <button className="conversation-icon" onClick={() => rotate.current(-1)} aria-label="Rotate view left"><RotateCcw size={17} /></button>
+      <span className="workshop-orbit-hint">Drag to rotate · scroll to zoom</span>
+      <button className="conversation-icon" onClick={() => rotate.current(1)} aria-label="Rotate view right"><RotateCw size={17} /></button>
     </div>
     {!installedIds(preparation).length ? <div className="workshop-empty">Your workbench is empty.</div> : null}
     <div className="workshop-vehicle-labels"><span>Lander</span><span>{partById(preparation.roverId)?.name ?? 'Rover bay'}</span></div>

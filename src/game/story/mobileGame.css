@@ -67,41 +67,38 @@
  .conversation-game.conversation-game.is-mobile-game .story-demo-button { margin-top:8px; padding:6px 8px; font-size:12px; min-height:36px; }
  .conversation-game.conversation-game.is-mobile-game .story-demo-button>span { display:none; }
  /* The tray is one paged card. Details remain available via its info button. */
- .conversation-game.conversation-game.is-mobile-game .workshop-top-row { height:30px; min-height:30px; display:block; position:relative; }
- .conversation-game.conversation-game.is-mobile-game .workshop-heading { height:30px; }
- .conversation-game.conversation-game.is-mobile-game .workshop-heading h1 { font-size:21px; margin:0; padding-right:92px; }
+ .conversation-game.conversation-game.is-mobile-game .workshop-top-row { height:auto; min-height:32px; display:flex; align-items:center; position:relative; padding-right:calc(105px + env(safe-area-inset-right,0px)); }
+ .conversation-game.conversation-game.is-mobile-game .workshop-heading { height:auto; display:flex; align-items:center; justify-content:space-between; width:100%; gap:12px; }
+ .conversation-game.conversation-game.is-mobile-game .workshop-heading h1 { font-size:clamp(17px,2.2vw,21px); margin:0; padding-right:0; white-space:nowrap; }
  .conversation-game.conversation-game.is-mobile-game .workshop-heading p { display:none; }
  .conversation-game.conversation-game.is-mobile-game .workshop-top-row>.workshop-engineer { display:none; }
- .conversation-game.conversation-game.is-mobile-game .workshop-quick { position:absolute; right:0; top:-4px; height:36px; min-height:36px; padding:7px 9px; font-size:12px; }
+ .conversation-game.conversation-game.is-mobile-game .workshop-quick { position:static; height:32px; min-height:32px; padding:4px 12px; font-size:12px; white-space:nowrap; flex-shrink:0; }
  .conversation-game.conversation-game.is-mobile-game .workshop-stage-tabs { gap:4px; }
- .conversation-game.conversation-game.is-mobile-game .workshop-stage-tabs button { min-height:32px; height:32px; padding:4px 10px; font-size:12px; }
- .conversation-game.conversation-game.is-mobile-game .workshop-stage-tabs button>span { width:20px; height:20px; }
- .conversation-game.conversation-game.is-mobile-game .workshop-main>.workshop-meters { height:27px; gap:6px; }
- .conversation-game.conversation-game.is-mobile-game .workshop-main>.workshop-meters .workshop-meter { padding:3px 7px; display:flex; align-items:center; justify-content:space-between; gap:5px; border-radius:8px; }
- .conversation-game.conversation-game.is-mobile-game .workshop-meter>span { font-size:11px; }
- .conversation-game.conversation-game.is-mobile-game .workshop-meter strong { font-size:16px; margin:0; }
- .conversation-game.conversation-game.is-mobile-game .workshop-meter strong small { font-size:10px; }
- .conversation-game.conversation-game.is-mobile-game .workshop-meter progress { display:none; }
- .conversation-game.conversation-game.is-mobile-game .workshop-layout { grid-template-columns:minmax(240px,.43fr) minmax(0,1fr); grid-template-rows:minmax(0,1fr); gap:10px; }
+ .conversation-game.conversation-game.is-mobile-game .workshop-stage-tabs button { min-height:28px; height:28px; padding:3px 9px; font-size:11px; }
+ .conversation-game.conversation-game.is-mobile-game .workshop-stage-tabs button>span { width:18px; height:18px; font-size:10px; }
+ .conversation-game.conversation-game.is-mobile-game .workshop-layout { grid-template-columns:minmax(240px,.42fr) minmax(0,1fr); grid-template-rows:minmax(0,1fr); gap:10px; }
+ .conversation-game.conversation-game.is-mobile-game .workshop-layout.is-shelf-collapsed,.conversation-game.conversation-game.is-mobile-game .workshop-layout.is-stage-maximized { grid-template-columns:minmax(0,1fr)!important; }
  .conversation-game.conversation-game.is-mobile-game .workshop-shelf { grid-row:1; padding:6px; gap:4px; }
+ .conversation-game.conversation-game.is-mobile-game .workshop-shelf.is-collapsed { display:none!important; }
  .conversation-game.conversation-game.is-mobile-game .workshop-view-column { grid-row:1; gap:4px; }
  .conversation-game.conversation-game.is-mobile-game .workshop-category-tabs { gap:4px; }
- .conversation-game.conversation-game.is-mobile-game .workshop-category-tabs button { min-height:32px; font-size:12px; padding:5px 6px; }
+ .conversation-game.conversation-game.is-mobile-game .workshop-category-tabs button { min-height:26px; font-size:11px; padding:3px 6px; }
  .conversation-game.conversation-game.is-mobile-game .workshop-shelf-pages { gap:4px; }
  .conversation-game.conversation-game.is-mobile-game .workshop-bulk { display:none; }
  .conversation-game.conversation-game.is-mobile-game .workshop-part-top>input { display:none; }
- .conversation-game.conversation-game.is-mobile-game .workshop-part-grid { grid-template-columns:1fr; }
- .conversation-game.conversation-game.is-mobile-game .workshop-pick { display:grid; grid-template-columns:65px minmax(0,1fr); grid-template-rows:auto auto; align-content:center; padding:28px 8px 4px; gap:3px 6px; }
- .conversation-game.conversation-game.is-mobile-game .workshop-pick>img { grid-row:1/4; width:65px; height:54px; }
- .conversation-game.conversation-game.is-mobile-game .workshop-pick strong { font-size:15px; line-height:1.2; margin:0; min-height:0; }
- .conversation-game.conversation-game.is-mobile-game .workshop-part-price,.conversation-game.conversation-game.is-mobile-game .workshop-part-spec { font-size:12px; margin:0; }
- .conversation-game.conversation-game.is-mobile-game .workshop-part-action { display:none; }
- .conversation-game.conversation-game.is-mobile-game .part-badge { font-size:10px; top:7px; }
- .conversation-game.conversation-game.is-mobile-game .workshop-info { width:32px; height:32px; top:3px; right:3px; }
+ .conversation-game.conversation-game.is-mobile-game .workshop-part-grid { grid-template-columns:1fr; gap:6px; }
+ .conversation-game.conversation-game.is-mobile-game .workshop-part-top { top:4px; right:6px; left:auto; }
+ .conversation-game.conversation-game.is-mobile-game .workshop-pick { display:grid; grid-template-columns:52px minmax(0,1fr); grid-template-rows:auto auto auto; align-items:center; padding:26px 8px 6px; gap:2px 8px; text-align:left; }
+ .conversation-game.conversation-game.is-mobile-game .workshop-pick>img { grid-row:1/4; width:52px; height:50px; }
+ .conversation-game.conversation-game.is-mobile-game .workshop-pick strong { font-size:13px; line-height:1.2; margin:0; min-height:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+ .conversation-game.conversation-game.is-mobile-game .workshop-part-price,.conversation-game.conversation-game.is-mobile-game .workshop-part-spec { font-size:11px; margin:0; }
+ .conversation-game.conversation-game.is-mobile-game .workshop-part-action { font-size:10px; }
+ .conversation-game.conversation-game.is-mobile-game .part-badge { font-size:10px; top:5px; left:8px; padding:2px 6px; line-height:1.2; }
+ .conversation-game.conversation-game.is-mobile-game .workshop-info { width:24px; height:24px; top:auto; right:auto; }
  .conversation-game.conversation-game.is-mobile-game .part-comparison { display:none; }
- .conversation-game.conversation-game.is-mobile-game .part-remove { min-height:30px; padding:3px 8px; font-size:12px; }
- .conversation-game.conversation-game.is-mobile-game .workshop-part-pages { min-height:38px; height:38px; gap:14px; font-size:12px; }
- .conversation-game.conversation-game.is-mobile-game .workshop-part-pages .conversation-icon { width:44px; height:38px; min-height:38px; }
+ .conversation-game.conversation-game.is-mobile-game .part-remove { min-height:26px; height:26px; padding:2px 8px; font-size:11px; margin:2px 6px 6px; }
+ .conversation-game.conversation-game.is-mobile-game .workshop-part-pages { min-height:32px; height:32px; gap:12px; font-size:11px; }
+ .conversation-game.conversation-game.is-mobile-game .workshop-part-pages .conversation-icon { width:32px; height:32px; min-height:32px; }
  .conversation-game.conversation-game.is-mobile-game .workshop-feedback,.conversation-game.conversation-game.is-mobile-game .workshop-live-strip,.conversation-game.conversation-game.is-mobile-game .workshop-power-strip { display:none; }
  .conversation-game.conversation-game.is-mobile-game .workshop-depth { padding:8px; justify-content:center; }
  .conversation-game.conversation-game.is-mobile-game .workshop-depth label { font-size:15px; }

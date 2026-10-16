@@ -197,17 +197,17 @@ html[data-gentle-motion=true] .conversation-game *,html[data-gentle-motion=true]
 .conversation-game.conversation-game .workshop-part.was-installed{border-color:#b6f3d7;animation:installed-confirm .6s ease-out;}
 @keyframes installed-confirm{from{box-shadow:0 0 0 5px #b6f3d770;}to{box-shadow:0 0 0 0 #b6f3d700;}}
 .conversation-game.conversation-game:has(.trial-success) .conversation-controls .conversation-next:not(:disabled){border:2px solid #b6f3d7;box-shadow:0 0 18px #b6f3d730;}
-.conversation-game.conversation-game .part-badge{position:absolute;left:38px;top:11px;font-size:12px;color:#fff0b3;z-index:1;pointer-events:none;}
-.conversation-game.conversation-game .workshop-pick{flex:1;height:auto;padding:48px 8px 8px;gap:3px;justify-content:center;min-height:0;}
-.conversation-game.conversation-game .workshop-pick>img{height:clamp(70px,13dvh,125px);width:100%;max-width:180px;min-height:40px;object-fit:contain;}
-.conversation-game.conversation-game .workshop-pick strong{font-size:18px;min-height:0;line-height:1.25;margin:4px 0;}
-.conversation-game.conversation-game .workshop-part-price{font-size:15px;color:#e0cceb;}
-.conversation-game.conversation-game .workshop-part-spec{font-size:14px;color:#ffe181;}
-.conversation-game.conversation-game .workshop-part-action{font-size:14px;color:#f7dcff;}
+.conversation-game.conversation-game .part-badge{position:absolute;left:8px;top:6px;font-size:10px;color:#fff0b3;z-index:2;pointer-events:none;background:rgba(27,17,49,.85);border:1px solid rgba(255,227,108,.4);border-radius:6px;padding:2px 6px;line-height:1.2;}
+.conversation-game.conversation-game .workshop-pick{flex:1;height:auto;padding:28px 8px 6px;gap:3px;justify-content:center;min-height:0;}
+.conversation-game.conversation-game .workshop-pick>img{height:clamp(50px,10dvh,85px);width:100%;max-width:120px;min-height:40px;object-fit:contain;}
+.conversation-game.conversation-game .workshop-pick strong{font-size:14px;min-height:0;line-height:1.2;margin:2px 0;}
+.conversation-game.conversation-game .workshop-part-price{font-size:12px;color:#e0cceb;}
+.conversation-game.conversation-game .workshop-part-spec{font-size:11px;color:#ffe181;}
+.conversation-game.conversation-game .workshop-part-action{font-size:11px;color:#f7dcff;}
 .conversation-game.conversation-game .workshop-pick:disabled{opacity:1;color:#e6ffed;}
-.conversation-game.conversation-game .workshop-info{width:36px;height:36px;display:grid;place-items:center;}
-.conversation-game.conversation-game .workshop-part-top{top:6px;left:8px;right:8px;}
-.conversation-game.conversation-game .workshop-part-top input{width:24px;height:24px;accent-color:#d573e7;}
+.conversation-game.conversation-game .workshop-info{width:26px;height:26px;display:grid;place-items:center;}
+.conversation-game.conversation-game .workshop-part-top{top:5px;right:6px;left:auto;z-index:2;}
+.conversation-game.conversation-game .workshop-part-top input{width:18px;height:18px;accent-color:#d573e7;}
 .conversation-game.conversation-game .part-comparison{display:flex;flex-direction:column;gap:4px;padding:10px;background:#171525;color:#ead5fa;font-size:13px;line-height:1.25;border-top:1px solid #75528c;}
 .conversation-game.conversation-game .part-comparison strong{color:#ffdf68;font-size:14px;}
 .conversation-game.conversation-game .part-remove{flex-shrink:0;display:flex;align-items:center;justify-content:center;gap:7px;background:#17453e;color:#c3f2df;border:0;border-top:1px solid #498b79;min-height:36px;font-size:14px;}

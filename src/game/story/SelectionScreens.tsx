@@ -10,6 +10,7 @@ import { STORY_FLOW } from './flow.ts';
 import './selection.css';
 import './missionExperience.css';
 const HomeViewport = lazy(() => import('./HomeViewport.tsx').then(module => ({ default: module.HomeViewport })));
+import { CosmicBackground } from './CosmicBackground.tsx';
 import { Term } from './Learning.tsx';
 import { useMobileGame } from './mobileGameContext.ts';
 
@@ -105,6 +106,7 @@ export function MissionHome({ progress, onContinue, onRestart, frame, onDemo }: 
   const mobileGame = useMobileGame();
   return <StoryShell {...frame} controls={null}>
     <main className="mission-home" id="story-content" tabIndex={-1} aria-labelledby="mission-home-title">
+      <CosmicBackground />
       <section className="home-copy">
         <span className="home-mission-tag"><span/>YOUR FIRST MOON MISSION</span>
         <h1 id="mission-home-title">Small explorer.<br/><em>Big adventure.</em></h1>

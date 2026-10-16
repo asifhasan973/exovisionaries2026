@@ -58,6 +58,7 @@ A high-performance cinematic loading screen (`src/components/common/LoadingScree
 - **Browser-managed cache with 7-day purge**: Leverages the browser's Cache Storage API (`caches.open('exovisionaries-assets-v1')`) and automatically purges cached assets if inactive for longer than 7 days.
 - **Developer delay**: Includes a prominent `__DEV_LOADING_TEST_DELAY__` configuration at the top of `LoadingScreen.tsx` for easy visual verification and removal. See [Loading Screen documentation](docs/loading-screen.md).
 
+
 ## Project layout
 
 - `src/game/story/`: the active exact-script story, character renderer, shared frame, five workshop stages, procedural lander/rover/part meshes, validated preparation reducer, resource calculations, correctable readiness checks, lazy 3D packing, immutable approval snapshots, gated interactive flight and atomic saved progress.
