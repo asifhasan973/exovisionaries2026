@@ -54,9 +54,9 @@ A high-performance cinematic loading screen (`src/components/common/LoadingScree
 
 - **Cinematic entry**: Displays an exclusive pitch-black `"ExoVisionaries-2k26 Presents"` intro splash on the user's first visit of the day/session, fading into a continuous looping carousel of authentic NASA space exploration imagery.
 - **Real engineering preloader**: Progress tracks actual background subsystem preparation (`src/engine/assetPreloader.ts`)—dynamic JS modules, Three.js 3D Moon & rocket meshes, textures, and audio synthesis—dismissing immediately when backend tasks hit 100%.
-- **Orientation pause synchronization**: Carousel cycling and asset loading automatically pause when orientation is locked by `OrientationGuard`, and underlying game views remain inert during loading.
+- **Orientation pause synchronization**: Carousel cycling pauses in portrait while background asset loading continues. Underlying game views and keyboard input stay inert during loading; manual mission pauses survive orientation changes.
 - **Browser-managed cache with 7-day TTL**: Leverages the browser's Cache Storage API (`caches.open('exovisionaries-assets-v1')`) and automatically purges cached assets once they exceed their universal 7-day lifecycle.
-- **Developer delay**: Includes a prominent `__DEV_LOADING_TEST_DELAY__` configuration at the top of `LoadingScreen.tsx` for easy visual verification and removal. See [Loading Screen documentation](docs/loading-screen.md).
+- **Developer delay**: Configure `VITE_LOADING_PROGRESS_MULTIPLIER`, `VITE_SLIDE_DISPLAY_MIN_MS`, and `VITE_INTRO_SPLASH_DISPLAY_MS` in `.env.local`. See [Loading Screen documentation](docs/loading-screen.md).
 
 ## Progressive Web App (PWA) & Offline Asset Preloader
 
@@ -88,7 +88,7 @@ When developing locally (`VITE_APP_ENV=development`), every screen, module, stan
 
 - `src/game/story/`: the active exact-script story, character renderer, shared frame, five workshop stages, procedural lander/rover/part meshes, validated preparation reducer, resource calculations, correctable readiness checks, lazy 3D packing, immutable approval snapshots, gated interactive flight and atomic saved progress.
 - `src/game/`: preserved legacy screens, 2D rocket and part art, interactive 3D builder, launch sequence, responsive styles in `src/index.css`. The 3D shelf renders part thumbnails from the same hardware meshes as the rocket; the enlarged drop bay accepts nearby releases and shows a quick snap animation. A full compatible bay offers a reversible swap.
-- `src/state/`: reactive Zustand state stores including `audioStore.ts` (centralized whole-game sound and narration mute state), `loadingStore.ts` (cinematic loading engine & task registration), `pwaStore.ts` (multi-platform PWA install lifecycle), and `missionStore.ts` (validated placements, crew choices, launch readiness gate).
+- `src/state/`: reactive Zustand state stores including `audioStore.ts` (independent voice/effects preferences plus a temporary master mute), `loadingStore.ts` (cinematic loading engine & task registration), `pwaStore.ts` (multi-platform PWA install lifecycle), and `missionStore.ts` (validated placements, crew choices, launch readiness gate).
 - `src/data/` and `src/engine/`: catalogue, mission references, budget and mass accounting, readiness checks and authored ascent values.
 - `public/story/`: the character illustrations supplied by the project team.
 - `backups/before-story-redesign-20260926-130824/`: a local copy of the previous source and documentation.

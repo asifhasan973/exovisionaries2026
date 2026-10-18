@@ -8,6 +8,7 @@ const slidesData: LoadingSlide[] = rawSlides as LoadingSlide[];
 
 // Determine intro splash status synchronously at module initialization
 const initialShowSplash = typeof window !== 'undefined' ? shouldShowIntroSplash() : false;
+let loadingGeneration = 0;
 
 export const useLoadingStore = create<LoadingState>((set, get) => ({
   // Initialize to true on boot to prevent any 1-frame background screen flash
@@ -22,6 +23,7 @@ export const useLoadingStore = create<LoadingState>((set, get) => ({
   pendingTasks: [],
 
   startLoading: async (context: LoadingContext = 'landing', initialMessage?: string) => {
+    const generation = ++loadingGeneration;
     const isLanding = context === 'landing';
     const showSplash = isLanding && shouldShowIntroSplash();
 
@@ -37,7 +39,7 @@ export const useLoadingStore = create<LoadingState>((set, get) => ({
 
     const onProgress = (percent: number, msg: string) => {
       // Background engineered preloading continues spinning unhindered during orientation block
-      get().updateProgress(percent, msg);
+      if (generation === loadingGeneration) get().updateProgress(percent, msg);
     };
 
     try {
@@ -50,13 +52,14 @@ export const useLoadingStore = create<LoadingState>((set, get) => ({
       // Also await any externally registered background tasks
       const extraTasks = get().pendingTasks;
       if (extraTasks.length > 0) {
-        get().updateProgress(98, 'Finalizing mission parameters…');
-        await Promise.all(extraTasks);
+        onProgress(98, 'Finalizing mission parameters…');
+        await Promise.allSettled(extraTasks);
       }
 
-      get().updateProgress(100, 'All systems nominal · Ready for flight');
+      onProgress(100, 'All systems nominal · Ready for flight');
     } catch (err) {
       console.warn('Subsystem preloader exception:', err);
+      onProgress(100, 'Some assets unavailable · Continue with fallback views');
     }
   },
 

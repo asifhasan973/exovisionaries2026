@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { RotateCw, Sparkles, Expand, Compass } from 'lucide-react';
 import { useOrientationLifecycleStore } from '../../state/orientationLifecycleStore';
+import { useLoadingStore } from '../../state/loadingStore';
 import './orientationGuard.css';
 
 interface OrientationGuardProps {
@@ -44,6 +45,7 @@ export function checkIsLandscape(): boolean {
  * to immediately detect mode changes without requiring page reload.
  */
 export function OrientationGuard({ children, forceBlock = false }: OrientationGuardProps) {
+  const loading = useLoadingStore(state => state.isLoading);
   const [isLandscape, setIsLandscape] = useState(() => (forceBlock ? false : checkIsLandscape()));
   const [fullscreenError, setFullscreenError] = useState<string | null>(null);
 
@@ -147,6 +149,17 @@ export function OrientationGuard({ children, forceBlock = false }: OrientationGu
     // Centrally halt or resume all application states from the lifecycle store
     useOrientationLifecycleStore.getState().setOrientationBlocked(isBlocked);
   }, [isBlocked]);
+
+  useEffect(() => {
+    const blockGameKeys = (event: KeyboardEvent) => {
+      if (!isBlocked && !loading) return;
+      if (event.target instanceof Element && event.target.closest('.orientation-blocker-overlay')) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    };
+    window.addEventListener('keydown', blockGameKeys, true);
+    return () => window.removeEventListener('keydown', blockGameKeys, true);
+  }, [isBlocked, loading]);
 
   return (
     <>

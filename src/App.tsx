@@ -11,6 +11,7 @@ const ConversationPreview = lazy(() => import('./game/story/ConversationPreview'
 const ExactStory = lazy(() => import('./game/story/ExactStory'));
 
 export default function App() {
+  const isLoading = useLoadingStore(state => state.isLoading);
   const query = new URLSearchParams(window.location.search);
   const preview = query.get('module') === '3';
   const legacy = query.get('experience') === 'legacy';
@@ -62,10 +63,12 @@ export default function App() {
     <OrientationGuard forceBlock={forceBlock}>
       <LoadingScreen />
       <InstallAppModal />
-      <Suspense>
+      <div inert={isLoading} aria-hidden={isLoading || undefined} style={{ height: '100%', minHeight: 0 }}>
+      <Suspense key={debugRoute ? `${debugRoute.type}:${debugRoute.id}` : `normal:${preview}:${legacy}`}>
         {content}
       </Suspense>
       {isDevelopment && <DebugToolbar />}
+      </div>
     </OrientationGuard>
   );
 }

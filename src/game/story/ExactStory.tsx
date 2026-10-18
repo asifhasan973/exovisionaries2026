@@ -60,20 +60,24 @@ export default function ExactStory({ debugStepId, debugDemoChapter, initialHome,
   });
   const { progress, preparation, readiness, flight, moon } = mission;
   const isMuted = useAudioStore((s) => s.isMuted);
-  const toggleAudioMute = useAudioStore((s) => s.toggleMute);
+  const voicesEnabled = useAudioStore((s) => s.voicesEnabled);
   const setAudioMuted = useAudioStore((s) => s.setMuted);
-  const voiceEnabled = !isMuted;
+  const setVoicesEnabled = useAudioStore((s) => s.setVoicesEnabled);
+  const voiceEnabled = !isMuted && voicesEnabled;
   const setVoiceEnabled = useCallback((valueOrUpdater: boolean | ((prev: boolean) => boolean)) => {
-    const current = !useAudioStore.getState().isMuted;
+    const audio = useAudioStore.getState();
+    const current = !audio.isMuted && audio.voicesEnabled;
     const nextVal = typeof valueOrUpdater === 'function' ? valueOrUpdater(current) : valueOrUpdater;
-    setAudioMuted(!nextVal);
-  }, [setAudioMuted]);
+    setVoicesEnabled(nextVal);
+    if (nextVal && audio.isMuted) setAudioMuted(false);
+  }, [setAudioMuted, setVoicesEnabled]);
+  const toggleAudioMute = useCallback(() => setVoiceEnabled(value => !value), [setVoiceEnabled]);
 
   useEffect(() => {
     if (session.voiceEnabled === false) {
-      setAudioMuted(true);
+      setVoicesEnabled(false);
     }
-  }, [session.voiceEnabled, setAudioMuted]);
+  }, [session.voiceEnabled, setVoicesEnabled]);
   const [storageAvailable, setStorageAvailable] = useState(session.storageAvailable);
   // A user gesture resumes saved narration; reloading cannot queue unsolicited speech.
   const [home, setHome] = useState(() => {
@@ -93,8 +97,8 @@ export default function ExactStory({ debugStepId, debugDemoChapter, initialHome,
   const normalMission = useRef(mission);
   const step = getStoryStep(progress.stepId,progress.selections.objective);
   useEffect(() => { window.scrollTo({ top: 0, behavior: 'instant' }); }, [progress.stepId, home]);
-  const latest = useRef({ progress, voiceEnabled, preparation, readiness, flight, moon, demo, repair: mission.repair });
-  useEffect(() => { latest.current = { progress, voiceEnabled, preparation, readiness, flight, moon, demo, repair: mission.repair }; }, [progress, voiceEnabled, preparation, readiness, flight, moon, demo, mission.repair]);
+  const latest = useRef({ progress, voiceEnabled: voicesEnabled, preparation, readiness, flight, moon, demo, repair: mission.repair });
+  useEffect(() => { latest.current = { progress, voiceEnabled: voicesEnabled, preparation, readiness, flight, moon, demo, repair: mission.repair }; }, [progress, voicesEnabled, preparation, readiness, flight, moon, demo, mission.repair]);
 
   useEffect(() => {
     if (debugStepId) {
@@ -128,14 +132,17 @@ export default function ExactStory({ debugStepId, debugDemoChapter, initialHome,
     // Report external storage results after this render. Cancel obsolete status updates.
     const timer = setTimeout(() => setStorageAvailable(saved), 0);
     return () => clearTimeout(timer);
-  }, [isDebugSession, returnCheckpoint, mission.repair, progress, voiceEnabled, preparation, moon.designSignature, moon.human, moon.phase, moon.journey.stage, moon.journey.route, moon.journey.direction, moon.journey.mode, moon.journey.speed, moon.journey.paused, moon.journey.assisted, moon.journey.attempts, journeyCheckpoint, landingCheckpoint, surfaceCheckpoint, scienceCheckpoint, moon.science.phase, moon.science.target, moon.science.depthCm, moon.science.program, moon.science.useGas, moon.science.sensorPlan, moon.science.samples, moon.science.seismometerSite, moon.science.paused, moon.science.records, moon.science.accepted, moon.science.feedback, moon.science.attempts, moon.science.assisted, incidentCheckpoint, moon.science.committed, moon.science.fieldworkStopped, moon.surface.stage, moon.surface.location, moon.surface.selected, moon.surface.mode, moon.surface.pace, moon.surface.paused, moon.surface.held, moon.surface.autonomyArmed, moon.surface.assisted, moon.surface.attempts, moon.landing.stage, moon.landing.paused, moon.landing.mode, moon.landing.target, landingInputCheckpoint, moon.landing.assisted, moon.landing.attempts, moon.landing.decisionPending, readiness.checks, readiness.packing, readiness.approved, readiness.radarConnected, trialCheckpoint, readiness.trial.phase, readiness.trial.paused, flightCheckpoint, flight.status, flight.speed, flight.events, flight.skipped, flight.mode, flight.missedWindow, demo]);
+  }, [isDebugSession, returnCheckpoint, mission.repair, progress, voiceEnabled, voicesEnabled, preparation, moon.designSignature, moon.human, moon.phase, moon.journey.stage, moon.journey.route, moon.journey.direction, moon.journey.mode, moon.journey.speed, moon.journey.paused, moon.journey.assisted, moon.journey.attempts, journeyCheckpoint, landingCheckpoint, surfaceCheckpoint, scienceCheckpoint, moon.science.phase, moon.science.target, moon.science.depthCm, moon.science.program, moon.science.useGas, moon.science.sensorPlan, moon.science.samples, moon.science.seismometerSite, moon.science.paused, moon.science.records, moon.science.accepted, moon.science.feedback, moon.science.attempts, moon.science.assisted, incidentCheckpoint, moon.science.committed, moon.science.fieldworkStopped, moon.surface.stage, moon.surface.location, moon.surface.selected, moon.surface.mode, moon.surface.pace, moon.surface.paused, moon.surface.held, moon.surface.autonomyArmed, moon.surface.assisted, moon.surface.attempts, moon.landing.stage, moon.landing.paused, moon.landing.mode, moon.landing.target, landingInputCheckpoint, moon.landing.assisted, moon.landing.attempts, moon.landing.decisionPending, readiness.checks, readiness.packing, readiness.approved, readiness.radarConnected, trialCheckpoint, readiness.trial.phase, readiness.trial.paused, flightCheckpoint, flight.status, flight.speed, flight.events, flight.skipped, flight.mode, flight.missedWindow, demo]);
   useEffect(() => {
     if (isDebugSession) return;
     const save = () => { const current = latest.current; if (current.demo) writeBrowserDemoSession(current); else writeBrowserSelectionSession(current.progress, current.voiceEnabled, current.preparation, current.readiness, current.flight, current.moon, current.repair); };
     window.addEventListener('pagehide', save);
     return () => window.removeEventListener('pagehide', save);
   }, [isDebugSession]);
-  const dispatch = useCallback((event: MissionEvent) => setMission(current => reduceMission(current, event)), []);
+  // Global suspension gates progress without changing a subsystem's manual pause.
+  // Timers keep their wall-clock baseline current, so releasing it adds no time debt.
+  const dispatch = useCallback((event: MissionEvent) => setMission(current =>
+    isEngineFrozen() && !event.type.endsWith('-pause') ? current : reduceMission(current, event)), []);
   const pausedFromMenu = useRef({ flight: false, trial: false, journey:false,landing:false,surface:false,science:false,returning:false });
   const pauseGame = useCallback(() => {
     const current = latest.current;
@@ -168,6 +175,7 @@ export default function ExactStory({ debugStepId, debugDemoChapter, initialHome,
     window.dispatchEvent(new Event('game-help-open'));
   }, [dispatch]);
   const resumeGame = useCallback(() => {
+    if (isEngineFrozen()) return;
     if (pausedFromMenu.current.flight) dispatch({ type: 'flight-resume' });
     if (pausedFromMenu.current.returning) dispatch({ type: 'return-resume' });
     if (pausedFromMenu.current.science) dispatch({ type: 'science-resume' });
@@ -178,25 +186,12 @@ export default function ExactStory({ debugStepId, debugDemoChapter, initialHome,
     pausedFromMenu.current = { flight: false, trial: false, journey:false,landing:false,surface:false,science:false,returning:false };
   }, [dispatch]);
 
-  useEffect(() => {
-    window.addEventListener('game-orientation-pause', pauseGame);
-    window.addEventListener('game-orientation-resume', resumeGame);
-    if (isEngineFrozen()) {
-      pauseGame();
-    }
-    return () => {
-      window.removeEventListener('game-orientation-pause', pauseGame);
-      window.removeEventListener('game-orientation-resume', resumeGame);
-    };
-  }, [pauseGame, resumeGame]);
   const enterMission = () => {
-    pauseGame();
     useLoadingStore.getState().startLoading('mission_start');
     setAutoplay(true);
     setHome(false);
   };
   const reset = () => {
-    pauseGame();
     useLoadingStore.getState().startLoading('mission_start', 'Preparing fresh mission…');
     setAutoBuilding(false);
     setAutoplay(true);

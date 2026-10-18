@@ -5,58 +5,49 @@ const STORAGE_KEY = 'zero_to_beyond_audio_muted_v1';
 const VOICE_KEY = 'zero_to_beyond_story_voice_v1';
 const EFFECTS_KEY = 'ztb-effects';
 
-function getInitialMuted(): boolean {
-  if (typeof window === 'undefined') return false;
+function saved(key: string, fallback: boolean, enabledValue = 'true'): boolean {
   try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved !== null) {
-      return saved === 'true';
-    }
-    const voice = localStorage.getItem(VOICE_KEY);
-    if (voice !== null) {
-      return voice === 'off';
-    }
-  } catch {}
-  return false;
+    const value = localStorage.getItem(key);
+    return value === null ? fallback : value === enabledValue;
+  } catch { return fallback; }
 }
 
 export interface AudioState {
   isMuted: boolean;
-  setMuted: (muted: boolean) => void;
-  toggleMute: () => void;
+  voicesEnabled: boolean;
+  effectsEnabled: boolean;
+  setMuted(muted: boolean): void;
+  toggleMute(): void;
+  setVoicesEnabled(enabled: boolean): void;
+  setEffectsEnabled(enabled: boolean): void;
 }
 
-const initialMuted = getInitialMuted();
-sound.setMuted(initialMuted);
+const initialMuted = saved(STORAGE_KEY, false);
+const initialEffects = saved(EFFECTS_KEY, true);
+sound.setMuted(initialMuted || !initialEffects);
 
+/** Master mute temporarily silences both channels without overwriting preferences. */
 export const useAudioStore = create<AudioState>((set, get) => ({
   isMuted: initialMuted,
-
-  setMuted: (muted: boolean) => {
-    sound.setMuted(muted);
-    if (muted) {
-      sound.stopAll();
-      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-        try {
-          window.speechSynthesis.cancel();
-        } catch {}
-      }
-    }
-    try {
-      localStorage.setItem(STORAGE_KEY, String(muted));
-      localStorage.setItem(VOICE_KEY, muted ? 'off' : 'on');
-      localStorage.setItem(EFFECTS_KEY, String(!muted));
-    } catch {}
-
+  voicesEnabled: saved(VOICE_KEY, true, 'on'),
+  effectsEnabled: initialEffects,
+  setMuted: muted => {
     set({ isMuted: muted });
-
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('game-audio-mute-change', { detail: { isMuted: muted } }));
-    }
+    sound.setMuted(muted || !get().effectsEnabled);
+    if (muted) sound.stopAll();
+    try { localStorage.setItem(STORAGE_KEY, String(muted)); } catch { /* In-memory preference remains. */ }
+    window.dispatchEvent(new CustomEvent('game-audio-mute-change', { detail: { isMuted: muted } }));
   },
-
-  toggleMute: () => {
-    const current = get().isMuted;
-    get().setMuted(!current);
-  }
+  toggleMute: () => get().setMuted(!get().isMuted),
+  setVoicesEnabled: enabled => {
+    set({ voicesEnabled: enabled });
+    try { localStorage.setItem(VOICE_KEY, enabled ? 'on' : 'off'); } catch { /* In-memory preference remains. */ }
+    window.dispatchEvent(new CustomEvent('game-audio-voices-change', { detail: { enabled } }));
+  },
+  setEffectsEnabled: enabled => {
+    set({ effectsEnabled: enabled });
+    sound.setMuted(get().isMuted || !enabled);
+    if (!enabled) sound.stopAll();
+    try { localStorage.setItem(EFFECTS_KEY, String(enabled)); } catch { /* In-memory preference remains. */ }
+  },
 }));

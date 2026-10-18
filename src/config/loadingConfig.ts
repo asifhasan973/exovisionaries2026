@@ -6,7 +6,7 @@
 function parseEnvNumber(val: unknown, fallback: number): number {
   if (typeof val === 'string' && val.trim() !== '') {
     const parsed = Number(val);
-    if (!Number.isNaN(parsed) && parsed >= 0) {
+    if (Number.isFinite(parsed) && parsed >= 0) {
       return parsed;
     }
   }
@@ -32,6 +32,6 @@ export const LOADING_CONFIG = {
   /** Minimum duration in milliseconds each carousel slide remains active (default: 2800) */
   slideDisplayMinMs: parseEnvNumber(import.meta.env.VITE_SLIDE_DISPLAY_MIN_MS, 2800),
 
-  /** Display duration in milliseconds for the pitch-black intro splash text (default: 1800) */
-  introSplashDisplayMs: parseEnvNumber(import.meta.env.VITE_INTRO_SPLASH_DISPLAY_MS, 1800),
+  /** Display duration in milliseconds for the pitch-black intro splash text (default: 2800) */
+  introSplashDisplayMs: parseEnvNumber(import.meta.env.VITE_INTRO_SPLASH_DISPLAY_MS, 2800),
 };

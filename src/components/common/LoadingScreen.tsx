@@ -28,7 +28,7 @@ export const LoadingScreen: React.FC = () => {
   const isPausedRef = useRef(isPaused);
   isPausedRef.current = isPaused;
 
-  const splashRemainingMs = useRef(3200);
+  const splashRemainingMs = useRef(LOADING_CONFIG.introSplashDisplayMs);
   const splashLastStartRef = useRef<number | null>(null);
   const slideRemainingMs = useRef(LOADING_CONFIG.slideDisplayMinMs);
   const slideLastStartRef = useRef<number | null>(null);
@@ -43,7 +43,7 @@ export const LoadingScreen: React.FC = () => {
       setDisplayedProgress(0);
       setIsScreenExiting(false);
       setActiveSlide(0);
-      splashRemainingMs.current = 3200;
+      splashRemainingMs.current = LOADING_CONFIG.introSplashDisplayMs;
       splashLastStartRef.current = null;
       slideRemainingMs.current = LOADING_CONFIG.slideDisplayMinMs;
       slideLastStartRef.current = null;
@@ -195,7 +195,7 @@ export const LoadingScreen: React.FC = () => {
       animate={{ opacity: isScreenExiting ? 0 : 1 }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
       onAnimationComplete={() => {
-        if (isScreenExiting) {
+        if (isScreenExiting && !isPausedRef.current) {
           completeLoading();
         }
       }}

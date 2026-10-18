@@ -23,6 +23,7 @@ export function browserNarrationEnvironment(): NarrationEnvironment | null {
 }
 
 import { isEngineFrozen } from '../../state/orientationLifecycleStore';
+import { useAudioStore } from '../../state/audioStore';
 
 // One radio channel across scenes, companions and the glossary. A new message
 // interrupts the old owner; it never queues behind an obsolete instruction.
@@ -39,6 +40,7 @@ export class NarrationController {
   private speechStartedAt = 0;
   private environment: NarrationEnvironment | null;
   private isPaused = false;
+  private pausedByEngine = false;
   private pausedAt: number | null = null;
   private totalPausedTime = 0;
   private lastSpokenParams: {
@@ -62,26 +64,25 @@ export class NarrationController {
     return Math.max(0, now - this.speechStartedAt - this.totalPausedTime) * NARRATION_SPEED;
   };
 
-  pause = () => {
+  pause = (byEngine = false) => {
     if (this.isPaused) return;
     if (this.snapshot.status !== 'speaking' && this.snapshot.status !== 'starting') return;
+    const params = this.lastSpokenParams;
+    if (!params) return;
+    // Cancel old callbacks/watchdogs before replaying this line after suspension.
+    this.stop();
+    activeNarrator = this;
+    this.lastSpokenParams = params;
     this.isPaused = true;
+    this.pausedByEngine = byEngine;
     this.pausedAt = performance.now();
-    if (this.recording) {
-      this.recording.onpause = null;
-      this.recording.pause();
-    }
-    if (this.utterance && typeof window !== 'undefined' && window.speechSynthesis) {
-      try {
-        window.speechSynthesis.cancel();
-      } catch {}
-    }
-    this.update('starting', this.snapshot.character);
+    this.update('starting', params.character);
   };
 
-  resume = () => {
-    if (!this.isPaused) return;
+  resume = (byEngine = false) => {
+    if (!this.isPaused || byEngine && !this.pausedByEngine) return;
     this.isPaused = false;
+    this.pausedByEngine = false;
     this.pausedAt = null;
     this.totalPausedTime = 0;
 
@@ -105,6 +106,7 @@ export class NarrationController {
     this.generation++;
     this.clearTimer();
     this.isPaused = false;
+    this.pausedByEngine = false;
     this.pausedAt = null;
     this.totalPausedTime = 0;
     this.lastSpokenParams = null;
@@ -119,6 +121,8 @@ export class NarrationController {
   };
   speak(text: string, character: StoryCharacterId, clipId?: string, gender: 'male' | 'female' = 'female') {
     this.stop();
+    const audio = useAudioStore.getState();
+    if (audio.isMuted || !audio.voicesEnabled) return;
     const environment = this.environment;
     if (!environment) return;
     activeNarrator?.stop();
@@ -129,6 +133,7 @@ export class NarrationController {
     // defer playback until engine resume
     if (isEngineFrozen()) {
       this.isPaused = true;
+      this.pausedByEngine = true;
       this.update('starting', character);
       return;
     }
@@ -240,10 +245,19 @@ export function selectCharacterVoice(voices: readonly SpeechSynthesisVoice[], ch
 }
 
 export function pauseActiveNarration() {
-  activeNarrator?.pause();
+  activeNarrator?.pause(true);
 }
 
 export function resumeActiveNarration() {
-  activeNarrator?.resume();
+  activeNarrator?.resume(true);
+}
+
+if (typeof window !== 'undefined') {
+  const syncVoiceMute = () => {
+    const audio = useAudioStore.getState();
+    if (audio.isMuted || !audio.voicesEnabled) activeNarrator?.stop();
+  };
+  window.addEventListener('game-audio-mute-change', syncVoiceMute);
+  window.addEventListener('game-audio-voices-change', syncVoiceMute);
 }
 

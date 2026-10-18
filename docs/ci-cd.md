@@ -30,7 +30,7 @@ To enable Cloudflare Pages deployment, configure the following secrets and varia
 ### Target Project
 - **Project Name**: `zero-to-beyond`
 - **Output Directory**: `dist`
-- If the project does not already exist in your Cloudflare Pages dashboard, `wrangler` will create it on the first successful deployment run.
+- Create the `zero-to-beyond` Pages project in the intended Cloudflare account before enabling deployment. This workflow does not provision a project or credentials.
 
 ### Optional Build Variables
 

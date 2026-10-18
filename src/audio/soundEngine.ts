@@ -25,7 +25,6 @@ class SoundEngine {
   public stopAll() {
     this.stopRoverSound();
     this.stopRocketRoar();
-    this.isArchiveActive = false;
     this.noteStep = 0;
   }
 
@@ -81,7 +80,11 @@ class SoundEngine {
         this.ctx = new AudioCtx();
       }
     }
-    if (this.ctx && this.ctx.state === 'suspended' && !this.wasSuspendedByOrientation) {
+    if (this.ctx && this.wasSuspendedByOrientation) {
+      if (this.ctx.state === 'running') void this.ctx.suspend().catch(() => {});
+      return;
+    }
+    if (this.ctx && this.ctx.state === 'suspended') {
       this.ctx.resume().catch(() => {});
     }
   }
