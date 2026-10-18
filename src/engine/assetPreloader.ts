@@ -74,11 +74,26 @@ export async function preloadEntrySubsystems(
       '/assets/loading/mars_perseverance.jpg',
     ];
     await Promise.allSettled(entryImages.map(src => preloadImage(src)));
-    onProgress(90, 'Imagery textures cached');
+    onProgress(85, 'Imagery textures cached');
     await paceMilestone();
 
-    // 4. Audio synthesizer & session state (10% milestone target: 90% -> 100%)
-    onProgress(95, 'Synchronizing audio synthesizer and flight telemetry…');
+    // 3b. NASA Mission Archive Subsystems & Timeline Thumbnail Bubbles
+    onProgress(88, 'Preloading NASA Mission Archive timeline & bubble assets…');
+    try {
+      const { getAllBubbleThumbnailUrls } = await import('../data/nasaArchiveData.ts');
+      const bubbleThumbnails = getAllBubbleThumbnailUrls();
+      await Promise.allSettled([
+        import('../components/archive/NasaMissionArchive.tsx'),
+        ...bubbleThumbnails.map(src => preloadImage(src))
+      ]);
+    } catch (archivePreloadErr) {
+      console.warn('NASA archive preload notice:', archivePreloadErr);
+    }
+    onProgress(92, 'NASA timeline bubbles primed');
+    await paceMilestone();
+
+    // 4. Audio synthesizer & session state (10% milestone target: 92% -> 100%)
+    onProgress(96, 'Synchronizing audio synthesizer and flight telemetry…');
     await paceMilestone();
   } finally {
     onProgress(100, 'All entry subsystems verified');

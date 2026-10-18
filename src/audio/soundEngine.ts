@@ -107,6 +107,102 @@ class SoundEngine {
     this.playClick(freq);
   }
 
+  // Joyful pentatonic arpeggio notes for playful timeline sliding (C5, D5, E5, G5, A5, C6, D6, E6)
+  private pentatonicNotes = [523.25, 587.33, 659.25, 783.99, 880.0, 1046.5, 1174.66, 1318.51];
+  private noteStep = 0;
+
+  /**
+   * Playful, game-intro tone for timeline sliding.
+   * Cheerful, arcade-like chime/bubble pip cycling through a bright pentatonic scale.
+   * Joyful, lively, and engaging (replaces the mechanical comb flick with a game tone).
+   */
+  public playTimelineSlideTick(_velocity = 1.0) {
+    if (this.isMuted) return;
+    this.initContext();
+    if (!this.ctx) return;
+
+    try {
+      const ctx = this.ctx;
+      const now = ctx.currentTime;
+
+      // Select next pentatonic note for a joyful, musical cascading arpeggio as you slide
+      const freq = this.pentatonicNotes[this.noteStep % this.pentatonicNotes.length];
+      this.noteStep = (this.noteStep + 1) % this.pentatonicNotes.length;
+
+      // 1. Warm sine fundamental (musical, sweet, arcade chime)
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now);
+      // Subtle buoyant pitch glide up (classic video game pop/coin feel)
+      osc.frequency.exponentialRampToValueAtTime(freq * 1.06, now + 0.035);
+
+      gain.gain.setValueAtTime(0.18, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.045);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.05);
+
+      // 2. Crystal sparkle octave overtone (gives it that celestial space-arcade gloss)
+      const sparkleOsc = ctx.createOscillator();
+      const sparkleGain = ctx.createGain();
+      sparkleOsc.type = 'triangle';
+      sparkleOsc.frequency.setValueAtTime(freq * 2, now);
+      sparkleOsc.frequency.exponentialRampToValueAtTime(freq * 2.15, now + 0.025);
+
+      sparkleGain.gain.setValueAtTime(0.07, now);
+      sparkleGain.gain.exponentialRampToValueAtTime(0.0005, now + 0.03);
+
+      sparkleOsc.connect(sparkleGain);
+      sparkleGain.connect(ctx.destination);
+      sparkleOsc.start(now);
+      sparkleOsc.stop(now + 0.032);
+    } catch {}
+  }
+
+  public playCombFlick(velocity = 1.0) {
+    this.playTimelineSlideTick(velocity);
+  }
+
+  /**
+   * Magnetic snap lock sound when a year docks into the needle reticle.
+   */
+  public playMagneticSnap() {
+    if (this.isMuted) return;
+    this.initContext();
+    if (!this.ctx) return;
+
+    try {
+      const ctx = this.ctx;
+      const now = ctx.currentTime;
+      // Dual resonant ping (880Hz -> 1046.5Hz and 1318.5Hz harmonic third chord)
+      const osc1 = ctx.createOscillator();
+      const osc2 = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(880, now);
+      osc1.frequency.exponentialRampToValueAtTime(1046.5, now + 0.04);
+
+      osc2.type = 'sine';
+      osc2.frequency.setValueAtTime(1318.5, now);
+
+      gain.gain.setValueAtTime(0.15, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.075);
+
+      osc1.connect(gain);
+      osc2.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc1.start(now);
+      osc2.start(now);
+      osc1.stop(now + 0.08);
+      osc2.stop(now + 0.08);
+    } catch {}
+  }
+
   // Cartoon snap / boing on part install
   public playSnap() {
     if (this.isMuted) return;

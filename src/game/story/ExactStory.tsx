@@ -35,9 +35,11 @@ const LandingScreen=lazy(()=>import('./moon/LandingScreen.tsx').then(m=>({defaul
 const JourneyScreen=lazy(()=>import('./moon/JourneyScreen.tsx').then(m=>({default:m.JourneyScreen})));
 const HumanReadinessScreen = lazy(() => import('./moon/HumanReadinessScreen.tsx').then(module => ({ default: module.HumanReadinessScreen })));
 const CrewScreen = lazy(() => import('./moon/CrewScreen.tsx').then(module => ({ default: module.CrewScreen })));
+const NasaMissionArchive = lazy(() => import('../../components/archive/NasaMissionArchive').then(module => ({ default: module.NasaMissionArchive })));
 
 /** Exact dialogue and a real preparation manifest share one saved mission. */
 export default function ExactStory() {
+  const [archiveOpen, setArchiveOpen] = useState(false);
   const [session] = useState(readBrowserSelectionSession);
   const [mission, setMission] = useState(() => createWorkshopSession(session.progress, session.preparation, session.readiness, session.flight, session.moon, session.repair));
   const { progress, preparation, readiness, flight, moon } = mission;
@@ -200,7 +202,7 @@ export default function ExactStory() {
     </>,
   };
   let screen;
-  if (home) screen = <MissionHome progress={progress} onContinue={enterMission} onBack={() => setHome(false)} onRestart={requestRestart} onDemo={() => setDemoGender(progress.playerGender)} frame={frame} />;
+  if (home) screen = <MissionHome progress={progress} onContinue={enterMission} onBack={() => setHome(false)} onRestart={requestRestart} onDemo={() => setDemoGender(progress.playerGender)} onOpenArchive={() => setArchiveOpen(true)} frame={frame} />;
   else if (step.kind === 'name') screen = <NameScreen playerName={progress.playerName} playerGender={progress.playerGender} frame={frame} onBack={back} onDemo={gender => setDemoGender(gender)}
     onSubmit={(name, gender) => { setAutoplay(true); setMission(current => {
       if (current.progress.stepId !== 'player-name') return current;
@@ -230,6 +232,15 @@ export default function ExactStory() {
   else if (step.module === 6) screen = <ReadinessScreen key={progress.stepId} session={mission} dispatch={dispatch} onBack={back} frame={frame} />;
   else screen = <WorkshopScreen key={progress.stepId} session={mission} dispatch={dispatch} onBack={back} frame={frame}
     autoBuilding={autoBuilding} onStopAutoBuild={() => setAutoBuilding(false)} onAutoBuild={() => { dispatch({ type: 'begin-auto-build' }); setAutoBuilding(true); }} />;
+
+  if (archiveOpen) {
+    return (
+      <Suspense fallback={<div className="fixed inset-0 w-screen h-screen bg-[#030712] flex items-center justify-center text-cyan-400 font-mono text-sm z-50">Opening NASA Mission Archive…</div>}>
+        <NasaMissionArchive onBack={() => setArchiveOpen(false)} />
+      </Suspense>
+    );
+  }
+
   return <PlayerCharacterProvider value={progress.playerGender}><GameSettingsProvider voiceEnabled={voiceEnabled} onToggleVoice={() => setVoiceEnabled(value => !value)} onRestart={requestRestart}><LearningProvider>
     <MobileGameProvider active={!home} voiceEnabled={voiceEnabled} onToggleVoice={() => setVoiceEnabled(value => !value)} onHome={goHome} onPause={pauseGame} onResume={resumeGame}>
       <MissionBoundary key={`${home}-${demo}-${progress.stepId}`} frame={frame} onReload={() => {

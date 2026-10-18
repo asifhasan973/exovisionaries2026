@@ -1,0 +1,1578 @@
+/* NASA Mission Archive - Aerospace HUD Aesthetic & Responsive Landscape Architecture */
+
+.nasa-archive-container {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  min-height: 100vh;
+  background: #030712;
+  color: #f1f5f9;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  user-select: none;
+  font-family: inherit;
+  z-index: 90;
+}
+
+/* Deep Space Ambient Glow & Grid */
+.nasa-archive-ambient-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.glow-sphere {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.18;
+}
+
+.sphere-cyan {
+  top: 15%;
+  left: 20%;
+  width: clamp(260px, 35vw, 550px);
+  height: clamp(260px, 35vw, 550px);
+  background: radial-gradient(circle, #8ce2c2, #0891b2, transparent 70%);
+}
+
+.sphere-purple {
+  bottom: 10%;
+  right: 18%;
+  width: clamp(300px, 40vw, 600px);
+  height: clamp(300px, 40vw, 600px);
+  background: radial-gradient(circle, #ed8def, #7c3aed, transparent 70%);
+}
+
+.archive-starfield-grid {
+  position: absolute;
+  inset: 0;
+  opacity: 0.12;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.25) 1px, transparent 1px);
+  background-size: 36px 36px;
+}
+
+/* Top Aerospace Navbar */
+.nasa-archive-navbar {
+  position: relative;
+  z-index: 30;
+  width: 100%;
+  height: clamp(48px, 6.5vh, 60px);
+  padding: 0 clamp(16px, 3vw, 40px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: rgba(7, 11, 25, 0.85);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+  flex-shrink: 0;
+}
+
+.navbar-left,
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.navbar-exit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 16px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
+  font-size: clamp(11px, 1.1vw, 13px);
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s cubic-bezier(0.25, 0.45, 0.3, 1);
+}
+
+.navbar-exit-btn:hover {
+  background: rgba(140, 226, 194, 0.12);
+  border-color: rgba(140, 226, 194, 0.4);
+  color: #8ce2c2;
+  transform: scale(1.02);
+}
+
+.navbar-exit-btn:active {
+  transform: scale(0.97);
+}
+
+.archive-brand-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  background: rgba(140, 226, 194, 0.08);
+  border: 1px solid rgba(140, 226, 194, 0.25);
+  padding: 6px 16px;
+  border-radius: 30px;
+  font-size: clamp(10px, 1vw, 12px);
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: #8ce2c2;
+  box-shadow: inset 0 0 14px rgba(140, 226, 194, 0.12);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.badge-divider {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.badge-span {
+  font-weight: 800;
+}
+
+.navbar-sound-toggle {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.navbar-sound-toggle:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #8ce2c2;
+}
+
+/* Main Viewport Stage */
+.nasa-archive-stage {
+  position: relative;
+  z-index: 10;
+  flex: 1;
+  min-height: 0;
+  height: calc(100vh - clamp(48px, 6.5vh, 60px));
+  width: 100%;
+  overflow: hidden;
+}
+
+/* Layer 1: Timeline Slider Transitions */
+.nasa-timeline-slider-wrapper {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transition: transform 0.55s cubic-bezier(0.25, 0.45, 0.3, 1), opacity 0.45s ease;
+  will-change: transform, opacity;
+}
+
+.nasa-timeline-slider-wrapper.is-visible {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.nasa-timeline-slider-wrapper.is-slid-up {
+  transform: translateY(-115%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Side Quick Step Buttons */
+.timeline-step-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 25;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  color: #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+  transition: all 0.2s cubic-bezier(0.25, 0.45, 0.3, 1);
+}
+
+.timeline-step-btn:hover {
+  background: rgba(140, 226, 194, 0.2);
+  border-color: #8ce2c2;
+  color: #8ce2c2;
+  transform: translateY(-50%) scale(1.1);
+}
+
+.timeline-step-btn:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.step-prev {
+  left: 18px;
+}
+
+.step-next {
+  right: 18px;
+}
+
+/* Draggable Timeline Track Viewport */
+.timeline-viewport {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  cursor: grab;
+  touch-action: pan-x;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  align-items: center;
+}
+
+.timeline-viewport::-webkit-scrollbar {
+  display: none;
+}
+
+.timeline-viewport:active {
+  cursor: grabbing;
+}
+
+.timeline-track {
+  --timeline-col-w: 104px;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  width: max-content;
+}
+
+@media (max-height: 450px) {
+  .timeline-track {
+    --timeline-col-w: 76px;
+  }
+}
+
+.timeline-spacer-lead,
+.timeline-spacer-tail {
+  height: 100%;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+/* Individual Year Column Node */
+.timeline-year-node {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: var(--timeline-col-w, 104px);
+  height: 100%;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+/* Upper Zone (Above Timeline) */
+.timeline-zone {
+  width: 100%;
+  flex: 1 1 0%;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.timeline-zone.zone-upper {
+  align-items: flex-end;
+  padding-bottom: 6px;
+}
+
+.timeline-zone.zone-lower {
+  align-items: flex-start;
+  padding-top: 6px;
+}
+
+.zone-bubble-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  animation: fadeIn 0.3s ease;
+}
+
+.bubble-stem {
+  width: 2px;
+  height: 14px;
+  background: rgba(140, 226, 194, 0.4);
+  box-shadow: 0 0 6px rgba(140, 226, 194, 0.3);
+}
+
+.stem-downward {
+  margin-top: 4px;
+  margin-bottom: 0;
+}
+
+.stem-upward {
+  margin-bottom: 4px;
+  margin-top: 0;
+}
+
+/* Bubble Clusters (Single, Double, Triangle) */
+.bubble-cluster-single {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bubble-cluster-double {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+/* Triangle Stacking Formation */
+.bubble-cluster-triangle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.triangle-apex-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.triangle-base-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+/* PERFECTLY CIRCULAR BUBBLES */
+.timeline-bubble {
+  position: relative;
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
+  max-width: 44px !important;
+  max-height: 44px !important;
+  aspect-ratio: 1 / 1 !important;
+  border-radius: 50% !important;
+  background: #090e1e;
+  border: 2px solid rgba(255, 255, 255, 0.22);
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+  cursor: pointer;
+  flex-shrink: 0 !important;
+  box-sizing: border-box !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+  transition: transform 0.2s cubic-bezier(0.25, 0.45, 0.3, 1), border-color 0.2s ease, box-shadow 0.2s ease;
+  padding: 0;
+}
+
+.timeline-bubble:hover {
+  transform: scale(1.18);
+  border-color: #8ce2c2;
+  box-shadow: 0 0 20px rgba(140, 226, 194, 0.65);
+  z-index: 20;
+}
+
+.timeline-bubble:active {
+  transform: scale(0.95);
+}
+
+/* Perfectly circular image inside bubble */
+.bubble-img {
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 100% !important;
+  min-height: 100% !important;
+  aspect-ratio: 1 / 1 !important;
+  object-fit: cover !important;
+  border-radius: 50% !important;
+  display: block !important;
+  pointer-events: none;
+}
+
+.bubble-fallback-icon {
+  position: absolute;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.bubble-glow-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(140, 226, 194, 0.5);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.timeline-bubble:hover .bubble-glow-ring {
+  opacity: 1;
+}
+
+/* 3rd More Indicator Bubble */
+.bubble-more {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95));
+  border: 2px dashed rgba(237, 141, 239, 0.6) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 1px !important;
+}
+
+.bubble-more:hover {
+  border-color: #ed8def !important;
+  box-shadow: 0 0 20px rgba(237, 141, 239, 0.55);
+}
+
+.bubble-dots {
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: 1.5px;
+  color: #ed8def;
+  font-weight: 800;
+}
+
+.bubble-more-count {
+  font-size: 8.5px;
+  font-family: monospace;
+  color: #cbd5e1;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* 2. RULER AXIS ZONE (Central scale line & synchronized pointer level) */
+.timeline-ruler-axis-zone {
+  position: relative;
+  width: 100%;
+  height: 68px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+/* Continuous horizontal ruler baseline */
+.ruler-horizontal-baseline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 18px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.18);
+  pointer-events: none;
+}
+
+/* Geometry-box scale subdivision tick markings */
+.ruler-subdivision-ticks {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 12px;
+  height: 13px;
+  pointer-events: none;
+}
+
+.sub-tick {
+  position: absolute;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 1px;
+}
+
+.tick-20 {
+  left: 20%;
+  height: 6px;
+  top: 3px;
+}
+
+.tick-40 {
+  left: 40%;
+  height: 6px;
+  top: 3px;
+}
+
+.tick-mid {
+  left: 50%;
+  height: 12px;
+  top: 0px;
+  width: 1.5px;
+  background: rgba(140, 226, 194, 0.45);
+}
+
+.tick-60 {
+  left: 60%;
+  height: 6px;
+  top: 3px;
+}
+
+.tick-80 {
+  left: 80%;
+  height: 6px;
+  top: 3px;
+}
+
+/* Primary Major Tick Mark for Year */
+.ruler-major-tick {
+  position: absolute;
+  left: 50%;
+  top: 5px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  height: 19px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.major-tick-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #64748b;
+  transition: all 0.2s ease;
+}
+
+.has-events .major-tick-dot {
+  background: #8ce2c2;
+  box-shadow: 0 0 8px rgba(140, 226, 194, 0.8);
+}
+
+.major-tick-line {
+  width: 2px;
+  flex: 1;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+  transition: all 0.2s ease;
+}
+
+.has-events .major-tick-line {
+  background: #8ce2c2;
+  box-shadow: 0 0 6px rgba(140, 226, 194, 0.5);
+}
+
+/* Year Label Button (Synchronized on the exact same line/level!) */
+.timeline-year-btn {
+  position: absolute;
+  left: 50%;
+  top: 28px;
+  transform: translateX(-50%);
+  width: 58px;
+  height: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 5px;
+  background: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: all 0.2s cubic-bezier(0.25, 0.45, 0.3, 1);
+  z-index: 5;
+  box-sizing: border-box;
+}
+
+.year-digits {
+  font-family: monospace;
+  font-size: 13px;
+  line-height: 14px;
+  color: #94a3b8;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  letter-spacing: 0.5px;
+}
+
+.is-major .year-digits {
+  color: #e2e8f0;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.timeline-year-btn.is-active-center {
+  background: rgba(140, 226, 194, 0.15);
+  border-color: #8ce2c2;
+  box-shadow: 0 0 16px rgba(140, 226, 194, 0.45), inset 0 0 8px rgba(140, 226, 194, 0.2);
+}
+
+.timeline-year-btn.is-active-center .year-digits {
+  color: #ffffff;
+  font-weight: 800;
+  text-shadow: 0 0 10px rgba(140, 226, 194, 0.8);
+}
+
+.year-current-badge {
+  margin-top: 2px;
+  font-size: 7px;
+  font-family: monospace;
+  background: #0891b2;
+  color: #ffffff;
+  padding: 0px 4px;
+  border-radius: 6px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  line-height: 1.2;
+}
+
+.year-future-badge {
+  margin-top: 2px;
+  font-size: 7px;
+  font-family: monospace;
+  background: #7c3aed;
+  color: #ffffff;
+  padding: 0px 4px;
+  border-radius: 6px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  line-height: 1.2;
+}
+
+/* SYNCHRONIZED CENTER POINTER RETICLE (On the exact same horizontal level as the year labels!) */
+.timeline-synced-center-pointer {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 15;
+  width: 58px;
+  height: 68px;
+  pointer-events: none;
+}
+
+.pointer-top-needle {
+  position: absolute;
+  left: 50%;
+  top: 17px;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 8px solid #8ce2c2;
+  filter: drop-shadow(0 0 6px rgba(140, 226, 194, 0.9));
+  transition: filter 0.2s ease;
+}
+
+.pointer-frame-bracket {
+  position: absolute;
+  left: 50%;
+  top: 28px;
+  transform: translateX(-50%);
+  width: 58px;
+  height: 32px;
+  border: 1px dashed rgba(140, 226, 194, 0.4);
+  border-radius: 10px;
+  box-shadow: 0 0 14px rgba(140, 226, 194, 0.12);
+  transition: all 0.2s cubic-bezier(0.25, 0.45, 0.3, 1);
+  box-sizing: border-box;
+}
+
+.timeline-synced-center-pointer.is-magnet-docked .pointer-frame-bracket {
+  border-style: solid;
+  border-color: #8ce2c2;
+  box-shadow: 0 0 22px rgba(140, 226, 194, 0.55), inset 0 0 10px rgba(140, 226, 194, 0.25);
+  transform: translateX(-50%) scale(1.04);
+}
+
+.timeline-synced-center-pointer.is-magnet-docked .pointer-top-needle,
+.timeline-synced-center-pointer.is-magnet-docked .pointer-bottom-needle {
+  filter: drop-shadow(0 0 10px rgba(140, 226, 194, 1));
+}
+
+.pointer-bottom-needle {
+  position: absolute;
+  left: 50%;
+  top: 63px;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 8px solid #8ce2c2;
+  filter: drop-shadow(0 0 6px rgba(140, 226, 194, 0.9));
+  transition: filter 0.2s ease;
+}
+
+/* Bottom Telemetry HUD */
+.timeline-footer-hud {
+  position: absolute;
+  bottom: 12px;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 clamp(16px, 4vw, 50px);
+  pointer-events: none;
+  font-family: monospace;
+  font-size: 11px;
+  z-index: 15;
+}
+
+.hud-left-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  pointer-events: auto;
+}
+
+.hud-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 5px 12px;
+  border-radius: 20px;
+  color: #cbd5e1;
+  letter-spacing: 0.8px;
+  backdrop-filter: blur(8px);
+}
+
+/* Jump to Current Year (NOW) Button */
+.hud-jump-now-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(8, 145, 178, 0.2);
+  border: 1px solid rgba(140, 226, 194, 0.4);
+  padding: 5px 14px;
+  border-radius: 20px;
+  color: #8ce2c2;
+  letter-spacing: 0.8px;
+  font-family: monospace;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  pointer-events: auto;
+  transition: all 0.25s cubic-bezier(0.25, 0.45, 0.3, 1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+
+.hud-jump-now-btn:hover {
+  background: rgba(140, 226, 194, 0.25);
+  border-color: #8ce2c2;
+  color: #ffffff;
+  transform: scale(1.05);
+  box-shadow: 0 0 20px rgba(140, 226, 194, 0.45);
+}
+
+.hud-jump-now-btn:active {
+  transform: scale(0.96);
+}
+
+.hud-jump-now-btn.can-jump {
+  border-color: rgba(140, 226, 194, 0.7);
+  box-shadow: 0 0 14px rgba(140, 226, 194, 0.35);
+  animation: hud-beacon 2s infinite ease-in-out;
+}
+
+@keyframes hud-beacon {
+
+  0%,
+  100% {
+    box-shadow: 0 0 8px rgba(140, 226, 194, 0.25);
+    border-color: rgba(140, 226, 194, 0.4);
+  }
+
+  50% {
+    box-shadow: 0 0 18px rgba(140, 226, 194, 0.65);
+    border-color: #8ce2c2;
+  }
+}
+
+.hud-jump-now-btn.is-at-current {
+  opacity: 0.8;
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #94a3b8;
+}
+
+.jump-icon {
+  transition: transform 0.4s ease;
+}
+
+.hud-jump-now-btn:hover .jump-icon {
+  transform: rotate(-180deg);
+}
+
+.hud-count-tag {
+  color: #64748b;
+  letter-spacing: 0.5px;
+}
+
+/* Layer 2: Mission Event Tree Panel */
+.nasa-event-tree-panel {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(3, 7, 18, 0.95);
+  backdrop-filter: blur(20px);
+  display: flex;
+  flex-direction: column;
+  z-index: 25;
+  transition: transform 0.55s cubic-bezier(0.25, 0.45, 0.3, 1), opacity 0.45s ease;
+  will-change: transform, opacity;
+}
+
+.nasa-event-tree-panel.is-slid-in {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.nasa-event-tree-panel.is-slid-down {
+  transform: translateY(115%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.tree-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: clamp(8px, 1.8vh, 16px) clamp(16px, 4vw, 40px);
+  background: rgba(15, 23, 42, 0.8);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.tree-back-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 16px;
+  border-radius: 12px;
+  background: rgba(140, 226, 194, 0.1);
+  border: 1px solid rgba(140, 226, 194, 0.35);
+  color: #8ce2c2;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s cubic-bezier(0.25, 0.45, 0.3, 1);
+}
+
+.tree-back-button:hover {
+  background: rgba(140, 226, 194, 0.2);
+  transform: scale(1.02);
+  box-shadow: 0 0 16px rgba(140, 226, 194, 0.25);
+}
+
+.tree-back-button:active {
+  transform: scale(0.97);
+}
+
+.tree-header-title-block {
+  text-align: center;
+  min-width: 0;
+  flex: 1;
+}
+
+.tree-year-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #8ce2c2;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.tree-heading {
+  font-size: clamp(15px, 1.8vw, 21px);
+  font-weight: 800;
+  color: #ffffff;
+  margin: 2px 0 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tree-count-pill {
+  font-size: 11px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 5px 12px;
+  border-radius: 20px;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+.tree-panel-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: clamp(14px, 2.5vh, 28px) clamp(16px, 5vw, 60px);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(140, 226, 194, 0.3) rgba(15, 23, 42, 0.6);
+}
+
+.tree-live-sync-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 8px 16px;
+  border-radius: 12px;
+  background: rgba(8, 145, 178, 0.1);
+  border: 1px solid rgba(8, 145, 178, 0.25);
+  color: #67e8f9;
+  font-size: 11.5px;
+  font-family: monospace;
+  margin-bottom: 20px;
+}
+
+/* Vertical Tree Structure */
+.tree-structure-container {
+  --tree-spine-x: 28px;
+  --card-margin-left: 64px;
+  position: relative;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.tree-vertical-spine {
+  position: absolute;
+  left: var(--tree-spine-x);
+  transform: translateX(-50%);
+  top: 10px;
+  bottom: 20px;
+  width: 2px;
+  background: linear-gradient(to bottom, #8ce2c2, #0891b2 50%, #7c3aed);
+  box-shadow: 0 0 12px rgba(140, 226, 194, 0.5);
+  border-radius: 2px;
+}
+
+.tree-events-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.tree-event-card {
+  position: relative;
+  margin-left: var(--card-margin-left);
+}
+
+.event-spine-node {
+  position: absolute;
+  left: calc(var(--tree-spine-x) - var(--card-margin-left));
+  transform: translateX(-50%);
+  top: 24px;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Illuminated branch connecting spine dot to mission card */
+.event-spine-node::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: calc(var(--card-margin-left) - var(--tree-spine-x));
+  height: 1px;
+  background: linear-gradient(to right, #8ce2c2, rgba(140, 226, 194, 0.25));
+  transform: translateY(-50%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.spine-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #8ce2c2;
+  border: 2px solid #030712;
+  box-shadow: 0 0 10px rgba(140, 226, 194, 0.8);
+  z-index: 2;
+}
+
+.spine-pulse {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(140, 226, 194, 0.3);
+  animation: radar-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.event-card-inner {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  padding: clamp(14px, 2.2vw, 22px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  transition: all 0.25s cubic-bezier(0.25, 0.45, 0.3, 1);
+}
+
+.event-card-inner:hover {
+  border-color: rgba(140, 226, 194, 0.4);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(140, 226, 194, 0.15);
+  transform: translateY(-2px);
+}
+
+.event-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.event-category-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: monospace;
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(140, 226, 194, 0.12);
+  border: 1px solid rgba(140, 226, 194, 0.3);
+  color: #8ce2c2;
+  padding: 4px 10px;
+  border-radius: 8px;
+}
+
+.event-time-badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.time-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-family: monospace;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 4px 10px;
+  border-radius: 8px;
+  color: #cbd5e1;
+}
+
+.event-card-title {
+  font-size: clamp(15px, 1.7vw, 20px);
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 14px;
+  line-height: 1.3;
+}
+
+.event-media-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 18px;
+}
+
+@media (min-width: 768px) {
+  .event-media-grid {
+    grid-template-columns: 220px minmax(0, 1fr);
+  }
+}
+
+.event-thumbnail-box {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  height: clamp(130px, 20vh, 170px);
+  background: #090d1a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.event-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.event-card-inner:hover .event-img {
+  transform: scale(1.05);
+}
+
+.thumbnail-lens-flare {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(140, 226, 194, 0.15), transparent 60%);
+  pointer-events: none;
+}
+
+.event-copy-box {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.event-description {
+  font-size: clamp(12px, 1.15vw, 13.5px);
+  color: #cbd5e1;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.event-highlights-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.highlight-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 11.5px;
+  color: #94a3b8;
+  line-height: 1.4;
+}
+
+.event-actions-bar {
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.event-redirect-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  background: rgba(8, 145, 178, 0.2);
+  border: 1px solid rgba(8, 145, 178, 0.45);
+  color: #67e8f9;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s cubic-bezier(0.25, 0.45, 0.3, 1);
+}
+
+.event-redirect-btn:hover {
+  background: rgba(8, 145, 178, 0.35);
+  border-color: #67e8f9;
+  color: #ffffff;
+  transform: scale(1.02);
+  box-shadow: 0 0 16px rgba(8, 145, 178, 0.4);
+}
+
+.event-redirect-btn:active {
+  transform: scale(0.97);
+}
+
+/* Empty State */
+.tree-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+}
+
+/* Live Enriched Media Library Strip */
+.tree-live-media-section {
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  max-width: 1100px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.live-media-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: monospace;
+  font-size: 12px;
+  font-weight: 700;
+  color: #ffdf89;
+  margin-bottom: 16px;
+  letter-spacing: 1px;
+}
+
+.live-media-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px;
+}
+
+.live-media-card {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.live-media-img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  background: #090e1c;
+}
+
+.live-media-caption {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.live-media-date {
+  font-size: 9.5px;
+  font-family: monospace;
+  color: #8ce2c2;
+}
+
+.live-media-title {
+  font-size: 11.5px;
+  color: #f1f5f9;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.live-media-desc {
+  font-size: 10.5px;
+  color: #94a3b8;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Starting Page Secondary Entry Button */
+.home-archive-wrapper {
+  margin-top: 14px;
+  width: 100%;
+  max-width: 380px;
+}
+
+.home-archive-button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 18px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(14, 21, 46, 0.85), rgba(7, 11, 26, 0.95));
+  border: 1px solid rgba(140, 226, 194, 0.35);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(140, 226, 194, 0.2);
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.25, 0.45, 0.3, 1);
+  text-align: left;
+}
+
+.home-archive-button:hover {
+  transform: translateY(-2px) scale(1.02);
+  border-color: rgba(140, 226, 194, 0.7);
+  box-shadow: 0 8px 30px rgba(140, 226, 194, 0.2), inset 0 1px 0 rgba(140, 226, 194, 0.4);
+}
+
+.home-archive-button:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+.archive-icon-wrapper {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(140, 226, 194, 0.12);
+  border: 1px solid rgba(140, 226, 194, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #8ce2c2;
+  flex-shrink: 0;
+}
+
+.archive-sparkle {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  color: #ffdf89;
+}
+
+.archive-button-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.archive-button-copy strong {
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.3px;
+}
+
+.archive-button-copy small {
+  font-size: 10.5px;
+  color: #8ce2c2;
+  font-family: monospace;
+}
+
+.archive-pill-tag {
+  font-size: 9.5px;
+  font-family: monospace;
+  font-weight: 800;
+  letter-spacing: 1px;
+  background: rgba(140, 226, 194, 0.15);
+  border: 1px solid rgba(140, 226, 194, 0.4);
+  color: #8ce2c2;
+  padding: 4px 8px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+/* ========================================================================= */
+/* Multi-Tier Responsive Layouts (Strict Landscape Architecture)             */
+/* ========================================================================= */
+
+/* Tier 1: Compact Mobile Landscape (Height <= 450px) */
+@media (max-height: 450px) {
+  .nasa-archive-navbar {
+    height: 40px;
+    padding: 0 12px;
+  }
+
+  .navbar-exit-btn {
+    padding: 4px 10px;
+    font-size: 10px;
+    border-radius: 8px;
+  }
+
+  .archive-brand-badge {
+    padding: 3px 10px;
+    font-size: 9.5px;
+  }
+
+  .timeline-year-node {
+    width: 76px;
+  }
+
+  .timeline-bubble {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    min-height: 34px !important;
+    max-width: 34px !important;
+    max-height: 34px !important;
+  }
+
+  .timeline-ruler-axis-zone {
+    height: 52px;
+  }
+
+  .ruler-horizontal-baseline {
+    top: 14px;
+  }
+
+  .ruler-subdivision-ticks {
+    top: 9px;
+    height: 11px;
+  }
+
+  .ruler-major-tick {
+    top: 3px;
+    height: 15px;
+  }
+
+  .timeline-year-btn {
+    top: 22px;
+    width: 48px;
+    height: 26px;
+    padding-top: 3px;
+    border-radius: 8px;
+  }
+
+  .year-digits {
+    font-size: 10.5px;
+    line-height: 11px;
+  }
+
+  .year-current-badge,
+  .year-future-badge {
+    margin-top: 1px;
+    font-size: 6px;
+    padding: 0 2px;
+  }
+
+  .timeline-synced-center-pointer {
+    width: 48px;
+    height: 52px;
+  }
+
+  .pointer-frame-bracket {
+    top: 22px;
+    width: 48px;
+    height: 26px;
+    border-radius: 8px;
+  }
+
+  .pointer-top-needle {
+    top: 13px;
+    border-top-width: 6px;
+    border-left-width: 4px;
+    border-right-width: 4px;
+  }
+
+  .pointer-bottom-needle {
+    top: 51px;
+    border-bottom-width: 6px;
+    border-left-width: 4px;
+    border-right-width: 4px;
+  }
+
+  .timeline-footer-hud {
+    bottom: 4px;
+    font-size: 9px;
+  }
+
+  .hud-pill {
+    padding: 2px 8px;
+    font-size: 9px;
+  }
+
+  .hud-jump-now-btn {
+    padding: 2px 10px;
+    font-size: 9.5px;
+  }
+
+  .tree-panel-header {
+    padding: 4px 12px;
+  }
+
+  .tree-back-button {
+    padding: 4px 10px;
+    font-size: 10px;
+  }
+
+  .tree-heading {
+    font-size: 13px;
+  }
+
+  .tree-panel-body {
+    padding: 8px 12px;
+  }
+
+  .tree-structure-container {
+    --tree-spine-x: 18px;
+    --card-margin-left: 44px;
+  }
+
+  .event-spine-node {
+    top: 16px;
+  }
+
+  .event-card-inner {
+    padding: 10px;
+    border-radius: 12px;
+  }
+
+  .event-media-grid {
+    grid-template-columns: 120px minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .event-thumbnail-box {
+    height: 90px;
+  }
+
+  .event-card-title {
+    font-size: 13px;
+    margin-bottom: 6px;
+  }
+
+  .event-description {
+    font-size: 10.5px;
+  }
+
+  .home-archive-wrapper {
+    margin-top: 6px;
+  }
+
+  .home-archive-button {
+    padding: 5px 10px;
+    border-radius: 10px;
+  }
+
+  .archive-icon-wrapper {
+    width: 26px;
+    height: 26px;
+  }
+
+  .archive-button-copy strong {
+    font-size: 10.5px;
+  }
+
+  .archive-button-copy small {
+    font-size: 8.5px;
+  }
+}
+
+/* Tier 2: Compact Viewport Widths (Width <= 768px) */
+@media (max-width: 768px) {
+  .tree-structure-container {
+    --tree-spine-x: 20px;
+    --card-margin-left: 48px;
+  }
+
+  .event-spine-node {
+    top: 18px;
+  }
+}
+
+/* Tier 4: Ultra-Wide (Width > 1920px) */
+@media (min-width: 1921px) {
+  .nasa-archive-container {
+    max-width: 1720px;
+    margin: 0 auto;
+    border-left: 1px solid rgba(255, 255, 255, 0.08);
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+  }
+}
