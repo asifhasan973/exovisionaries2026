@@ -107,7 +107,7 @@ export const TimelineSlider: React.FC<TimelineSliderProps> = ({
   const handleScroll = () => {
     updateCenterYear();
 
-    if (!containerRef.current) return;
+    if (!isVisible || !containerRef.current || !sound.getArchiveActive()) return;
     const currentScroll = containerRef.current.scrollLeft;
     const now = performance.now();
     const delta = Math.abs(currentScroll - lastSoundScrollLeft.current);
@@ -209,6 +209,20 @@ export const TimelineSlider: React.FC<TimelineSliderProps> = ({
     };
   }, [getColWidth, updateSpacerWidth]);
 
+  // Ensure momentum and debounced sounds are strictly halted on unmount
+  useEffect(() => {
+    return () => {
+      if (momentumAnimId.current) {
+        cancelAnimationFrame(momentumAnimId.current);
+        momentumAnimId.current = null;
+      }
+      if (wheelDebounce.current) {
+        clearTimeout(wheelDebounce.current);
+        wheelDebounce.current = null;
+      }
+    };
+  }, []);
+
   // Responsive resize handler: uses ref to preserve current position without resetting to 2026!
   useEffect(() => {
     const handleResize = () => {
@@ -240,8 +254,6 @@ export const TimelineSlider: React.FC<TimelineSliderProps> = ({
     startX.current = e.clientX;
     scrollLeftStart.current = containerRef.current.scrollLeft;
     velocitySamples.current = [{ time: performance.now(), x: e.clientX }];
-
-    sound.setMuted(false);
   };
 
   // Window-level pointer drag movement & release with magnetic snapping

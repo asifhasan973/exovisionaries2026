@@ -41,7 +41,7 @@ export const NASA_MISSION_EVENTS: NasaMissionEvent[] = [
     period: 'Jan 31, 1958',
     duration: '111 days operational (12 years in orbit)',
     category: 'Solar & Space',
-    thumbnail: 'https://images-assets.nasa.gov/image/8970899/8970899~thumb.jpg',
+    thumbnail: 'https://images-assets.nasa.gov/image/PIA04601/PIA04601~thumb.jpg',
     description: 'Launched atop a Juno I rocket from Cape Canaveral, Explorer 1 made the monumental discovery of the Van Allen radiation belts surrounding Earth.',
     highlights: ['Discovered Earth’s Van Allen radiation belts', 'First US scientific satellite in space', 'Weighed only 13.97 kg'],
     nasaUrl: 'https://www.nasa.gov/history/65-years-ago-explorer-1-first-satellite-launched-by-the-united-states/'
@@ -53,7 +53,7 @@ export const NASA_MISSION_EVENTS: NasaMissionEvent[] = [
     period: 'Jul 29 – Oct 1, 1958',
     duration: 'Historical Agency Inception',
     category: 'Infrastructure',
-    thumbnail: 'https://images-assets.nasa.gov/image/6758410/6758410~thumb.jpg',
+    thumbnail: 'https://images-assets.nasa.gov/image/GRC-1997-C-03941/GRC-1997-C-03941~thumb.jpg',
     description: 'President Dwight D. Eisenhower signed the National Aeronautics and Space Act, consolidating NACA and founding NASA to lead civilian space research.',
     highlights: ['Absorbed 8,000 employees from NACA', 'Established purely civilian exploration doctrine', 'Opened for operations on October 1, 1958'],
     nasaUrl: 'https://www.nasa.gov/history/the-birth-of-nasa/'
@@ -65,7 +65,7 @@ export const NASA_MISSION_EVENTS: NasaMissionEvent[] = [
     period: 'Oct 7, 1958',
     duration: '1958 – 1963 Program Arc',
     category: 'Crewed',
-    thumbnail: 'https://images-assets.nasa.gov/image/S61-02758/S61-02758~thumb.jpg',
+    thumbnail: 'https://images-assets.nasa.gov/image/LRC-1959-B701_P-02361/LRC-1959-B701_P-02361~thumb.jpg',
     description: 'NASA’s first human spaceflight program was officially approved, with the objective of putting an astronaut into orbit and returning safely.',
     highlights: ['Selected Mercury 7 astronauts', 'Laid ground communication networks', 'Developed heat shield ablation technology'],
     nasaUrl: 'https://www.nasa.gov/mission/mercury/'
@@ -79,7 +79,7 @@ export const NASA_MISSION_EVENTS: NasaMissionEvent[] = [
     period: 'May 5, 1961',
     duration: '15 min 28 sec suborbital flight',
     category: 'Crewed',
-    thumbnail: 'https://images-assets.nasa.gov/image/61c-0005/61c-0005~thumb.jpg',
+    thumbnail: 'https://images-assets.nasa.gov/image/6417075/6417075~thumb.jpg',
     description: 'Alan B. Shepard Jr. piloted the Mercury capsule Freedom 7 to an altitude of 187 km, proving humans could endure launch and weightlessness.',
     highlights: ['Reached altitude of 187.5 km', 'First pilot-controlled manual spacecraft attitude', 'Splashdown safely in Atlantic Ocean'],
     nasaUrl: 'https://www.nasa.gov/mission/mercury-redstone-3/'
@@ -91,7 +91,7 @@ export const NASA_MISSION_EVENTS: NasaMissionEvent[] = [
     period: 'May 25, 1961',
     duration: 'National Milestone',
     category: 'Infrastructure',
-    thumbnail: 'https://images-assets.nasa.gov/image/61-Apollo-1/61-Apollo-1~thumb.jpg',
+    thumbnail: 'https://images-assets.nasa.gov/image/NHQ201806010017/NHQ201806010017~thumb.jpg',
     description: 'In an address to Congress, President John F. Kennedy committed the nation to landing an American astronaut on the Moon before the decade was out.',
     highlights: ['Sparked the Apollo lunar program', 'Expanded NASA budget to 4.4% of federal budget', 'Accelerated Saturn rocket development'],
     nasaUrl: 'https://www.nasa.gov/the-apollo-program/'
@@ -105,7 +105,7 @@ export const NASA_MISSION_EVENTS: NasaMissionEvent[] = [
     period: 'Feb 20, 1962',
     duration: '4 hours 55 min (3 orbits)',
     category: 'Crewed',
-    thumbnail: 'https://images-assets.nasa.gov/image/62-MA6-1/62-MA6-1~thumb.jpg',
+    thumbnail: 'https://images-assets.nasa.gov/image/9139490/9139490~thumb.jpg',
     description: 'John Glenn became the first American to orbit Earth aboard Friendship 7, verifying orbital mechanics, telecommunications, and reentry survival.',
     highlights: ['3 complete orbits around Earth', 'Manual fly-by-wire reentry attitude control', 'Overcame faulty landing bag sensor alarm'],
     nasaUrl: 'https://www.nasa.gov/mission/mercury-atlas-6/'
@@ -131,7 +131,7 @@ export const NASA_MISSION_EVENTS: NasaMissionEvent[] = [
     period: 'Jun 3 – 7, 1965',
     duration: '4 days 1 hour (20 min EVA)',
     category: 'Crewed',
-    thumbnail: 'https://images-assets.nasa.gov/image/S65-30433/S65-30433~thumb.jpg',
+    thumbnail: 'https://images-assets.nasa.gov/image/s66-45605/s66-45605~thumb.jpg',
     description: 'During Gemini 4, astronaut Ed White stepped outside the capsule tethered to oxygen, maneuvering with a handheld thruster gun for 20 minutes.',
     highlights: ['First US extravehicular activity (EVA)', '62 orbits around Earth', 'First multi-day crewed endurance check'],
     nasaUrl: 'https://www.nasa.gov/mission/gemini-iv/'
@@ -157,7 +157,7 @@ export const NASA_MISSION_EVENTS: NasaMissionEvent[] = [
     period: 'Oct 11 – 22, 1968',
     duration: '10 days 20 hours',
     category: 'Crewed',
-    thumbnail: 'https://images-assets.nasa.gov/image/AS07-03-1514/AS07-03-1514~thumb.jpg',
+    thumbnail: 'https://images-assets.nasa.gov/image/S68-50712/S68-50712~thumb.jpg',
     description: 'Wally Schirra, Donn Eisele, and Walter Cunningham flight-certified the redesigned Apollo Command and Service Module in Earth orbit.',
     highlights: ['First live television broadcast from American space', 'Validated Service Propulsion System (SPS) engine', '163 orbits of Earth'],
     nasaUrl: 'https://www.nasa.gov/mission/apollo-7/'
@@ -261,7 +261,7 @@ export const NASA_MISSION_EVENTS: NasaMissionEvent[] = [
     period: 'May 14, 1973 – Feb 8, 1974',
     duration: '3 crewed missions (171 days total)',
     category: 'Infrastructure',
-    thumbnail: 'https://images-assets.nasa.gov/image/sl4-143-4654/sl4-143-4654~thumb.jpg',
+    thumbnail: 'https://images-assets.nasa.gov/image/sl3-114-1682/sl3-114-1682~thumb.jpg',
     description: 'A converted Saturn V third stage became America’s first orbital laboratory. Astronauts repaired a damaged micrometeoroid shield and conducted long-duration biology and solar research.',
     highlights: ['Proved humans can thrive for 84 consecutive days in orbit', 'Observed solar flares with Apollo Telescope Mount', 'First in-space emergency sunshade repair'],
     nasaUrl: 'https://www.nasa.gov/mission/skylab/'
@@ -287,7 +287,7 @@ export const NASA_MISSION_EVENTS: NasaMissionEvent[] = [
     period: 'Jul 15 – 24, 1975',
     duration: '9 days mission (44 hours docked)',
     category: 'Crewed',
-    thumbnail: 'https://images-assets.nasa.gov/image/AST-1-037/AST-1-037~thumb.jpg',
+    thumbnail: 'https://images-assets.nasa.gov/image/S74-17843/S74-17843~thumb.jpg',
     description: 'An Apollo Command Module docked with a Soviet Soyuz capsule in orbit. Astronauts Thomas Stafford and Alexey Leonov exchanged a historic handshake through the docking tunnel.',
     highlights: ['First joint US-Soviet space mission', 'Universal docking system engineering breakthrough', 'Ended the Space Race through scientific cooperation'],
     nasaUrl: 'https://www.nasa.gov/history/apollo-soyuz-test-project/'
@@ -299,7 +299,7 @@ export const NASA_MISSION_EVENTS: NasaMissionEvent[] = [
     period: 'Aug 20, 1975',
     duration: '10-month interplanetary cruise',
     category: 'Planetary',
-    thumbnail: 'https://images-assets.nasa.gov/image/viking-1-launch/viking-1-launch~thumb.jpg',
+    thumbnail: 'https://images-assets.nasa.gov/image/PIA10738/PIA10738~thumb.jpg',
     description: 'Viking 1 launched from Titan IIIE/Centaur towards Mars equipped with an orbiter and biological life-detection surface lander.',
     highlights: ['Twin orbiter-lander architecture', 'Automated biological chemistry labs', 'Paved the way for modern robotic surface operations'],
     nasaUrl: 'https://www.nasa.gov/mission/viking-1/'
@@ -325,7 +325,7 @@ export const NASA_MISSION_EVENTS: NasaMissionEvent[] = [
     period: 'Sep 3, 1976 – Apr 11, 1980',
     duration: '3 years 221 days',
     category: 'Planetary',
-    thumbnail: 'https://images-assets.nasa.gov/image/PIA00570/PIA00570~thumb.jpg',
+    thumbnail: 'https://images-assets.nasa.gov/image/PIA00396/PIA00396~thumb.jpg',
     description: 'Viking 2 landed 6,400 km away from Viking 1 in Utopia Planitia, operating a seismometer and analyzing water frost that coated the winter rocks.',
     highlights: ['Recorded Martian marsquakes and wind tremors', 'Photographed pure water frost on Martian rocks', 'Radioed weather station data across 4 seasons'],
     nasaUrl: 'https://www.nasa.gov/mission/viking-2/'
@@ -365,7 +365,7 @@ export const NASA_MISSION_EVENTS: NasaMissionEvent[] = [
     period: 'Apr 12 – 14, 1981',
     duration: '2 days 6 hours (36 orbits)',
     category: 'Crewed',
-    thumbnail: 'https://images-assets.nasa.gov/image/S81-30691/S81-30691~thumb.jpg',
+    thumbnail: 'https://images-assets.nasa.gov/image/8111969/8111969~thumb.jpg',
     description: 'Astronauts John Young and Robert Crippen launched on the maiden flight of Space Shuttle Columbia, inaugurating the reusable winged orbiter era.',
     highlights: ['First human orbital flight of a reusable winged spaceplane', 'Flew with solid rocket boosters on a crewed flight for the first time', 'Glided to unpowered landing at Edwards AFB'],
     nasaUrl: 'https://www.nasa.gov/mission/sts-1/'
@@ -405,7 +405,7 @@ export const NASA_MISSION_EVENTS: NasaMissionEvent[] = [
     period: 'Oct 18, 1989',
     duration: '14-year mission life',
     category: 'Planetary',
-    thumbnail: 'https://images-assets.nasa.gov/image/STS034-71-042/STS034-71-042~thumb.jpg',
+    thumbnail: 'https://images-assets.nasa.gov/image/S89-44173/S89-44173~thumb.jpg',
     description: 'Deployed from Space Shuttle Atlantis (STS-34), Galileo set out for Jupiter to deliver an atmospheric probe and become the first craft to orbit the giant planet.',
     highlights: ['First spacecraft to fly past an asteroid (Gaspra & Ida)', 'Discovered first asteroid moon (Dactyl)', 'Deployed first probe into Jupiter’s stormy atmosphere'],
     nasaUrl: 'https://www.nasa.gov/mission/galileo/'
@@ -419,7 +419,7 @@ export const NASA_MISSION_EVENTS: NasaMissionEvent[] = [
     period: 'Apr 24 – 25, 1990',
     duration: '34+ years active observing',
     category: 'Astrophysics',
-    thumbnail: 'https://images-assets.nasa.gov/image/STS031-11-002/STS031-11-002~thumb.jpg',
+    thumbnail: 'https://images-assets.nasa.gov/image/s31-10-018/s31-10-018~thumb.jpg',
     description: 'Space Shuttle Discovery lifted the Hubble Space Telescope into low Earth orbit above atmospheric distortion, opening a revolutionary window onto the cosmos.',
     highlights: ['Over 1.5 million scientific observations', 'Determined the expansion rate of the universe (Hubble constant)', 'Produced iconic images like the Pillars of Creation'],
     nasaUrl: 'https://www.nasa.gov/mission/hubble-space-telescope/'
@@ -485,7 +485,7 @@ export const NASA_MISSION_EVENTS: NasaMissionEvent[] = [
     period: 'Nov 20 – Dec 4, 1998',
     duration: '26+ years continuous operations',
     category: 'Infrastructure',
-    thumbnail: 'https://images-assets.nasa.gov/image/STS088-703-018/STS088-703-018~thumb.jpg',
+    thumbnail: 'https://images-assets.nasa.gov/image/KSC-98pc1413/KSC-98pc1413~thumb.jpg',
     description: 'Zarya and Unity modules mated in orbit during STS-88, inaugurating the largest cooperative peacetime engineering project in human history.',
     highlights: ['Over 270 astronauts from 21 nations have visited', 'Continuously occupied by humans since November 2, 2000', 'Travels at 28,000 km/h orbiting Earth every 90 minutes'],
     nasaUrl: 'https://www.nasa.gov/international-space-station/'
@@ -523,7 +523,7 @@ export const NASA_MISSION_EVENTS: NasaMissionEvent[] = [
     period: 'Jan 25, 2004 – Jun 10, 2018',
     duration: '14 years 136 days on Mars',
     category: 'Planetary',
-    thumbnail: 'https://images-assets.nasa.gov/image/PIA05214/PIA05214~thumb.jpg',
+    thumbnail: 'https://images-assets.nasa.gov/image/PIA20285/PIA20285~thumb.jpg',
     description: 'Opportunity scored an interplanetary hole-in-one in Eagle Crater, discovering hematite "blueberries" and rock layers formed in acidic standing water.',
     highlights: ['Drove an all-time interplanetary marathon of 45.16 km', 'Proved ancient liquid water pooled on Mars surface', 'Operated for more than 5,000 Martian sols'],
     nasaUrl: 'https://science.nasa.gov/mission/mer-opportunity/'
@@ -653,7 +653,7 @@ export const NASA_MISSION_EVENTS: NasaMissionEvent[] = [
     period: 'Aug 12, 2018 – Present',
     duration: '7-year nominal mission',
     category: 'Solar & Space',
-    thumbnail: 'https://images-assets.nasa.gov/image/NHQ201808120003/NHQ201808120003~thumb.jpg',
+    thumbnail: 'https://images-assets.nasa.gov/image/KSC-20180419-PH_KLS01_0009/KSC-20180419-PH_KLS01_0009~thumb.jpg',
     description: 'Parker Solar Probe is swooping within 6.1 million km of the Sun’s surface at up to 690,000 km/h, protected by an 11.4 cm carbon-composite heat shield.',
     highlights: ['Fastest human-made object ever built (up to 692,000 km/h)', 'First spacecraft to fly inside the Sun’s corona', 'Discovered magnetic "switchbacks" in the solar wind'],
     nasaUrl: 'https://science.nasa.gov/mission/parker-solar-probe/'
@@ -691,7 +691,7 @@ export const NASA_MISSION_EVENTS: NasaMissionEvent[] = [
     period: 'Oct 20, 2020',
     duration: 'TAG sampling event',
     category: 'Planetary',
-    thumbnail: 'https://images-assets.nasa.gov/image/PIA24065/PIA24065~thumb.jpg',
+    thumbnail: 'https://images-assets.nasa.gov/image/DSCN0120/DSCN0120~thumb.jpg',
     description: 'OSIRIS-REx extended its robotic sampling arm TAGSAM, tapped asteroid Bennu’s surface, and fired pressurized nitrogen gas to collect over 120 grams of carbon-rich regolith.',
     highlights: ['First US mission to sample an asteroid surface', 'Collected over twice the required sample mass (>120 grams)', 'Discovered Bennu behaves like a fluid ball of pebbles'],
     nasaUrl: 'https://science.nasa.gov/mission/osiris-rex/'
@@ -755,7 +755,7 @@ export const NASA_MISSION_EVENTS: NasaMissionEvent[] = [
     period: 'Jul 12, 2022',
     duration: 'Operational Milestone',
     category: 'Astrophysics',
-    thumbnail: 'https://images-assets.nasa.gov/image/STScI-01G7ETPF1000B298G7180D821W/STScI-01G7ETPF1000B298G7180D821W~thumb.jpg',
+    thumbnail: 'https://images-assets.nasa.gov/image/carina_nebula/carina_nebula~thumb.jpg',
     description: 'NASA released the deepest and sharpest infrared images of the early universe, including galaxy cluster SMACS 0723 peering back over 13 billion years.',
     highlights: ['Detected light from galaxies born 300 million years after Big Bang', 'Identified atmospheric water vapor and carbon dioxide on exoplanets', 'Detailed star formation in Carina Nebula Cosmic Cliffs'],
     nasaUrl: 'https://science.nasa.gov/mission/webb/'
@@ -805,7 +805,7 @@ export const NASA_MISSION_EVENTS: NasaMissionEvent[] = [
     period: 'Oct 13, 2023',
     duration: '6-year cruise to main asteroid belt',
     category: 'Planetary',
-    thumbnail: 'https://images-assets.nasa.gov/image/KSC-20231013-PH-KLS01_0007/KSC-20231013-PH-KLS01_0007~thumb.jpg',
+    thumbnail: 'https://images-assets.nasa.gov/image/PIA21499/PIA21499~thumb.jpg',
     description: 'Launched atop a Falcon Heavy, Psyche is travelling 3.5 billion km to explore a unique metallic asteroid thought to be the exposed core of an ancient planetesimal.',
     highlights: ['Exploring an asteroid made of nickel-iron metal rather than rock or ice', 'Demonstrating Deep Space Optical Laser Communications (DSOC)', 'Scheduled to arrive at asteroid Psyche in 2029'],
     nasaUrl: 'https://science.nasa.gov/mission/psyche/'
@@ -819,7 +819,7 @@ export const NASA_MISSION_EVENTS: NasaMissionEvent[] = [
     period: 'Oct 14, 2024',
     duration: '5.5-year journey to Jupiter',
     category: 'Planetary',
-    thumbnail: 'https://images-assets.nasa.gov/image/KSC-20241014-PH-JLS01_0001/KSC-20241014-PH-JLS01_0001~thumb.jpg',
+    thumbnail: 'https://images-assets.nasa.gov/image/PIA25125/PIA25125~thumb.jpg',
     description: 'NASA’s largest planetary mission ever built launched on Falcon Heavy to perform 49 low-altitude flybys of Jupiter’s moon Europa, assessing its subsurface ocean habitability.',
     highlights: ['Equipped with ice-penetrating radar (REASON) to sound through the crust', 'Features 30-meter solar array wingspan for Jupiter distance', 'Will fly as close as 25 km above Europa’s icy surface'],
     nasaUrl: 'https://science.nasa.gov/mission/europa-clipper/'
@@ -833,7 +833,7 @@ export const NASA_MISSION_EVENTS: NasaMissionEvent[] = [
     period: 'Late 2025 / 2026',
     duration: '10-day crewed lunar flyby',
     category: 'Crewed',
-    thumbnail: 'https://images-assets.nasa.gov/image/artemis_launch/artemis_launch~thumb.jpg',
+    thumbnail: 'https://images-assets.nasa.gov/image/KSC-20230602-PH-GEB01-0010/KSC-20230602-PH-GEB01-0010~thumb.jpg',
     description: 'Four astronauts—Reid Wiseman, Victor Glover, Christina Koch, and Jeremy Hansen—will become the first humans to journey to the Moon in over 50 years.',
     highlights: ['First crewed flight of SLS and Orion', 'Christina Koch will be first woman to fly to the Moon', 'Conducting high-apogee proximity operations in Earth orbit before lunar burn'],
     nasaUrl: 'https://www.nasa.gov/mission/artemis-ii/'
@@ -857,7 +857,7 @@ export const NASA_MISSION_EVENTS: NasaMissionEvent[] = [
     period: '2026 / 2027',
     duration: '5-year primary mission',
     category: 'Astrophysics',
-    thumbnail: 'https://images-assets.nasa.gov/image/GSFC_20190520_Roman_m13264/GSFC_20190520_Roman_m13264~thumb.jpg',
+    thumbnail: 'https://images-assets.nasa.gov/image/GSFC_20170331_2017-11028_014/GSFC_20170331_2017-11028_014~thumb.jpg',
     description: 'With a view 100 times greater than Hubble at equivalent sharpness, the Roman Space Telescope will survey billions of galaxies to unravel Dark Energy.',
     highlights: ['100x field of view of Hubble Space Telescope with same clarity', 'Equipped with starlight-blocking Coronagraph exoplanet instrument', 'Will survey 1 billion galaxies across cosmic time'],
     nasaUrl: 'https://roman.gsfc.nasa.gov/'
@@ -871,7 +871,7 @@ export const NASA_MISSION_EVENTS: NasaMissionEvent[] = [
     period: 'Target 2027',
     duration: '30-day mission (6.5 days on Moon)',
     category: 'Crewed',
-    thumbnail: 'https://images-assets.nasa.gov/image/apollo_bootprint/apollo_bootprint~thumb.jpg',
+    thumbnail: 'https://images-assets.nasa.gov/image/art002e009283/art002e009283~thumb.jpg',
     description: 'Astronauts will land at the Moon’s South Pole, utilizing advanced surface spacesuits to explore permanent shadow craters and harvest water-ice samples.',
     highlights: ['First human landing at the Lunar South Pole', 'First woman and first person of color to walk on the Moon', 'Field sampling of primordial volatiles in permanent shadow traps'],
     nasaUrl: 'https://www.nasa.gov/mission/artemis-iii/'
@@ -899,7 +899,7 @@ export const NASA_MISSION_EVENTS: NasaMissionEvent[] = [
     period: 'Target 2030',
     duration: 'Sustained Lunar Presence',
     category: 'Infrastructure',
-    thumbnail: 'https://images-assets.nasa.gov/image/orion_earth_view/orion_earth_view~thumb.jpg',
+    thumbnail: 'https://images-assets.nasa.gov/image/Gateway-Set-1-IAC7-4k-BG_10/Gateway-Set-1-IAC7-4k-BG_10~thumb.jpg',
     description: 'Establishes a permanent surface habitat, pressurized lunar rover, and orbiting Lunar Gateway space station as the staging ground for human missions to Mars.',
     highlights: ['Sustained human living habitat at Lunar South Pole', 'Commercial in-situ resource utilization (ISRU) water fuel extraction', 'Crucial proving ground for 500-day human missions to Mars'],
     nasaUrl: 'https://www.nasa.gov/specials/artemis/'

@@ -47,7 +47,19 @@ export async function fetchNasaYearUpdates(year: number, query = 'mission'): Pro
     }
 
     const json = await response.json();
-    const items = json?.collection?.items || [];
+    let items = json?.collection?.items || [];
+
+    // If specific mission title query returned no items, try a broader NASA mission search for that year
+    if (items.length === 0 && query !== 'mission' && query !== 'NASA') {
+      try {
+        const fallbackUrl = `https://images-api.nasa.gov/search?q=NASA&media_type=image&year_start=${year}&year_end=${year}`;
+        const fallbackResp = await fetch(fallbackUrl);
+        if (fallbackResp.ok) {
+          const fallbackJson = await fallbackResp.json();
+          items = fallbackJson?.collection?.items || [];
+        }
+      } catch {}
+    }
 
     const mapped: NasaLiveMediaItem[] = items.slice(0, 6).map((item: {
       data?: Array<{
@@ -61,7 +73,8 @@ export async function fetchNasaYearUpdates(year: number, query = 'mission'): Pro
       links?: Array<{ href?: string; rel?: string }>;
     }) => {
       const data = item.data?.[0] || {};
-      const imageLink = item.links?.find(l => l.rel === 'preview')?.href;
+      const rawLink = item.links?.find(l => l.rel === 'preview')?.href || item.links?.[0]?.href;
+      const imageLink = rawLink ? rawLink.replace(/^http:\/\//, 'https://') : undefined;
       return {
         nasaId: data.nasa_id || `nasa-${Math.random()}`,
         title: data.title || 'NASA Mission Record',

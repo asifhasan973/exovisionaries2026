@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
-import { ArrowRight, Play, RotateCcw, Check, CheckCircle2, LockKeyhole, MapPin, Moon, Rocket, Sparkles, Compass } from 'lucide-react';
+import { ArrowRight, Play, RotateCcw, Check, CheckCircle2, LockKeyhole, MapPin, Moon, Rocket, Sparkles, Compass, Download } from 'lucide-react';
 import { sound } from '../../audio/soundEngine';
+import { usePwaStore } from '../../state/pwaStore';
 import { CharacterStage } from './CharacterStage.tsx';
 import { SelectionArt } from './SelectionArt.tsx';
 import { StoryControls, StoryShell } from './StoryShell.tsx';
@@ -106,6 +107,7 @@ export function MissionHome({ progress, onContinue, onRestart, frame, onDemo, on
 }) {
   const hasProgress = !!progress.playerName;
   const mobileGame = useMobileGame();
+  const { isInstalled, promptInstall } = usePwaStore();
   return <StoryShell {...frame} controls={null}>
     <main className="mission-home" id="story-content" tabIndex={-1} aria-labelledby="mission-home-title">
       <CosmicBackground />
@@ -140,6 +142,19 @@ export function MissionHome({ progress, onContinue, onRestart, frame, onDemo, on
         </div>
 
         <div className="home-other-actions">
+          {!isInstalled ? (
+            <button
+              type="button"
+              className="home-install-app-btn"
+              onClick={() => {
+                sound.playClick(720);
+                promptInstall();
+              }}
+              title="Install app on your device for fast fullscreen offline play"
+            >
+              <Download size={17} />Install App
+            </button>
+          ) : null}
           {onDemo ? <button onClick={() => { mobileGame.start(); onDemo(); }}><Rocket size={18}/>Judge demo</button> : null}
           {hasProgress ? <button onClick={onRestart}><RotateCcw size={17}/>New mission</button> : null}
         </div>

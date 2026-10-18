@@ -1,4 +1,4 @@
-import { preloadImage, maintainBrowserAssetCache } from './loadingEngine.ts';
+import { preloadImage, maintainBrowserAssetCache, cacheAssetInBrowser } from './loadingEngine.ts';
 import { LOADING_CONFIG } from '../config/loadingConfig';
 
 /**
@@ -162,14 +162,37 @@ export async function preloadMissionSubsystems(
     onProgress(70, '3D rocket builder primed');
     await paceMilestone();
 
-    // 3. Heavy mission crew portraits & textures (20% milestone target: 70% -> 90%)
+    // 3. Heavy mission visuals, celestial textures & character rig atlases (20% milestone target: 70% -> 90%)
     onProgress(75, 'Decoding astronaut dossiers & lunar surface maps…');
-    const missionImages = [
+    const missionVisualAssets = [
+      // 3D Flight celestial textures
+      '/story/flight/earth-blue-marble.jpg',
+      // Character rig WebP body & face atlases
+      '/story/characters-v1/chief-body.webp',
+      '/story/characters-v1/chief-faces-a.webp',
+      '/story/characters-v1/chief-faces-b.webp',
+      '/story/characters-v1/commander-body.webp',
+      '/story/characters-v1/commander-faces-a.webp',
+      '/story/characters-v1/commander-faces-b.webp',
+      '/story/characters-v1/commander-faces-c.webp',
+      '/story/characters-v1/commander-male-atlas.png',
+      // Mission crew portraits & character expressions
       '/story/pilot.png',
       '/story/sarah-jenkins.png',
+      '/story/kai-briefing.webp',
+      '/story/kai-talking.webp',
+      '/story/mira-briefing.webp',
+      '/story/mira-talking.webp',
+      '/story/mira-neutral-new-cut.webp',
+      '/story/mira-speaking-new-cut.webp',
+      '/story/mira-success-cut.webp',
+      '/story/mira-warning-cut.webp',
     ];
-    await Promise.allSettled(missionImages.map(src => preloadImage(src)));
-    onProgress(90, 'Crew dossiers cached');
+    await Promise.allSettled([
+      ...missionVisualAssets.map(src => preloadImage(src)),
+      cacheAssetInBrowser('/story/characters-v1/manifest.json')
+    ]);
+    onProgress(90, 'Visual textures & character rigs cached');
     await paceMilestone();
 
     // 4. Mission flight audio synthesis buffers (10% milestone target: 90% -> 100%)

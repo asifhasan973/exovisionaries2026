@@ -46,9 +46,9 @@ export function StoryShell({ children, controls, headerExtra, onHome, exitURL = 
         {headerExtra}
         <LearningControls /><SourcesButton /><SettingsButton />
         {onToggleVoice ? <button className="conversation-icon labeled-control" onClick={onToggleVoice} disabled={!voiceAvailable}
-          aria-label={!voiceAvailable ? 'Narration unavailable' : voiceEnabled ? 'Mute narration' : 'Enable narration'}
-          aria-pressed={voiceEnabled && voiceAvailable} title={!voiceAvailable ? 'Narration unavailable' : voiceEnabled ? 'Mute narration' : 'Enable narration'}>
-          {voiceEnabled && voiceAvailable ? <Volume2 size={21} /> : <VolumeX size={21} />}<span>Voice</span>
+          aria-label={!voiceAvailable ? 'Audio unavailable' : voiceEnabled ? 'Mute all game audio' : 'Unmute all game audio'}
+          aria-pressed={voiceEnabled && voiceAvailable} title={!voiceAvailable ? 'Audio unavailable' : voiceEnabled ? 'Mute all game audio' : 'Unmute all game audio'}>
+          {voiceEnabled && voiceAvailable ? <Volume2 size={21} /> : <VolumeX size={21} />}<span>{voiceEnabled ? 'Sound' : 'Silent'}</span>
         </button> : null}
       </nav>
     </header> : null}

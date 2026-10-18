@@ -9,6 +9,25 @@ class SoundEngine {
   private rocketFilterNode: BiquadFilterNode | null = null;
 
   private roverNodes: { oscillator: OscillatorNode; noise: AudioBufferSourceNode; gain: GainNode; filter: BiquadFilterNode } | null = null;
+  private isArchiveActive: boolean = false;
+
+  public setArchiveActive(active: boolean) {
+    this.isArchiveActive = active;
+    if (!active) {
+      this.noteStep = 0;
+    }
+  }
+
+  public getArchiveActive(): boolean {
+    return this.isArchiveActive;
+  }
+
+  public stopAll() {
+    this.stopRoverSound();
+    this.stopRocketRoar();
+    this.isArchiveActive = false;
+    this.noteStep = 0;
+  }
 
   /** Separate motor feedback for the practice game; never shares flight audio nodes. */
   public startRoverSound(kind: 'drive' | 'drill') {
@@ -117,7 +136,7 @@ class SoundEngine {
    * Joyful, lively, and engaging (replaces the mechanical comb flick with a game tone).
    */
   public playTimelineSlideTick(_velocity = 1.0) {
-    if (this.isMuted) return;
+    if (this.isMuted || !this.isArchiveActive) return;
     this.initContext();
     if (!this.ctx) return;
 
@@ -170,7 +189,7 @@ class SoundEngine {
    * Magnetic snap lock sound when a year docks into the needle reticle.
    */
   public playMagneticSnap() {
-    if (this.isMuted) return;
+    if (this.isMuted || !this.isArchiveActive) return;
     this.initContext();
     if (!this.ctx) return;
 

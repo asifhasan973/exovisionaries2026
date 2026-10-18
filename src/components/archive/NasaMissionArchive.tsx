@@ -8,6 +8,7 @@ import {
 import { TimelineSlider } from './TimelineSlider';
 import { MissionEventTree } from './MissionEventTree';
 import { sound } from '../../audio/soundEngine';
+import { useAudioStore } from '../../state/audioStore';
 import './nasaArchive.css';
 
 interface NasaMissionArchiveProps {
@@ -17,11 +18,16 @@ interface NasaMissionArchiveProps {
 export const NasaMissionArchive: React.FC<NasaMissionArchiveProps> = ({ onBack }) => {
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
-  const [isMuted, setIsMuted] = useState<boolean>(false);
+  const isMuted = useAudioStore((s) => s.isMuted);
+  const toggleMute = useAudioStore((s) => s.toggleMute);
 
-  // Unmute audio for archive experience on mount
+  // Activate archive sound containment on mount; stop and deactivate on unmount
   useEffect(() => {
-    sound.setMuted(false);
+    sound.setArchiveActive(true);
+    return () => {
+      sound.setArchiveActive(false);
+      sound.stopAll();
+    };
   }, []);
 
   // Listen to orientation freeze events
@@ -52,12 +58,6 @@ export const NasaMissionArchive: React.FC<NasaMissionArchiveProps> = ({ onBack }
     setSelectedEventId(null);
   };
 
-  const toggleSound = () => {
-    const nextMuted = !isMuted;
-    sound.setMuted(nextMuted);
-    setIsMuted(nextMuted);
-  };
-
   return (
     <div className="nasa-archive-container">
       {/* Deep Space Ambient Glow & Starfield */}
@@ -76,6 +76,8 @@ export const NasaMissionArchive: React.FC<NasaMissionArchiveProps> = ({ onBack }
             className="navbar-exit-btn group"
             onClick={() => {
               sound.playClick(600);
+              sound.setArchiveActive(false);
+              sound.stopAll();
               onBack();
             }}
             title="Return to starting page"
@@ -101,9 +103,9 @@ export const NasaMissionArchive: React.FC<NasaMissionArchiveProps> = ({ onBack }
           <button
             type="button"
             className="navbar-sound-toggle"
-            onClick={toggleSound}
-            title={isMuted ? 'Unmute archive sounds' : 'Mute archive sounds'}
-            aria-label={isMuted ? 'Unmute archive audio' : 'Mute archive audio'}
+            onClick={toggleMute}
+            title={isMuted ? 'Unmute all game audio' : 'Mute all game audio'}
+            aria-label={isMuted ? 'Unmute all game audio' : 'Mute all game audio'}
           >
             {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} className="text-cyan-400" />}
           </button>

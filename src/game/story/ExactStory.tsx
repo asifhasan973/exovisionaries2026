@@ -27,6 +27,7 @@ import { MobileGameProvider } from './MobileGame.tsx';
 import { trialActive } from './trial.ts';
 import { useLoadingStore } from '../../state/loadingStore';
 import { isEngineFrozen } from '../../state/orientationLifecycleStore';
+import { useAudioStore } from '../../state/audioStore';
 const ReturnScreen=lazy(()=>import('./moon/ReturnScreen.tsx').then(m=>({default:m.ReturnScreen})));
 const RecoveryScreen=lazy(()=>import('./moon/RecoveryScreen.tsx').then(m=>({default:m.RecoveryScreen})));
 const ScienceScreen=lazy(()=>import('./moon/ScienceScreen.tsx').then(m=>({default:m.ScienceScreen})));
@@ -43,7 +44,21 @@ export default function ExactStory() {
   const [session] = useState(readBrowserSelectionSession);
   const [mission, setMission] = useState(() => createWorkshopSession(session.progress, session.preparation, session.readiness, session.flight, session.moon, session.repair));
   const { progress, preparation, readiness, flight, moon } = mission;
-  const [voiceEnabled, setVoiceEnabled] = useState(session.voiceEnabled);
+  const isMuted = useAudioStore((s) => s.isMuted);
+  const toggleAudioMute = useAudioStore((s) => s.toggleMute);
+  const setAudioMuted = useAudioStore((s) => s.setMuted);
+  const voiceEnabled = !isMuted;
+  const setVoiceEnabled = useCallback((valueOrUpdater: boolean | ((prev: boolean) => boolean)) => {
+    const current = !useAudioStore.getState().isMuted;
+    const nextVal = typeof valueOrUpdater === 'function' ? valueOrUpdater(current) : valueOrUpdater;
+    setAudioMuted(!nextVal);
+  }, [setAudioMuted]);
+
+  useEffect(() => {
+    if (session.voiceEnabled === false) {
+      setAudioMuted(true);
+    }
+  }, [session.voiceEnabled, setAudioMuted]);
   const [storageAvailable, setStorageAvailable] = useState(session.storageAvailable);
   // A user gesture resumes saved narration; reloading cannot queue unsolicited speech.
   const [home, setHome] = useState(true);
@@ -190,7 +205,7 @@ export default function ExactStory() {
   };
   useEffect(() => { const stop = () => setAutoBuilding(false); window.addEventListener('game-help-open', stop); return () => window.removeEventListener('game-help-open', stop); }, []);
   const frame: SelectionFrame = {
-    onHome: goHome, voiceEnabled, onToggleVoice: () => setVoiceEnabled(value => !value),
+    onHome: goHome, voiceEnabled, onToggleVoice: toggleAudioMute,
     voiceAvailable: typeof Audio !== 'undefined',
     headerExtra: <>
       {demo ? <button className="story-demo-exit" onClick={goHome}>Demo · Exit</button> : null}
@@ -241,8 +256,8 @@ export default function ExactStory() {
     );
   }
 
-  return <PlayerCharacterProvider value={progress.playerGender}><GameSettingsProvider voiceEnabled={voiceEnabled} onToggleVoice={() => setVoiceEnabled(value => !value)} onRestart={requestRestart}><LearningProvider>
-    <MobileGameProvider active={!home} voiceEnabled={voiceEnabled} onToggleVoice={() => setVoiceEnabled(value => !value)} onHome={goHome} onPause={pauseGame} onResume={resumeGame}>
+  return <PlayerCharacterProvider value={progress.playerGender}><GameSettingsProvider voiceEnabled={voiceEnabled} onToggleVoice={toggleAudioMute} onRestart={requestRestart}><LearningProvider>
+    <MobileGameProvider active={!home} voiceEnabled={voiceEnabled} onToggleVoice={toggleAudioMute} onHome={goHome} onPause={pauseGame} onResume={resumeGame}>
       <MissionBoundary key={`${home}-${demo}-${progress.stepId}`} frame={frame} onReload={() => {
         const current = latest.current;
         const saved = current.demo ? writeBrowserDemoSession(current) : writeBrowserSelectionSession(current.progress,current.voiceEnabled,current.preparation,current.readiness,current.flight,current.moon,current.repair);

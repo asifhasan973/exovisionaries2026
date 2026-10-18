@@ -1,34 +1,35 @@
 /**
- * Cache storage identifier and inactivity expiration thresholds
+ * Cache storage identifier and 7-day TTL expiration thresholds
  */
 const ASSET_CACHE_NAME = 'exovisionaries-assets-v1';
-const CACHE_LAST_ACTIVE_KEY = 'exovisionaries_cache_last_active_v1';
-const INACTIVITY_EXPIRATION_MS = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
+const CACHE_CREATED_AT_KEY = 'exovisionaries_cache_created_at_v1';
+const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
 
 /** In-memory cache holding preloaded HTMLImageElements to guarantee instant slide switching */
 const memoryImageCache = new Map<string, HTMLImageElement>();
 
 /**
  * Initializes and manages the browser Cache Storage lifecycle,
- * automatically purging cached assets if inactive for longer than 7 days.
+ * automatically purging and renewing cached assets after 7 days (universal 7-day TTL without inactivity reset).
  */
 export async function maintainBrowserAssetCache(): Promise<void> {
   if (typeof window === 'undefined' || !('caches' in window)) return;
 
   try {
     const now = Date.now();
-    const lastActiveStr = window.localStorage.getItem(CACHE_LAST_ACTIVE_KEY);
+    const createdAtStr = window.localStorage.getItem(CACHE_CREATED_AT_KEY);
 
-    if (lastActiveStr) {
-      const lastActive = Number(lastActiveStr);
-      if (now - lastActive > INACTIVITY_EXPIRATION_MS) {
-        // Cache has been inactive for more than 7 days: purge it
+    if (createdAtStr) {
+      const createdAt = Number(createdAtStr);
+      if (now - createdAt > CACHE_TTL_MS) {
+        // Cache has exceeded 7 days: purge it and start fresh 7-day lifecycle
         await window.caches.delete(ASSET_CACHE_NAME);
+        window.localStorage.setItem(CACHE_CREATED_AT_KEY, String(now));
       }
+    } else {
+      // First time initialization: stamp creation timestamp
+      window.localStorage.setItem(CACHE_CREATED_AT_KEY, String(now));
     }
-
-    // Refresh last active timestamp
-    window.localStorage.setItem(CACHE_LAST_ACTIVE_KEY, String(now));
   } catch {
     // Ignore restricted storage contexts
   }

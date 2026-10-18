@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <radialGradient id="space-bg" cx="50%" cy="30%" r="75%">
+      <stop offset="0%" stop-color="#1e1145" />
+      <stop offset="45%" stop-color="#0f0728" />
+      <stop offset="100%" stop-color="#030712" />
+    </radialGradient>
+    <linearGradient id="rocket-body" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="50%" stop-color="#e2e8f0" />
+      <stop offset="100%" stop-color="#94a3b8" />
+    </linearGradient>
+    <linearGradient id="neon-glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8ce2c2" />
+      <stop offset="100%" stop-color="#38bdf8" />
+    </linearGradient>
+    <linearGradient id="flame" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="25%" stop-color="#ffdf89" />
+      <stop offset="65%" stop-color="#f97316" />
+      <stop offset="100%" stop-color="#ef4444" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="12" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Deep space rounded icon background -->
+  <rect width="512" height="512" rx="112" fill="url(#space-bg)" />
+  <rect width="504" height="504" x="4" y="4" rx="108" fill="none" stroke="#8ce2c2" stroke-width="4" stroke-opacity="0.3" />
+
+  <!-- Stars and cosmic dust -->
+  <circle cx="96" cy="112" r="3" fill="#ffffff" opacity="0.8" />
+  <circle cx="160" cy="72" r="2" fill="#8ce2c2" opacity="0.9" />
+  <circle cx="416" cy="128" r="3.5" fill="#ffdf89" opacity="0.8" />
+  <circle cx="448" cy="224" r="2" fill="#ffffff" opacity="0.7" />
+  <circle cx="80" cy="384" r="2.5" fill="#38bdf8" opacity="0.8" />
+  <circle cx="400" cy="416" r="3" fill="#8ce2c2" opacity="0.7" />
+
+  <!-- Moon Orbital Ring -->
+  <ellipse cx="256" cy="256" rx="210" ry="80" fill="none" stroke="url(#neon-glow)" stroke-width="6" opacity="0.4" transform="rotate(-32 256 256)" filter="url(#glow)" />
+  <circle cx="410" cy="165" r="22" fill="#e2e8f0" stroke="#8ce2c2" stroke-width="2">
+    <animate attributeName="opacity" values="0.85;1;0.85" dur="3s" repeatCount="indefinite" />
+  </circle>
+  <circle cx="404" cy="158" r="4" fill="#94a3b8" opacity="0.6" />
+  <circle cx="418" cy="172" r="6" fill="#94a3b8" opacity="0.5" />
+
+  <!-- Rocket Thruster Flame -->
+  <g transform="translate(256, 256) rotate(45) translate(-256, -256)">
+    <path d="M 236 340 Q 256 460 256 480 Q 256 460 276 340 Z" fill="url(#flame)" filter="url(#glow)" />
+    <path d="M 244 340 Q 256 420 256 440 Q 256 420 268 340 Z" fill="#ffffff" />
+    
+    <!-- Rocket Fins -->
+    <path d="M 200 320 Q 220 330 232 340 L 224 280 Z" fill="#0284c7" />
+    <path d="M 312 320 Q 292 330 280 340 L 288 280 Z" fill="#0284c7" />
+    <path d="M 188 340 L 232 340 L 226 270 L 194 310 Z" fill="#863bff" />
+    <path d="M 324 340 L 280 340 L 286 270 L 318 310 Z" fill="#863bff" />
+
+    <!-- Rocket Body -->
+    <path d="M 256 100 Q 296 160 296 280 L 216 280 Q 216 160 256 100 Z" fill="url(#rocket-body)" />
+    <path d="M 216 280 L 296 280 L 284 340 L 228 340 Z" fill="#334155" />
+    
+    <!-- Aerospace Accent Stripes -->
+    <path d="M 230 180 Q 256 170 282 180 L 280 200 Q 256 190 232 200 Z" fill="#0ea5e9" />
+    
+    <!-- Porthole Window -->
+    <circle cx="256" cy="220" r="26" fill="#030712" stroke="#8ce2c2" stroke-width="5" />
+    <circle cx="256" cy="220" r="18" fill="#38bdf8" opacity="0.85" />
+    <circle cx="251" cy="215" r="6" fill="#ffffff" opacity="0.8" />
+  </g>
+</svg>

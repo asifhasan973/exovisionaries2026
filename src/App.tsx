@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect } from 'react';
 import { OrientationGuard } from './components/common/OrientationGuard';
 import { LoadingScreen } from './components/common/LoadingScreen';
+import { InstallAppModal } from './components/common/InstallAppModal';
 import { useLoadingStore } from './state/loadingStore';
 
 const StoryGame = lazy(() => import('./game/StoryGame').then(module => ({ default: module.StoryGame })));
@@ -21,6 +22,7 @@ export default function App() {
   return (
     <OrientationGuard forceBlock={forceBlock}>
       <LoadingScreen />
+      <InstallAppModal />
       <Suspense>
         {preview ? <ConversationPreview /> : legacy ? <StoryGame /> : <ExactStory />}
       </Suspense>

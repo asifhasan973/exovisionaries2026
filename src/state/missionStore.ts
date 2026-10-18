@@ -3,6 +3,7 @@ import { create } from 'zustand';
 import { CANDIDATES } from '../data/crew';
 import { validateLaunchReadiness } from '../engine/validation';
 import { sound } from '../audio/soundEngine';
+import { useAudioStore } from './audioStore';
 import { QUICK_LAUNCH_CREW, QUICK_LAUNCH_INSTALLED_PARTS } from '../data/defaultManifest';
 import { PARTS, SLOTS } from '../data/parts';
 import { computeBudgetAccounting, computeMassAccounting } from '../engine/accounting';
@@ -562,8 +563,8 @@ export const useMissionStore = create<MissionState>((set, get) => ({
   },
 
   toggleMute: () => {
-    const newMuted = !get().audioSettings.isMuted;
-    sound.setMuted(newMuted);
+    useAudioStore.getState().toggleMute();
+    const newMuted = useAudioStore.getState().isMuted;
     set((state) => ({
       audioSettings: { ...state.audioSettings, isMuted: newMuted }
     }));
@@ -590,3 +591,12 @@ export const useMissionStore = create<MissionState>((set, get) => ({
     saveState(get());
   }
 }));
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('game-audio-mute-change', (e: Event) => {
+    const isMuted = (e as CustomEvent<{ isMuted: boolean }>).detail.isMuted;
+    useMissionStore.setState((state) => ({
+      audioSettings: { ...state.audioSettings, isMuted }
+    }));
+  });
+}
