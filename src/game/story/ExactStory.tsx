@@ -38,11 +38,26 @@ const HumanReadinessScreen = lazy(() => import('./moon/HumanReadinessScreen.tsx'
 const CrewScreen = lazy(() => import('./moon/CrewScreen.tsx').then(module => ({ default: module.CrewScreen })));
 const NasaMissionArchive = lazy(() => import('../../components/archive/NasaMissionArchive').then(module => ({ default: module.NasaMissionArchive })));
 
+import { createDebugSession } from '../../debug/debugConfig';
+
+export interface ExactStoryProps {
+  debugStepId?: string;
+  debugDemoChapter?: string;
+  initialHome?: boolean;
+  initialArchive?: boolean;
+}
+
 /** Exact dialogue and a real preparation manifest share one saved mission. */
-export default function ExactStory() {
-  const [archiveOpen, setArchiveOpen] = useState(false);
+export default function ExactStory({ debugStepId, debugDemoChapter, initialHome, initialArchive }: ExactStoryProps = {}) {
+  const isDebugSession = Boolean(debugStepId || debugDemoChapter);
+  const [archiveOpen, setArchiveOpen] = useState(() => Boolean(initialArchive));
   const [session] = useState(readBrowserSelectionSession);
-  const [mission, setMission] = useState(() => createWorkshopSession(session.progress, session.preparation, session.readiness, session.flight, session.moon, session.repair));
+  const [mission, setMission] = useState(() => {
+    if (debugStepId) {
+      return createDebugSession(debugStepId as StoryStepId);
+    }
+    return createWorkshopSession(session.progress, session.preparation, session.readiness, session.flight, session.moon, session.repair);
+  });
   const { progress, preparation, readiness, flight, moon } = mission;
   const isMuted = useAudioStore((s) => s.isMuted);
   const toggleAudioMute = useAudioStore((s) => s.toggleMute);
@@ -61,7 +76,11 @@ export default function ExactStory() {
   }, [session.voiceEnabled, setAudioMuted]);
   const [storageAvailable, setStorageAvailable] = useState(session.storageAvailable);
   // A user gesture resumes saved narration; reloading cannot queue unsolicited speech.
-  const [home, setHome] = useState(true);
+  const [home, setHome] = useState(() => {
+    if (initialHome) return true;
+    if (debugStepId || debugDemoChapter || initialArchive) return false;
+    return true;
+  });
   const [autoBuilding, setAutoBuilding] = useState(false);
   const [autoplay, setAutoplay] = useState(true);
   const [restart, setRestart] = useState(false);
@@ -76,6 +95,22 @@ export default function ExactStory() {
   useEffect(() => { window.scrollTo({ top: 0, behavior: 'instant' }); }, [progress.stepId, home]);
   const latest = useRef({ progress, voiceEnabled, preparation, readiness, flight, moon, demo, repair: mission.repair });
   useEffect(() => { latest.current = { progress, voiceEnabled, preparation, readiness, flight, moon, demo, repair: mission.repair }; }, [progress, voiceEnabled, preparation, readiness, flight, moon, demo, mission.repair]);
+
+  useEffect(() => {
+    if (debugStepId) {
+      setMission(createDebugSession(debugStepId as StoryStepId));
+      setHome(false);
+      setAutoBuilding(false);
+      setAutoplay(false);
+    }
+  }, [debugStepId]);
+
+  useEffect(() => {
+    if (debugDemoChapter) {
+      startDemo(debugDemoChapter as DemoChapterId);
+    }
+  }, [debugDemoChapter]);
+
   const flightCheckpoint = Math.floor(flight.t * 2);
   const incident=moon.science.hazards;
   const incidentCheckpoint=[incident.pending,incident.dust,incident.kitUsed,incident.sensorCalibrated,incident.radiationUntil,incident.evaBlocked,incident.autoWaitAtBase,incident.recovery,incident.feedback,incident.roverParked,incident.dataArchived,incident.crewChecked,incident.log.map(r=>`${r.id}:${r.status}:${r.action}`).join(',')].join('|');
@@ -87,17 +122,19 @@ export default function ExactStory() {
   const journeyCheckpoint=Math.floor(moon.journey.elapsed*2);
   const trialCheckpoint = Math.floor(readiness.trial.progress * 10);
   useEffect(() => {
+    if (isDebugSession) return;
     const current = latest.current;
     const saved = current.demo ? writeBrowserDemoSession(current) : writeBrowserSelectionSession(current.progress, current.voiceEnabled, current.preparation, current.readiness, current.flight, current.moon, current.repair);
     // Report external storage results after this render. Cancel obsolete status updates.
     const timer = setTimeout(() => setStorageAvailable(saved), 0);
     return () => clearTimeout(timer);
-  }, [returnCheckpoint, mission.repair, progress, voiceEnabled, preparation, moon.designSignature, moon.human, moon.phase, moon.journey.stage, moon.journey.route, moon.journey.direction, moon.journey.mode, moon.journey.speed, moon.journey.paused, moon.journey.assisted, moon.journey.attempts, journeyCheckpoint, landingCheckpoint, surfaceCheckpoint, scienceCheckpoint, moon.science.phase, moon.science.target, moon.science.depthCm, moon.science.program, moon.science.useGas, moon.science.sensorPlan, moon.science.samples, moon.science.seismometerSite, moon.science.paused, moon.science.records, moon.science.accepted, moon.science.feedback, moon.science.attempts, moon.science.assisted, incidentCheckpoint, moon.science.committed, moon.science.fieldworkStopped, moon.surface.stage, moon.surface.location, moon.surface.selected, moon.surface.mode, moon.surface.pace, moon.surface.paused, moon.surface.held, moon.surface.autonomyArmed, moon.surface.assisted, moon.surface.attempts, moon.landing.stage, moon.landing.paused, moon.landing.mode, moon.landing.target, landingInputCheckpoint, moon.landing.assisted, moon.landing.attempts, moon.landing.decisionPending, readiness.checks, readiness.packing, readiness.approved, readiness.radarConnected, trialCheckpoint, readiness.trial.phase, readiness.trial.paused, flightCheckpoint, flight.status, flight.speed, flight.events, flight.skipped, flight.mode, flight.missedWindow, demo]);
+  }, [isDebugSession, returnCheckpoint, mission.repair, progress, voiceEnabled, preparation, moon.designSignature, moon.human, moon.phase, moon.journey.stage, moon.journey.route, moon.journey.direction, moon.journey.mode, moon.journey.speed, moon.journey.paused, moon.journey.assisted, moon.journey.attempts, journeyCheckpoint, landingCheckpoint, surfaceCheckpoint, scienceCheckpoint, moon.science.phase, moon.science.target, moon.science.depthCm, moon.science.program, moon.science.useGas, moon.science.sensorPlan, moon.science.samples, moon.science.seismometerSite, moon.science.paused, moon.science.records, moon.science.accepted, moon.science.feedback, moon.science.attempts, moon.science.assisted, incidentCheckpoint, moon.science.committed, moon.science.fieldworkStopped, moon.surface.stage, moon.surface.location, moon.surface.selected, moon.surface.mode, moon.surface.pace, moon.surface.paused, moon.surface.held, moon.surface.autonomyArmed, moon.surface.assisted, moon.surface.attempts, moon.landing.stage, moon.landing.paused, moon.landing.mode, moon.landing.target, landingInputCheckpoint, moon.landing.assisted, moon.landing.attempts, moon.landing.decisionPending, readiness.checks, readiness.packing, readiness.approved, readiness.radarConnected, trialCheckpoint, readiness.trial.phase, readiness.trial.paused, flightCheckpoint, flight.status, flight.speed, flight.events, flight.skipped, flight.mode, flight.missedWindow, demo]);
   useEffect(() => {
+    if (isDebugSession) return;
     const save = () => { const current = latest.current; if (current.demo) writeBrowserDemoSession(current); else writeBrowserSelectionSession(current.progress, current.voiceEnabled, current.preparation, current.readiness, current.flight, current.moon, current.repair); };
     window.addEventListener('pagehide', save);
     return () => window.removeEventListener('pagehide', save);
-  }, []);
+  }, [isDebugSession]);
   const dispatch = useCallback((event: MissionEvent) => setMission(current => reduceMission(current, event)), []);
   const pausedFromMenu = useRef({ flight: false, trial: false, journey:false,landing:false,surface:false,science:false,returning:false });
   const pauseGame = useCallback(() => {
@@ -208,10 +245,23 @@ export default function ExactStory() {
     onHome: goHome, voiceEnabled, onToggleVoice: toggleAudioMute,
     voiceAvailable: typeof Audio !== 'undefined',
     headerExtra: <>
-      {demo ? <button className="story-demo-exit" onClick={goHome}>Demo · Exit</button> : null}
-      <span className={`selection-save-status ${storageAvailable ? '' : 'is-unsaved'}`} role="status"
-        title={storageAvailable ? 'Progress saved on this device' : 'Saving unavailable. Keep this tab open.'}>
-        <i aria-hidden="true" /><span>{storageAvailable ? 'Saved' : 'Not saved'}</span>
+      {isDebugSession ? (
+        <button
+          className="story-debug-exit"
+          onClick={() => {
+            window.location.hash = '';
+            setHome(true);
+          }}
+          title="Exit debug session and return to normal user progress"
+        >
+          Debug · {debugStepId ?? debugDemoChapter} · Exit
+        </button>
+      ) : demo ? (
+        <button className="story-demo-exit" onClick={goHome}>Demo · Exit</button>
+      ) : null}
+      <span className={`selection-save-status ${storageAvailable && !isDebugSession ? '' : 'is-unsaved'}`} role="status"
+        title={isDebugSession ? 'Ephemeral debug session: local progress preserved' : storageAvailable ? 'Progress saved on this device' : 'Saving unavailable. Keep this tab open.'}>
+        <i aria-hidden="true" /><span>{isDebugSession ? 'Debug Mode' : storageAvailable ? 'Saved' : 'Not saved'}</span>
       </span>
 
     </>,

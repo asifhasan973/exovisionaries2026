@@ -38,6 +38,7 @@ The following optional repository variables (defined in **Settings → Secrets a
 
 | Variable Name | Default | Description |
 | :--- | :--- | :--- |
+| `VITE_APP_ENV` | `production` (in CI) / `development` (in `.env`) | Controls in-app debug routes (`#/debug/...`) and dev toolbar. Forced to `production` in CI/CD to disable debug bypasses. |
 | `VITE_LOADING_PROGRESS_MULTIPLIER` | `1` | Multiplier to simulate slower network conditions during the loading screen. |
 | `VITE_SLIDE_DISPLAY_MIN_MS` | `2800` | Minimum display duration in milliseconds for each loading carousel slide. |
 | `VITE_INTRO_SPLASH_DISPLAY_MS` | `2800` | Display duration for the intro splash screen. |

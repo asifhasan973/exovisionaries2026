@@ -9,16 +9,15 @@
 .conversation-game.conversation-game .conversation-dialogue p { font-size:clamp(20px,2vw,28px); line-height:1.4; }
 .conversation-game.conversation-game .conversation-dialogue { padding:20px; }
 .conversation-game.conversation-game .conversation-speaker { font-size:var(--game-small); }
-.conversation-game.conversation-game .workshop-meter>span { font-size:var(--game-small); gap:5px; }
-.conversation-game.conversation-game .workshop-meter strong { font-size:20px; }
-.conversation-game.conversation-game .workshop-meter strong small { font-size:12px; }
-.conversation-game.conversation-game .workshop-pick strong { font-size:16px; line-height:1.25; }
+.conversation-game.conversation-game .workshop-summary-layout .workshop-meter>span { font-size:var(--game-small); gap:5px; }
+.conversation-game.conversation-game .workshop-summary-layout .workshop-meter strong { font-size:20px; }
+.conversation-game.conversation-game .workshop-summary-layout .workshop-meter strong small { font-size:12px; }
+.conversation-game.conversation-game .workshop-part-details strong { font-size:12px; line-height:1.2; }
 .conversation-game.conversation-game .workshop-part-price,
-.conversation-game.conversation-game .workshop-part-spec { font-size:13px; }
+.conversation-game.conversation-game .workshop-part-spec { font-size:10px; }
 .conversation-game.conversation-game .workshop-heading p,
 .conversation-game.conversation-game .engineer-bubble p { font-size:var(--game-body); }
 .conversation-game.conversation-game .engineer-bubble>span { font-size:10px; }
-.conversation-game.conversation-game .workshop-orbit-controls>span,
 .conversation-game.conversation-game .workshop-empty { display:none; }
 .conversation-game.conversation-game .workshop-feedback:empty { display:none; }
 .conversation-game.conversation-game .readiness-console h2 { font-size:25px; }
@@ -187,32 +186,33 @@ html[data-gentle-motion=true] .conversation-game *,html[data-gentle-motion=true]
 .conversation-game.conversation-game .selection-card-copy>strong{font-size:21px;}
 .conversation-game.conversation-game .selection-card-description{font-size:15px;line-height:1.35;}
 /* Workshop: room for hardware, clear replacement costs, direct remove. */
-.conversation-game.conversation-game .workshop-layout{grid-template-columns:minmax(350px,.45fr) minmax(0,1fr);}
+.conversation-game.conversation-game .workshop-summary-layout{grid-template-columns:minmax(350px,.45fr) minmax(0,1fr);}
+.conversation-game.conversation-game .workshop-layout:not(.workshop-summary-layout){position:relative;display:flex;width:100%;height:100%;min-height:0;flex:1;}
 .conversation-game.conversation-game .workshop-main>.workshop-meters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));flex-shrink:0;gap:10px;}
 .conversation-game.conversation-game .workshop-main>.workshop-meters .workshop-meter{display:grid;grid-template-columns:auto 1fr;align-items:center;padding:6px 12px;gap:0 12px;}
 .conversation-game.conversation-game .workshop-meter strong{font-size:21px;justify-self:end;}
 .conversation-game.conversation-game .workshop-meter>span{font-size:14px;}
 .conversation-game.conversation-game .workshop-meter progress{grid-column:1/-1;margin-top:3px;height:4px;}
-.conversation-game.conversation-game .workshop-part{display:flex;flex-direction:column;min-height:0;position:relative;overflow:hidden;border-radius:18px;}
+.conversation-game.conversation-game .workshop-part{display:flex;flex-direction:column;min-height:0;position:relative;overflow:hidden;border-radius:12px;}
 .conversation-game.conversation-game .workshop-part.was-installed{border-color:#b6f3d7;animation:installed-confirm .6s ease-out;}
 @keyframes installed-confirm{from{box-shadow:0 0 0 5px #b6f3d770;}to{box-shadow:0 0 0 0 #b6f3d700;}}
 .conversation-game.conversation-game:has(.trial-success) .conversation-controls .conversation-next:not(:disabled){border:2px solid #b6f3d7;box-shadow:0 0 18px #b6f3d730;}
-.conversation-game.conversation-game .part-badge{position:absolute;left:8px;top:6px;font-size:10px;color:#fff0b3;z-index:2;pointer-events:none;background:rgba(27,17,49,.85);border:1px solid rgba(255,227,108,.4);border-radius:6px;padding:2px 6px;line-height:1.2;}
-.conversation-game.conversation-game .workshop-pick{flex:1;height:auto;padding:28px 8px 6px;gap:3px;justify-content:center;min-height:0;}
-.conversation-game.conversation-game .workshop-pick>img{height:clamp(50px,10dvh,85px);width:100%;max-width:120px;min-height:40px;object-fit:contain;}
-.conversation-game.conversation-game .workshop-pick strong{font-size:14px;min-height:0;line-height:1.2;margin:2px 0;}
-.conversation-game.conversation-game .workshop-part-price{font-size:12px;color:#e0cceb;}
-.conversation-game.conversation-game .workshop-part-spec{font-size:11px;color:#ffe181;}
-.conversation-game.conversation-game .workshop-part-action{font-size:11px;color:#f7dcff;}
+.conversation-game.conversation-game .part-badge{position:absolute;left:6px;top:4px;font-size:9px;color:#fff0b3;z-index:2;pointer-events:none;background:rgba(27,17,49,.85);border:1px solid rgba(255,227,108,.4);border-radius:4px;padding:1px 5px;line-height:1.2;}
+.conversation-game.conversation-game .workshop-pick{height:auto;padding:20px 8px 6px;column-gap:8px;min-height:0;}
+.conversation-game.conversation-game .workshop-pick>img{height:42px;width:44px;min-height:0;object-fit:contain;}
+.conversation-game.conversation-game .workshop-pick strong{font-size:12px;min-height:0;line-height:1.2;margin:0;}
+.conversation-game.conversation-game .workshop-part-price{font-size:10px;color:#e0cceb;}
+.conversation-game.conversation-game .workshop-part-spec{font-size:10px;color:#ffe181;}
+.conversation-game.conversation-game .workshop-part-action{font-size:10px;color:#f7dcff;}
 .conversation-game.conversation-game .workshop-pick:disabled{opacity:1;color:#e6ffed;}
-.conversation-game.conversation-game .workshop-info{width:26px;height:26px;display:grid;place-items:center;}
-.conversation-game.conversation-game .workshop-part-top{top:5px;right:6px;left:auto;z-index:2;}
-.conversation-game.conversation-game .workshop-part-top input{width:18px;height:18px;accent-color:#d573e7;}
-.conversation-game.conversation-game .part-comparison{display:flex;flex-direction:column;gap:4px;padding:10px;background:#171525;color:#ead5fa;font-size:13px;line-height:1.25;border-top:1px solid #75528c;}
-.conversation-game.conversation-game .part-comparison strong{color:#ffdf68;font-size:14px;}
-.conversation-game.conversation-game .part-remove{flex-shrink:0;display:flex;align-items:center;justify-content:center;gap:7px;background:#17453e;color:#c3f2df;border:0;border-top:1px solid #498b79;min-height:36px;font-size:14px;}
-.conversation-game.conversation-game .workshop-category-tabs button{font-size:14px;min-height:36px;}
-.conversation-game.conversation-game .workshop-part-pages{font-size:14px;min-height:36px;gap:15px;}
+.conversation-game.conversation-game .workshop-info{width:22px;height:22px;display:grid;place-items:center;}
+.conversation-game.conversation-game .workshop-part-top{top:4px;right:6px;left:auto;z-index:2;}
+.conversation-game.conversation-game .workshop-part-top input{width:16px;height:16px;accent-color:#d573e7;}
+.conversation-game.conversation-game .part-comparison{display:flex;flex-direction:column;gap:3px;padding:6px 8px;background:#171525;color:#ead5fa;font-size:11px;line-height:1.25;border-top:1px solid #75528c;}
+.conversation-game.conversation-game .part-comparison strong{color:#ffdf68;font-size:11px;}
+.conversation-game.conversation-game .part-remove{flex-shrink:0;display:flex;align-items:center;justify-content:center;gap:5px;background:#17453e;color:#c3f2df;border:0;min-height:24px;font-size:10px;border-radius:6px;margin:2px 8px 6px;}
+.conversation-game.conversation-game .workshop-category-tabs button{font-size:11px;min-height:26px;}
+.conversation-game.conversation-game .workshop-part-pages{display:none;}
 .conversation-game.conversation-game .workshop-part-pages .conversation-icon{min-width:36px;min-height:36px;}
 .conversation-game.conversation-game .workshop-bulk label{font-size:14px;min-height:36px;}
 .conversation-game.conversation-game .workshop-bulk button{font-size:14px;min-height:36px;}
@@ -274,7 +274,7 @@ html[data-gentle-motion=true] .conversation-game *,html[data-gentle-motion=true]
  .conversation-game.conversation-game .flight-layout{grid-template-columns:minmax(270px,.6fr) minmax(0,1fr);}
 }
 @media(max-width:600px) and (min-height:551px){
- .conversation-game.conversation-game{grid-template-rows:56px minmax(0,1fr) 88px;}
+ .conversation-game.conversation-game:not(.is-mobile-game){grid-template-rows:56px minmax(0,1fr) 88px;}
  .conversation-game.conversation-game>.conversation-header{height:56px;padding:6px 10px;}
  .conversation-game.conversation-game .conversation-brand{font-size:17px;gap:6px;}
  .conversation-game.conversation-game .conversation-brand>span{width:28px;height:31px;}

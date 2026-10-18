@@ -74,6 +74,15 @@ Automated deployments are managed by GitHub Actions at [`.github/workflows/deplo
 - **Manual Trigger**: Supports `workflow_dispatch` with custom target branch names.
 - **Safety Gate**: Gracefully skips deployment if `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` are not configured in secrets. See [CI/CD Documentation](docs/ci-cd.md) for full configuration instructions.
 
+## Development Debug Endpoints & Navigator
+
+When developing locally (`VITE_APP_ENV=development`), every screen, module, standalone page, and chapter is directly accessible via hash endpoints:
+
+- **Hash-Based Deep-Linking**: Jump directly to any mission screen without playing prior gates (e.g., `#/debug/step/lander-build`, `#/debug/step/liftoff`, `#/debug/step/lunar-surface`, `#/debug/page/legacy`, `#/debug/demo/ice-science`).
+- **Interactive Debug Toolbar**: Press **`~`** (tilde / backquote) to toggle the in-game search & navigation drawer.
+- **Production Guard**: In production builds (`VITE_APP_ENV=production`), debug routes are safely ignored and the toolbar is excluded. See [Debug Endpoints Documentation](docs/debug-endpoints.md) for full reference.
+
+
 
 ## Project layout
 

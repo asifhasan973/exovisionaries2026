@@ -55,6 +55,7 @@ jobs:
 
       - name: Build project
         env:
+          VITE_APP_ENV: production
           VITE_LOADING_PROGRESS_MULTIPLIER: ${{ vars.VITE_LOADING_PROGRESS_MULTIPLIER }}
           VITE_SLIDE_DISPLAY_MIN_MS: ${{ vars.VITE_SLIDE_DISPLAY_MIN_MS }}
           VITE_INTRO_SPLASH_DISPLAY_MS: ${{ vars.VITE_INTRO_SPLASH_DISPLAY_MS }}

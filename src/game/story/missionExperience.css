@@ -99,7 +99,7 @@ html[data-gentle-motion=true] .radar-wave{animation:none;opacity:1;}html[data-ge
  .conversation-game.conversation-game>.conversation-controls .next-control .next-hint{display:none;}
 }
 @media(max-width:700px){
- .conversation-game.conversation-game:has(>.conversation-controls:not(.launch-controls)){grid-template-rows:56px minmax(0,1fr) 64px;}
- .conversation-game.conversation-game:has(>.conversation-controls:not(.launch-controls))>.conversation-header{height:56px;}
+ .conversation-game.conversation-game:not(.is-mobile-game):has(>.conversation-controls:not(.launch-controls)){grid-template-rows:56px minmax(0,1fr) 64px;}
+ .conversation-game.conversation-game:not(.is-mobile-game):has(>.conversation-controls:not(.launch-controls))>.conversation-header{height:56px;}
  .conversation-game.conversation-game>.conversation-controls:not(.launch-controls){height:64px;min-height:0;padding:8px 10px;align-items:center;}
 }

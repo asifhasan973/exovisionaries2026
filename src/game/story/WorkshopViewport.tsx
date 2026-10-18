@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Expand, RotateCcw, RotateCw, Undo2, Redo2, Maximize2, Minimize2 } from 'lucide-react';
+import { RotateCcw, Undo2, Redo2 } from 'lucide-react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import type { PreparationSelection } from './design.ts';
@@ -10,11 +10,10 @@ import { isEngineFrozen } from '../../state/orientationLifecycleStore';
 
 let thumbnailCache: Record<string, string> | undefined;
 
-export function WorkshopViewport({ preparation, draggingId, lastInstalled, canUndo, canRedo, onUndo, onRedo, onThumbnails, onMeshError, isMaximized = false, onToggleMaximize }: {
+export function WorkshopViewport({ preparation, draggingId, lastInstalled, canUndo, canRedo, onUndo, onRedo, onThumbnails, onMeshError }: {
   preparation: PreparationSelection; draggingId: string | null; lastInstalled: string | null;
   canUndo: boolean; canRedo: boolean; onUndo(): void; onRedo(): void;
   onThumbnails(images: Record<string, string>): void; onMeshError(): void;
-  isMaximized?: boolean; onToggleMaximize?: () => void;
 }) {
   const { gentle } = useGameSettings();
   const gentleMotion = useRef(gentle);
@@ -22,7 +21,6 @@ export function WorkshopViewport({ preparation, draggingId, lastInstalled, canUn
   const model = useRef({ preparation, draggingId, lastInstalled });
   const repaint = useRef<() => void>(() => {});
   const fit = useRef<() => void>(() => {});
-  const rotate = useRef<(direction: number) => void>(() => {});
   const thumbnailCallback = useRef(onThumbnails), errorCallback = useRef(onMeshError);
   const [failed, setFailed] = useState(false);
   useEffect(() => { gentleMotion.current = gentle; repaint.current(); }, [gentle]);
@@ -65,7 +63,6 @@ export function WorkshopViewport({ preparation, draggingId, lastInstalled, canUn
     let aspectScale = 1;
     fit.current = () => { controls.target.set(0, 1, 0); camera.position.copy(controls.target).add(new THREE.Vector3(8.3, 4.4, 10.5).multiplyScalar(aspectScale)); controls.update(); };
     fit.current();
-    rotate.current = direction => { const relative = camera.position.clone().sub(controls.target); relative.applyAxisAngle(new THREE.Vector3(0, 1, 0), direction * .35); camera.position.copy(controls.target).add(relative); controls.update(); };
     const platform = new THREE.Mesh(new THREE.CylinderGeometry(5, 5.1, .1, 64), new THREE.MeshStandardMaterial({ color: 0x25203e, metalness: .45, roughness: .7 }));
     platform.position.y = -.06; scene.add(platform);
     const grid = new THREE.GridHelper(10, 20, 0x78668d, 0x38304e); grid.position.y = .008;
@@ -124,11 +121,11 @@ export function WorkshopViewport({ preparation, draggingId, lastInstalled, canUn
       window.removeEventListener('game-orientation-pause', pause);
       window.removeEventListener('game-orientation-resume', resume);
       renderer.domElement.removeEventListener('webglcontextlost', contextLost);
-      repaint.current = () => {}; fit.current = () => {}; rotate.current = () => {};
+      repaint.current = () => {}; fit.current = () => {};
       disposeGroup(scene); renderer.dispose(); renderer.forceContextLoss(); renderer.domElement.remove();
     };
   }, []);
-  return <div className={`workshop-viewport ${isMaximized ? 'is-maximized' : ''}`}>
+  return <div className="workshop-viewport">
     <div className="workshop-canvas" ref={host} role="img" aria-label={`3D assembly with ${installedIds(preparation).length} installed parts`} />
     {failed ? <div className="workshop-render-fallback" role="status">3D unavailable. Use the Install buttons to keep building.</div> : null}
     <span className="workshop-viewport-badge">3D WORKSHOP</span>
@@ -136,21 +133,6 @@ export function WorkshopViewport({ preparation, draggingId, lastInstalled, canUn
       <button className="conversation-icon" onClick={onUndo} disabled={!canUndo} aria-label="Undo installation" title="Undo"><Undo2 size={18} /></button>
       <button className="conversation-icon" onClick={onRedo} disabled={!canRedo} aria-label="Redo installation" title="Redo"><Redo2 size={18} /></button>
       <button className="conversation-icon" onClick={() => fit.current()} aria-label="Reset camera angle" title="Reset camera angle"><RotateCcw size={18} /></button>
-      {onToggleMaximize ? (
-        <button
-          className={`conversation-icon ${isMaximized ? 'is-active' : ''}`}
-          onClick={onToggleMaximize}
-          aria-label={isMaximized ? "Restore workshop shelf" : "Maximize 3D stage"}
-          title={isMaximized ? "Restore workshop shelf" : "Maximize 3D stage"}
-        >
-          {isMaximized ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
-        </button>
-      ) : null}
-    </div>
-    <div className="workshop-orbit-controls">
-      <button className="conversation-icon" onClick={() => rotate.current(-1)} aria-label="Rotate view left"><RotateCcw size={17} /></button>
-      <span className="workshop-orbit-hint">Drag to rotate · scroll to zoom</span>
-      <button className="conversation-icon" onClick={() => rotate.current(1)} aria-label="Rotate view right"><RotateCw size={17} /></button>
     </div>
     {!installedIds(preparation).length ? <div className="workshop-empty">Your workbench is empty.</div> : null}
     <div className="workshop-vehicle-labels"><span>Lander</span><span>{partById(preparation.roverId)?.name ?? 'Rover bay'}</span></div>
