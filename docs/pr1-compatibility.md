@@ -26,3 +26,14 @@ installation or deployment is claimed by these checks.
 
 Cloudflare deployment remains conditional on repository credentials and an
 existing Pages project. Its credentials and project are not provisioned here.
+
+The subsequent debug/workshop update is integrated with these fixes:
+
+- Debug route changes remount the experience, preserving normal saved progress
+  when leaving an ephemeral session. Debug navigation is disabled in every
+  production build, including builds with copied development environment values.
+- Workshop cards retain keyboard activation and an Install fallback if 3D fails.
+  Repair guidance opens the correct inventory category and brings its highlighted
+  target into view. Hidden inventory controls leave the keyboard focus order.
+
+Focused checks of the subsequent update confirmed keyboard installation in the new drawer and preservation of the normal saved adventure after exiting an edited debug session. The latest update also needed a missing `StoryStepId` type import to compile.

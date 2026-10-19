@@ -283,7 +283,8 @@ export function DebugToolbar() {
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
-          onPointerCancel={handlePointerUp}
+          onPointerCancel={() => { dragSessionRef.current = null; setIsDragging(false); }}
+          onClick={event => { if (event.detail === 0) { setIsOpen(true); setTimeout(() => searchInputRef.current?.focus(), 50); } }}
           title="Drag to dock anywhere on screen • Click or press ~ to open navigator"
         >
           <span className="debug-grip-handle" title="Drag handle">

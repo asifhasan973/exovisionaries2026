@@ -17,12 +17,11 @@ import { DEMO_CHAPTERS } from '../game/story/demoChapters.ts';
 
 /**
  * Environment resolution:
- * Enabled ONLY when VITE_APP_ENV is explicitly 'development', or in standard Vite dev
- * mode when VITE_APP_ENV is not forced to 'production'.
+ * Debug navigation is available only in the Vite development server.
+ * VITE_APP_ENV=production can also disable it locally.
  */
 export const isDevelopment: boolean =
-  import.meta.env.VITE_APP_ENV === 'development' ||
-  (import.meta.env.DEV && import.meta.env.VITE_APP_ENV !== 'production');
+  import.meta.env.DEV && import.meta.env.VITE_APP_ENV !== 'production';
 
 export type DebugTargetType = 'page' | 'step' | 'demo';
 

@@ -87,7 +87,6 @@ export function WorkshopScreen({ session, dispatch, frame, onBack, autoBuilding,
   const [scienceFamily,setScienceFamily] = useState<ScienceFamily>('camera');
   const [shelfTab, setShelfTab] = useState<DesignCategory | 'depth' | null>(() => repair?.category ?? null);
   const [shelfPage, setShelfPage] = useState(0);
-  const [shortScreen, setShortScreen] = useState(() => window.matchMedia('(max-height: 760px), (max-width: 700px)').matches);
   const [shelfOpen, setShelfOpen] = useState(true);
   const toggleShelf = () => setShelfOpen(prev => !prev);
   const ids = installedIds(session.preparation);
@@ -95,19 +94,15 @@ export function WorkshopScreen({ session, dispatch, frame, onBack, autoBuilding,
   const categories = stage ? STAGE_CATEGORIES[stage] : [];
   const parts = partsForObjective(objective).filter(part => categories.includes(part.category));
   const multi = stage === 'lander-build' || stage === 'science-build' && !geology;
-  useEffect(() => {
-    const query = window.matchMedia('(max-height: 760px), (max-width: 700px)');
-    const update = () => setShortScreen(query.matches);
-    query.addEventListener('change', update);
-    return () => query.removeEventListener('change', update);
-  }, []);
   const activeCategory = shelfTab && shelfTab !== 'depth' && categories.includes(shelfTab) ? shelfTab : categories[0];
   const depthOpen = shelfTab === 'depth' && stage === 'science-build';
-  const pageSize = shortScreen ? 1 : 2;
+  // The drawer shows every option; Next advances categories rather than hidden pages.
+  const pageSize = Math.max(1, parts.filter(part => part.category === activeCategory && (!geology || stage !== 'science-build' || part.scienceFamily === scienceFamily)).length);
   useEffect(() => {
     if (!repair) return;
     const focusRepair = () => {
-      setShelfTab(repair.category);
+      setShelfOpen(true);
+      setShelfTab(repair.action === 'depth' ? 'depth' : repair.category);
       const repairPart = partById(repair.partId);
       if (repairPart?.scienceFamily) setScienceFamily(repairPart.scienceFamily);
       const options = partsForObjective(objective).filter(part => part.category === repair.category && (!geology || repair.category !== 'science' || part.scienceFamily === repairPart?.scienceFamily));
@@ -120,7 +115,6 @@ export function WorkshopScreen({ session, dispatch, frame, onBack, autoBuilding,
   const categoryParts = parts.filter(part => part.category === activeCategory && (!geology || stage !== 'science-build' || part.scienceFamily === scienceFamily));
   const pageCount = Math.ceil(categoryParts.length / pageSize);
   const currentPage = Math.min(shelfPage, Math.max(0, pageCount - 1));
-  const visibleParts = categoryParts.slice(currentPage * pageSize, (currentPage + 1) * pageSize);
   const nextAction = stage ? nextWorkshopAction(stage, session.preparation, activeCategory, currentPage, pageSize, depthOpen,objective,scienceFamily) : null;
   const nextDisabled = nextAction?.kind === 'install' || (nextAction?.kind === 'advance' && !!stage && !ready(stage));
   useEffect(() => {
@@ -140,6 +134,13 @@ export function WorkshopScreen({ session, dispatch, frame, onBack, autoBuilding,
       }
     };
   }, []);
+  useEffect(() => {
+    if (!shelfOpen || !repair || appliedRepair) return;
+    const frame = requestAnimationFrame(() => {
+      drawerRef.current?.querySelector('.is-repair-target')?.scrollIntoView({ block: 'nearest' });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [shelfOpen, repair, appliedRepair, shelfTab, scienceFamily]);
   const install = (selected: string[]) => {
     if (autoBuilding || !selected.length) return;
     dispatch({ type: 'install', ids: selected }); setLastInstalled(selected.at(-1)!);
@@ -332,7 +333,7 @@ export function WorkshopScreen({ session, dispatch, frame, onBack, autoBuilding,
             title={shelfOpen ? "Close inventory drawer" : "Open inventory drawer"}
           >
             {shelfOpen ? <PanelLeftClose size={16} /> : <PanelLeftOpen size={16} />}
-            <span>Inventory ({ids.length}/{parts.length})</span>
+            <span>Inventory ({parts.filter(part => ids.includes(part.id)).length}/{parts.length})</span>
           </button>
           <nav className="workshop-stage-tabs" inert={autoBuilding} aria-label="Build stages">{WORKSHOP_STAGES.map((id, index) => <button key={id} aria-current={id === stage ? 'step' : undefined} disabled={index > stageIndex}
             onClick={() => dispatch({ type: 'visit-stage', stage: id })}><span>{ready(id) ? <Check size={13} /> : index + 1}</span>{stageNames[index]}</button>)}</nav>
@@ -340,7 +341,7 @@ export function WorkshopScreen({ session, dispatch, frame, onBack, autoBuilding,
       </header>
       <div className={`workshop-layout ${!shelfOpen ? 'is-shelf-collapsed' : ''}`} inert={autoBuilding}>
         {shelfOpen ? <div className="workshop-drawer-backdrop" onClick={() => setShelfOpen(false)} aria-hidden="true" /> : null}
-        <aside ref={drawerRef} className={`workshop-shelf workshop-inventory-drawer ${!shelfOpen ? 'is-collapsed' : ''}`} aria-label="Inventory side-drawer">
+        <aside ref={drawerRef} className={`workshop-shelf workshop-inventory-drawer ${!shelfOpen ? 'is-collapsed' : ''}`} aria-label="Inventory side-drawer" inert={!shelfOpen && !dragging} aria-hidden={!shelfOpen && !dragging || undefined}>
         <div className="workshop-shelf-header">
           <span className="workshop-shelf-title">INVENTORY</span>
           <button className="workshop-shelf-close" onClick={toggleShelf} aria-label="Close inventory drawer" title="Close inventory drawer">
@@ -362,9 +363,9 @@ export function WorkshopScreen({ session, dispatch, frame, onBack, autoBuilding,
                   {installed ? <button type="button" className="workshop-part-remove-icon" aria-label={`Remove ${part.name}`} title={`Remove ${part.name}`} onClick={event => { event.stopPropagation(); dispatch({ type: 'remove', id: part.id }); setMessage(`${part.name} returned to shelf`); setReaction('intro'); }}><Trash2 size={13} /></button> : null}
                   <button type="button" className="workshop-info" aria-label={`Details for ${part.name}`} title={`Details for ${part.name}`} onClick={event => { event.stopPropagation(); setInfoId(part.id); }}><Info size={14} /></button>
                 </div>
-                <button type="button" className="workshop-pick" disabled={installed} aria-label={installed ? `${part.name} (installed)` : `Drag to install ${part.name}`} onPointerDown={event => onPointerDown(event, part.id)} onPointerMove={onPointerMove} onPointerUp={onPointerUp}
+                <button type="button" className="workshop-pick" disabled={installed} aria-label={installed ? `${part.name} (installed)` : `Install ${part.name}`} onPointerDown={event => onPointerDown(event, part.id)} onPointerMove={onPointerMove} onPointerUp={onPointerUp}
                   onPointerCancel={onPointerCancel} onLostPointerCapture={() => { if (drag.current?.id === part.id) onPointerCancel(); }}
-                  onClick={event => { event.preventDefault(); if (suppressClick.current) { suppressClick.current = false; return; } if (!installed) { setMessage('Drag and drop the part onto the 3D spacecraft to install!'); } }}>
+                  onClick={event => { event.preventDefault(); if (suppressClick.current) { suppressClick.current = false; return; } if (!installed) { if (event.detail === 0 || meshError) install([part.id]); else setMessage('Drag the part onto your spacecraft!'); } }}>
                   {thumbnails[part.id] ? <img draggable={false} src={thumbnails[part.id]} alt="" /> : <div className="workshop-part-placeholder"><PackageCheck size={38} /></div>}
                   <div className="workshop-part-details">
                     <strong>{part.id === 'nss' ? 'NSS · Ice clues' : part.id === 'nirvss' ? 'NIRVSS · Soil scan' : part.id === 'trident' ? 'TRIDENT · Drill' : part.name}</strong>
@@ -373,7 +374,7 @@ export function WorkshopScreen({ session, dispatch, frame, onBack, autoBuilding,
                     {part.outputW ? <span className="workshop-part-spec">{part.outputW} W sunlight</span> : null}
                     {part.capacityWh ? <span className="workshop-part-spec">{part.capacityWh} Wh</span> : null}{part.capability ? <span className="workshop-part-spec">{part.capability}</span> : null}
                   </div>
-                  <span className="workshop-part-action">{installed ? '✓ Installed' : 'Drag to install'}</span>
+                  <span className="workshop-part-action">{installed ? '✓ Installed' : meshError ? 'Install' : 'Drag to install'}</span>
                 </button>
                 {!installed && !multi && (!geology || !!comparison.replaces) ? <div className="part-comparison">{comparison.replaces ? <><span title={comparison.replaces}>Swap {geology ? 'installed tier' : comparison.replaces}</span><strong>{signed(comparison.credits)} cr · {signed(comparison.massKg)} kg</strong></> : null}{!geology ? <span>{part.category === 'rover' && comparison.replaces ? `${signed(comparison.peakW)} W peak · ` : ''}{optionBenefit(part.id, comparison.shadowMinutes)}</span> : null}</div> : null}
               </article>;

@@ -133,3 +133,5 @@ When running in development mode (`VITE_APP_ENV=development`), an aerospace Miss
 | `#/debug/demo/geology-science` | Rock Science | Direct jump to lunar geology analysis |
 | `#/debug/demo/ice-return` | Ice Crew Return | Direct jump to lunar liftoff and return flight |
 | `#/debug/demo/geology-return` | Rock Crew Return | Direct jump to return flight for geology mission |
+
+Production builds always disable the debug navigator, even when a copied local environment file sets `VITE_APP_ENV=development`. Navigation remounts the selected experience so ephemeral sessions cannot be written to normal saved progress when exiting.

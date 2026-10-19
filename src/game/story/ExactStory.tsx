@@ -1,3 +1,4 @@
+import type { StoryStepId } from './types.ts';
 import { repairApplied } from './repairGuidance.ts';
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { PlayerCharacterProvider } from './playerCharacter.tsx';
