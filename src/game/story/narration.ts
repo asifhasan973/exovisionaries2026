@@ -253,6 +253,8 @@ export function resumeActiveNarration() {
 }
 
 if (typeof window !== 'undefined') {
+  window.addEventListener('game-orientation-pause', pauseActiveNarration);
+  window.addEventListener('game-orientation-resume', resumeActiveNarration);
   const syncVoiceMute = () => {
     const audio = useAudioStore.getState();
     if (audio.isMuted || !audio.voicesEnabled) activeNarrator?.stop();

@@ -37,3 +37,5 @@ The subsequent debug/workshop update is integrated with these fixes:
   target into view. Hidden inventory controls leave the keyboard focus order.
 
 Focused checks of the subsequent update confirmed keyboard installation in the new drawer and preservation of the normal saved adventure after exiting an edited debug session. The latest update also needed a missing `StoryStepId` type import to compile.
+
+Narration subscribes to shared lifecycle events instead of being imported by the lifecycle store. This removes a circular module initialization dependency that could crash a hot reload while loading was active.

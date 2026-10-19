@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { sound } from '../audio/soundEngine';
-import { pauseActiveNarration, resumeActiveNarration } from '../game/story/narration';
 import { useLoadingStore } from './loadingStore';
 
 export interface OrientationLifecycleState {
@@ -36,10 +35,7 @@ export const useOrientationLifecycleStore = create<OrientationLifecycleState>((s
       // 2. Halt Web Audio hardware process in-place
       sound.pauseAll();
 
-      // 3. Halt active spoken narration / audio elements
-      pauseActiveNarration();
-
-      // 4. Dispatch central lifecycle freeze event for decoupled subscribers
+      // Notify audio elements and simulations through the shared lifecycle event.
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('game-orientation-pause', { detail: { frozenAt: now } }));
       }
@@ -60,10 +56,7 @@ export const useOrientationLifecycleStore = create<OrientationLifecycleState>((s
       // 2. Resume Web Audio hardware process
       sound.resumeAll();
 
-      // 3. Resume active spoken narration (replays dialogue from start)
-      resumeActiveNarration();
-
-      // 4. Dispatch central lifecycle resume event for decoupled subscribers
+      // Subscribers replay narration and resume simulations after all blocks clear.
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('game-orientation-resume', { detail: { resumedAt: now, pauseDelta } }));
       }
