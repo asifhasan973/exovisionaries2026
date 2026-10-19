@@ -2,31 +2,25 @@
 .conversation-game.conversation-game.is-mobile-game {
   --mobile-top:calc(46px + env(safe-area-inset-top,0px));
   --mobile-bottom:calc(60px + env(safe-area-inset-bottom,0px));
-  grid-template-rows:minmax(0,1fr) var(--mobile-bottom);
+  grid-template-rows:minmax(0,1fr) var(--mobile-bottom) !important;
   padding:var(--mobile-top) env(safe-area-inset-right,0px) 0 env(safe-area-inset-left,0px);
   box-sizing:border-box;
+}
+.conversation-game.conversation-game.is-mobile-game.without-footer {
+  grid-template-rows:minmax(0,1fr) !important;
 }
 .mobile-game-tools { position:fixed; z-index:8; top:calc(3px + env(safe-area-inset-top,0px)); right:calc(10px + env(safe-area-inset-right,0px)); display:flex; gap:6px; }
 .mobile-game-tools button { display:grid; place-items:center; width:44px; height:40px; padding:0; border:1px solid #9d76b2; border-radius:13px; background:#251636ed; color:#f2d5ff; cursor:pointer; touch-action:manipulation; }
 .mobile-game-tools button[aria-pressed=false] { color:#a999b7; }
-.mobile-game-tools button:focus-visible,.mobile-pause-menu button:focus-visible,.mobile-rotate-guide button:focus-visible { outline:3px solid #ffe36c; outline-offset:3px; }
+.mobile-game-tools button:focus-visible,.mobile-pause-menu button:focus-visible { outline:3px solid #ffe36c; outline-offset:3px; }
 .mobile-pause-menu { display:flex; flex-direction:column; gap:16px; }
 .mobile-resume { display:flex; align-items:center; justify-content:center; gap:9px; min-height:46px; padding:10px 18px; border:1px solid #eea1ff; border-radius:14px; background:linear-gradient(100deg,#ef79ed,#c952e8); color:#210e35; font:800 17px Outfit,sans-serif; cursor:pointer; }
 .mobile-menu-grid { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
 .mobile-menu-grid button { display:flex; align-items:center; justify-content:center; gap:9px; width:auto; height:auto; min-height:46px; padding:9px; border:1px solid #8f64a4; border-radius:13px; background:#372047; color:#f0dcf8; font:600 14px Outfit,sans-serif; cursor:pointer; }
 .mobile-menu-grid button:disabled { opacity:.55; cursor:default; }
 .game-info.learning-drawer .mobile-menu-grid button { width:100%; height:auto; min-height:46px; }
-.mobile-menu-home,.mobile-upright { display:flex; align-items:center; justify-content:center; gap:8px; min-height:44px; padding:10px; border:1px solid #80678f; border-radius:12px; background:transparent; color:#e5cdef; font:600 15px Outfit,sans-serif; cursor:pointer; }
+.mobile-menu-home { display:flex; align-items:center; justify-content:center; gap:8px; min-height:44px; padding:10px; border:1px solid #80678f; border-radius:12px; background:transparent; color:#e5cdef; font:600 15px Outfit,sans-serif; cursor:pointer; }
 .mobile-pause-menu p { margin:0; font-size:13px; }
-.mobile-rotate-guide { display:flex; flex-direction:column; align-items:center; gap:12px; text-align:center; }
-.mobile-phone-turn { position:relative; display:grid; place-items:center; width:140px; height:110px; color:#efb5fb; }
-.mobile-phone-turn>svg:first-child { animation:mobile-turn 2.8s ease-in-out infinite; }
-.mobile-phone-turn>svg:last-child { position:absolute; right:0; top:4px; color:#ffdf68; }
-.mobile-rotate-guide p { margin:0 0 4px; }
-.mobile-rotate-guide .mobile-resume,.mobile-rotate-guide .mobile-upright { width:100%; }
-@keyframes mobile-turn { 0%,15%{transform:rotate(0deg);}55%,85%{transform:rotate(90deg);}100%{transform:rotate(0deg);} }
-@media(prefers-reduced-motion:reduce){.mobile-phone-turn>svg:first-child{animation:none;transform:rotate(90deg);}}
-html[data-gentle-motion=true] .mobile-phone-turn>svg:first-child { animation:none; transform:rotate(90deg); }
 .conversation-game.conversation-game.is-mobile-game>.conversation-controls {
   height:var(--mobile-bottom); min-height:0; grid-template-columns:auto minmax(0,1fr) auto; grid-template-rows:1fr;
   padding:6px 12px calc(6px + env(safe-area-inset-bottom,0px)); gap:8px; align-items:center;
@@ -40,9 +34,15 @@ html[data-gentle-motion=true] .mobile-phone-turn>svg:first-child { animation:non
 .conversation-game.conversation-game.is-mobile-game .story-briefing-progress { display:flex; align-items:center; gap:10px; }
 .conversation-game.conversation-game.is-mobile-game .story-skip-briefing { margin:0; min-height:44px; padding:7px 9px; font-size:12px; }
 .conversation-game.conversation-game.is-mobile-game .story-skip-briefing>span { display:none; }
-.conversation-game.conversation-game.is-mobile-game>.conversation-main,
-.conversation-game.conversation-game.is-mobile-game>.workshop-main { padding:6px 12px; gap:6px; }
-.conversation-game.conversation-game.is-mobile-game .workshop-pick { touch-action:none; }
+.conversation-game.conversation-game.is-mobile-game:has(.workshop-main) {
+  --mobile-top: calc(8px + env(safe-area-inset-top, 0px)) !important;
+}
+.conversation-game.conversation-game.is-mobile-game:has(.workshop-main) .mobile-game-tools {
+  top: calc(8px + env(safe-area-inset-top, 0px)) !important;
+}
+.conversation-game.conversation-game.is-mobile-game>.conversation-main { padding:6px 12px; gap:6px; }
+.conversation-game.conversation-game.is-mobile-game>.workshop-main { padding:0 clamp(10px, 2vw, 24px) 6px !important; gap:6px; }
+.conversation-game.conversation-game.is-mobile-game .workshop-pick { touch-action:pan-y !important; }
 
 /* A phone held sideways: a tall character, a readable dialogue and a roomy 3D stage. */
 @media(orientation:landscape) {
@@ -76,50 +76,41 @@ html[data-gentle-motion=true] .mobile-phone-turn>svg:first-child { animation:non
  .conversation-game.conversation-game.is-mobile-game .story-demo-button { margin-top:8px; padding:6px 8px; font-size:12px; min-height:36px; }
  .conversation-game.conversation-game.is-mobile-game .story-demo-button>span { display:none; }
  /* The tray is one paged card. Details remain available via its info button. */
- .conversation-game.conversation-game.is-mobile-game .workshop-top-row { height:30px; min-height:30px; display:block; position:relative; }
- .conversation-game.conversation-game.is-mobile-game .workshop-heading { height:30px; }
- .conversation-game.conversation-game.is-mobile-game .workshop-heading h1 { font-size:21px; margin:0; padding-right:92px; }
- .conversation-game.conversation-game.is-mobile-game .workshop-heading p { display:none; }
- .conversation-game.conversation-game.is-mobile-game .workshop-top-row>.workshop-engineer { display:none; }
- .conversation-game.conversation-game.is-mobile-game .workshop-quick { position:absolute; right:0; top:-4px; height:36px; min-height:36px; padding:7px 9px; font-size:12px; }
+ .conversation-game.conversation-game.is-mobile-game .workshop-top-row { height:auto; min-height:32px; display:flex; align-items:center; position:relative; padding-right:calc(105px + env(safe-area-inset-right,0px)); }
+ .conversation-game.conversation-game.is-mobile-game .workshop-heading { height:auto; display:flex; align-items:center; justify-content:space-between; width:100%; gap:12px; }
+ .conversation-game.conversation-game.is-mobile-game .workshop-header-bar { height:34px; min-height:34px; margin-bottom:6px; padding-right:calc(105px + env(safe-area-inset-right,0px)); gap:8px; }
+ .conversation-game.conversation-game.is-mobile-game .workshop-header-bar h1 { font-size:clamp(13px,2vw,17px); margin:0; padding-right:0; white-space:nowrap; }
+ .conversation-game.conversation-game.is-mobile-game .workshop-quick { position:static; height:28px; min-height:28px; padding:0 10px; font-size:11px; white-space:nowrap; flex-shrink:0; }
  .conversation-game.conversation-game.is-mobile-game .workshop-stage-tabs { gap:4px; }
- .conversation-game.conversation-game.is-mobile-game .workshop-stage-tabs button { min-height:32px; height:32px; padding:4px 10px; font-size:12px; }
- .conversation-game.conversation-game.is-mobile-game .workshop-stage-tabs button>span { width:20px; height:20px; }
- .conversation-game.conversation-game.is-mobile-game .workshop-main>.workshop-meters { height:27px; gap:6px; }
- .conversation-game.conversation-game.is-mobile-game .workshop-main>.workshop-meters .workshop-meter { padding:3px 7px; display:flex; align-items:center; justify-content:space-between; gap:5px; border-radius:8px; }
- .conversation-game.conversation-game.is-mobile-game .workshop-meter>span { font-size:11px; }
- .conversation-game.conversation-game.is-mobile-game .workshop-meter strong { font-size:16px; margin:0; }
- .conversation-game.conversation-game.is-mobile-game .workshop-meter strong small { font-size:10px; }
- .conversation-game.conversation-game.is-mobile-game .workshop-meter progress { display:none; }
- .conversation-game.conversation-game.is-mobile-game .workshop-layout { grid-template-columns:minmax(240px,.43fr) minmax(0,1fr); grid-template-rows:minmax(0,1fr); gap:10px; }
- .conversation-game.conversation-game.is-mobile-game .workshop-shelf { grid-row:1; padding:6px; gap:4px; }
- .conversation-game.conversation-game.is-mobile-game .workshop-view-column { grid-row:1; gap:4px; }
- .conversation-game.conversation-game.is-mobile-game .workshop-category-tabs { gap:4px; }
- .conversation-game.conversation-game.is-mobile-game .workshop-category-tabs button { min-height:32px; font-size:12px; padding:5px 6px; }
+ .conversation-game.conversation-game.is-mobile-game .workshop-stage-tabs button { min-height:26px; height:26px; padding:2px 7px; font-size:11px; }
+ .conversation-game.conversation-game.is-mobile-game .workshop-stage-tabs button>span { width:16px; height:16px; font-size:10px; }
+ .conversation-game.conversation-game.is-mobile-game .workshop-layout:not(.workshop-summary-layout) { display:flex; position:relative; width:100%; height:100%; min-height:0; }
+ .conversation-game.conversation-game.is-mobile-game .workshop-shelf.workshop-inventory-drawer { position:absolute; left:0; top:0; bottom:0; z-index:25; width:min(290px,85vw); padding:8px 8px 6px; }
+ .conversation-game.conversation-game.is-mobile-game .workshop-shelf.workshop-inventory-drawer.is-collapsed { transform:translateX(-105%)!important; opacity:0!important; pointer-events:none!important; display:flex!important; }
+ .conversation-game.conversation-game.is-mobile-game .workshop-view-column { width:100%; height:100%; min-width:0; min-height:0; flex:1; gap:4px; }
+ .conversation-game.conversation-game.is-mobile-game .workshop-drawer-toggle.is-open { left:calc(min(290px,85vw) + 8px); }
+ .conversation-game.conversation-game.is-mobile-game .workshop-telemetry-pill-wrapper { top:50%!important; transform:translateY(-50%)!important; left:6px!important; z-index:26!important; }
+ .conversation-game.conversation-game.is-mobile-game .workshop-telemetry-pill-wrapper.is-drawer-open { left:calc(min(290px,85vw) + 10px)!important; }
+ .conversation-game.conversation-game.is-mobile-game .workshop-category-tabs { gap:3px; margin-bottom:4px; }
+ .conversation-game.conversation-game.is-mobile-game .workshop-category-tabs button { min-height:24px; font-size:10px; padding:2px 6px; }
  .conversation-game.conversation-game.is-mobile-game .workshop-shelf-pages { gap:4px; }
  .conversation-game.conversation-game.is-mobile-game .workshop-bulk { display:none; }
  .conversation-game.conversation-game.is-mobile-game .workshop-part-top>input { display:none; }
- .conversation-game.conversation-game.is-mobile-game .workshop-part-grid { grid-template-columns:1fr; }
- .conversation-game.conversation-game.is-mobile-game .workshop-pick { display:grid; grid-template-columns:65px minmax(0,1fr); grid-template-rows:auto auto; align-content:center; padding:28px 8px 4px; gap:3px 6px; }
- .conversation-game.conversation-game.is-mobile-game .workshop-pick>img { grid-row:1/4; width:65px; height:54px; }
- .conversation-game.conversation-game.is-mobile-game .workshop-pick strong { font-size:15px; line-height:1.2; margin:0; min-height:0; }
- .conversation-game.conversation-game.is-mobile-game .workshop-part-price,.conversation-game.conversation-game.is-mobile-game .workshop-part-spec { font-size:12px; margin:0; }
- .conversation-game.conversation-game.is-mobile-game .workshop-part-action { display:none; }
- .conversation-game.conversation-game.is-mobile-game .part-badge { font-size:10px; top:7px; }
- .conversation-game.conversation-game.is-mobile-game .workshop-info { width:32px; height:32px; top:3px; right:3px; }
+ .conversation-game.conversation-game.is-mobile-game .workshop-part-grid { display:flex; flex-direction:column; gap:4px; }
+ .conversation-game.conversation-game.is-mobile-game .workshop-part-top { top:3px; right:5px; left:auto; }
+ .conversation-game.conversation-game.is-mobile-game .workshop-pick { display:grid; grid-template-columns:42px minmax(0,1fr) auto; align-items:center; padding:16px 6px 4px; gap:6px; text-align:left; }
+ .conversation-game.conversation-game.is-mobile-game .workshop-pick>img { width:40px; height:38px; }
+ .conversation-game.conversation-game.is-mobile-game .workshop-pick strong { font-size:12px; line-height:1.2; margin:0; min-height:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+ .conversation-game.conversation-game.is-mobile-game .workshop-part-price,.conversation-game.conversation-game.is-mobile-game .workshop-part-spec { font-size:10px; margin:0; }
+ .conversation-game.conversation-game.is-mobile-game .workshop-part-action { font-size:9px; padding:2px 6px; }
+ .conversation-game.conversation-game.is-mobile-game .part-badge { font-size:9px; top:3px; left:6px; padding:1px 5px; line-height:1.2; }
+ .conversation-game.conversation-game.is-mobile-game .workshop-info,.conversation-game.conversation-game.is-mobile-game .workshop-part-remove-icon { width:20px; height:20px; min-width:20px; top:auto; right:auto; }
  .conversation-game.conversation-game.is-mobile-game .part-comparison { display:none; }
- .conversation-game.conversation-game.is-mobile-game .part-remove { min-height:30px; padding:3px 8px; font-size:12px; }
- .conversation-game.conversation-game.is-mobile-game .workshop-part-pages { min-height:38px; height:38px; gap:14px; font-size:12px; }
- .conversation-game.conversation-game.is-mobile-game .workshop-part-pages .conversation-icon { width:44px; height:38px; min-height:38px; }
  .conversation-game.conversation-game.is-mobile-game .workshop-feedback,.conversation-game.conversation-game.is-mobile-game .workshop-live-strip,.conversation-game.conversation-game.is-mobile-game .workshop-power-strip { display:none; }
  .conversation-game.conversation-game.is-mobile-game .workshop-depth { padding:8px; justify-content:center; }
- .conversation-game.conversation-game.is-mobile-game .workshop-depth label { font-size:15px; }
- .conversation-game.conversation-game.is-mobile-game .workshop-depth input { margin:6px 0; min-height:36px; }
- .conversation-game.conversation-game.is-mobile-game .workshop-depth p { font-size:12px; margin:3px 0; }
- .conversation-game.conversation-game.is-mobile-game .is-repairing .workshop-top-row { height:54px; min-height:54px; }
- .conversation-game.conversation-game.is-mobile-game .is-repairing .workshop-engineer { display:grid; position:absolute; top:27px; left:0; right:0; height:27px; padding:0 5px; margin:0; grid-template-columns:minmax(0,1fr) 28px; }
- .conversation-game.conversation-game.is-mobile-game .is-repairing .engineer-character,.conversation-game.conversation-game.is-mobile-game .is-repairing .engineer-bubble>span { display:none; }
- .conversation-game.conversation-game.is-mobile-game .is-repairing .engineer-bubble p { font-size:13px; margin:0; }
+ .conversation-game.conversation-game.is-mobile-game .workshop-depth label { font-size:14px; }
+ .conversation-game.conversation-game.is-mobile-game .workshop-depth input { margin:6px 0; min-height:32px; }
+ .conversation-game.conversation-game.is-mobile-game .workshop-depth p { font-size:11px; margin:3px 0; }
  /* Checks keep two panels side by side, with the power rehearsal filling the stage. */
  .conversation-game.conversation-game.is-mobile-game .readiness-heading-tools .readiness-chip { display:none; }
  .conversation-game.conversation-game.is-mobile-game .readiness-heading-tools .game-info-trigger { font-size:12px; padding:5px 8px; min-height:32px; }
@@ -212,7 +203,6 @@ html[data-gentle-motion=true] .mobile-phone-turn>svg:first-child { animation:non
  body:has(.is-mobile-game) .game-info.learning-drawer { padding:14px 18px; width:min(480px,100vw); }
  body:has(.is-mobile-game) .game-info-page { padding:10px 0; min-height:0; }
  body:has(.is-mobile-game) .mobile-pause-menu { gap:9px; }
- body:has(.is-mobile-game) .mobile-rotate-guide { gap:8px; }
  body:has(.is-mobile-game) .game-settings-options { gap:8px; }
  body:has(.is-mobile-game) .game-settings-options label { padding:8px; min-height:40px; }
  body:has(.is-mobile-game) .learning-diagram { max-height:84px; }

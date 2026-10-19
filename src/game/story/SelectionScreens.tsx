@@ -1,5 +1,7 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
-import { ArrowRight, Play, RotateCcw, Check, CheckCircle2, LockKeyhole, MapPin, Moon, Rocket, Sparkles } from 'lucide-react';
+import { ArrowRight, Play, RotateCcw, Check, CheckCircle2, LockKeyhole, MapPin, Moon, Rocket, Sparkles, Compass, Download } from 'lucide-react';
+import { sound } from '../../audio/soundEngine';
+import { usePwaStore } from '../../state/pwaStore';
 import { CharacterStage } from './CharacterStage.tsx';
 import { SelectionArt } from './SelectionArt.tsx';
 import { StoryControls, StoryShell } from './StoryShell.tsx';
@@ -9,7 +11,9 @@ import { PlayerCharacterProvider } from './playerCharacter.tsx';
 import { STORY_FLOW } from './flow.ts';
 import './selection.css';
 import './missionExperience.css';
+import '../../components/archive/nasaArchive.css';
 const HomeViewport = lazy(() => import('./HomeViewport.tsx').then(module => ({ default: module.HomeViewport })));
+import { CosmicBackground } from './CosmicBackground.tsx';
 import { Term } from './Learning.tsx';
 import { useMobileGame } from './mobileGameContext.ts';
 
@@ -97,21 +101,60 @@ export function ChoiceScreen({ step, progress, onSelect, onNext, onBack, frame }
 }
 function ArrowMarker() { return <span className="selection-empty-marker" />; }
 
-export function MissionHome({ progress, onContinue, onRestart, frame, onDemo }: {
+export function MissionHome({ progress, onContinue, onRestart, frame, onDemo, onOpenArchive }: {
   progress: StoryProgress; onContinue(): void; onBack(): void; onRestart(): void; frame: SelectionFrame;
-  onDemo?: () => void;
+  onDemo?: () => void; onOpenArchive?: () => void;
 }) {
   const hasProgress = !!progress.playerName;
   const mobileGame = useMobileGame();
+  const { isInstalled, promptInstall } = usePwaStore();
   return <StoryShell {...frame} controls={null}>
     <main className="mission-home" id="story-content" tabIndex={-1} aria-labelledby="mission-home-title">
+      <CosmicBackground />
       <section className="home-copy">
         <span className="home-mission-tag"><span/>YOUR FIRST MOON MISSION</span>
         <h1 id="mission-home-title">Small explorer.<br/><em>Big adventure.</em></h1>
         <p>Build it. Test it. Launch it.</p>
         <button className="home-play conversation-next" data-primary-action onClick={() => { mobileGame.start(); onContinue(); }}><Play size={25} fill="currentColor"/>Play now<ArrowRight size={25}/></button>
         <span className="home-play-note">{hasProgress ? `Continue ${progress.playerName}’s saved adventure` : 'Your adventure starts here'}</span>
+
+        {/* Secondary entry button for NASA Mission Archive */}
+        <div className="home-archive-wrapper">
+          <button
+            type="button"
+            className="home-archive-button"
+            onClick={() => {
+              sound.playClick(650);
+              onOpenArchive?.();
+            }}
+            title="Explore historical and upcoming NASA mission milestones"
+          >
+            <span className="archive-icon-wrapper">
+              <Sparkles size={14} className="archive-sparkle" />
+              <Compass size={18} />
+            </span>
+            <span className="archive-button-copy">
+              <strong>NASA Mission Archive</strong>
+              <small>1958 — 2030+ Historical Timeline</small>
+            </span>
+            <span className="archive-pill-tag">EXPLORE</span>
+          </button>
+        </div>
+
         <div className="home-other-actions">
+          {!isInstalled ? (
+            <button
+              type="button"
+              className="home-install-app-btn"
+              onClick={() => {
+                sound.playClick(720);
+                promptInstall();
+              }}
+              title="Install app on your device for fast fullscreen offline play"
+            >
+              <Download size={17} />Install App
+            </button>
+          ) : null}
           {onDemo ? <button onClick={() => { mobileGame.start(); onDemo(); }}><Rocket size={18}/>Judge demo</button> : null}
           {hasProgress ? <button onClick={onRestart}><RotateCcw size={17}/>New mission</button> : null}
         </div>

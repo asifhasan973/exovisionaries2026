@@ -4,6 +4,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { buildAssembly, disposeGroup } from './workshopMeshes.ts';
 import { quickPreparation } from './preparation.ts';
 import { useGameSettings } from './gameSettingsContext.ts';
+import { isEngineFrozen } from '../../state/orientationLifecycleStore';
 
 /** Existing playable hardware, shown in a lightweight Moon diorama. */
 export function HomeViewport() {
@@ -40,11 +41,14 @@ export function HomeViewport() {
     const resize=()=>{ const w=Math.max(1,mount.clientWidth),h=Math.max(1,mount.clientHeight); renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();camera.position.set(10,6.8,12).multiplyScalar(Math.max(1,1.1/camera.aspect));controls.update(); };
     const observer=new ResizeObserver(resize);observer.observe(mount);resize();
     let last=0;
-    const render=(now:number)=>{ if(disposed||document.hidden)return; if(now-last>32){controls.update();renderer.render(scene,camera);last=now;}frame=requestAnimationFrame(render);};
-    const resume=()=>{cancelAnimationFrame(frame);if(!document.hidden)frame=requestAnimationFrame(render);};
+    const render=(now:number)=>{ if(disposed||document.hidden||isEngineFrozen())return; if(now-last>32){controls.update();renderer.render(scene,camera);last=now;}frame=requestAnimationFrame(render);};
+    const resume=()=>{cancelAnimationFrame(frame);if(!document.hidden&&!isEngineFrozen())frame=requestAnimationFrame(render);};
+    const pause=()=>{cancelAnimationFrame(frame);};
     const lost=(event:Event)=>{event.preventDefault();cancelAnimationFrame(frame);setFailed(true);};
-    renderer.domElement.addEventListener('webglcontextlost',lost);document.addEventListener('visibilitychange',resume);resume();
-    return()=>{disposed=true;cancelAnimationFrame(frame);observer.disconnect();document.removeEventListener('visibilitychange',resume);renderer.domElement.removeEventListener('webglcontextlost',lost);controls.dispose();disposeGroup(scene);renderer.dispose();renderer.forceContextLoss();renderer.domElement.remove();};
+    renderer.domElement.addEventListener('webglcontextlost',lost);document.addEventListener('visibilitychange',resume);
+    window.addEventListener('game-orientation-pause',pause);window.addEventListener('game-orientation-resume',resume);
+    resume();
+    return()=>{disposed=true;cancelAnimationFrame(frame);observer.disconnect();document.removeEventListener('visibilitychange',resume);window.removeEventListener('game-orientation-pause',pause);window.removeEventListener('game-orientation-resume',resume);renderer.domElement.removeEventListener('webglcontextlost',lost);controls.dispose();disposeGroup(scene);renderer.dispose();renderer.forceContextLoss();renderer.domElement.remove();};
   },[gentle]);
   return <div className="home-world" role="img" aria-label="A 3D lunar lander and rover waiting for your Moon adventure"><div ref={host} className="home-world-canvas"/>{failed ? <div className="home-world-fallback" aria-hidden="true">🌕<span>🚀</span></div> : null}</div>;
 }

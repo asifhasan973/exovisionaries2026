@@ -14,9 +14,12 @@ import {
   BookOpen,
   Volume2,
   VolumeX,
-  MessageSquare
+  MessageSquare,
+  Download
 } from 'lucide-react';
 import { useMissionStore } from '../../state/missionStore';
+import { usePwaStore } from '../../state/pwaStore';
+import { useAudioStore } from '../../state/audioStore';
 import { MissionPhase } from '../../types/mission';
 
 interface StepDef {
@@ -44,10 +47,14 @@ export const Header: React.FC = () => {
     currentPhase,
     setPhase,
     audioSettings,
-    toggleMute,
     toggleCaptions,
     toggleSourcesDrawer
   } = useMissionStore();
+
+  const isMuted = useAudioStore((s) => s.isMuted);
+  const toggleMute = useAudioStore((s) => s.toggleMute);
+
+  const { isInstalled, promptInstall } = usePwaStore();
 
   const currentIdx = STEPS.findIndex((s) => s.phase === currentPhase);
 
@@ -117,6 +124,18 @@ export const Header: React.FC = () => {
 
       {/* Flight Control Accessories */}
       <div className="flex items-center gap-2">
+        {!isInstalled && (
+          <button
+            type="button"
+            onClick={promptInstall}
+            className="btn-aerospace-dark px-2.5 py-1.5 text-xs flex items-center gap-1.5 border-cyan-500/30 hover:border-cyan-400 text-cyan-300 transition-all shadow-sm shadow-cyan-500/10"
+            title="Install Web App for Fullscreen Offline Play"
+          >
+            <Download size={13} className="text-cyan-400 animate-pulse" />
+            <span className="hidden sm:inline font-mono text-[11px]">Install App</span>
+          </button>
+        )}
+
         <button
           type="button"
           onClick={() => toggleSourcesDrawer()}
@@ -131,13 +150,13 @@ export const Header: React.FC = () => {
           type="button"
           onClick={toggleMute}
           className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
-            audioSettings.isMuted
+            isMuted
               ? 'bg-red-500/10 border border-red-500/30 text-red-400'
               : 'bg-white/5 border border-white/10 text-slate-300 hover:text-cyan-300 hover:border-cyan-500/30'
           }`}
-          title={audioSettings.isMuted ? 'Unmute Audio' : 'Mute Audio'}
+          title={isMuted ? 'Unmute Audio' : 'Mute Audio'}
         >
-          {audioSettings.isMuted ? <VolumeX size={15} /> : <Volume2 size={15} />}
+          {isMuted ? <VolumeX size={15} /> : <Volume2 size={15} />}
         </button>
 
         <button

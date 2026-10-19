@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import { Expand, RotateCcw, RotateCw, Undo2, Redo2 } from 'lucide-react';
+import { RotateCcw, Undo2, Redo2 } from 'lucide-react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import type { PreparationSelection } from './design.ts';
 import { WORKSHOP_PARTS, installedIds, partById } from './preparation.ts';
 import { attachmentPosition, buildAssembly, createPartMesh, disposeGroup } from './workshopMeshes.ts';
 import { useGameSettings } from './gameSettingsContext.ts';
+import { isEngineFrozen } from '../../state/orientationLifecycleStore';
 
 let thumbnailCache: Record<string, string> | undefined;
 
@@ -20,7 +21,6 @@ export function WorkshopViewport({ preparation, draggingId, lastInstalled, canUn
   const model = useRef({ preparation, draggingId, lastInstalled });
   const repaint = useRef<() => void>(() => {});
   const fit = useRef<() => void>(() => {});
-  const rotate = useRef<(direction: number) => void>(() => {});
   const thumbnailCallback = useRef(onThumbnails), errorCallback = useRef(onMeshError);
   const [failed, setFailed] = useState(false);
   useEffect(() => { gentleMotion.current = gentle; repaint.current(); }, [gentle]);
@@ -63,7 +63,6 @@ export function WorkshopViewport({ preparation, draggingId, lastInstalled, canUn
     let aspectScale = 1;
     fit.current = () => { controls.target.set(0, 1, 0); camera.position.copy(controls.target).add(new THREE.Vector3(8.3, 4.4, 10.5).multiplyScalar(aspectScale)); controls.update(); };
     fit.current();
-    rotate.current = direction => { const relative = camera.position.clone().sub(controls.target); relative.applyAxisAngle(new THREE.Vector3(0, 1, 0), direction * .35); camera.position.copy(controls.target).add(relative); controls.update(); };
     const platform = new THREE.Mesh(new THREE.CylinderGeometry(5, 5.1, .1, 64), new THREE.MeshStandardMaterial({ color: 0x25203e, metalness: .45, roughness: .7 }));
     platform.position.y = -.06; scene.add(platform);
     const grid = new THREE.GridHelper(10, 20, 0x78668d, 0x38304e); grid.position.y = .008;
@@ -90,7 +89,7 @@ export function WorkshopViewport({ preparation, draggingId, lastInstalled, canUn
       render(performance.now());
     };
     const render = (time: number) => {
-      if (disposed || document.hidden) return;
+      if (disposed || document.hidden || isEngineFrozen()) return;
       if (time - lastFrame > 30) {
         controls.enableDamping = !gentleMotion.current && !reduced.matches;
         controls.update();
@@ -100,8 +99,9 @@ export function WorkshopViewport({ preparation, draggingId, lastInstalled, canUn
         renderer.render(scene, camera); lastFrame = time; dirty = false;
       }
     };
-    const animate = (time: number) => { render(time); if (!disposed && !document.hidden) frame = requestAnimationFrame(animate); };
-    const resume = () => { cancelAnimationFrame(frame); if (!disposed && !document.hidden) frame = requestAnimationFrame(animate); };
+    const animate = (time: number) => { render(time); if (!disposed && !document.hidden && !isEngineFrozen()) frame = requestAnimationFrame(animate); };
+    const resume = () => { cancelAnimationFrame(frame); if (!disposed && !document.hidden && !isEngineFrozen()) frame = requestAnimationFrame(animate); };
+    const pause = () => { cancelAnimationFrame(frame); };
     repaint.current = update;
     const resize = () => { const width = Math.max(1, mount.clientWidth), height = Math.max(1, mount.clientHeight); renderer.setSize(width, height, false); camera.aspect = width / height; camera.updateProjectionMatrix();
       // Preserve the viewing angle and user zoom when a tall/narrow bay is resized.
@@ -112,11 +112,16 @@ export function WorkshopViewport({ preparation, draggingId, lastInstalled, canUn
     const contextLost = (event: Event) => { event.preventDefault(); cancelAnimationFrame(frame); setFailed(true); errorCallback.current(); };
     renderer.domElement.addEventListener('webglcontextlost', contextLost);
     document.addEventListener('visibilitychange', resume);
+    window.addEventListener('game-orientation-pause', pause);
+    window.addEventListener('game-orientation-resume', resume);
     resize(); update(); resume();
     return () => {
       disposed = true; cancelAnimationFrame(frame); observer.disconnect(); controls.removeEventListener('change', changed); controls.dispose();
-      document.removeEventListener('visibilitychange', resume); renderer.domElement.removeEventListener('webglcontextlost', contextLost);
-      repaint.current = () => {}; fit.current = () => {}; rotate.current = () => {};
+      document.removeEventListener('visibilitychange', resume);
+      window.removeEventListener('game-orientation-pause', pause);
+      window.removeEventListener('game-orientation-resume', resume);
+      renderer.domElement.removeEventListener('webglcontextlost', contextLost);
+      repaint.current = () => {}; fit.current = () => {};
       disposeGroup(scene); renderer.dispose(); renderer.forceContextLoss(); renderer.domElement.remove();
     };
   }, []);
@@ -125,14 +130,9 @@ export function WorkshopViewport({ preparation, draggingId, lastInstalled, canUn
     {failed ? <div className="workshop-render-fallback" role="status">3D unavailable. Use the Install buttons to keep building.</div> : null}
     <span className="workshop-viewport-badge">3D WORKSHOP</span>
     <div className="workshop-camera-controls">
-      <button className="conversation-icon" onClick={onUndo} disabled={!canUndo} aria-label="Undo installation" title="Undo"><Undo2 size={19} /></button>
-      <button className="conversation-icon" onClick={onRedo} disabled={!canRedo} aria-label="Redo installation" title="Redo"><Redo2 size={19} /></button>
-      <button className="conversation-icon" onClick={() => fit.current()} aria-label="Fit spacecraft" title="Fit spacecraft"><Expand size={19} /></button>
-    </div>
-    <div className="workshop-orbit-controls">
-      <button className="conversation-icon" onClick={() => rotate.current(-1)} aria-label="Rotate view left"><RotateCcw size={18} /></button>
-      <span>Drag to rotate · scroll to zoom</span>
-      <button className="conversation-icon" onClick={() => rotate.current(1)} aria-label="Rotate view right"><RotateCw size={18} /></button>
+      <button className="conversation-icon" onClick={onUndo} disabled={!canUndo} aria-label="Undo installation" title="Undo"><Undo2 size={18} /></button>
+      <button className="conversation-icon" onClick={onRedo} disabled={!canRedo} aria-label="Redo installation" title="Redo"><Redo2 size={18} /></button>
+      <button className="conversation-icon" onClick={() => fit.current()} aria-label="Reset camera angle" title="Reset camera angle"><RotateCcw size={18} /></button>
     </div>
     {!installedIds(preparation).length ? <div className="workshop-empty">Your workbench is empty.</div> : null}
     <div className="workshop-vehicle-labels"><span>Lander</span><span>{partById(preparation.roverId)?.name ?? 'Rover bay'}</span></div>

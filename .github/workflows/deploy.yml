@@ -1,0 +1,84 @@
+name: deploy-cloudflare
+
+# Builds the Vite single-page application and publishes it to Cloudflare Pages.
+# Triggers on push to the main branch (including merged pull requests) and on manual dispatch.
+# Pull requests are excluded to avoid unnecessary preview deploys.
+#
+# Safe execution: if Cloudflare credentials are not configured in repository secrets,
+# the deploy step safely no-ops with a notice rather than breaking the build.
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      pages_branch:
+        description: 'Cloudflare Pages branch name to deploy to (defaults to main)'
+        type: string
+        default: 'main'
+        required: false
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: deploy-cloudflare-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build project
+        env:
+          VITE_APP_ENV: production
+          VITE_LOADING_PROGRESS_MULTIPLIER: ${{ vars.VITE_LOADING_PROGRESS_MULTIPLIER }}
+          VITE_SLIDE_DISPLAY_MIN_MS: ${{ vars.VITE_SLIDE_DISPLAY_MIN_MS }}
+          VITE_INTRO_SPLASH_DISPLAY_MS: ${{ vars.VITE_INTRO_SPLASH_DISPLAY_MS }}
+        run: pnpm run build
+
+      - name: Check Cloudflare credentials
+        id: cf-check
+        # Secrets are read strictly through env to prevent shell interpolation.
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -n "$CLOUDFLARE_API_TOKEN" ] && [ -n "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::CLOUDFLARE_API_TOKEN or CLOUDFLARE_ACCOUNT_ID not set in secrets — skipping deploy step. See docs/ci-cd.md."
+          fi
+
+      - name: Deploy to Cloudflare Pages
+        if: steps.cf-check.outputs.configured == 'true'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name=zero-to-beyond --branch=${{ github.event_name == 'workflow_dispatch' && inputs.pages_branch || 'main' }}

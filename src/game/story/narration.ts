@@ -22,6 +22,9 @@ export function browserNarrationEnvironment(): NarrationEnvironment | null {
   };
 }
 
+import { isEngineFrozen } from '../../state/orientationLifecycleStore';
+import { useAudioStore } from '../../state/audioStore';
+
 // One radio channel across scenes, companions and the glossary. A new message
 // interrupts the old owner; it never queues behind an obsolete instruction.
 let activeNarrator: NarrationController | null = null;
@@ -36,6 +39,17 @@ export class NarrationController {
   private recording: HTMLAudioElement | null = null;
   private speechStartedAt = 0;
   private environment: NarrationEnvironment | null;
+  private isPaused = false;
+  private pausedByEngine = false;
+  private pausedAt: number | null = null;
+  private totalPausedTime = 0;
+  private lastSpokenParams: {
+    text: string;
+    character: StoryCharacterId;
+    clipId?: string;
+    gender: 'male' | 'female';
+  } | null = null;
+
   constructor(environment: NarrationEnvironment | null) {
     this.environment = environment;
     this.snapshot = { status: environment ? 'idle' : 'unavailable', character: null };
@@ -43,9 +57,42 @@ export class NarrationController {
   getSnapshot = () => this.snapshot;
   subscribe = (listener: () => void) => { this.listeners.add(listener); return () => { this.listeners.delete(listener); }; };
   /** Sampled by canvas, without causing React renders for every audio frame. */
-  getSpeechTime = () => this.snapshot.status !== 'speaking' ? 0 : this.recording
-    ? this.recording.currentTime * 1000
-    : Math.max(0, performance.now() - this.speechStartedAt) * NARRATION_SPEED;
+  getSpeechTime = () => {
+    if (this.snapshot.status !== 'speaking' && !this.isPaused) return 0;
+    if (this.recording) return this.recording.currentTime * 1000;
+    const now = this.isPaused && this.pausedAt !== null ? this.pausedAt : performance.now();
+    return Math.max(0, now - this.speechStartedAt - this.totalPausedTime) * NARRATION_SPEED;
+  };
+
+  pause = (byEngine = false) => {
+    if (this.isPaused) return;
+    if (this.snapshot.status !== 'speaking' && this.snapshot.status !== 'starting') return;
+    const params = this.lastSpokenParams;
+    if (!params) return;
+    // Cancel old callbacks/watchdogs before replaying this line after suspension.
+    this.stop();
+    activeNarrator = this;
+    this.lastSpokenParams = params;
+    this.isPaused = true;
+    this.pausedByEngine = byEngine;
+    this.pausedAt = performance.now();
+    this.update('starting', params.character);
+  };
+
+  resume = (byEngine = false) => {
+    if (!this.isPaused || byEngine && !this.pausedByEngine) return;
+    this.isPaused = false;
+    this.pausedByEngine = false;
+    this.pausedAt = null;
+    this.totalPausedTime = 0;
+
+    // Replay from start of dialogue when unfreezing to ensure the player hears full context
+    if (this.lastSpokenParams) {
+      const { text, character, clipId, gender } = this.lastSpokenParams;
+      this.speak(text, character, clipId, gender);
+    }
+  };
+
   private update(status: NarrationStatus, character: StoryCharacterId | null = null) {
     this.snapshot = { status, character };
     this.listeners.forEach(listener => listener());
@@ -58,6 +105,11 @@ export class NarrationController {
     if (activeNarrator === this) activeNarrator = null;
     this.generation++;
     this.clearTimer();
+    this.isPaused = false;
+    this.pausedByEngine = false;
+    this.pausedAt = null;
+    this.totalPausedTime = 0;
+    this.lastSpokenParams = null;
     const owned = this.utterance;
     this.utterance = null;
     if (this.recording) {
@@ -69,10 +121,24 @@ export class NarrationController {
   };
   speak(text: string, character: StoryCharacterId, clipId?: string, gender: 'male' | 'female' = 'female') {
     this.stop();
+    const audio = useAudioStore.getState();
+    if (audio.isMuted || !audio.voicesEnabled) return;
     const environment = this.environment;
     if (!environment) return;
     activeNarrator?.stop();
     activeNarrator = this;
+    this.lastSpokenParams = { text, character, clipId, gender };
+
+    // If game engine is currently suspended by orientation lock or loading screen,
+    // defer playback until engine resume
+    if (isEngineFrozen()) {
+      this.isPaused = true;
+      this.pausedByEngine = true;
+      this.update('starting', character);
+      return;
+    }
+
+    this.isPaused = false;
     const generation = this.generation;
     const valid = () => generation === this.generation;
     const finish = (status: 'idle' | 'error') => {
@@ -85,6 +151,8 @@ export class NarrationController {
         this.recording.onplaying = this.recording.onended = this.recording.onerror = this.recording.onwaiting = this.recording.onstalled = this.recording.onpause = null;
         this.recording.pause(); this.recording = null;
       }
+      this.lastSpokenParams = null;
+      this.isPaused = false;
       this.update(status);
     };
     const speech = (voiceWait = 0) => { try {
@@ -175,3 +243,21 @@ export function selectCharacterVoice(voices: readonly SpeechSynthesisVoice[], ch
     ?? voices.find(voice => !(useMale ? female : male).test(voice.name) && voice.default)
     ?? voices.find(voice => !(useMale ? female : male).test(voice.name)) ?? voices[useMale ? 0 : Math.min(1, voices.length - 1)];
 }
+
+export function pauseActiveNarration() {
+  activeNarrator?.pause(true);
+}
+
+export function resumeActiveNarration() {
+  activeNarrator?.resume(true);
+}
+
+if (typeof window !== 'undefined') {
+  const syncVoiceMute = () => {
+    const audio = useAudioStore.getState();
+    if (audio.isMuted || !audio.voicesEnabled) activeNarrator?.stop();
+  };
+  window.addEventListener('game-audio-mute-change', syncVoiceMute);
+  window.addEventListener('game-audio-voices-change', syncVoiceMute);
+}
+

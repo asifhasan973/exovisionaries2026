@@ -35,8 +35,7 @@
 .conversation-game.conversation-game .workshop-part.is-repair-target .part-comparison span{display:none;}
 
 @media(max-height:760px),(max-width:1000px){
-.conversation-game.conversation-game .workshop-part.is-repair-target .workshop-pick{padding:30px 8px 6px;grid-template-columns:65px minmax(0,1fr);grid-template-rows:auto auto;gap:3px 8px;align-content:center;}
-.conversation-game.conversation-game .workshop-part.is-repair-target .workshop-pick>img{height:55px;width:65px;grid-row:1/3;}
-.conversation-game.conversation-game .workshop-part.is-repair-target .workshop-pick strong{font-size:16px;line-height:1.15;margin:0;}
-.conversation-game.conversation-game .workshop-part.is-repair-target .workshop-part-action{display:none;}
+.conversation-game.conversation-game .workshop-part.is-repair-target .workshop-pick{padding:20px 8px 6px;grid-template-columns:46px minmax(0,1fr) auto;align-items:center;column-gap:8px;}
+.conversation-game.conversation-game .workshop-part.is-repair-target .workshop-pick>img{height:42px;width:44px;}
+.conversation-game.conversation-game .workshop-part.is-repair-target .workshop-pick strong{font-size:12px;line-height:1.2;margin:0;}
 }
