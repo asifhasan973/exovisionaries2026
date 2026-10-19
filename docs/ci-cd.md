@@ -1,66 +1,57 @@
-# Continuous Deployment with Cloudflare Pages
+# Cloudflare production deployment
 
-This document details the Continuous Deployment (CD) pipeline configured for **Zero To Beyond** using GitHub Actions and Cloudflare Pages.
+Production: https://zero-to-beyond.pages.dev/
 
----
+Project: `zero-to-beyond` · production branch: `main` · output: `dist/`.
 
-## 1. Overview
+## Automatic releases
 
-The deployment workflow resides in [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml). It automates building the Vite single-page application and uploading the static artifacts in `dist/` directly to Cloudflare Pages.
+`.github/workflows/deploy.yml` runs for pushes and merges to `main`, or a manual
+workflow dispatch on `main`. It installs locked npm dependencies with Node.js 22,
+builds the production frontend, deploys through Wrangler 4.151.2, and verifies the
+live URL. Releases run sequentially. Action versions are pinned to commit SHAs.
 
-### Key Characteristics
-- **Automated Deployments**: Pushes to `main` (including merged pull requests) automatically build and publish to production.
-- **Manual Trigger Support**: Includes `workflow_dispatch` to allow manual deployments with an optional custom Pages branch name.
-- **No Unsolicited PR Builds**: Pull requests do not trigger deployments, avoiding unneeded preview builds and saving CI minutes.
-- **Safe Fallback**: If Cloudflare credentials are missing from repository secrets, the build finishes successfully while the deployment step gracefully logs a notice and skips without failing CI.
+Missing credentials fail immediately; a green run cannot silently skip deployment.
+Cloudflare credentials are available only to credential validation and deployment,
+not dependency installation or the frontend build. Fork pull requests do not deploy.
 
----
+## Repository secrets
 
-## 2. Configuration & Secrets
+Configure these in GitHub repository Settings → Secrets and variables → Actions:
 
-To enable Cloudflare Pages deployment, configure the following secrets and variables in your GitHub repository (**Settings → Secrets and variables → Actions**).
+- `CLOUDFLARE_ACCOUNT_ID`: the account containing the Pages project.
+- `CLOUDFLARE_API_TOKEN`: a dedicated API token with Account → Cloudflare Pages → Edit,
+  scoped to that Cloudflare account. No DNS, account administration or token
+  provisioning permission is needed. Store its value only as a GitHub Actions secret.
 
-### Required Secrets
+The Cloudflare connection used for interactive releases cannot provision persistent
+API tokens. An account administrator must create the dedicated CI token before the
+first automatic release. Revoke/replace it if access is no longer needed.
 
-| Secret Name | Description | Where to find |
-| :--- | :--- | :--- |
-| `CLOUDFLARE_API_TOKEN` | Cloudflare API Token with `Cloudflare Pages: Edit` permissions. | **Cloudflare Dashboard → My Profile → API Tokens → Create Token** (use the *Edit Cloudflare Workers/Pages* template or custom token). |
-| `CLOUDFLARE_ACCOUNT_ID` | Your Cloudflare Account ID. | Found in your Cloudflare dashboard URL or on the right sidebar of the Workers & Pages dashboard. |
+Optional public GitHub Actions variables control loading timing:
+`VITE_LOADING_PROGRESS_MULTIPLIER`, `VITE_SLIDE_DISPLAY_MIN_MS`, and
+`VITE_INTRO_SPLASH_DISPLAY_MS`. Empty values use application defaults.
 
-### Target Project
-- **Project Name**: `zero-to-beyond`
-- **Output Directory**: `dist`
-- Create the `zero-to-beyond` Pages project in the intended Cloudflare account before enabling deployment. This workflow does not provision a project or credentials.
+## Caching and previous host
 
-### Optional Build Variables
+`public/_headers` enables immutable caching for hashed assets, daily revalidation
+for audio, and fresh HTML/service-worker checks. Pages serves the SPA fallback.
 
-The following optional repository variables (defined in **Settings → Secrets and variables → Actions → Variables**) can be configured to customize build behavior:
+`vercel.json` disables automatic Git deployments to Vercel. Existing Vercel
+releases are retained; Cloudflare is the production URL for new releases.
 
-| Variable Name | Default | Description |
-| :--- | :--- | :--- |
-| `VITE_APP_ENV` | `production` (in CI) / `development` (in `.env`) | Controls in-app debug routes (`#/debug/...`) and dev toolbar. Forced to `production` in CI/CD to disable debug bypasses. |
-| `VITE_LOADING_PROGRESS_MULTIPLIER` | `1` | Multiplier to simulate slower network conditions during the loading screen. |
-| `VITE_SLIDE_DISPLAY_MIN_MS` | `2800` | Minimum display duration in milliseconds for each loading carousel slide. |
-| `VITE_INTRO_SPLASH_DISPLAY_MS` | `2800` | Display duration for the intro splash screen. |
+## Manual releases
 
----
+After authenticating Wrangler to the same account:
 
-## 3. Workflow Steps Breakdown
+```sh
+VITE_APP_ENV=production npm run build
+wrangler pages deploy dist --project-name=zero-to-beyond --branch=main
+```
 
-1. **Checkout**: Checks out the repository using `actions/checkout@v4` with credentials unpersisted.
-2. **Setup pnpm & Node.js**: Installs `pnpm` (v9) via `pnpm/action-setup@v4` and Node.js (v20) via `actions/setup-node@v4` with automatic pnpm store caching keyed to `pnpm-lock.yaml`.
-3. **Dependency Installation**: Runs `pnpm install --frozen-lockfile` to ensure reproducible builds.
-4. **Project Build**: Executes `pnpm run build` (`tsc -b && vite build`) to generate production assets into `dist/`.
-5. **Credential Verification**: Verifies presence of `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` via environment flags (preventing shell injection).
-6. **Deploy**: Uses `cloudflare/wrangler-action@v3` to execute `pages deploy dist --project-name=zero-to-beyond --branch=<branch>`.
+## Troubleshooting
 
----
-
-## 4. Manual Deployments
-
-To trigger a deployment manually:
-1. Navigate to the **Actions** tab in GitHub.
-2. Select the **deploy-cloudflare** workflow.
-3. Click **Run workflow**.
-4. Specify the target Cloudflare Pages branch (defaults to `main` for production, or enter a custom name for a preview branch).
-5. Click **Run workflow**.
+Check the [GitHub Actions run](https://github.com/asifhasan973/exovisionaries2026/actions/workflows/deploy.yml).
+Authentication errors require checking the dedicated token's permissions and
+account scope. Install/build failures happen before publication, leaving the
+current Cloudflare release available.
