@@ -14,7 +14,7 @@ export const SCIENCE_TARGETS=[{id:'lookout',name:'Sunny lookout',hint:'Close · 
 export type ScienceTarget=typeof SCIENCE_TARGETS[number]['id'];
 export type ScienceFinding='confirmed'|'inconclusive'|'negative'|GeoFinding;
 export type SciencePhase='plan'|'outbound'|'survey'|'drilling'|'analysis'|'returning'|'report'|'transmitting'|'ready'|'failed'|'recovering'|'sensor-site'|'listening';
-type ScienceCommand={type:'sensor-plan';placement:'ground'|'rover'}|{type:'place-sensor';placement:'ground'|'rover'}|{type:'incident';action:IncidentAction}|{type:'commit'}|{type:'secure';item:'rover'|'data'|'crew'|'samples'}|{type:'target';target:ScienceTarget}|{type:'depth';cm:number}|{type:'program';program:'survey'|'sample'}|{type:'gas';enabled:boolean}|{type:'start'}|{type:'claim';finding:ScienceFinding}|{type:'transmit'}|{type:'new-trip'}|{type:'home'}|{type:'charge'}|{type:'retry'}|{type:'hint'}|{type:'advance';frames:number};
+type ScienceCommand={type:'sensor-plan';placement:'ground'|'rover'}|{type:'place-sensor';placement:'ground'|'rover'}|{type:'incident';action:IncidentAction}|{type:'commit'}|{type:'secure';item:'rover'|'data'|'crew'|'samples'}|{type:'target';target:ScienceTarget}|{type:'depth';cm:number}|{type:'program';program:'survey'|'sample'}|{type:'gas';enabled:boolean}|{type:'end-fieldwork'}|{type:'start'}|{type:'claim';finding:ScienceFinding}|{type:'transmit'}|{type:'new-trip'}|{type:'home'}|{type:'charge'}|{type:'retry'}|{type:'hint'}|{type:'advance';frames:number};
 export interface ScienceState {
   version:2;model:typeof SCIENCE_MODEL.id|typeof GEOLOGY_MODEL.id;objective:'lunar-ice'|'lunar-geology';samples:GeoSample[];seismometerSite:ScienceTarget|null;sensorPlan:'ground'|'rover';signature:string|null;origin:SurfaceState|null;
   incidentActivationIndex:number;hazards:IncidentState;committed:boolean;fieldworkStopped:boolean;
@@ -52,7 +52,7 @@ function measure(seed:number,target:ScienceTarget,depth:number){
     gas:ground==='dry'?'No water gas':!reached?'Unclear':ground==='water'?'Water gas':ground==='hydroxyl'?'No water gas':'Mixed gases',quality};
 }
 function measurementId(s:ScienceState,instrument:'nss'|'trident'|'nirvss'|'msolo'){const suffix=instrument==='nirvss'&&s.hazards.dust>.3?s.hazards.sensorCalibrated?':calibrated':':dusty':'';return `ice:${s.target}:${instrument}:${instrument==='nss'?'survey':s.depthCm}${suffix}`;}
-function record(s:ScienceState,moon:MoonSession,instrument:'nss'|'trident'|'nirvss'|'msolo'):ScienceState{
+export function record(s:ScienceState,moon:MoonSession,instrument:'nss'|'trident'|'nirvss'|'msolo'):ScienceState{
   const depth=instrument==='nss'?null:s.depthCm,id=measurementId(s,instrument);
   if(s.records.some(r=>r.id===id))return {...s,currentIds:[...new Set([...s.currentIds,id])]};
   const reading=measure(moon.scenarioSeed,s.target,s.depthCm),signal=instrument==='nss'?reading.hydrogen:instrument==='nirvss'?reading.optical:instrument==='msolo'?reading.gas:'Cuttings exposed';
@@ -145,6 +145,7 @@ function apply(s:ScienceState,surface:SurfaceState,c:ScienceCommand,moon:MoonSes
       if(vehicle.stage==='failed')return {surface:vehicle,science:{...s,phase:'failed',feedback:'failed'}};
       return {surface:vehicle,science:{...s,hazards:{...s.hazards,roverParked:c.item==='rover'||s.hazards.roverParked,crewChecked:c.item==='crew'||s.hazards.crewChecked,feedback:c.item==='rover'?'parked':'crew'}}};
     }
+    case 'end-fieldwork':return !s.committed&&['plan','report','ready'].includes(s.phase)&&linked&&surface.stage==='idle'?stopExpedition(s,surface,moon,prep,true):same;
     case 'start':{
       if(s.phase!=='plan'||!linked||surface.stage!=='idle'||s.committed||s.fieldworkStopped)return same;
       const duplicate=s.objective==='lunar-geology'?(s.program==='survey'?geoTools(prep).filter(p=>['camera','gpr'].includes(p.scienceFamily)):geoTools(prep).filter(p=>['ir','xrf','xrd','seismometer'].includes(p.scienceFamily))).every(p=>s.records.some(r=>r.id===geoMeasurementId(s,p.id))):s.records.some(r=>r.id===measurementId(s,s.program==='survey'?'nss':'nirvss'))&&(s.program==='survey'||!s.useGas||s.records.some(r=>r.id===`ice:${s.target}:msolo:${s.depthCm}`));
@@ -186,8 +187,8 @@ function apply(s:ScienceState,surface:SurfaceState,c:ScienceCommand,moon:MoonSes
     case 'advance':return advancePair(s,surface,c.frames,moon,prep);
   }
 }
-export type ScienceEvent={type:'science-sensor-plan';placement:'ground'|'rover'}|{type:'science-place-sensor';placement:'ground'|'rover'}|{type:'science-incident';action:IncidentAction}|{type:'science-commit'}|{type:'science-secure';item:'rover'|'data'|'crew'|'samples'}|{type:'science-design-retry'}|{type:'science-target';target:ScienceTarget}|{type:'science-depth';cm:number}|{type:'science-program';program:'survey'|'sample'}|{type:'science-gas';enabled:boolean}|{type:'science-start'}|{type:'science-claim';finding:ScienceFinding}|{type:'science-transmit'}|{type:'science-new-trip'}|{type:'science-home'}|{type:'science-charge'}|{type:'science-retry'}|{type:'science-hint'}|{type:'science-tick';seconds:number}|{type:'science-pause'}|{type:'science-resume'};
-function validCommand(c:ScienceCommand){return c&&typeof c==='object'&&['sensor-plan','place-sensor','incident','commit','secure','target','depth','program','gas','start','claim','transmit','new-trip','home','charge','retry','hint','advance'].includes(c.type)&&
+export type ScienceEvent={type:'science-sensor-plan';placement:'ground'|'rover'}|{type:'science-place-sensor';placement:'ground'|'rover'}|{type:'science-incident';action:IncidentAction}|{type:'science-commit'}|{type:'science-secure';item:'rover'|'data'|'crew'|'samples'}|{type:'science-design-retry'}|{type:'science-target';target:ScienceTarget}|{type:'science-depth';cm:number}|{type:'science-program';program:'survey'|'sample'}|{type:'science-gas';enabled:boolean}|{type:'science-end-fieldwork'}|{type:'science-start'}|{type:'science-claim';finding:ScienceFinding}|{type:'science-transmit'}|{type:'science-new-trip'}|{type:'science-home'}|{type:'science-charge'}|{type:'science-retry'}|{type:'science-hint'}|{type:'science-tick';seconds:number}|{type:'science-pause'}|{type:'science-resume'};
+function validCommand(c:ScienceCommand){return c&&typeof c==='object'&&['sensor-plan','place-sensor','incident','commit','secure','target','depth','program','gas','end-fieldwork','start','claim','transmit','new-trip','home','charge','retry','hint','advance'].includes(c.type)&&
   ((c.type!=='place-sensor'&&c.type!=='sensor-plan')||['ground','rover'].includes(c.placement))&&(c.type!=='incident'||INCIDENT_ACTIONS.includes(c.action))&&(c.type!=='secure'||['rover','data','crew','samples'].includes(c.item))&&(c.type!=='target'||SCIENCE_TARGETS.some(t=>t.id===c.target))&&(c.type!=='depth'||Number.isInteger(c.cm)&&c.cm>=10&&c.cm<=100&&c.cm%10===0)&&(c.type!=='program'||['survey','sample'].includes(c.program))&&(c.type!=='gas'||typeof c.enabled==='boolean')&&(c.type!=='claim'||['confirmed','negative','inconclusive','anorthosite','basalt','breccia'].includes(c.finding))&&(c.type!=='advance'||Number.isInteger(c.frames)&&c.frames>0&&c.frames<=30000);}
 export function reduceScience(s:ScienceState,surface:SurfaceState,e:ScienceEvent,moon:MoonSession,prep:PreparationSelection){
   if(e.type==='science-design-retry')return {science:s,surface};

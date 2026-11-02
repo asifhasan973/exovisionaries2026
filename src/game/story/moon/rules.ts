@@ -2,7 +2,7 @@ import { SCRIPT_RESOURCES } from '../design.ts';
 
 /** These are balancing rules, not NASA hardware specifications or flight certification. */
 export const MOON_RULES = Object.freeze({
-  version: 2,
+  version: 3,
   equipmentCredits: SCRIPT_RESOURCES.budgetCredits,
   equipmentMassKg: SCRIPT_RESOURCES.payloadMassLimitKg,
   equipmentPeakW: SCRIPT_RESOURCES.peakPowerLimitW,
@@ -30,7 +30,7 @@ export const CREW_PLATFORM = Object.freeze({
   surfaceCapacity: 2,
   included: ['command-service-spacecraft', 'crewed-descent-stage', 'lunar-ascent-stage',
     'life-support', 'return-heat-shield', 'earth-parachutes'] as const,
-  explanation: 'Supplied game architecture, separately accounted from the equipment kit. Module 3 accounts for its mass, propellant and life support using the authored model in platform.ts; crewed journey and terminal landing now use separately declared game models.',
+  explanation: 'Apollo-inspired game architecture with three crew, a lunar lander and an Earth-return capsule. Geology charges these standard systems in one mission ledger; Ice retains its earlier kit and crew allocations. Flight masses and resources use authored simulation inputs.',
 });
 
 /** Later modules enable their own gates only after implementing and validating their gameplay. */
@@ -38,8 +38,10 @@ export const MOON_IMPLEMENTED = Object.freeze({ readiness: true, crewDeparture: 
 
 export const MOON_ASSUMPTIONS = [
   'Credits, lightweight equipment allocations, crew support units and upgrade tiers are authored game values.',
-  'The 1,000-credit / 350-kg kit allocation excludes crew bodies and the supplied full-size human spacecraft; crew has a separate 240-credit roster allocation.',
-  'The geology 100-kg limit is a science sub-limit, not another free 1,000-credit budget.',
+  'The Ice mission keeps its 1,000-credit equipment kit and separate 240-credit crew roster allocation.',
+  'The Geology mission uses one fictional 10,000-MC ledger for platform, launch, crew systems, rover, power, science and upgrades. Base hardware is charged once.',
+  'The Geology 100-kg science limit is a payload sub-limit; the existing 350-kg Moon equipment mass cap still applies.',
+  'Geology fuel units are fictional planning points. The flight simulator maps a chosen pack to its authored service-propellant mass and still checks route and return feasibility.',
   'Battery energy is Wh; instantaneous loads are W. The 450-W discharge ceiling and 20% reserve are game rules.',
   'A rehearsal conservatively runs all rover loads for 15 minutes plus drilling, or 60 seconds collecting a surface sample. Actual operating modes select active loads.',
   'Hydrogen is a clue, not confirmed water. Instruments, samples and valid observations determine earned science.',

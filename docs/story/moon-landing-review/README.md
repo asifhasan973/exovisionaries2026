@@ -1,5 +1,7 @@
 # Module 5 — laptop lunar landing
 
+The current landing experience is described in [Landing game](../landing-game.md). The notes below document the original version 1 model, retained for replaying older saves. New flights use version 2, one medium difficulty and real screen time during terminal descent.
+
 Lunar orbit → lander separation → braking → terminal descent → terrain decision → safe touchdown. Two crew land; the support specialist remains in the command spacecraft. Surface deployment and exploration remain Module 6.
 
 ## Declared game model
@@ -17,7 +19,7 @@ Lunar orbit → lander separation → braking → terminal descent → terrain d
 
 Save v6 preserves v5 and earlier normal save keys. Landing stores bounded control/frame receipts; refresh replays those inputs to reconstruct physics rather than accepting saved position, fuel or success flags. Active descent resumes paused. Retry restores the lunar-orbit checkpoint and marks assistance. In-flight hardware edits stay locked.
 
-Landing demo is explicitly assisted and traverses real preparation, launch and journey gates through the existing reducers. It never overwrites the player’s normal save. The shortcut was opened from Home → Judge demo → Landing demo and reached the real separation screen with its valid manifest and 8500 kg landing fuel. Previous Module 4 source/assets are archived at `/Users/asifhasan/.codex/backups/zero-to-beyond-module4-20261012.tar.gz`.
+Landing demo is explicitly assisted and traverses real preparation, launch and journey gates through the existing reducers. It never overwrites the player’s normal save. The shortcut was opened from Home → Judge demo → Landing demo and reached the real separation screen with its valid manifest and 8500 kg landing fuel.
 
 ## Verification boundary
 

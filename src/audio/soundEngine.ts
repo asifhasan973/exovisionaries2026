@@ -129,6 +129,14 @@ class SoundEngine {
     this.playClick(freq);
   }
 
+  public playRocketFit(part: string) {
+    if (part === 'engines' || part === 'core' || part === 'upper') this.playStagingThud();
+    else if (part.startsWith('cover')) this.playHatchSeal();
+    else if (['rover','lander','capsule'].includes(part)) this.playMagneticSnap();
+    else if (part === 'tower') this.playRadioBeep();
+    else this.playSnap();
+  }
+
   // Joyful pentatonic arpeggio notes for playful timeline sliding (C5, D5, E5, G5, A5, C6, D6, E6)
   private pentatonicNotes = [523.25, 587.33, 659.25, 783.99, 880.0, 1046.5, 1174.66, 1318.51];
   private noteStep = 0;
@@ -246,6 +254,49 @@ class SoundEngine {
 
       osc.start();
       osc.stop(this.ctx.currentTime + 0.11);
+    } catch {}
+  }
+
+  /** Pressure-hatch feedback: a short seal hiss followed by two metal locking clicks. */
+  public playHatchSeal() {
+    if (this.isMuted) return;
+    this.initContext();
+    const ctx = this.ctx; if (!ctx) return;
+    try {
+      const now = ctx.currentTime;
+      const buffer = ctx.createBuffer(1, Math.floor(ctx.sampleRate * .46), ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+      const hiss = ctx.createBufferSource(); hiss.buffer = buffer;
+      const filter = ctx.createBiquadFilter(); filter.type = 'bandpass'; filter.frequency.value = 2100; filter.Q.value = .45;
+      const air = ctx.createGain(); air.gain.setValueAtTime(.001, now); air.gain.linearRampToValueAtTime(.16, now + .07); air.gain.exponentialRampToValueAtTime(.001, now + .43);
+      hiss.connect(filter); filter.connect(air); air.connect(ctx.destination); hiss.start(now); hiss.stop(now + .45);
+      [0, .33].forEach((offset, index) => {
+        const osc = ctx.createOscillator(), gain = ctx.createGain(); osc.type = 'triangle';
+        osc.frequency.setValueAtTime(index ? 650 : 440, now + offset);
+        osc.frequency.exponentialRampToValueAtTime(index ? 290 : 180, now + offset + .09);
+        gain.gain.setValueAtTime(.001, now + offset); gain.gain.linearRampToValueAtTime(.15, now + offset + .012); gain.gain.exponentialRampToValueAtTime(.001, now + offset + .13);
+        osc.connect(gain); gain.connect(ctx.destination); osc.start(now + offset); osc.stop(now + offset + .14);
+      });
+    } catch {}
+  }
+
+  /** Fabric deployment and water feedback for the Earth drop rehearsal. */
+  public playReturnTestEffect(kind: 'canopy' | 'splash') {
+    if (this.isMuted || this.wasSuspendedByOrientation) return;
+    this.initContext();
+    const ctx = this.ctx; if (!ctx) return;
+    try {
+      const duration = kind === 'canopy' ? .5 : .7, now = ctx.currentTime;
+      const buffer = ctx.createBuffer(1, Math.floor(ctx.sampleRate * duration), ctx.sampleRate);
+      const samples = buffer.getChannelData(0);
+      for (let i = 0; i < samples.length; i++) samples[i] = (Math.random() * 2 - 1) * (1 - i / samples.length);
+      const source = ctx.createBufferSource(), filter = ctx.createBiquadFilter(), gain = ctx.createGain();
+      source.buffer = buffer; filter.type = 'lowpass'; filter.frequency.setValueAtTime(kind === 'canopy' ? 2600 : 1400, now);
+      filter.frequency.exponentialRampToValueAtTime(180, now + duration);
+      gain.gain.setValueAtTime(.001, now); gain.gain.linearRampToValueAtTime(.22, now + .025); gain.gain.exponentialRampToValueAtTime(.001, now + duration);
+      source.connect(filter); filter.connect(gain); gain.connect(ctx.destination); source.start(); source.stop(now + duration);
+      source.onended = () => { source.disconnect(); filter.disconnect(); gain.disconnect(); };
     } catch {}
   }
 

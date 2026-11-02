@@ -1,29 +1,39 @@
-import {GEOLOGY_SITE_BRIEFING} from './moon/geologyCopy.ts';
+import {GEOLOGY_SITE_BRIEFING,GEOLOGY_RESOURCE_BRIEFING} from './moon/geologyCopy.ts';
 import { STORY_DIALOGUE } from './dialogue.ts';
 import type { StoryLine, StoryStep, StoryStepId } from './types.ts';
 import { CREW_BRIEFING } from './moon/crewDialogue.ts';
 
+// The source script is preserved in dialogue.ts. The playable briefing keeps
+// only the lines that introduce a decision, so players reach each choice sooner.
+export const PLAYABLE_BRIEFINGS = {
+  appointment: STORY_DIALOGUE.appointment.filter(line => ['appointment-01', 'appointment-02', 'appointment-03', 'appointment-04', 'appointment-05'].includes(line.id)),
+  companionIntro: STORY_DIALOGUE.companionIntro.filter(line => line.id === 'companionIntro-01'),
+  objectiveBriefing: STORY_DIALOGUE.objectiveBriefing.filter(line => line.id === 'objectiveBriefing-01'),
+  siteBriefing: STORY_DIALOGUE.siteBriefing,
+  resourceBriefing: STORY_DIALOGUE.resourceBriefing.filter(line => line.id === 'resourceBriefing-01'),
+} as const satisfies Record<string, readonly StoryLine[]>;
+
 /** Ordered screen contract; the later modules implement these screens. */
 export const STORY_FLOW: readonly StoryStep[] = [
   { id: 'player-name', title: 'Enter ur name', kind: 'name', module: 4 },
-  { id: 'appointment', title: 'Mission Commander', kind: 'conversation', lines: STORY_DIALOGUE.appointment, module: 4 },
-  { id: 'companion-intro', title: 'Your mission companion', kind: 'conversation', lines: STORY_DIALOGUE.companionIntro, module: 4 },
+  { id: 'appointment', title: 'Mission Commander', kind: 'conversation', lines: PLAYABLE_BRIEFINGS.appointment, module: 4 },
+  { id: 'companion-intro', title: 'Your mission companion', kind: 'conversation', lines: PLAYABLE_BRIEFINGS.companionIntro, module: 4 },
   { id: 'destination', title: 'Planet selection', kind: 'choice', choiceKey: 'destination', module: 4, options: [
     { id: 'moon', label: 'Moon', available: true },
     { id: 'mars', label: 'Mars', available: false },
     { id: 'coming-soon', label: 'Comming Soon', available: false }
   ] },
-  { id: 'objective-briefing', title: 'Mission Objective', kind: 'conversation', lines: STORY_DIALOGUE.objectiveBriefing, module: 4 },
+  { id: 'objective-briefing', title: 'Mission Objective', kind: 'conversation', lines: PLAYABLE_BRIEFINGS.objectiveBriefing, module: 4 },
   { id: 'objective', title: 'Mission Objective', kind: 'choice', choiceKey: 'objective', module: 4, options: [
     { id: 'lunar-ice', label: 'Mission A — Lunar South Pole Ice Explorer', available: true },
     { id: 'lunar-geology', label: 'Mission B — Lunar Geology Explorer', available: true }
   ] },
-  { id: 'site-briefing', title: 'Landing Site', kind: 'conversation', lines: STORY_DIALOGUE.siteBriefing, module: 4 },
+  { id: 'site-briefing', title: 'Landing Site', kind: 'conversation', lines: PLAYABLE_BRIEFINGS.siteBriefing, module: 4 },
   { id: 'site', title: 'Landing Site Selection', kind: 'choice', choiceKey: 'site', module: 4, options: [
     { id: 'crater-rim', label: '🧊 SITE A — Ice-Proximity Crater Rim', description: 'Balanced exploration mission ⭐\nModerate risk • Short ice traverse • High science', available: true },
     { id: 'permanent-shadow', label: '🌑 SITE B — Permanently Shadowed Region', description: 'Extreme science mission\nVery high risk • Maximum ice access • Severe power/thermal challenges', available: true }
   ] },
-  { id: 'resource-briefing', title: 'Make every decision count', kind: 'conversation', lines: STORY_DIALOGUE.resourceBriefing, module: 4 },
+  { id: 'resource-briefing', title: 'Make every decision count', kind: 'conversation', lines: PLAYABLE_BRIEFINGS.resourceBriefing, module: 4 },
   { id: 'resource-limits', title: 'Spacecraft Design Specifications', kind: 'activity', activity: 'resource-limits', module: 5 },
   { id: 'lander-build', title: '🚀 LANDER SYSTEM', kind: 'activity', activity: 'lander-build', module: 5 },
   { id: 'rover-select', title: '🤖 CHOOSE YOUR ROVER', kind: 'activity', activity: 'rover-select', module: 5 },
@@ -38,8 +48,9 @@ export const STORY_FLOW: readonly StoryStep[] = [
   { id: 'power-check', title: 'POWER CHECK', kind: 'activity', activity: 'power-check', module: 6 },
   { id: 'budget-check', title: 'BUDGET CHECK', kind: 'activity', activity: 'budget-check', module: 6 },
   { id: 'systems-check', title: 'Check the return path', kind: 'activity', activity: 'systems-check', module: 6 },
-  { id: 'stress-check', title: 'Practice Moon decisions', kind: 'activity', activity: 'stress-check', module: 6 },
-  { id: 'rocket-pack', title: 'Rocket Design', kind: 'activity', activity: 'rocket-pack', module: 6 },
+  { id: 'stress-check', title: 'Moon quiz', kind: 'activity', activity: 'stress-check', module: 6 },
+  { id: 'rocket-pack', title: 'Secure your spacecraft', kind: 'activity', activity: 'rocket-pack', module: 6 },
+  { id: 'rocket-assembly', title: 'Build your rocket', kind: 'activity', activity: 'rocket-assembly', module: 6 },
   { id: 'launch-ready', title: 'Departure plan ready', kind: 'activity', activity: 'launch-ready', module: 6 },
   { id: 'liftoff', title: 'Launch your explorer', kind: 'activity', activity: 'liftoff', module: 7 },
   { id: 'earth-orbit', title: 'Choose your Moon route', kind: 'activity', activity: 'earth-orbit', module: 9 },
@@ -62,6 +73,7 @@ export function getStoryStep(id: StoryStepId, objective?:string): StoryStep {
   if (!step) throw new Error(`Unknown story step: ${id}`);
   if(objective==='lunar-geology'&&step.kind==='choice'&&step.choiceKey==='site')return {...step,options:[{id:'lunar-highlands',label:'Lunar highlands',description:'Ancient crust · sunlit camp',available:true},{id:'ancient-crater',label:'Ancient impact crater',description:'Mixed rocks · impact clues',available:true}]};
   if(objective==='lunar-geology'&&step.id==='site-briefing'&&step.kind==='conversation')return {...step,lines:GEOLOGY_SITE_BRIEFING};
+  if(objective==='lunar-geology'&&step.id==='resource-briefing'&&step.kind==='conversation')return {...step,lines:GEOLOGY_RESOURCE_BRIEFING};
   return step;
 }
 

@@ -62,4 +62,4 @@ export function geologyFinding(records:readonly ScienceObservation[]):GeoFinding
   if(vote('breccia')>=2&&records.some(r=>r.kind==='texture'&&r.quality!=='low'&&r.signal?.startsWith('Angular')))return 'breccia';return 'inconclusive';
 }
 export function geoAnalytical(records:readonly ScienceObservation[]){return records.some(r=>r.kind==='mineral-evidence');}
-export function returnedSampleKg(moon:MoonSession){return moon.objective==='lunar-geology'?moon.science.samples.filter(s=>s.stowed).reduce((a,s)=>a+s.massKg,0):0;}
+export function returnedSampleKg(moon:MoonSession){if(moon.rover)return moon.rover.deposited.length*.2;return moon.objective==='lunar-geology'?moon.science.samples.filter(s=>s.stowed).reduce((a,s)=>a+s.massKg,0):0;}

@@ -8,6 +8,141 @@
   "purpose": "Synthetic character narration",
   "lines": [
     {
+      "id": "rover-run-intro-0",
+      "character": "commander",
+      "text": "We\u2019ll control the rover from here."
+    },
+    {
+      "id": "rover-run-intro-1",
+      "character": "chief",
+      "text": "First, collect the sample in sunlight."
+    },
+    {
+      "id": "rover-run-setback-0",
+      "character": "chief",
+      "text": "Too hard to drill. Try the nearby site."
+    },
+    {
+      "id": "rover-run-setback-1",
+      "character": "commander",
+      "text": "New target marked. Let\u2019s try there."
+    },
+    {
+      "id": "rover-run-launch-0",
+      "character": "chief",
+      "text": "Both samples secured."
+    },
+    {
+      "id": "rover-run-launch-1",
+      "character": "commander",
+      "text": "Ready for ascent."
+    },
+    {
+      "id": "rover-radio-charge",
+      "character": "chief",
+      "text": "Hold the charge control. Then head into shadow."
+    },
+    {
+      "id": "rover-radio-charged",
+      "character": "chief",
+      "text": "Charged. The shadow outcrop is marked."
+    },
+    {
+      "id": "rover-radio-first",
+      "character": "commander",
+      "text": "First sample delivered. Recharge at Solar Ridge."
+    },
+    {
+      "id": "rover-radio-second",
+      "character": "commander",
+      "text": "Both samples delivered. Park the rover inside."
+    },
+    {
+      "id": "rocket-intro",
+      "character": "commander",
+      "text": "Match each rocket part to its outline."
+    },
+    {
+      "id": "rocket-engines",
+      "character": "commander",
+      "text": "Engine cluster locked. Ready to push!"
+    },
+    {
+      "id": "rocket-core",
+      "character": "commander",
+      "text": "Main tank secured."
+    },
+    {
+      "id": "rocket-interstage",
+      "character": "commander",
+      "text": "Stage connector locked."
+    },
+    {
+      "id": "rocket-upper",
+      "character": "commander",
+      "text": "Upper stage secured. Next stop, orbit!"
+    },
+    {
+      "id": "rocket-adapter",
+      "character": "commander",
+      "text": "Payload mount ready for our spacecraft."
+    },
+    {
+      "id": "rocket-lander",
+      "character": "commander",
+      "text": "Lunar lander aboard."
+    },
+    {
+      "id": "rocket-rover",
+      "character": "commander",
+      "text": "Our rover is packed for the Moon."
+    },
+    {
+      "id": "rocket-capsule",
+      "character": "commander",
+      "text": "Crew capsule secured."
+    },
+    {
+      "id": "rocket-cover-left",
+      "character": "commander",
+      "text": "Left cover sealed."
+    },
+    {
+      "id": "rocket-cover-right",
+      "character": "commander",
+      "text": "Right cover sealed."
+    },
+    {
+      "id": "rocket-tower",
+      "character": "commander",
+      "text": "Escape tower locked."
+    },
+    {
+      "id": "rocket-blocked",
+      "character": "commander",
+      "text": "Open the cover before loading the cargo."
+    },
+    {
+      "id": "rocket-wrong",
+      "character": "commander",
+      "text": "Try the matching outline."
+    },
+    {
+      "id": "rocket-open",
+      "character": "commander",
+      "text": "Bay open. Load the cargo first."
+    },
+    {
+      "id": "rocket-complete",
+      "character": "commander",
+      "text": "Rocket complete! Ready for the launch pad."
+    },
+    {
+      "id": "rocket-removed",
+      "character": "commander",
+      "text": "Part removed. Try another fit."
+    },
+    {
       "id": "geo-site-01",
       "character": "commander",
       "text": "Choose highlands for ancient crust, or an old crater for impact clues."
@@ -613,6 +748,11 @@
       "text": "Route scouted! Ready for science."
     },
     {
+      "id": "landing-controls",
+      "character": "commander",
+      "text": "Steer with A and D. Hold Space to slow down. You have control."
+    },
+    {
       "id": "landing-ready",
       "character": "commander",
       "text": "Two crew will land. One stays in orbit. Ready to separate?"
@@ -621,6 +761,16 @@
       "id": "landing-separate",
       "character": "commander",
       "text": "Lander free! Start the braking burn."
+    },
+    {
+      "id": "landing-separating",
+      "character": "commander",
+      "text": "Releasing the lander. One teammate stays in orbit."
+    },
+    {
+      "id": "landing-scanning",
+      "character": "commander",
+      "text": "Scanning for a clear landing spot."
     },
     {
       "id": "landing-braking",
@@ -665,7 +815,7 @@
     {
       "id": "landing-terrain",
       "character": "commander",
-      "text": "Rocky ground! Retry and choose a clear patch."
+      "text": "Land inside A or B. Move over the clear circle before touching down."
     },
     {
       "id": "landing-bounds",
@@ -755,12 +905,12 @@
     {
       "id": "check-crewIntro",
       "character": "commander",
-      "text": "Seal the cabin. Pack enough supplies for everyone."
+      "text": "The crew hatch is open. Close it to keep air inside, then pack day kits."
     },
     {
       "id": "check-sealed",
       "character": "commander",
-      "text": "Cabin sealed! Let\u2019s check our crew supplies."
+      "text": "Click! The hatch is locked and the cabin can hold air."
     },
     {
       "id": "check-supplies",
@@ -780,27 +930,52 @@
     {
       "id": "check-returnIntro",
       "character": "commander",
-      "text": "Check our engines, return shield and Earth parachutes."
+      "text": "Let\u2019s put our spacecraft to work!"
+    },
+    {
+      "id": "check-ascentIntro",
+      "character": "commander",
+      "text": "Ready for a lift test?"
+    },
+    {
+      "id": "check-serviceIntro",
+      "character": "commander",
+      "text": "Can you send the capsule through the ring?"
+    },
+    {
+      "id": "check-shieldIntro",
+      "character": "commander",
+      "text": "Let\u2019s see the heat shield in action."
+    },
+    {
+      "id": "check-parachutesIntro",
+      "character": "commander",
+      "text": "Can you give the capsule a soft landing?"
+    },
+    {
+      "id": "check-returnRetry",
+      "character": "commander",
+      "text": "Almost! Adjust it and try again."
     },
     {
       "id": "check-ascent",
       "character": "commander",
-      "text": "Ascent engine connected. It brings our surface team back to orbit."
+      "text": "Liftoff! The ascent engine works."
     },
     {
       "id": "check-service",
       "character": "commander",
-      "text": "Service engine connected. Keep fuel for the journey home."
+      "text": "On target! The return engine works."
     },
     {
       "id": "check-shield",
       "character": "commander",
-      "text": "Heat shield checked. It protects the capsule during Earth entry."
+      "text": "The shield kept the cabin safe!"
     },
     {
       "id": "check-parachutes",
       "character": "commander",
-      "text": "Parachutes checked. We use them at Earth, not on the Moon."
+      "text": "Parachutes open! A soft landing on Earth."
     },
     {
       "id": "check-returnPass",
@@ -810,67 +985,72 @@
     {
       "id": "check-mobilityIntro",
       "character": "commander",
-      "text": "Pick a route your rover can cross safely."
+      "text": "Quiz time! The rover has a choice. What would you do?"
     },
     {
       "id": "check-mobilityPass",
       "character": "commander",
-      "text": "Route passed. Keep a return reserve."
+      "text": "Nice! That path is easier for the rover."
     },
     {
       "id": "check-mobilityFail",
       "character": "commander",
-      "text": "Too steep for this rover. Take the gentle route."
+      "text": "Oops, wrong route. Let\u2019s try the next one!"
     },
     {
       "id": "check-dustIntro",
       "character": "commander",
-      "text": "Dust hides the view. Clear the camera before driving."
+      "text": "Moon dust is on the camera. What would you do?"
     },
     {
       "id": "check-dustPass",
       "character": "commander",
-      "text": "Clear view! Now we can navigate."
+      "text": "Nice! The view is clear again."
     },
     {
       "id": "check-dustFail",
       "character": "commander",
-      "text": "Dust hides the rocks. Clean the lens before driving."
+      "text": "Oops, the camera still cannot see. Next question!"
     },
     {
       "id": "check-communicationIntro",
       "character": "commander",
-      "text": "A hill blocks the signal. Get the lander back in view."
+      "text": "The lander signal is gone. What would you do?"
     },
     {
       "id": "check-communicationPass",
       "character": "commander",
-      "text": "Signal restored. The lander is in view."
+      "text": "Nice! The signal is back."
     },
     {
       "id": "check-communicationFail",
       "character": "commander",
-      "text": "The hill blocks the signal. Move into view; more power cannot see through it."
+      "text": "Oops, the hill still blocks us. Next question!"
     },
     {
       "id": "check-radiationIntro",
       "character": "commander",
-      "text": "Space-weather alert. Bring our surface team to shelter."
+      "text": "A space-weather alert arrives. What would you do?"
     },
     {
       "id": "check-radiationPass",
       "character": "commander",
-      "text": "Sheltered. Wait for the all-clear."
+      "text": "Nice! The crew is safe."
     },
     {
       "id": "check-radiationFail",
       "character": "commander",
-      "text": "Stop the Moon walk. Shelter reduces exposure."
+      "text": "Oops, the crew needs cover. Next question!"
     },
     {
       "id": "check-practicePass",
       "character": "commander",
-      "text": "Practice complete! You made safe choices."
+      "text": "Quiz complete! See your score."
+    },
+    {
+      "id": "check-quizRetry",
+      "character": "commander",
+      "text": "No points yet. Restart the quiz and try again!"
     },
     {
       "id": "check-packIntro",
@@ -878,9 +1058,39 @@
       "text": "Secure the capsule, lander and crew supplies."
     },
     {
+      "id": "check-packcapsuleIntro",
+      "character": "commander",
+      "text": "Fit the capsule on the ring, then close both clamps."
+    },
+    {
+      "id": "check-packcapsulePass",
+      "character": "commander",
+      "text": "Click! Both clamps are locked."
+    },
+    {
+      "id": "check-packlanderIntro",
+      "character": "commander",
+      "text": "Line up the marks, then hold to lower the lander."
+    },
+    {
+      "id": "check-packlanderPass",
+      "character": "commander",
+      "text": "Perfect landing! The cargo mount is locked."
+    },
+    {
+      "id": "check-packsuppliesIntro",
+      "character": "commander",
+      "text": "Match the food, water and oxygen cases to their lockers."
+    },
+    {
+      "id": "check-packsuppliesPass",
+      "character": "commander",
+      "text": "All three cases are strapped in. Ready for launch!"
+    },
+    {
       "id": "check-packed",
       "character": "commander",
-      "text": "Secured! Keep going, Commander."
+      "text": "Everything is locked in. Great teamwork!"
     },
     {
       "id": "check-ready",
@@ -893,11 +1103,6 @@
       "text": "Your explorer is built. Time to choose your crew."
     },
     {
-      "id": "crew-briefing-2",
-      "character": "commander",
-      "text": "Who should come with us?"
-    },
-    {
       "id": "crew-briefing-3",
       "character": "chief",
       "text": "Take one science expert and one support expert."
@@ -906,11 +1111,6 @@
       "id": "crew-briefing-4",
       "character": "commander",
       "text": "Two of us land. Our support expert stays in orbit."
-    },
-    {
-      "id": "crew-briefing-5",
-      "character": "chief",
-      "text": "Match each expert to the right job. You have this, Commander!"
     },
     {
       "id": "crew-advice-intro",
@@ -1060,7 +1260,7 @@
     {
       "id": "short-appointment-01",
       "character": "chief",
-      "text": "Charlie, good to see you."
+      "text": "Good to see you, Commander."
     },
     {
       "id": "short-appointment-02",
@@ -1410,7 +1610,7 @@
     {
       "id": "word-budget",
       "character": "commander",
-      "text": "Budget. How many coins you can spend. You have 1,000 game coins. Save some by choosing smaller parts."
+      "text": "Budget. How many game coins you can spend. Your mission shows a coin limit. Keep your choices under it."
     },
     {
       "id": "word-credits",
@@ -1756,6 +1956,116 @@
       "id": "greeting-welcome",
       "character": "chief",
       "text": "Good to see you, Commander."
+    },
+    {
+      "id": "male-rover-run-intro-0",
+      "character": "commander-male",
+      "text": "We\u2019ll control the rover from here."
+    },
+    {
+      "id": "male-rover-run-setback-1",
+      "character": "commander-male",
+      "text": "New target marked. Let\u2019s try there."
+    },
+    {
+      "id": "male-rover-run-launch-1",
+      "character": "commander-male",
+      "text": "Ready for ascent."
+    },
+    {
+      "id": "male-rover-radio-first",
+      "character": "commander-male",
+      "text": "First sample delivered. Recharge at Solar Ridge."
+    },
+    {
+      "id": "male-rover-radio-second",
+      "character": "commander-male",
+      "text": "Both samples delivered. Park the rover inside."
+    },
+    {
+      "id": "male-rocket-intro",
+      "character": "commander-male",
+      "text": "Match each rocket part to its outline."
+    },
+    {
+      "id": "male-rocket-engines",
+      "character": "commander-male",
+      "text": "Engine cluster locked. Ready to push!"
+    },
+    {
+      "id": "male-rocket-core",
+      "character": "commander-male",
+      "text": "Main tank secured."
+    },
+    {
+      "id": "male-rocket-interstage",
+      "character": "commander-male",
+      "text": "Stage connector locked."
+    },
+    {
+      "id": "male-rocket-upper",
+      "character": "commander-male",
+      "text": "Upper stage secured. Next stop, orbit!"
+    },
+    {
+      "id": "male-rocket-adapter",
+      "character": "commander-male",
+      "text": "Payload mount ready for our spacecraft."
+    },
+    {
+      "id": "male-rocket-lander",
+      "character": "commander-male",
+      "text": "Lunar lander aboard."
+    },
+    {
+      "id": "male-rocket-rover",
+      "character": "commander-male",
+      "text": "Our rover is packed for the Moon."
+    },
+    {
+      "id": "male-rocket-capsule",
+      "character": "commander-male",
+      "text": "Crew capsule secured."
+    },
+    {
+      "id": "male-rocket-cover-left",
+      "character": "commander-male",
+      "text": "Left cover sealed."
+    },
+    {
+      "id": "male-rocket-cover-right",
+      "character": "commander-male",
+      "text": "Right cover sealed."
+    },
+    {
+      "id": "male-rocket-tower",
+      "character": "commander-male",
+      "text": "Escape tower locked."
+    },
+    {
+      "id": "male-rocket-blocked",
+      "character": "commander-male",
+      "text": "Open the cover before loading the cargo."
+    },
+    {
+      "id": "male-rocket-wrong",
+      "character": "commander-male",
+      "text": "Try the matching outline."
+    },
+    {
+      "id": "male-rocket-open",
+      "character": "commander-male",
+      "text": "Bay open. Load the cargo first."
+    },
+    {
+      "id": "male-rocket-complete",
+      "character": "commander-male",
+      "text": "Rocket complete! Ready for the launch pad."
+    },
+    {
+      "id": "male-rocket-removed",
+      "character": "commander-male",
+      "text": "Part removed. Try another fit."
     },
     {
       "id": "male-geo-site-01",
@@ -2363,6 +2673,11 @@
       "text": "Route scouted! Ready for science."
     },
     {
+      "id": "male-landing-controls",
+      "character": "commander-male",
+      "text": "Steer with A and D. Hold Space to slow down. You have control."
+    },
+    {
       "id": "male-landing-ready",
       "character": "commander-male",
       "text": "Two crew will land. One stays in orbit. Ready to separate?"
@@ -2371,6 +2686,16 @@
       "id": "male-landing-separate",
       "character": "commander-male",
       "text": "Lander free! Start the braking burn."
+    },
+    {
+      "id": "male-landing-separating",
+      "character": "commander-male",
+      "text": "Releasing the lander. One teammate stays in orbit."
+    },
+    {
+      "id": "male-landing-scanning",
+      "character": "commander-male",
+      "text": "Scanning for a clear landing spot."
     },
     {
       "id": "male-landing-braking",
@@ -2415,7 +2740,7 @@
     {
       "id": "male-landing-terrain",
       "character": "commander-male",
-      "text": "Rocky ground! Retry and choose a clear patch."
+      "text": "Land inside A or B. Move over the clear circle before touching down."
     },
     {
       "id": "male-landing-bounds",
@@ -2505,12 +2830,12 @@
     {
       "id": "male-check-crewIntro",
       "character": "commander-male",
-      "text": "Seal the cabin. Pack enough supplies for everyone."
+      "text": "The crew hatch is open. Close it to keep air inside, then pack day kits."
     },
     {
       "id": "male-check-sealed",
       "character": "commander-male",
-      "text": "Cabin sealed! Let\u2019s check our crew supplies."
+      "text": "Click! The hatch is locked and the cabin can hold air."
     },
     {
       "id": "male-check-supplies",
@@ -2530,27 +2855,52 @@
     {
       "id": "male-check-returnIntro",
       "character": "commander-male",
-      "text": "Check our engines, return shield and Earth parachutes."
+      "text": "Let\u2019s put our spacecraft to work!"
+    },
+    {
+      "id": "male-check-ascentIntro",
+      "character": "commander-male",
+      "text": "Ready for a lift test?"
+    },
+    {
+      "id": "male-check-serviceIntro",
+      "character": "commander-male",
+      "text": "Can you send the capsule through the ring?"
+    },
+    {
+      "id": "male-check-shieldIntro",
+      "character": "commander-male",
+      "text": "Let\u2019s see the heat shield in action."
+    },
+    {
+      "id": "male-check-parachutesIntro",
+      "character": "commander-male",
+      "text": "Can you give the capsule a soft landing?"
+    },
+    {
+      "id": "male-check-returnRetry",
+      "character": "commander-male",
+      "text": "Almost! Adjust it and try again."
     },
     {
       "id": "male-check-ascent",
       "character": "commander-male",
-      "text": "Ascent engine connected. It brings our surface team back to orbit."
+      "text": "Liftoff! The ascent engine works."
     },
     {
       "id": "male-check-service",
       "character": "commander-male",
-      "text": "Service engine connected. Keep fuel for the journey home."
+      "text": "On target! The return engine works."
     },
     {
       "id": "male-check-shield",
       "character": "commander-male",
-      "text": "Heat shield checked. It protects the capsule during Earth entry."
+      "text": "The shield kept the cabin safe!"
     },
     {
       "id": "male-check-parachutes",
       "character": "commander-male",
-      "text": "Parachutes checked. We use them at Earth, not on the Moon."
+      "text": "Parachutes open! A soft landing on Earth."
     },
     {
       "id": "male-check-returnPass",
@@ -2560,67 +2910,72 @@
     {
       "id": "male-check-mobilityIntro",
       "character": "commander-male",
-      "text": "Pick a route your rover can cross safely."
+      "text": "Quiz time! The rover has a choice. What would you do?"
     },
     {
       "id": "male-check-mobilityPass",
       "character": "commander-male",
-      "text": "Route passed. Keep a return reserve."
+      "text": "Nice! That path is easier for the rover."
     },
     {
       "id": "male-check-mobilityFail",
       "character": "commander-male",
-      "text": "Too steep for this rover. Take the gentle route."
+      "text": "Oops, wrong route. Let\u2019s try the next one!"
     },
     {
       "id": "male-check-dustIntro",
       "character": "commander-male",
-      "text": "Dust hides the view. Clear the camera before driving."
+      "text": "Moon dust is on the camera. What would you do?"
     },
     {
       "id": "male-check-dustPass",
       "character": "commander-male",
-      "text": "Clear view! Now we can navigate."
+      "text": "Nice! The view is clear again."
     },
     {
       "id": "male-check-dustFail",
       "character": "commander-male",
-      "text": "Dust hides the rocks. Clean the lens before driving."
+      "text": "Oops, the camera still cannot see. Next question!"
     },
     {
       "id": "male-check-communicationIntro",
       "character": "commander-male",
-      "text": "A hill blocks the signal. Get the lander back in view."
+      "text": "The lander signal is gone. What would you do?"
     },
     {
       "id": "male-check-communicationPass",
       "character": "commander-male",
-      "text": "Signal restored. The lander is in view."
+      "text": "Nice! The signal is back."
     },
     {
       "id": "male-check-communicationFail",
       "character": "commander-male",
-      "text": "The hill blocks the signal. Move into view; more power cannot see through it."
+      "text": "Oops, the hill still blocks us. Next question!"
     },
     {
       "id": "male-check-radiationIntro",
       "character": "commander-male",
-      "text": "Space-weather alert. Bring our surface team to shelter."
+      "text": "A space-weather alert arrives. What would you do?"
     },
     {
       "id": "male-check-radiationPass",
       "character": "commander-male",
-      "text": "Sheltered. Wait for the all-clear."
+      "text": "Nice! The crew is safe."
     },
     {
       "id": "male-check-radiationFail",
       "character": "commander-male",
-      "text": "Stop the Moon walk. Shelter reduces exposure."
+      "text": "Oops, the crew needs cover. Next question!"
     },
     {
       "id": "male-check-practicePass",
       "character": "commander-male",
-      "text": "Practice complete! You made safe choices."
+      "text": "Quiz complete! See your score."
+    },
+    {
+      "id": "male-check-quizRetry",
+      "character": "commander-male",
+      "text": "No points yet. Restart the quiz and try again!"
     },
     {
       "id": "male-check-packIntro",
@@ -2628,19 +2983,44 @@
       "text": "Secure the capsule, lander and crew supplies."
     },
     {
+      "id": "male-check-packcapsuleIntro",
+      "character": "commander-male",
+      "text": "Fit the capsule on the ring, then close both clamps."
+    },
+    {
+      "id": "male-check-packcapsulePass",
+      "character": "commander-male",
+      "text": "Click! Both clamps are locked."
+    },
+    {
+      "id": "male-check-packlanderIntro",
+      "character": "commander-male",
+      "text": "Line up the marks, then hold to lower the lander."
+    },
+    {
+      "id": "male-check-packlanderPass",
+      "character": "commander-male",
+      "text": "Perfect landing! The cargo mount is locked."
+    },
+    {
+      "id": "male-check-packsuppliesIntro",
+      "character": "commander-male",
+      "text": "Match the food, water and oxygen cases to their lockers."
+    },
+    {
+      "id": "male-check-packsuppliesPass",
+      "character": "commander-male",
+      "text": "All three cases are strapped in. Ready for launch!"
+    },
+    {
       "id": "male-check-packed",
       "character": "commander-male",
-      "text": "Secured! Keep going, Commander."
+      "text": "Everything is locked in. Great teamwork!"
     },
     {
       "id": "male-check-ready",
       "character": "commander-male",
       "text": "Your departure plan is locked. Great teamwork!"
-    },
-    {
-      "id": "male-crew-briefing-2",
-      "character": "commander-male",
-      "text": "Who should come with us?"
     },
     {
       "id": "male-crew-briefing-4",
@@ -3075,7 +3455,7 @@
     {
       "id": "male-word-budget",
       "character": "commander-male",
-      "text": "Budget. How many coins you can spend. You have 1,000 game coins. Save some by choosing smaller parts."
+      "text": "Budget. How many game coins you can spend. Your mission shows a coin limit. Keep your choices under it."
     },
     {
       "id": "male-word-credits",

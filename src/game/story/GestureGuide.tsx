@@ -6,6 +6,8 @@ import type { CSSProperties } from 'react';
 import type { StoryStepId } from './types.ts';
 import { useGameSettings } from './gameSettingsContext.ts';
 import './moon/scenePolish.css';
+import { isEngineFrozen } from '../../state/orientationLifecycleStore.ts';
+import { ROCKET_ORDER } from './moon/rocketAssembly.ts';
 
 type Demo = { key: string; from: string; to?: string; label: string; depthCm?: number };
 function lesson(step: StoryStepId, repair?: RepairGuide, replaying = false): Demo {
@@ -29,11 +31,28 @@ function lesson(step: StoryStepId, repair?: RepairGuide, replaying = false): Dem
     return !scienceFilled ? { key: 'crew-scientist', from: `[data-crew-id="${scientist}"]`, to: '[data-crew-role="scientist"]', label: 'Match a science expert' } : { key: 'crew-support', from: '[data-crew-id="robotics-specialist"]', to: '[data-crew-role="support"]', label: 'Match a support expert' };
   }
   if(step==='crew-check'){
-    if(document.querySelector('.human-hatch:not(.is-sealed)'))return {key:'seal-cabin',from:'.human-hatch:not(.is-sealed)',label:'Seal the cabin'};
+    if(document.querySelector('.human-hatch:not(.is-sealed)'))return {key:'seal-cabin',from:'.human-hatch:not(.is-sealed)',label:'Close the crew hatch'};
     if(document.querySelector('.human-supply.is-required'))return {key:'load-kits',from:'.human-supply.is-required',label:'Pack more day kits'};
   }
-  if(step==='systems-check')return {key:'return-connections',from:'.human-connect:not(.is-connected)',label:'Check each return system'};
-  if(step==='stress-check'&&document.querySelector('.human-stress-actions'))return document.querySelector('.human-main')?.getAttribute('data-stress-mode')==='challenge'&&!replaying?{key:'challenge-choice',from:'.human-stress-actions',label:'Pick a safe action'}:{key:'stress-choice',from:'[data-stress-hint="true"]',label:'Try this safe action'};
+  if(step==='systems-check'){
+    const lab=document.querySelector('.return-lab-controls'),id=lab?.getAttribute('data-return-test'),angle=Number(lab?.getAttribute('data-test-angle'));
+    const throttle=document.querySelector<HTMLInputElement>('.return-throttle input');
+    if(throttle&&(Number(throttle.value)<55||Number(throttle.value)>75))return {key:'test-thrust',from:'.return-throttle input',to:'.return-throttle input',label:'Slide into green'};
+    if((id==='service'||id==='shield')&&angle!==0&&document.querySelector('.return-aim-controls button:not(:disabled)'))return {key:`test-aim-${id}`,from:`.return-aim-controls button[aria-label="Turn ${angle<0?'right':'left'}"]`,label:id==='shield'?'Turn the shield toward the heat':'Aim at the ring'};
+    if(document.querySelector('[data-return-test-action]:not(:disabled)'))return {key:`run-test-${id}`,from:'[data-return-test-action]:not(:disabled)',label:id==='ascent'?'Hold to fire':id==='parachutes'?'Drop, then open in green':'Run the test'};
+    return {key:'test-next',from:'.conversation-next:not(:disabled)',label:'Next test'};
+  }
+  if(step==='stress-check'&&document.querySelector('.human-stress-actions'))return {key:'quiz-choice',from:'.human-stress-actions',label:'Pick an answer'};
+  if(step==='rocket-assembly'){
+    const page=document.querySelector('.rocket-assembly-main');
+    if(page?.getAttribute('data-rocket-ready')!=='true')return {key:'rocket-loading',from:'.rocket-guide-wait',label:''};
+    const count=Number(page.getAttribute('data-rocket-count'));
+    if(!replaying&&count>0)return {key:'rocket-manual',from:'.rocket-guide-wait',label:''};
+    if(replaying&&page.getAttribute('data-rocket-blocked')==='true')return {key:'rocket-open-first',from:'[data-rocket-open-cover]',label:'Remove cover. Load the cargo first.'};
+    const selected=page.getAttribute('data-rocket-selected');
+    const id=replaying&&selected&&document.querySelector(`[data-rocket-part="${selected}"]:not(:disabled)`)?selected:ROCKET_ORDER.find(id=>document.querySelector(`[data-rocket-part="${id}"]:not(:disabled)`));
+    return id?{key:replaying?`rocket-hint-${id}`:'rocket-first-part',from:`[data-rocket-part="${id}"]`,to:`[data-rocket-socket="${id}"]`,label:'Match the part to this outline'}:{key:'rocket-ready',from:'.conversation-next:not(:disabled)',label:'Your rocket is ready!'};
+  }
   if (step === 'mass-check' && document.querySelector('.readiness-connectors .is-unplugged')) return { key: 'repair', from: '.readiness-connectors .is-unplugged', label: 'Tap to fix' };
   if (step === 'power-check') {
     if (document.querySelector('.repair-fix')) return { key: 'fix-alert', from: '.repair-fix', label: 'Tap Fix' };
@@ -41,12 +60,28 @@ function lesson(step: StoryStepId, repair?: RepairGuide, replaying = false): Dem
       ? { key: 'trial', from: '.trial-actions button:not(:disabled)', label: 'Tap to test' }
       : { key: 'trial-next', from: '.conversation-next:not(:disabled)', label: 'Next check' };
   }
-  if(step==='rocket-pack'&&document.querySelector('.human-pack-list'))return {key:'secure-ship',from:'.human-pack-item:not(:disabled)',label:'Secure each flight item'};
+  if(step==='rocket-pack'&&document.querySelector('.packing-lab-controls')){
+    const lab=document.querySelector('.packing-lab-controls'),id=lab?.getAttribute('data-packing-game');
+    if(id==='capsule'){
+      if(lab?.getAttribute('data-packing-seated')!=='true')return {key:'pack-capsule-fit',from:'.packing-cargo-source',to:'[data-packing-target="capsule"]',label:'Fit the capsule on the ring'};
+      if(document.querySelector('[data-packing-clamp][aria-disabled="false"]'))return {key:'pack-capsule-lock',from:'[data-packing-clamp][aria-disabled="false"]',label:'Close both clamps'};
+    }
+    if(id==='lander'&&document.querySelector('[data-packing-lower]')){
+      const angle=Number(lab?.getAttribute('data-packing-angle'));
+      return Math.abs(angle)>5?{key:'pack-lander-align',from:`button[aria-label="Turn lander ${angle<0?'right':'left'}"]`,label:'Line up the gold marks'}:{key:'pack-lander-lower',from:'[data-packing-lower]',label:'Hold to lower the lander'};
+    }
+    if(id==='supplies'&&document.querySelector('.packing-cargo-source')){
+      const source=document.querySelector('.packing-cargo-source'),name=source?.getAttribute('aria-label')?.split(' ')[2];
+      return {key:'pack-supplies-match',from:'.packing-cargo-source',to:`[data-packing-target="${name}"]`,label:'Match the case to its symbol'};
+    }
+    return {key:'pack-next-game',from:'.conversation-next:not(:disabled)',label:'Next game'};
+  }
   if (step === 'rocket-pack') return { key: 'pack', from: '.readiness-pack-button:not(:disabled)', to: '.readiness-bay', label: 'Drag to pack' };
   if(['ice-science','surface-recovery'].includes(step)&&document.querySelector('.incident-panel'))return {key:'incident-choice',from:'[data-incident-recommended=true]:not(:disabled)',label:'Choose a safe plan'};
   if(step==='crew-return'){const stage=document.querySelector('.return-main')?.getAttribute('data-return-stage');return {key:`return-${stage}`,from:document.querySelector('[data-return-hint]:not(:disabled)')?'[data-return-hint]:not(:disabled)':'.conversation-next:not(:disabled)',label:stage==='rendezvous'?'Slow down. Line up. Dock.':stage==='entry-ready'?'Turn the heat shield to Earth':'Bring the crew home'};}
-  if(step==='surface-recovery')return {key:'surface-secure',from:'[data-recovery-action]:not(:disabled)',label:'Secure the surface'};
+  if(step==='surface-recovery')return {key:'surface-secure',from:'.conversation-next:not(:disabled)',label:'Complete this step, then continue'};
   if(step==='ice-science'){
+    if(document.querySelector('.moon-findings'))return {key:'moon-evidence',from:'.moon-evidence',label:'Read the clues, then choose a finding'};
     if(document.querySelector('.geo-sensor-choice'))return {key:'geo-sensor',from:'[data-geo-sensor=ground]:not(:disabled)',label:'Place on quiet ground'};
     if(document.querySelector('.science-claims'))return {key:'read-evidence',from:'.science-evidence',label:'Match the clues, then choose'};
     if(document.querySelector('.science-targets'))return {key:'science-site',from:'.science-targets button[aria-pressed=true]',label:'Pick a site. Then Start expedition.'};
@@ -55,15 +90,15 @@ function lesson(step: StoryStepId, repair?: RepairGuide, replaying = false): Dem
   }
   if(step==='lunar-surface')return {key:'deploy-rover',from:'.conversation-next:not(:disabled)',label:'Deploy your rover'};
   if(step==='surface-explore'){
+    if(document.querySelector('.free-rover-world'))return {key:'free-drive',from:'.rover-dpad',label:'Drive freely. Bring any two samples home.'};
     if(document.querySelector('.surface-drive-hold'))return {key:'drive-held',from:'.surface-drive-hold',label:'Hold to drive'};
     if(document.querySelector('.conversation-controls .conversation-next')?.textContent?.trim().startsWith('Resume'))return {key:'surface-resume',from:'.conversation-next:not(:disabled)',label:'Resume your rover'};
     if(document.querySelector('.surface-routes button[aria-pressed=true]:not(.is-blocked)'))return {key:'surface-go',from:'.conversation-next:not(:disabled)',label:'Start your selected route'};
     return {key:'surface-path',from:'.surface-routes button:not(.is-blocked)',label:'Choose a safe path'};
   }
   if(step==='lunar-descent'){
-    if(document.querySelector('.landing-pads'))return {key:'clear-landing',from:'.landing-pads button[data-safe="true"]',label:'Choose a clear patch'};
-    if(document.querySelector('.conversation-controls .conversation-next')?.textContent?.trim().startsWith('Resume'))return {key:'landing-resume',from:'.conversation-next:not(:disabled)',label:'Resume, then adjust thrust'};
-    if(document.querySelector('.landing-throttle input:not(:disabled)'))return {key:'landing-throttle',from:'.landing-throttle input:not(:disabled)',to:'.landing-throttle input:not(:disabled)',label:'Slide thrust to slow down'};
+    if(document.querySelector('.landing-sites'))return {key:'clear-landing',from:'.landing-sites button',label:'Choose a clear landing spot'};
+    if(document.querySelector('.landing-brake:not(:disabled)'))return {key:'landing-brake',from:'.landing-brake',label:'Brake here, or hold Space. A / D steers.'};
     return {key:'landing-start',from:'.conversation-next:not(:disabled)',label:'Start your landing'};
   }
   if(step==='earth-orbit')return document.querySelector('.journey-routes button[aria-pressed=true]:not(.is-unavailable)')?{key:'moon-route-start',from:'.conversation-next:not(:disabled)',label:'Start this Moon route'}:{key:'moon-route',from:'.journey-routes button:not(.is-unavailable)',label:'Pick a Moon route'};
@@ -92,9 +127,9 @@ export function GestureGuide({ step, hidden, repair }: { step: StoryStepId; hidd
     // clear a gesture; stage changes already create a fresh null guide.
     if (hidden) return;
     let timer: ReturnType<typeof setTimeout>, finish: ReturnType<typeof setTimeout>, started = false, cancelled = false, replaying = !!repair;
-    const stop = () => { cancelled = true; clearTimeout(timer); clearTimeout(finish); setGuide(null); };
+    const stop = () => { cancelled = true; if(step==='rocket-assembly')replaying=false; clearTimeout(timer); clearTimeout(finish); setGuide(null); };
     const show = () => {
-      if (cancelled || started || document.querySelector('dialog[open]') || document.hidden) return;
+      if (cancelled || started || isEngineFrozen() || document.querySelector('dialog[open]') || document.hidden) return;
       const demo = lesson(step, repair, replaying);
       if (!replaying && hasSeen(demo.key)) return;
       const source = document.querySelector<HTMLElement>(demo.from), target = demo.to ? document.querySelector<HTMLElement>(demo.to) : source;
@@ -108,7 +143,7 @@ export function GestureGuide({ step, hidden, repair }: { step: StoryStepId; hidd
       const fromRatio = demo.depthCm !== undefined ? (Number(rangeInput.value) - min) / span : .3;
       const toRatio = demo.depthCm !== undefined ? (demo.depthCm - min) / span : .7;
       const reducedMotion = gentle || window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      setGuide({ key: demo.key, label: demo.label, from: { x: a.left + a.width * (range ? Math.max(0, Math.min(1, fromRatio)) : .5), y: a.top + a.height * .5 }, to: { x: b.left + b.width * (range ? Math.max(0, Math.min(1, toRatio)) : .5), y: b.top + b.height * .5 }, drag: !!demo.to && !reducedMotion, part: !range && !!demo.to && source !== target && source.classList.contains('workshop-pick'), image: source.querySelector('img')?.src, showing: !replaying, gentle: reducedMotion });
+      setGuide({ key: demo.key, label: demo.label, from: { x: a.left + a.width * (range ? Math.max(0, Math.min(1, fromRatio)) : .5), y: a.top + a.height * .5 }, to: { x: b.left + b.width * (range ? Math.max(0, Math.min(1, toRatio)) : .5), y: b.top + b.height * .5 }, drag: !!demo.to && !reducedMotion, part: !range && !!demo.to && source !== target && (source.classList.contains('workshop-pick')||source.classList.contains('rocket-part-pick')), image: source.querySelector('img')?.src, showing: !replaying, gentle: reducedMotion });
       finish = setTimeout(() => setGuide(null), repair ? 6000 : 3000);
     };
     let currentLesson = lesson(step, repair).key;
@@ -116,13 +151,14 @@ export function GestureGuide({ step, hidden, repair }: { step: StoryStepId; hidd
     const replay = () => { clearTimeout(finish); setGuide(null); started = false; cancelled = false; replaying = true; schedule(); };
     const resize = () => { clearTimeout(finish); setGuide(null); };
     const observer = new MutationObserver(() => { if (lesson(step, repair).key !== currentLesson || !started && !cancelled) { clearTimeout(timer); timer = setTimeout(show, 50); if (lesson(step, repair).key !== currentLesson) schedule(); } });
-    observer.observe(document.getElementById('root')!, { childList: true, subtree: true, attributes: true, attributeFilter: ['disabled', 'class', 'aria-pressed', 'data-tutorial-state', 'data-return-stage', 'data-burn-direction'] });
+    observer.observe(document.getElementById('root')!, { childList: true, subtree: true, attributes: true, attributeFilter: ['disabled', 'class', 'aria-pressed', 'data-tutorial-state', 'data-return-stage', 'data-burn-direction', 'data-rocket-ready', 'data-rocket-count'] });
     schedule();
     window.addEventListener('replay-game-help', replay);
+    window.addEventListener('game-orientation-resume',schedule);
     window.addEventListener('pointerdown', stop, true);
     window.addEventListener('keydown', stop, true);
     window.addEventListener('resize', resize);
-    return () => { clearTimeout(timer); clearTimeout(finish); observer.disconnect(); window.removeEventListener('replay-game-help', replay); window.removeEventListener('pointerdown', stop, true); window.removeEventListener('keydown', stop, true); window.removeEventListener('resize', resize); };
+    return () => { clearTimeout(timer); clearTimeout(finish); observer.disconnect(); window.removeEventListener('replay-game-help', replay); window.removeEventListener('game-orientation-resume',schedule); window.removeEventListener('pointerdown', stop, true); window.removeEventListener('keydown', stop, true); window.removeEventListener('resize', resize); };
   }, [step, hidden, repair, gentle]);
   if (!guide || hidden) return null;
   const labelShift = Math.max(115, Math.min(window.innerWidth - 115, guide.from.x)) - guide.from.x;

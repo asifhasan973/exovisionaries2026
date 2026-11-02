@@ -1,0 +1,9 @@
+# Crew return game
+
+`ReturnScreen.tsx` presents the existing receipt-driven return journey as five visible stages: lunar lift-off, orbital docking, Earth burn/coast, re-entry, and recovery. The 3D viewport uses closer cameras and lunar surface detail; stage labels and the current objective remain over the scene. The final debrief keeps the 3D ocean recovery visible behind a compact completion panel. Crew count and collected samples (or measured science points for older missions) come from the saved mission. Finish mission is the primary action; See discoveries opens the evidence log.
+
+The docking controls expose Brake, Left, Right and Dock directly. Keyboard: A/left and D/right adjust alignment, S/Space brakes, E docks when safe or activates the next contextual action. Click controls remain available. Docking still requires the existing speed/alignment limits, and an unsafe attempt remains recoverable. Heat-shield selection and parachute deployment are explicit player decisions. The stage strip does not grant progress; `return.ts` continues to derive fuel, resources, crew location and completion from validated action receipts.
+
+The final scene remains an authored teaching visualization. Camera distance and crater detail do not change flight calculations. Return pause, review, loading freeze, narration settings and saved-state replay retain their existing lifecycle.
+
+Verification: production build and `scripts/check-judge-tour.mjs` passed for both Ice and Geology through authorized return, debrief and save restoration. A localhost browser playthrough verified launch, braking/alignment and docking, Earth departure, heat-shield entry, parachute deployment, splashdown, milestone completion and the final results scene. The parachute camera was widened after observing canopy cropping. A fresh scene paint also occurs on initialization, resize and mission updates, so the viewport does not rely on its first animation frame occurring after loading.

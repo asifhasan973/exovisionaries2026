@@ -30,8 +30,8 @@ export interface StoryChoice {
   available: boolean;
 }
 
-export type StoryStepId = 'player-name' | 'appointment' | 'companion-intro' | 'destination' | 'objective-briefing' | 'objective' | 'site-briefing' | 'site' | 'resource-briefing' | 'resource-limits' | 'lander-build' | 'rover-select' | 'science-build' | 'power-build' | 'survival-build' | 'crew-briefing' | 'crew-selection' | 'crew-plan' | 'crew-check' | 'systems-check' | 'stress-check' | 'mass-check' | 'power-check' | 'budget-check' | 'rocket-pack' | 'launch-ready' | 'liftoff' | 'earth-orbit' | 'moon-transfer' | 'lunar-orbit' | 'lunar-descent' | 'lunar-surface' | 'surface-explore' | 'surface-ready' | 'ice-science' | 'science-ready' | 'surface-recovery' | 'surface-secured' | 'crew-return' | 'mission-debrief';
-export type ActivityId = 'resource-limits' | 'lander-build' | 'rover-select' | 'science-build' | 'power-build' | 'survival-build' | 'crew-selection' | 'crew-plan' | 'crew-check' | 'systems-check' | 'stress-check' | 'mass-check' | 'power-check' | 'budget-check' | 'rocket-pack' | 'launch-ready' | 'liftoff' | 'earth-orbit' | 'moon-transfer' | 'lunar-orbit' | 'lunar-descent' | 'surface-deploy' | 'surface-explore' | 'ice-science' | 'surface-recovery' | 'crew-return';
+export type StoryStepId = 'player-name' | 'appointment' | 'companion-intro' | 'destination' | 'objective-briefing' | 'objective' | 'site-briefing' | 'site' | 'resource-briefing' | 'resource-limits' | 'lander-build' | 'rover-select' | 'science-build' | 'power-build' | 'survival-build' | 'crew-briefing' | 'crew-selection' | 'crew-plan' | 'crew-check' | 'systems-check' | 'stress-check' | 'mass-check' | 'power-check' | 'budget-check' | 'rocket-pack' | 'rocket-assembly' | 'launch-ready' | 'liftoff' | 'earth-orbit' | 'moon-transfer' | 'lunar-orbit' | 'lunar-descent' | 'lunar-surface' | 'surface-explore' | 'surface-ready' | 'ice-science' | 'science-ready' | 'surface-recovery' | 'surface-secured' | 'crew-return' | 'mission-debrief';
+export type ActivityId = 'resource-limits' | 'lander-build' | 'rover-select' | 'science-build' | 'power-build' | 'survival-build' | 'crew-selection' | 'crew-plan' | 'crew-check' | 'systems-check' | 'stress-check' | 'mass-check' | 'power-check' | 'budget-check' | 'rocket-pack' | 'rocket-assembly' | 'launch-ready' | 'liftoff' | 'earth-orbit' | 'moon-transfer' | 'lunar-orbit' | 'lunar-descent' | 'surface-deploy' | 'surface-explore' | 'ice-science' | 'surface-recovery' | 'crew-return';
 
 interface BaseStep { id: StoryStepId; title: string; module: 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 }
 export type StoryStep =
@@ -50,6 +50,7 @@ export interface StoryProgress {
   selections: Partial<Record<ChoiceKey, ChoiceId>>;
   completedActivities: ActivityId[];
   history: { stepId: StoryStepId; lineIndex: number }[];
+  milestones?: import('./missionMilestones.ts').MilestoneState;
   /** Optional for old saves. Assistance labels never award mission completion. */
   assistance?: ('auto-build' | 'judge-demo')[];
 }

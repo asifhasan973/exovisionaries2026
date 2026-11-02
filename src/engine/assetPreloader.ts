@@ -132,6 +132,8 @@ export async function preloadMissionSubsystems(
         // Moon mission modules
         import('../game/story/moon/CrewScreen.tsx'),
         import('../game/story/moon/HumanReadinessScreen.tsx'),
+        import('../game/story/moon/RocketAssemblyScreen.tsx'),
+        import('../game/story/moon/MainRocketViewport.tsx'),
         import('../game/story/moon/JourneyScreen.tsx'),
         import('../game/story/moon/LandingScreen.tsx'),
         import('../game/story/moon/SurfaceScreen.tsx'),

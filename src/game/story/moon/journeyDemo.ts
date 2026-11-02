@@ -5,23 +5,62 @@ import type {PreparationSelection} from '../design.ts';
 import {createJudgeMission} from '../demo.ts';
 import {reduceMission} from '../workshopSession.ts';
 import type {MissionEvent} from '../workshopSession.ts';
-import type {PlayerGender} from '../types.ts';
+import type {PlayerGender,StoryStepId} from '../types.ts';
 import type {MoonObjective} from './catalog.ts';
 import {RETURN_CONNECTIONS,HUMAN_PACKING} from './validation.ts';
 import {trialActive} from '../trial.ts';
+import {CAPSULE_SOCKET,SUPPLY_ITEMS,SUPPLY_SOCKETS} from './packingGame.ts';
+import {ROCKET_ORDER} from './rocketAssembly.ts';
 /** Explicit assisted showcase: real readiness rules still have to accept the prepared kit. */
-export function createJourneyDemo(gender:PlayerGender,objective:MoonObjective,options?:{preparation?:PreparationSelection;playerName?:string}){
+export function createReadinessDemo(gender:PlayerGender,objective:MoonObjective,target:StoryStepId,options?:{preparation?:PreparationSelection;playerName?:string}){
   let s=createJudgeMission(gender,objective,options);const act=(e:MissionEvent)=>{s=reduceMission(s,e);};
   act({type:'moon-assign-crew',role:'scientist',id:objective==='lunar-ice'?'astrobiologist':'geologist'});
   act({type:'moon-assign-crew',role:'support',id:'robotics-specialist'});act({type:'next'});act({type:'next'});
+  if(s.progress.stepId===target)return s;
   act({type:'human-seal'});act({type:'human-check'});act({type:'next'});
+  if(s.progress.stepId===target)return s;
   act({type:'connect-radar'});act({type:'run-check'});act({type:'next'});
+  if(s.progress.stepId===target)return s;
   for(const type of ['trial-drive','trial-drill','trial-return'] as const){act({type});for(let i=0;i<80&&trialActive(s.readiness.trial);i++)act({type:'trial-tick',seconds:.25});}
-  act({type:'next'});act({type:'run-check'});act({type:'next'});
-  RETURN_CONNECTIONS.forEach(id=>act({type:'human-connect',id}));act({type:'human-check'});act({type:'next'});
+  act({type:'next'});
+  if(s.progress.stepId===target)return s;
+  act({type:'run-check'});act({type:'next'});
+  if(s.progress.stepId===target)return s;
+  for(const id of RETURN_CONNECTIONS){
+    act({type:'return-test-select',id});
+    if(id==='ascent'){act({type:'return-test-throttle',value:65});act({type:'return-test-hold',held:true});}
+    else if(id==='service'){for(let i=0;i<6;i++)act({type:'return-test-turn',direction:1});act({type:'return-test-start'});}
+    else if(id==='shield'){for(let i=0;i<4;i++)act({type:'return-test-turn',direction:-1});act({type:'return-test-start'});}
+    else{act({type:'return-test-start'});for(let i=0;i<20;i++)act({type:'return-test-tick',seconds:.1});act({type:'return-test-deploy'});}
+    for(let i=0;i<30;i++)act({type:'return-test-tick',seconds:.1});
+  }
+  act({type:'next'});
+  if(s.progress.stepId===target)return s;
   for(const action of ['safe-route','clean-lens','move-ridge','shelter'] as const){act({type:'human-stress',action});act({type:'human-stress-next'});}
-  act({type:'next'});HUMAN_PACKING.forEach(id=>act({type:'human-pack',id}));act({type:'next'});act({type:'next'});
+  act({type:'next'});
+  if(s.progress.stepId===target)return s;
+  for(const id of HUMAN_PACKING){
+    act({type:'packing-game-select',id});
+    if(id==='capsule'){
+      act({type:'packing-game-drop',item:'capsule',...CAPSULE_SOCKET});
+      act({type:'packing-game-lock',latch:0});act({type:'packing-game-lock',latch:1});
+    }else if(id==='lander'){
+      for(let i=0;i<3;i++)act({type:'packing-game-turn',direction:1});
+      act({type:'packing-game-hold',held:true});
+      for(let i=0;i<20;i++)act({type:'packing-game-tick',seconds:.1});
+    }else for(const item of SUPPLY_ITEMS)act({type:'packing-game-drop',item,...SUPPLY_SOCKETS[item]});
+  }
+  act({type:'next'});
+  if(s.progress.stepId===target)return s;
+  for(const part of ROCKET_ORDER)act({type:'rocket-build-place',part,target:part});
+  act({type:'next'});
+  if(s.progress.stepId===target)return s;
+  act({type:'next'});
   return s;
+}
+
+export function createJourneyDemo(gender:PlayerGender,objective:MoonObjective,options?:{preparation?:PreparationSelection;playerName?:string}){
+  return createReadinessDemo(gender,objective,'liftoff',options);
 }
 
 /** Declared chapter shortcut; departure and transfer still pass the real reducers. */
@@ -34,12 +73,16 @@ export function createLandingDemo(gender:PlayerGender,objective:MoonObjective,op
 /** Isolated, visibly assisted surface showcase; the real landing reducer must succeed. */
 export function createSurfaceDemo(gender:PlayerGender,objective:MoonObjective,options?:{preparation?:PreparationSelection;playerName?:string}){
   let s=createLandingDemo(gender,objective,options);const act=(e:MissionEvent)=>{s=reduceMission(s,e);};
-  act({type:'landing-mode',mode:'guided'});act({type:'landing-separate'});
+  act({type:'landing-mode',mode:'medium'});act({type:'landing-separate'});
   for(let i=0;i<30&&s.moon.landing.stage==='separating';i++)act({type:'landing-tick',seconds:.25});
   act({type:'landing-brake'});
   for(let i=0;i<120&&!s.moon.landing.decisionPending;i++)act({type:'landing-tick',seconds:.25});
   act({type:'landing-target',id:'left'});act({type:'landing-continue'});
-  for(let i=0;i<600&&s.moon.landing.stage==='descending';i++)act({type:'landing-tick',seconds:.25});
+  for(let i=0;i<600&&s.moon.landing.stage==='descending';i++){
+    const l=s.moon.landing;
+    act({type:'landing-control',steer:Math.max(-1,Math.min(1,(-45-l.x)*.18-l.vx*.5)),brake:true});
+    act({type:'landing-tick',seconds:.25});
+  }
   act({type:'next'});return s;
 }
 

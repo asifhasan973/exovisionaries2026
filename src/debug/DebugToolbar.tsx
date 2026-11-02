@@ -47,7 +47,10 @@ function loadSavedPosition(): PillPosition {
 }
 
 export function DebugToolbar() {
-  if (!isDevelopment) return null;
+  return isDevelopment ? <DevelopmentDebugToolbar /> : null;
+}
+
+function DevelopmentDebugToolbar() {
 
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');

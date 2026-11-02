@@ -9,14 +9,14 @@ export type LandingMissionEvent=LandingEvent|{type:'landing-restart'};
 export function landingAuthorized(s:WorkshopSession){return launchAuthorized(s.progress,s.preparation,s.readiness,s.moon)&&flightComplete(s.flight,s.moon.designSignature)&&s.moon.journey.signature===s.moon.designSignature&&s.moon.journey.stage==='complete';}
 export function enterLanding(s:WorkshopSession):WorkshopSession{
   if(!landingAuthorized(s))return s;
-  const landing={...emptyLanding(),signature:s.moon.designSignature,mode:s.moon.journey.mode,assisted:s.moon.journey.assisted};
+  const landing={...emptyLanding(),signature:s.moon.designSignature,assisted:s.moon.journey.assisted};
   return {...s,moon:{...s.moon,landing,phase:'lunar-orbit',resources:landingResources(s.moon,landing)}};
 }
 export function reduceLandingMission(s:WorkshopSession,e:LandingMissionEvent):WorkshopSession{
   if(!['lunar-descent','lunar-surface'].includes(s.progress.stepId)||!landingAuthorized(s))return s;
   if(e.type==='landing-restart'){
     const reset=enterLanding(s);
-    return {...reset,moon:{...reset.moon,surface:emptySurface(),science:emptyScience(),evidence:[],landing:{...reset.moon.landing,mode:s.moon.landing.mode,commands:[{type:'mode',mode:s.moon.landing.mode}],assisted:true,attempts:s.moon.landing.attempts+1},checkpoints:s.moon.checkpoints.filter(c=>c.id!=='touchdown'&&c.id!=='surface-orientation'),navigation:{...s.moon.navigation,locationId:'lunar-orbit'}},
+    return {...reset,moon:{...reset.moon,surface:emptySurface(),science:emptyScience(),evidence:[],landing:{...reset.moon.landing,assisted:true,attempts:s.moon.landing.attempts+1},checkpoints:s.moon.checkpoints.filter(c=>c.id!=='touchdown'&&c.id!=='surface-orientation'),navigation:{...s.moon.navigation,locationId:'lunar-orbit'}},
       progress:{...s.progress,stepId:'lunar-descent',lineIndex:0,completedActivities:s.progress.completedActivities.filter(id=>!['lunar-descent','surface-deploy','surface-explore'].includes(id))}};
   }
   if(s.progress.stepId==='lunar-surface')return s;

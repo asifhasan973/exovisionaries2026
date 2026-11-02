@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ArrowRight, Play, RotateCcw, Check, CheckCircle2, LockKeyhole, MapPin, Moon, Rocket, Sparkles, Compass, Download } from 'lucide-react';
 import { sound } from '../../audio/soundEngine';
 import { usePwaStore } from '../../state/pwaStore';
@@ -12,7 +12,6 @@ import { STORY_FLOW } from './flow.ts';
 import './selection.css';
 import './missionExperience.css';
 import '../../components/archive/nasaArchive.css';
-const HomeViewport = lazy(() => import('./HomeViewport.tsx').then(module => ({ default: module.HomeViewport })));
 import { CosmicBackground } from './CosmicBackground.tsx';
 import { Term } from './Learning.tsx';
 import { useMobileGame } from './mobileGameContext.ts';
@@ -113,8 +112,8 @@ export function MissionHome({ progress, onContinue, onRestart, frame, onDemo, on
       <CosmicBackground />
       <section className="home-copy">
         <span className="home-mission-tag"><span/>YOUR FIRST MOON MISSION</span>
-        <h1 id="mission-home-title">Small explorer.<br/><em>Big adventure.</em></h1>
-        <p>Build it. Test it. Launch it.</p>
+        <h1 id="mission-home-title">Build a mission.<br/><em>Go beyond.</em></h1>
+        <p>Choose your crew. Explore the Moon. Bring everyone home.</p>
         <button className="home-play conversation-next" data-primary-action onClick={() => { mobileGame.start(); onContinue(); }}><Play size={25} fill="currentColor"/>Play now<ArrowRight size={25}/></button>
         <span className="home-play-note">{hasProgress ? `Continue ${progress.playerName}’s saved adventure` : 'Your adventure starts here'}</span>
 
@@ -161,10 +160,9 @@ export function MissionHome({ progress, onContinue, onRestart, frame, onDemo, on
         <div className="home-mission-trail" aria-label="Mission path"><span><span>01</span>Build</span><i/><span><span>02</span>Test</span><i/><span><span>03</span>Launch</span></div>
       </section>
       <section className="home-scene" aria-label="Moon mission preview">
-        <div className="home-planet" aria-hidden="true"/><div className="home-orbit" aria-hidden="true"/>
-        <Suspense fallback={<div className="home-world-fallback">Opening your Moon adventure…</div>}><HomeViewport/></Suspense>
+        <div className="home-hero-art" aria-hidden="true" />
         <div className="home-scene-badge"><span/>MISSION 01 <strong>THE MOON</strong></div>
-        <span className="home-scene-note">Your rover. Your choices.</span>
+        <span className="home-scene-note">Your crew. Your choices. Your Moon mission.</span>
       </section>
     </main>
   </StoryShell>;

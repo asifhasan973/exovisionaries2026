@@ -10,6 +10,7 @@ import { StoryControls, StoryShell } from './StoryShell.tsx';
 import { SCRIPT_RESOURCES } from './design.ts';
 import { drillPotential, installedIds, installPart, partById, preparationTotals, stageReady, STAGE_CATEGORIES, WORKSHOP_STAGES, partsForObjective, selectedDrill } from './preparation.ts';
 import { GEOLOGY_FAMILIES, SCIENCE_FAMILY_NAMES } from './moon/geology.ts';
+import { geologyBudget, geologyUpgradeForPart } from './moon/geologyBudget.ts';
 import type { ScienceFamily } from './moon/geology.ts';
 import './moon/preparation.css';
 import { EngineerCompanion } from './EngineerCompanion.tsx';
@@ -45,8 +46,9 @@ function Meter({ label, value, limit, unit, icon: Icon, term }: { term?: Learnin
 }
 function ManifestMeters({ session }: { session: WorkshopSession }) {
   const totals = preparationTotals(session.preparation, session.progress.selections.site === 'permanent-shadow');
+  const geology = session.progress.selections.objective === 'lunar-geology' ? geologyBudget(session.preparation,session.moon.crew,session.moon.plan) : null;
   return <div className="workshop-meters">
-    <Meter term="budget" label="Budget" value={totals.credits} limit={SCRIPT_RESOURCES.budgetCredits} unit="cr" icon={Coins} />
+    <Meter term="budget" label={geology?'Mission budget':'Budget'} value={geology?.spent??totals.credits} limit={geology?.cap??SCRIPT_RESOURCES.budgetCredits} unit={geology?'MC':'cr'} icon={Coins} />
     <Meter term="mass" label="Mass" value={totals.massKg} limit={SCRIPT_RESOURCES.payloadMassLimitKg} unit="kg" icon={Weight} />
     {session.progress.stepId === 'science-build' && selectedDrill(session.preparation) ? <div className="workshop-meter drill-energy-meter" role="status">
       <span><BatteryCharging size={17}/><Term term="wh">Drill energy</Term></span><strong>{totals.drillEnergyWh}<small> Wh</small></strong>
@@ -82,7 +84,7 @@ export function WorkshopScreen({ session, dispatch, frame, onBack, autoBuilding,
   const dropZone = useRef<HTMLDivElement>(null);
   const drawerRef = useRef<HTMLElement>(null);
   const repair = session.repair?.stage === stage ? session.repair : undefined;
-  const appliedRepair = !!repair && repairApplied(repair, session.preparation, session.moon.crew);
+  const appliedRepair = !!repair && repairApplied(repair, session.preparation, session.moon.crew, objective, session.moon.plan);
   const retestReady = appliedRepair && WORKSHOP_STAGES.every(id => ready(id));
   const [scienceFamily,setScienceFamily] = useState<ScienceFamily>('camera');
   const [shelfTab, setShelfTab] = useState<DesignCategory | 'depth' | null>(() => repair?.category ?? null);
@@ -91,6 +93,9 @@ export function WorkshopScreen({ session, dispatch, frame, onBack, autoBuilding,
   const toggleShelf = () => setShelfOpen(prev => !prev);
   const ids = installedIds(session.preparation);
   const totals = preparationTotals(session.preparation, session.progress.selections.site === 'permanent-shadow');
+  const missionBudget = geology ? geologyBudget(session.preparation,session.moon.crew,session.moon.plan) : null;
+  const budgetSpent = missionBudget?.spent ?? totals.credits;
+  const budgetLimit = missionBudget?.cap ?? SCRIPT_RESOURCES.budgetCredits;
   const categories = stage ? STAGE_CATEGORIES[stage] : [];
   const parts = partsForObjective(objective).filter(part => categories.includes(part.category));
   const multi = stage === 'lander-build' || stage === 'science-build' && !geology;
@@ -146,9 +151,10 @@ export function WorkshopScreen({ session, dispatch, frame, onBack, autoBuilding,
     dispatch({ type: 'install', ids: selected }); setLastInstalled(selected.at(-1)!);
     sound.setMuted(!effects); sound.playSnap();
     const before = preparationTotals(session.preparation), after = preparationTotals(selected.reduce(installPart, session.preparation));
-    setMessage(`${signed(after.credits - before.credits)} cr · ${signed(after.massKg - before.massKg)} kg · ${selected.length === 1 ? partById(selected[0])?.name : `${selected.length} parts`} installed!`);
+    const creditChange = geology ? geologyBudget(selected.reduce(installPart,session.preparation),session.moon.crew,session.moon.plan).spent - geologyBudget(session.preparation,session.moon.crew,session.moon.plan).spent : after.credits - before.credits;
+    setMessage(`${signed(creditChange)} ${geology?'MC':'cr'} · ${signed(after.massKg - before.massKg)} kg · ${selected.length === 1 ? partById(selected[0])?.name : `${selected.length} parts`} installed!`);
     const updated = selected.reduce(installPart, session.preparation);
-    const overBudget = preparationTotals(updated).credits > SCRIPT_RESOURCES.budgetCredits;
+    const overBudget = geology ? geologyBudget(updated,session.moon.crew,session.moon.plan).remaining < 0 : preparationTotals(updated).credits > SCRIPT_RESOURCES.budgetCredits;
     const category = partById(selected.at(-1))?.category;
     const response: EngineerReaction = overBudget ? 'warning' : stage && ready(stage, updated) && !ready(stage) ? 'complete'
       : category === 'lander' ? 'lander' : category === 'rover' ? 'rover' : category === 'science' ? 'science'
@@ -239,14 +245,6 @@ export function WorkshopScreen({ session, dispatch, frame, onBack, autoBuilding,
 
     suppressClick.current = true;
     setDragging({ id: active.id, x: event.clientX, y: event.clientY });
-
-    // Auto-collapse drawer once dragged outside drawer bounds:
-    if (drawerRef.current && shelfOpen) {
-      const drawerBounds = drawerRef.current.getBoundingClientRect();
-      if (event.clientX > drawerBounds.right + 12) {
-        setShelfOpen(false);
-      }
-    }
   };
   const onPointerUp = (event: React.PointerEvent<HTMLButtonElement>) => {
     if (longPressTimer.current) {
@@ -301,7 +299,7 @@ export function WorkshopScreen({ session, dispatch, frame, onBack, autoBuilding,
       <div className="conversation-stage"><CharacterStage cue={cue} active speaking={false} label="Commander" /></div>
       <section className="conversation-panel workshop-resources"><h1>Your mission kit</h1>
         <p>Build a lander. Pack a rover. Stay within your limits.</p>
-        <div className="workshop-resource-cards"><div><Coins /><strong>1,000</strong><span><Term term="credits">credits</Term></span></div><div><Weight /><strong>350 kg</strong><span><Term term="payload">Payload</Term></span></div><div><Zap /><strong>450 W</strong><span><Term term="peak">Peak power</Term></span></div></div>
+        <div className="workshop-resource-cards"><div><Coins /><strong>{geology?'10,000 MC':'1,000'}</strong><span>{geology?'Whole mission':'Equipment credits'}</span></div><div><Weight /><strong>350 kg</strong><span><Term term="payload">Payload</Term></span></div><div><Zap /><strong>450 W</strong><span><Term term="peak">Peak power</Term></span></div></div>
 
       </section>
     </main>
@@ -316,7 +314,7 @@ export function WorkshopScreen({ session, dispatch, frame, onBack, autoBuilding,
       </section>{scene}</div>
     </main>
   </StoryShell>;
-  return <StoryShell {...frame} controls={<StoryControls onBack={autoBuilding ? onStopAutoBuild : repair ? onBack : back} onNext={retestReady ? () => dispatch({ type: 'repair-recheck' }) : next} hintDisabled={autoBuilding} nextDisabled={autoBuilding || !!repair && !appliedRepair || !retestReady && nextDisabled}
+  return <StoryShell {...frame} controls={<StoryControls keepProgress onBack={autoBuilding ? onStopAutoBuild : repair ? onBack : back} onNext={retestReady ? () => dispatch({ type: 'repair-recheck' }) : next} hintDisabled={autoBuilding} nextDisabled={autoBuilding || !!repair && !appliedRepair || !retestReady && nextDisabled}
     nextHint={autoBuilding ? `${ids.length}/${autoIds.length} parts` : nextAction?.kind === 'install' ? `Install ${nextAction.remaining} ${nextAction.remaining === 1 ? 'part' : 'parts'}` : undefined} nextLabel={repair ? 'Retest mission' : autoBuilding ? 'Auto-building…' : nextAction?.kind === 'install' ? 'Next' : nextAction?.kind === 'shelf' ? `Next: ${nextAction.category === activeCategory ? 'parts' : categoryNames[nextAction.category]}` : nextAction?.kind === 'depth' ? 'Next: drill plan' : stage === 'survival-build' ? 'Choose crew' : 'Next stage'}
     progress={<div className="workshop-footer-communicator"><EngineerCompanion scriptedReply={repair && !appliedRepair ? { id: repair.voiceId, text: repair.text } : undefined} statusText={autoBuilding ? `Watch your ${stageNames[stageIndex].toLowerCase()} system come together!` : undefined} reaction={repair && !appliedRepair ? 'warning' : autoBuilding || reaction === 'complete' && !ready(stage) ? 'intro' : reaction} token={reactionToken} voiceEnabled={!autoBuilding && (frame.voiceEnabled ?? true)} /></div>} />}>
     <main className={`workshop-main ${geology && stage === 'science-build' ? 'is-geology' : ''} ${autoBuilding ? 'is-auto-building' : ''} ${repair && !appliedRepair ? 'is-repairing' : ''}`} id="story-content" tabIndex={-1} aria-labelledby="workshop-title" aria-busy={autoBuilding}>
@@ -335,12 +333,11 @@ export function WorkshopScreen({ session, dispatch, frame, onBack, autoBuilding,
             {shelfOpen ? <PanelLeftClose size={16} /> : <PanelLeftOpen size={16} />}
             <span>Inventory ({parts.filter(part => ids.includes(part.id)).length}/{parts.length})</span>
           </button>
-          <nav className="workshop-stage-tabs" inert={autoBuilding} aria-label="Build stages">{WORKSHOP_STAGES.map((id, index) => <button key={id} aria-current={id === stage ? 'step' : undefined} disabled={index > stageIndex}
-            onClick={() => dispatch({ type: 'visit-stage', stage: id })}><span>{ready(id) ? <Check size={13} /> : index + 1}</span>{stageNames[index]}</button>)}</nav>
+
+          <div className="workshop-top-meters"><ManifestMeters session={session} /></div>
         </div>
       </header>
       <div className={`workshop-layout ${!shelfOpen ? 'is-shelf-collapsed' : ''}`} inert={autoBuilding}>
-        {shelfOpen ? <div className="workshop-drawer-backdrop" onClick={() => setShelfOpen(false)} aria-hidden="true" /> : null}
         <aside ref={drawerRef} className={`workshop-shelf workshop-inventory-drawer ${!shelfOpen ? 'is-collapsed' : ''}`} aria-label="Inventory side-drawer" inert={!shelfOpen && !dragging} aria-hidden={!shelfOpen && !dragging || undefined}>
         <div className="workshop-shelf-header">
           <span className="workshop-shelf-title">INVENTORY</span>
@@ -365,18 +362,18 @@ export function WorkshopScreen({ session, dispatch, frame, onBack, autoBuilding,
                 </div>
                 <button type="button" className="workshop-pick" disabled={installed} aria-label={installed ? `${part.name} (installed)` : `Install ${part.name}`} onPointerDown={event => onPointerDown(event, part.id)} onPointerMove={onPointerMove} onPointerUp={onPointerUp}
                   onPointerCancel={onPointerCancel} onLostPointerCapture={() => { if (drag.current?.id === part.id) onPointerCancel(); }}
-                  onClick={event => { event.preventDefault(); if (suppressClick.current) { suppressClick.current = false; return; } if (!installed) { if (event.detail === 0 || meshError) install([part.id]); else setMessage('Drag the part onto your spacecraft!'); } }}>
+                  onClick={event => { event.preventDefault(); if (suppressClick.current) { suppressClick.current = false; return; } if (!installed) { if (!multi || event.detail === 0 || meshError) install([part.id]); else setMessage('Drag the part onto your spacecraft!'); } }}>
                   {thumbnails[part.id] ? <img draggable={false} src={thumbnails[part.id]} alt="" /> : <div className="workshop-part-placeholder"><PackageCheck size={38} /></div>}
                   <div className="workshop-part-details">
                     <strong>{part.id === 'nss' ? 'NSS · Ice clues' : part.id === 'nirvss' ? 'NIRVSS · Soil scan' : part.id === 'trident' ? 'TRIDENT · Drill' : part.name}</strong>
-                    <span className="workshop-part-price">{part.credits} cr · {part.massKg} kg{part.objective === 'lunar-geology' ? ` · ${part.nominalPowerW} W` : ''}</span>
+                    <span className="workshop-part-price">{geology ? part.category==='science' ? `${part.credits} MC` : part.category==='lander' ? 'Landing system' : `+${geologyUpgradeForPart(part.id)} MC upgrade` : `${part.credits} cr`} · {part.massKg} kg{part.objective === 'lunar-geology' ? ` · ${part.nominalPowerW} W` : ''}</span>
                     {part.category === 'rover' ? <span className="workshop-part-spec">{part.nominalPowerW} W · {'★'.repeat(part.terrainStars ?? 0)}</span> : null}
                     {part.outputW ? <span className="workshop-part-spec">{part.outputW} W sunlight</span> : null}
                     {part.capacityWh ? <span className="workshop-part-spec">{part.capacityWh} Wh</span> : null}{part.capability ? <span className="workshop-part-spec">{part.capability}</span> : null}
                   </div>
-                  <span className="workshop-part-action">{installed ? '✓ Installed' : meshError ? 'Install' : 'Drag to install'}</span>
+                  <span className="workshop-part-action">{installed ? '✓ Installed' : meshError ? 'Install' : !multi ? 'Click to choose' : 'Drag to install'}</span>
                 </button>
-                {!installed && !multi && (!geology || !!comparison.replaces) ? <div className="part-comparison">{comparison.replaces ? <><span title={comparison.replaces}>Swap {geology ? 'installed tier' : comparison.replaces}</span><strong>{signed(comparison.credits)} cr · {signed(comparison.massKg)} kg</strong></> : null}{!geology ? <span>{part.category === 'rover' && comparison.replaces ? `${signed(comparison.peakW)} W peak · ` : ''}{optionBenefit(part.id, comparison.shadowMinutes)}</span> : null}</div> : null}
+                {!installed && !multi && (!geology || !!comparison.replaces) ? <div className="part-comparison">{comparison.replaces ? <><span title={comparison.replaces}>Swap {geology ? 'installed tier' : comparison.replaces}</span><strong>{geology?signed(geologyBudget(installPart(session.preparation,part.id),session.moon.crew,session.moon.plan).spent-missionBudget!.spent):signed(comparison.credits)} {geology?'MC':'cr'} · {signed(comparison.massKg)} kg</strong></> : null}{!geology ? <span>{part.category === 'rover' && comparison.replaces ? `${signed(comparison.peakW)} W peak · ` : ''}{optionBenefit(part.id, comparison.shadowMinutes)}</span> : null}</div> : null}
               </article>;
             })}</div></section> : null}
           {depthOpen && !!drill ? <div className={`workshop-depth ${repair?.action === 'depth' && !appliedRepair ? 'is-repair-target' : ''}`}>
@@ -388,15 +385,12 @@ export function WorkshopScreen({ session, dispatch, frame, onBack, autoBuilding,
         </div>
         <div className="workshop-feedback" role="status" aria-live="polite">{repair ? appliedRepair ? 'Part changed! Retest mission.' : repair.action === 'depth' ? repair.label : repair.action === 'remove' ? 'Remove the yellow part.' : 'Pick the yellow part.' : nextAction?.kind === 'install' ? `Install ${nextAction.remaining === 1 ? 'a part' : `${nextAction.remaining} parts`}, then Next.` : nextAction?.kind === 'depth' ? 'Tools ready! Next: drill depth.' : nextAction?.kind === 'shelf' && !multi && !categoryParts.some(part => ids.includes(part.id)) ? 'Pick a part, or Next for more.' : message || 'Ready! Choose Next.'}</div>
       </aside>
-      <div className={`workshop-telemetry-pill-wrapper ${shelfOpen ? 'is-drawer-open' : ''}`}>
-        <ManifestMeters session={session} />
-      </div>
       <section className="workshop-view-column" aria-label="Spacecraft assembly">
         {scene}
-        {!autoBuilding && !repair && (totals.credits > 1000 || totals.massKg > 350 || totals.peakW > 450) ? <RepairAlert session={session} dispatch={dispatch} problem={totals.massKg > 350 ? 'mass' : totals.peakW > 450 ? 'peak' : 'budget'}/> : null}
+        {!autoBuilding && !repair && (budgetSpent > budgetLimit || totals.massKg > 350 || totals.peakW > 450) ? <RepairAlert session={session} dispatch={dispatch} problem={totals.massKg > 350 ? 'mass' : totals.peakW > 450 ? 'peak' : 'budget'}/> : null}
         {autoBuilding ? <div className="auto-build-status" role="status"><WandSparkles size={19}/>Auto build <strong>{ids.length}/{autoIds.length}</strong><progress max={autoIds.length} value={ids.length}/></div> : null}
         <div className="workshop-live-strip"><span><Check size={17} />{ids.length} installed</span><span><Sparkles size={17} />Potential +{totals.potentialScience}</span></div>
-        {geology && stage === 'science-build' ? <div className={`geology-science-mass ${totals.scienceMassKg > 100 ? 'is-over' : ''}`} role="status">Science kit: <strong>{totals.scienceMassKg} / 100 kg</strong><span>Part of your 350 kg allowance</span></div> : null}
+        {geology && stage === 'science-build' ? <div className={`geology-science-mass ${totals.scienceMassKg > 100 ? 'is-over' : ''}`} role="status">Science kit: <strong>{totals.scienceMassKg} / 100 kg</strong><span>Part of the Moon payload</span></div> : null}
         {(stage === 'power-build' || stage === 'survival-build') ? <div className="workshop-power-strip"><span><Sun size={20} />{totals.solarW} W solar</span><span><BatteryCharging size={20} />{totals.batteryWh} <Term term="wh">Wh</Term></span><span>{totals.peakW} <Term term="peak">W peak</Term></span>
 
         </div> : null}

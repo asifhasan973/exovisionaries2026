@@ -7,6 +7,8 @@ import type { WorkshopStage } from './preparation.ts';
 import type { WorkshopSession } from './workshopSession.ts';
 import { trialPlan } from './trial.ts';
 import { REPAIR_LINES } from './voiceClips.ts';
+import { geologyBudget } from './moon/geologyBudget.ts';
+import type { FlightPlan } from './moon/platform.ts';
 
 export type RepairProblem = 'thermal' | 'energy' | 'peak' | 'mass' | 'budget' | 'depth' | 'science-mass';
 export interface RepairGuide {
@@ -22,11 +24,11 @@ const partGuide = (problem: RepairProblem, partId: string, action: 'install' | '
   const voiceId = action === 'remove' ? problem === 'budget' ? 'repair-remove-budget' : problem === 'peak' ? 'repair-remove-peak' : 'repair-remove-mass' : `repair-${problem}` as keyof typeof REPAIR_LINES;
   return { problem, stage, category: part.category, partId, action, label: `${action === 'remove' ? 'Remove' : 'Pick'} ${part.name}${part.category === 'battery' ? ' battery' : part.category === 'solar' ? ' solar array' : part.category === 'communication' ? ' radio' : ''}`, ...speech(voiceId) };
 };
-export function repairApplied(guide: RepairGuide, preparation: PreparationSelection, crew?: CrewAssignment) {
+export function repairApplied(guide: RepairGuide, preparation: PreparationSelection, crew?: CrewAssignment, objective = 'lunar-ice', flightPlan?: FlightPlan) {
   const totals = preparationTotals(preparation);
   const plan = trialPlan(preparation, false, crew ? crewCapabilities(crew) : undefined);
   if (guide.problem === 'science-mass') return totals.scienceMassKg <= 100;
-  if (guide.problem === 'energy' && plan.requiredWh <= plan.usableWh || guide.problem === 'mass' && totals.massKg <= SCRIPT_RESOURCES.payloadMassLimitKg || guide.problem === 'budget' && totals.credits <= SCRIPT_RESOURCES.budgetCredits || guide.problem === 'peak' && totals.peakW <= SCRIPT_RESOURCES.peakPowerLimitW) return true;
+  if (guide.problem === 'energy' && plan.requiredWh <= plan.usableWh || guide.problem === 'mass' && totals.massKg <= SCRIPT_RESOURCES.payloadMassLimitKg || guide.problem === 'budget' && (objective==='lunar-geology'?geologyBudget(preparation,crew,flightPlan).remaining>=0:totals.credits <= SCRIPT_RESOURCES.budgetCredits) || guide.problem === 'peak' && totals.peakW <= SCRIPT_RESOURCES.peakPowerLimitW) return true;
   return guide.action === 'depth' ? (preparation.drillDepthCm ?? 100) <= guide.depthCm! && plan.requiredWh <= plan.usableWh
     : ['budget','mass','energy','peak'].includes(guide.problem) ? false : guide.action === 'remove' ? !installedIds(preparation).includes(guide.partId!) : installedIds(preparation).includes(guide.partId!);
 }
@@ -68,9 +70,11 @@ export function recommendRepair(session: WorkshopSession, problem: RepairProblem
     return null;
   }
   const totals = preparationTotals(preparation, shadow);
+  const geology = session.progress.selections.objective==='lunar-geology';
   const metric = problem === 'science-mass' ? 'scienceMassKg' : problem === 'mass' ? 'massKg' : problem === 'budget' ? 'credits' : 'peakW';
-  const limit = problem === 'science-mass' ? 100 : problem === 'mass' ? SCRIPT_RESOURCES.payloadMassLimitKg : problem === 'budget' ? SCRIPT_RESOURCES.budgetCredits : SCRIPT_RESOURCES.peakPowerLimitW;
-  if (totals[metric] <= limit) return null;
+  const limit = problem === 'science-mass' ? 100 : problem === 'mass' ? SCRIPT_RESOURCES.payloadMassLimitKg : problem === 'budget' ? geology ? 10_000 : SCRIPT_RESOURCES.budgetCredits : SCRIPT_RESOURCES.peakPowerLimitW;
+  const value = problem==='budget'&&geology ? geologyBudget(preparation,session.moon.crew,session.moon.plan).spent : totals[metric];
+  if (value <= limit) return null;
   const installed = installedIds(preparation);
   const objective = session.progress.selections.objective ?? 'lunar-ice';
   const currentStageIndex = WORKSHOP_STAGES.findIndex(stage => stage === session.progress.stepId);
@@ -86,8 +90,9 @@ export function recommendRepair(session: WorkshopSession, problem: RepairProblem
     const changed = remove ? removePart(preparation, part.id) : installPart(preparation, part.id);
     if (part.objective && !stageReady('science-build', changed, objective)) continue;
     const next = preparationTotals(changed, shadow), nextPlan = trialPlan(changed, shadow, profile);
-    if (next[metric] >= totals[metric]) continue;
-    candidates.push({ id: part.id, action: remove ? 'remove' : 'install', value: next[metric], loss: Math.max(0, totals.potentialScience - next.potentialScience), energySafe: nextPlan.requiredWh <= nextPlan.usableWh });
+    const nextValue=problem==='budget'&&geology ? geologyBudget(changed,session.moon.crew,session.moon.plan).spent : next[metric];
+    if (nextValue >= value) continue;
+    candidates.push({ id: part.id, action: remove ? 'remove' : 'install', value: nextValue, loss: Math.max(0, totals.potentialScience - next.potentialScience), energySafe: nextPlan.requiredWh <= nextPlan.usableWh });
   }
   candidates.sort((a, b) => Number(b.value <= limit) - Number(a.value <= limit) || Number(b.energySafe) - Number(a.energySafe) || (a.value <= limit && b.value <= limit ? a.loss - b.loss : a.value - b.value));
   const best = candidates[0];

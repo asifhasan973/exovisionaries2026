@@ -1,5 +1,7 @@
 # Zero To Beyond — exact-script pre-launch rebuild
 
+> Historical module record. The current game continues through Moon landing, objective-specific science, crew return and debrief. Its playable opening is deliberately shorter than the 18-line archived source; see [the current Moon mission plan](FULL-MOON-MISSION-PLAN.md) and [Geology accounting](geology-economy.md). Statements below about pending modules describe the earlier delivery stages.
+
 ## Authority and scope
 
 The user supplied `user-script.txt` and explicitly requested the same story, verbatim conversations, click-to-next dialogue, changing expressions, and a modular implementation reviewed one module at a time. Keep the current purple/night palette. The original pre-launch phase ends at launch readiness. The user’s next-part instruction extends Module 7 through liftoff to Earth parking orbit; lunar travel/exploration is later work.
@@ -40,7 +42,7 @@ Each of the 18 dialogue lines has its own ID, speaker, expression and pose. The 
 | 16 | Mass check | Live manifest; return to equipment to correct excess | Module 6 |
 | 17 | Power check | Live operating loads and peak margin | Module 6 |
 | 18 | Budget check | Live credits spent and remaining | Module 6 |
-| 19 | Rocket packing | Pack the prepared payload into the launch vehicle | Module 6 |
+| 19 | Rocket packing | Secure mission cargo, then assemble the shared 3D launch rocket before Ready | Module 6 |
 | 20 | Launch approval | Source label: 🟢 MISSION APPROVED | Module 6 |
 | 21 | Liftoff | Start countdown; release booster and fairing | Module 7 |
 | 22 | Endpoint | Earth parking orbit; Moon journey later | Module 7 |

@@ -1,0 +1,20 @@
+export const ROCKET_LINES = {
+  intro:'Match each rocket part to its outline.',
+  engines:'Engine cluster locked. Ready to push!',
+  core:'Main tank secured.',
+  interstage:'Stage connector locked.',
+  upper:'Upper stage secured. Next stop, orbit!',
+  adapter:'Payload mount ready for our spacecraft.',
+  lander:'Lunar lander aboard.',
+  rover:'Our rover is packed for the Moon.',
+  capsule:'Crew capsule secured.',
+  'cover-left':'Left cover sealed.',
+  'cover-right':'Right cover sealed.',
+  tower:'Escape tower locked.',
+  blocked:'Open the cover before loading the cargo.',
+  wrong:'Try the matching outline.',
+  open:'Bay open. Load the cargo first.',
+  complete:'Rocket complete! Ready for the launch pad.',
+  removed:'Part removed. Try another fit.',
+} as const;
+export type RocketAdvice=keyof typeof ROCKET_LINES;

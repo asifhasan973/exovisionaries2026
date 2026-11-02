@@ -4,6 +4,7 @@
 .launch-stage{position:relative;isolation:isolate;flex:1;min-height:0;overflow:hidden;border:1px solid #66537e;border-radius:24px;background:#122239;box-shadow:0 14px 40px #08051540;}
 .launch-stage .flight-viewport,.launch-stage .flight-canvas{position:absolute;inset:0;}
 .launch-stage .flight-canvas canvas{display:block;width:100%;height:100%;}
+.flight-cargo-lock{position:absolute;right:20px;bottom:38px;z-index:1;display:flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid #8ce2c277;border-radius:10px;background:#122c28e6;color:#baf9dc;font:700 12px/1.2 Outfit,sans-serif;pointer-events:none;}
 .launch-stage::after{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;background:linear-gradient(90deg,#0d122b87,transparent 38%),linear-gradient(#10102b99,transparent 23%,transparent 76%,#10102b80);}
 .launch-topline{position:absolute;left:24px;right:24px;top:20px;display:flex;align-items:flex-start;justify-content:space-between;gap:20px;z-index:1;pointer-events:none;}
 .launch-title>span{font:700 11px/1.4 Outfit,sans-serif;letter-spacing:1.7px;color:#d5c0ee;}
@@ -41,3 +42,7 @@
 }
 
 .launch-milestones .learning-term{display:inline-flex;align-items:center;gap:2px;}.conversation-game.conversation-game .launch-milestones .learning-info{width:28px;height:28px;min-width:28px;padding:0;margin-left:0;}.launch-milestones .learning-info svg{width:12px;height:12px;}
+
+.launch-notes-button{display:grid;place-content:center;min-width:35px;height:35px;border:1px solid #9474aa;border-radius:10px;background:#30203f;color:#e5d9f1;cursor:pointer}.launch-controls:has(.conversation-judge-skip)>.launch-command{grid-column:3;grid-row:1;justify-self:end;display:flex;align-items:center;gap:8px}.launch-controls:has(.conversation-judge-skip)>.conversation-progress{grid-column:2;grid-row:1}.game-info .launch-options{display:flex;flex-wrap:wrap;justify-content:flex-start;gap:12px}.game-info .launch-utilities{display:flex}.game-info .launch-options button{font:inherit;color:inherit;background:#392844;border:1px solid #9979ad;border-radius:9px;padding:7px 10px}.game-info .launch-options [aria-pressed=true]{border-color:#b4edcf;background:#254b43}
+
+.game-info .launch-options>.launch-speed{display:flex}.game-info .launch-options button:hover{border-color:#c6b3d5}

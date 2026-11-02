@@ -1,10 +1,11 @@
 import { getStoryStep, STORY_FLOW } from './flow.ts';
 import type { ActivityId, StoryEvent, StoryProgress, StoryStepId } from './types.ts';
+import { restoreMilestones } from './missionMilestones.ts';
 
 export const STORY_SAVE_KEY = 'zero_to_beyond_script_story_v1';
 
 export function createStoryProgress(): StoryProgress {
-  return { version: 1, playerName: '', playerGender: 'female', stepId: 'player-name', lineIndex: 0, selections: {}, completedActivities: [], history: [] };
+  return { version: 1, playerName: '', playerGender: 'female', stepId: 'player-name', lineIndex: 0, selections: {}, completedActivities: [], history: [], milestones:{introduced:false,celebrated:[]} };
 }
 
 function advanceStep(progress: StoryProgress): StoryProgress {
@@ -28,7 +29,8 @@ export function reduceStoryProgress(progress: StoryProgress, event: StoryEvent):
     case 'select': {
       if (step.kind !== 'choice' || !step.options.some(option => option.id === event.choiceId && option.available)) return progress;
       const changed = progress.selections[step.choiceKey] !== event.choiceId;
-      return { ...progress, selections: { ...progress.selections, [step.choiceKey]: event.choiceId }, completedActivities: changed ? [] : progress.completedActivities };
+      return { ...progress, selections: { ...progress.selections, [step.choiceKey]: event.choiceId }, completedActivities: changed ? [] : progress.completedActivities,
+        milestones:changed&&progress.milestones?{...progress.milestones,celebrated:[],pending:undefined}:progress.milestones };
     }
     case 'complete-activity': {
       // Module 5/6 must verify the live design before sending this event.
@@ -74,6 +76,7 @@ export function restoreStoryProgress(raw: string | null): StoryProgress {
     const target = STORY_FLOW.find(step => step.id === saved.stepId);
     if (!target) return fresh;
     let progress = reduceStoryProgress(fresh, { type: 'set-name', name: saved.playerName, gender: saved.playerGender === 'male' ? 'male' : 'female' });
+    progress = {...progress,milestones:restoreMilestones(saved.milestones,target.id)};
     progress = { ...progress, assistance: Array.isArray(saved.assistance)
       ? [...new Set(saved.assistance.filter((id: unknown) => id === 'auto-build' || id === 'judge-demo'))] as NonNullable<StoryProgress['assistance']> : [] };
     // Back navigation may leave valid later choices in the save. Keep them across reloads,

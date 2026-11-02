@@ -187,7 +187,7 @@ html[data-gentle-motion=true] .conversation-game *,html[data-gentle-motion=true]
 .conversation-game.conversation-game .selection-card-description{font-size:15px;line-height:1.35;}
 /* Workshop: room for hardware, clear replacement costs, direct remove. */
 .conversation-game.conversation-game .workshop-summary-layout{grid-template-columns:minmax(350px,.45fr) minmax(0,1fr);}
-.conversation-game.conversation-game .workshop-layout:not(.workshop-summary-layout){position:relative;display:flex;width:100%;height:100%;min-height:0;flex:1;}
+.conversation-game.conversation-game .workshop-layout:not(.workshop-summary-layout){position:relative;display:flex;align-items:stretch;gap:12px;width:100%;height:100%;min-height:0;flex:1;}
 .conversation-game.conversation-game .workshop-main>.workshop-meters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));flex-shrink:0;gap:10px;}
 .conversation-game.conversation-game .workshop-main>.workshop-meters .workshop-meter{display:grid;grid-template-columns:auto 1fr;align-items:center;padding:6px 12px;gap:0 12px;}
 .conversation-game.conversation-game .workshop-meter strong{font-size:21px;justify-self:end;}

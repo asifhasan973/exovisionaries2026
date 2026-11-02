@@ -1,10 +1,22 @@
 # Zero To Beyond · A Mission Forge Adventure
 
-The exact-script robotic mission rebuild is being implemented module by module. **Modules 1–7 are complete**: the main entry follows name entry → exact Chief/Commander conversations → Moon → objective → site → resource briefing → lander → rover → science → power → survival → mass/power/budget checks → 3D rocket packing → launch readiness → interactive liftoff → Earth parking orbit. The workshop starts empty and saves a real preparation manifest. An approved, downloadable game mission manifest unlocks liftoff. Players release the spent booster and fairing; 1×/1.5×/2×, pause/resume, replay and skip are available. The authored flight ends in an illustrative 200 km Earth parking orbit; Moon transfer, landing and exploration remain future modules. Editing equipment invalidates checks and packing. See [the rebuild roadmap](docs/story/IMPLEMENTATION.md), [flight rules and verification](docs/story/flight-review/README.md), [readiness rules and verification](docs/story/readiness-review/README.md), [workshop rules and verification](docs/story/workshop-review/README.md), and [mission selection verification](docs/story/selection-review/README.md).
+The active game covers the Moon mission from choosing an objective through spacecraft assembly, crew selection, engineering checks, launch, lunar travel, landing, surface science, crew return and debrief. Ice and Geology have different instruments and evidence tasks. The opening uses short playable dialogue beats; the longer source transcript remains archived. Hardware decisions affect power, mass, routes and repair. The flight scenes are educational game models, not certified mission planning. See the [Moon mission design](docs/story/FULL-MOON-MISSION-PLAN.md), [Geology economy](docs/story/geology-economy.md), and [Laptop rover driving game](docs/story/free-rover.md), and [Crew return game](docs/story/return-game.md). The surface chapter is a remote rover sample run with sequential targets, held charging and animated delivery/storage. A centered [Judge preview Skip](docs/story/milestones-and-navigation.md#judge-preview-skip) provides a separate assisted tour through the mission.
+
+The adventure has eight milestones, introduced before play and celebrated between chapters. A small circular header indicator replaces the long stage strips and starts at 0% for each new milestone. Back/Next share one navigation policy across the full mission; reviewing earlier flight pages preserves the live checkpoint and resources. See [Milestones and navigation](docs/story/milestones-and-navigation.md).
+
+The home scene now introduces both mission guides, the crew board uses individual specialist portraits, and the crew check shows a closing pressure hatch with visual and audio feedback. See [Mission visual systems](docs/story/visual-systems.md).
+
+Return preparation now includes four playable rehearsals: hold ascent thrust, aim an orbital burn, orient a heat shield and deploy Earth parachutes. Each has visible motion, sound, retry and saved progress. See [Return test lab](docs/story/return-test-lab.md).
+
+Spacecraft packing has three visual cargo games: fit and clamp the capsule, align and lower the lander, and match supply cases to their lockers. Receipts require completed gameplay. See [Packing lab](docs/story/packing-lab.md).
+
+Pack now leads to a separate 3D rocket assembly game before Ready. Fit eleven launch/payload parts, recover from an early cover, inspect the bay or use animated Quick build. The built rocket shares its geometry and selected rover with ascent. See [Main rocket assembly](docs/story/main-rocket-assembly.md).
+
+During ascent, fairing halves tip from their base rims and drift clear while the cargo stays clamped to a visible adapter frame. Back pauses and returns to the previous screen; Notes has its own button.
 
 Open `http://127.0.0.1:5173/` to play the new story. Names, choices, dialogue position, installed hardware, drill depth and voice preference save separately from legacy progress. Hardware, checks, approval, flight and cursor are written atomically. Flight time saves at half-second checkpoints and on page exit; running saves resume paused. Refresh opens a Continue screen for an existing mission; Back restores previous lines/screens. The restart icon clears only the new mission after confirmation. Mars and Comming Soon are locked. Clicking Moon immediately enters the next conversation.
 
-**Gameplay update:** Skip briefing keeps every original script line and stops at required choices. Judge demo starts with a built explorer, but still requires sensor repair, a drive–drill–return shadow rehearsal, budget checks and packing. Demo progress never replaces the normal save. Battery capacity and drilling depth affect energy failure and retry; equipment edits reset checks. Guided launch pauses for actions; Challenge uses safe release windows with stage retry. Workshop reactions use the animated Commander and local recordings: Guy for Chief, Sonia for Commander. A personalized greeting uses the browser's male-voice fallback. Voice assets are generated with `scripts/generate-story-voices.py`; there is no runtime cloud TTS dependency.
+**Gameplay update:** Skip briefing jumps to required choices. Judge demo remains separate from the normal save. Geology uses one 10,000-MC mission ledger and a 100 kg science sub-limit; Ice keeps its earlier equipment and crew allocations. The Geology crew check lets players choose a cabin, life-support tier and transfer-fuel package, with mass, cost, capacity and return-feasibility consequences. Guided and Challenge modes, retry, hints and 1×/1.5×/2× flight speed remain available. Recorded lines are used where available, with browser speech as fallback.
 
 The existing build-and-launch chapter is preserved at `/?experience=legacy`. The standalone conversation preview remains at `/?module=3`, and the character art lab at `/story/characters-v1/preview.html`. These previews do not write the active story save.
 
@@ -72,7 +84,7 @@ Automated deployments are managed by GitHub Actions at [`.github/workflows/deplo
 
 - **Automated Deployment**: Pushes to `main` (including merged pull requests) trigger an automated build and deploy to Cloudflare Pages.
 - **Manual Trigger**: Supports `workflow_dispatch` with custom target branch names.
-- **Safety Gate**: Gracefully skips deployment if `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` are not configured in secrets. See [CI/CD Documentation](docs/ci-cd.md) for full configuration instructions.
+- **Safety Gate**: Fails deployment with a configuration error if `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` are not configured in secrets. See [CI/CD Documentation](docs/ci-cd.md) for full configuration instructions.
 
 ## Development Debug Endpoints & Navigator
 
@@ -94,3 +106,15 @@ When developing locally (`VITE_APP_ENV=development`), every screen, module, stan
 - `backups/before-story-redesign-20260926-130824/`: a local copy of the previous source and documentation.
 
 The original view components are retained in `src/components/` for reference; `src/App.tsx` selects the active story, legacy experience or conversation review route lazily.
+
+The lunar landing now uses a single medium game with a full 3D landscape, A/D steering, a Space descent brake, mouse controls, contextual hints and touchdown feedback. See [Landing game](docs/story/landing-game.md) for handling, save compatibility and scene lifecycle.
+
+## Current mission debrief and controls
+
+The Ice and Geology rover runs use launched instruments for simulated evidence and the existing W/Wh power model. Samples, scientific findings and crew recovery are separate results. The final debrief explains saved engineering choices, resource use and next-attempt recommendations. Players can explicitly save one completed summary on their browser and compare it with a later same-objective attempt; no backend is used.
+
+Driving requires a keyboard and mouse: W/S accelerate/brake/reverse, A/D steer, E interact/hold charge, M map, P/Escape pause, mouse drag look and C center. Compact landscape layouts are provided, but touch-only driving is unsupported. WebGL-capable laptop/desktop landscape browsers are the supported play target.
+
+See [release verification and scientific limits](docs/story/release-readiness.md), [the 90-second judge walkthrough](docs/story/judge-demo-90-seconds.md), and [the rover model and compatibility notes](docs/story/free-rover.md). New debrief checks: `node --experimental-strip-types scripts/check-mission-debrief.mjs`. Judge-tour checks use assistance and must not be represented as manual unassisted playthroughs.
+
+The Moon route planner includes a bounded NASA/JPL ephemeris dataset, computed transfer candidates, throttle/alignment burn controls, a local lunar-capture orbit preview and a solar-system overview. See [Moon transfer game](docs/story/moon-transfer-game.md) for dates, controls, reproducibility, source URLs and the distinction between measured celestial data and educational spacecraft assumptions.

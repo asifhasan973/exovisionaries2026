@@ -1,53 +1,61 @@
-import { SceneBoundary, SceneFallback } from './SceneFallback.tsx';
-import {GEOLOGY_LINES} from './geologyCopy.ts';
-import {lazy,Suspense,useEffect,useState} from 'react';
-import {Check,Info,ShieldCheck,Radio,Users,ParkingCircle} from 'lucide-react';
-import type {WorkshopSession,MissionEvent} from '../workshopSession.ts';
-import type {SelectionFrame} from '../SelectionScreens.tsx';
-import {StoryShell,StoryControls} from '../StoryShell.tsx';
-import {EngineerCompanion} from '../EngineerCompanion.tsx';
-import {GameInfo} from '../GameInfo.tsx';
-import {useGameSettings} from '../gameSettingsContext.ts';
-import {Term} from '../Learning.tsx';
-import {surfaceTaskPower} from './surface.ts';
-import {scienceActive,deliveredPoints} from './science.ts';
-import {IncidentPanel} from './IncidentPanel.tsx';
-import {careKitAvailable,surfaceSecured,INCIDENT_MODEL} from './incidents.ts';
-import {INCIDENT_LINES} from './incidentCopy.ts';
-import {sound} from '../../../audio/soundEngine.ts';
-import './surface.css';
-import './incidents.css';
-const SurfaceViewport=lazy(()=>import('./SurfaceViewport.tsx').then(m=>({default:m.SurfaceViewport})));
-export function RecoveryScreen({session,dispatch,frame}:{session:WorkshopSession;dispatch(e:MissionEvent):void;frame:SelectionFrame}){
-  const {moon,preparation}=session,s=moon.science,h=s.hazards,{effects,gentle}=useGameSettings(),[panel,setPanel]=useState<'notes'|'back'|null>(null);
-  const endpoint=session.progress.stepId==='surface-secured',active=scienceActive(s),ready=surfaceSecured(moon),power=surfaceTaskPower(moon,preparation,'standby'),kit=careKitAvailable(h,preparation),waiting=h.radiationUntil===null?0:Math.max(0,h.radiationUntil-moon.surface.elapsedSeconds);
-  useEffect(()=>{if(!active||s.paused)return;let last=performance.now();const timer=setInterval(()=>{const now=performance.now();if(!document.hidden)dispatch({type:'science-tick',seconds:(now-last)/1000});last=now;},100);return()=>clearInterval(timer);},[active,s.paused,dispatch]);
-  useEffect(()=>{const pause=()=>dispatch({type:'science-pause'}),hide=()=>{if(document.hidden)pause();},hint=()=>{dispatch({type:'science-hint'});pause();};window.addEventListener('game-help-open',pause);document.addEventListener('visibilitychange',hide);window.addEventListener('replay-game-help',hint);return()=>{window.removeEventListener('game-help-open',pause);document.removeEventListener('visibilitychange',hide);window.removeEventListener('replay-game-help',hint);};},[dispatch]);
-  useEffect(()=>{sound.setMuted(!effects);if(endpoint)sound.playFanfare();else if(s.phase==='transmitting')sound.playRadioBeep();},[endpoint,s.phase,effects]);
-  const act=(event:MissionEvent)=>{sound.setMuted(!effects);sound.playClick();dispatch(event);};
-  const hintKey=endpoint?'secured':h.evaBlocked?'radiation':s.phase==='recovering'?h.recovery==='brush'?'brush':h.recovery==='calibrate'?'calibration':'wait':s.phase==='transmitting'?'relay':h.feedback&&['parked','archived','crew','cleaned','calibrated','clear','unsafe'].includes(h.feedback)?h.feedback:'recovery';
-  const geoAdvice=moon.objective==='lunar-geology'&&!endpoint&&!active&&!h.pending&&!h.evaBlocked?s.samples.length&&s.samples.every(p=>p.stowed)?'samplesStowed':'recovery':null;
-  const controls=<StoryControls onBack={()=>{act({type:'science-pause'});setPanel('back');}} onNext={()=>act(active?{type:s.paused?'science-resume':'science-pause'}:{type:'next'})} nextLabel={endpoint?'Start crew return':active?s.paused?'Resume':'Pause':'Surface secured'} nextDisabled={!!h.pending||!active&&!ready} progress={<span>Explore · Recovery</span>} nextHint={!active&&!ready?'Secure each flight item':undefined}/>;
-  return <StoryShell {...frame} controls={controls}><main className="workshop-main surface-main recovery-main" id="story-content" tabIndex={-1} aria-labelledby="recovery-title">
-    <div className="surface-heading"><h1 id="recovery-title">{endpoint?'Surface secured!':'Get ready to leave the Moon'}</h1><button className="game-info-trigger" onClick={()=>{act({type:'science-pause'});setPanel('notes');}}><Info size={16}/>Mission log</button></div>
-    <div className="surface-layout"><section className="surface-console recovery-console" aria-label="Surface recovery controls">
-      <div className="surface-battery"><div><Term term="battery"/><strong>{moon.surface.batteryWh.toFixed(1)} Wh</strong></div><small>{power.solarW.toFixed(0)} W solar · crew supplies preserved</small></div>
-      {h.pending?<IncidentPanel session={session} dispatch={dispatch}/>:active?<div className="recovery-running"><ShieldCheck size={44}/><h2>{s.phase==='transmitting'?'Relaying all records':h.recovery==='brush'?'Crew cleaning at Base':h.recovery==='calibrate'?'Checking the sensor':'Waiting in shelter'}</h2><progress max={s.phase==='transmitting'?25:INCIDENT_MODEL.recoveryFrames} value={s.frame}/><p>{s.phase==='recovering'?`${Math.ceil(h.recoverySeconds/60)} virtual min`:''}</p></div>:<>
-        {h.evaBlocked?<div className="surface-alert"><ShieldCheck size={22}/><div><strong>Stay sheltered</strong><p>{Math.ceil(waiting/60)} virtual min to all-clear</p><button data-recovery-action onClick={()=>act({type:'science-incident',action:'shelter-wait'})}>Wait in shelter</button></div></div>:null}
-        {endpoint?<div className="surface-complete"><Check size={40}/><h2>Crew ready!</h2><p>Two below. One in orbit.</p></div>:<div className="recovery-checks">
-          <button data-recovery-action disabled={h.roverParked||h.evaBlocked} className={h.roverParked?'is-done':''} onClick={()=>act({type:'science-secure',item:'rover'})}><ParkingCircle/><span>Park the rover<small>Heaters stay on</small></span>{h.roverParked?<Check/>:null}</button>
-          <button data-recovery-action disabled={h.dataArchived||h.evaBlocked} className={h.dataArchived?'is-done':''} onClick={()=>act({type:'science-secure',item:'data'})}><Radio/><span>Relay all records<small>{s.records.filter(r=>r.transmitted).length}/{s.records.length} sent</small></span>{h.dataArchived?<Check/>:null}</button>
-          {moon.objective==='lunar-geology'&&s.samples.length?<button data-recovery-action disabled={s.samples.every(p=>p.stowed)||h.evaBlocked} className={s.samples.every(p=>p.stowed)?'is-done':''} onClick={()=>act({type:'science-secure',item:'samples'})}><ShieldCheck/><span>Stow rock samples<small>{s.samples.reduce((a,p)=>a+p.massKg,0).toFixed(1)} kg · {s.samples.every(p=>p.stowed)?'sealed':'not stowed'}</small></span>{s.samples.every(p=>p.stowed)?<Check/>:null}</button>:null}
-          <button data-recovery-action disabled={h.crewChecked||h.evaBlocked} className={h.crewChecked?'is-done':''} onClick={()=>act({type:'science-secure',item:'crew'})}><Users/><span>Check all three crew<small>Two sheltered · one in orbit</small></span>{h.crewChecked?<Check/>:null}</button>
-        </div>}
-        {!endpoint&&h.dust>.3?<div className="recovery-maintenance"><strong><Term term="dust">Dust</Term> remains · solar reduced</strong><button disabled={!kit||h.evaBlocked} onClick={()=>act({type:'science-incident',action:'brush'})}>{kit?'Use care kit · 8 min':h.kitUsed?'Care kit used':'Care kit not packed'}</button><small>Earlier readings keep their original quality.</small></div>:null}
-        <div className="science-delivery"><span>{deliveredPoints(s)} SP delivered</span><strong>{s.fieldworkStopped?'Safe early stop':'Science stored'}</strong></div>
-      </>}
-      <EngineerCompanion token={s.expedition+s.attempts} voiceEnabled={frame.voiceEnabled??true} reaction={endpoint?'complete':h.pending||h.evaBlocked?'warning':'intro'} scriptedReply={{id:geoAdvice?`geo-${geoAdvice}`:`incident-${hintKey}`,text:geoAdvice?GEOLOGY_LINES[geoAdvice]:INCIDENT_LINES[hintKey]}}/>
-    </section><section className="surface-scene"><SceneBoundary fallback={<SceneFallback scene="surface" label="Mission view" detail="Use the controls to keep playing"/>}><Suspense fallback={<div className="surface-fallback">Opening Base…</div>}><SurfaceViewport surface={moon.surface} moon={moon} preparation={preparation} gentle={gentle} science={{geology:moon.objective==='lunar-geology',seismometerSite:s.seismometerSite,phase:s.phase,frame:s.frame,frameLimit:INCIDENT_MODEL.recoveryFrames,depthCm:s.depthCm,paused:s.paused,target:s.target,dust:h.dust,recovery:h.recovery,radiation:h.evaBlocked}}/></Suspense></SceneBoundary><div className="surface-scene-label"><span>MOON BASE · RECOVERY</span><strong>{h.evaBlocked?'Crew in shelter':h.recovery==='brush'?'Crew cleaning':'Rover parked at Base'}</strong></div><div className="surface-scene-footer"><span>Qualitative safety model · not a dose forecast</span><span>Suit time {(moon.surface.evaSeconds/60).toFixed(0)}/60 min</span></div></section></div>
-    </main>{panel?<GameInfo title={panel==='back'?'Recovery checkpoint':'What happened on the Moon'} onClose={()=>setPanel(null)} pages={panel==='back'?[<div key="back"><p>Mission paused. Your data stays saved.</p><button className="game-info-trigger" onClick={frame.onHome}>Mission home</button><p>A simulation reset starts on Earth. It clears this flight and earns no recovery.</p><button className="game-info-trigger" onClick={()=>act({type:'science-design-retry'})}>Restart simulation</button></div>]:[
-      <div key="record"><h3>{s.fieldworkStopped?'Early stop':'Science completed'}</h3><p>{s.records.length} records, {deliveredPoints(s)} delivered science points. Crew ascent has not happened yet.</p><p>{h.log.length?`${h.log.length} relevant incidents occurred.`:'No incident was needed on this route.'}</p></div>,
-      ...h.log.map(r=><div key={r.id}><h3>{r.kind} · {r.status}</h3><p>{r.reason}</p><p>Actions: {r.actions?.map(a=>a.action).join(' → ')||r.action||'not chosen'}. Triggered at {(r.atSeconds/60).toFixed(1)} surface minutes.</p></div>),
-      <div key="rules"><p>Dust came from excavation, not an Earth-like windstorm. It lowers panel output, increases mobility power and degrades optical readings. A packed care kit is single-use and does not remove all dust. A systems expert can check the sensor without magically cleaning panels.</p><p>Radiation alerts forbid EVA. Crew shelter reduces modeled exposure qualitatively; no radiation dose or certified shield is calculated. The saved alert lasts 30 virtual minutes. Waiting uses real cabin energy, supplies and rover standby energy.</p><p>Robot fallback routes were loaded before departure. You cannot send a new live instruction through a blocked radio link. No new equipment can be bought on the Moon.</p><a href="https://science.nasa.gov/science-research/heliophysics/how-nasa-will-protect-astronauts-from-space-radiation-at-the-moon/" target="_blank" rel="noreferrer">NASA: radiation and shelter ↗</a><br/><a href="https://science.nasa.gov/science-research/science-enabling-technology/technology-highlights/new-moon-duster-will-help-clean-nasa-assets-in-space/" target="_blank" rel="noreferrer">NASA: lunar dust mitigation ↗</a></div>,
-    ]}/>:null}</StoryShell>;
+import { useEffect, useState } from 'react';
+import { Check, ShieldCheck } from 'lucide-react';
+import type { WorkshopSession, MissionEvent } from '../workshopSession.ts';
+import type { SelectionFrame } from '../SelectionScreens.tsx';
+import { StoryShell, StoryControls } from '../StoryShell.tsx';
+import { useStoryNavigation } from '../storyNavigationContext.ts';
+import { GameInfo } from '../GameInfo.tsx';
+import { useGameSettings } from '../gameSettingsContext.ts';
+import { MoonStage } from './MoonStage.tsx';
+import { nextSurfaceTask } from './moonExpedition.ts';
+import { scienceActive, deliveredPoints } from './science.ts';
+import { IncidentPanel } from './IncidentPanel.tsx';
+import { surfaceSecured, INCIDENT_MODEL } from './incidents.ts';
+import { sound } from '../../../audio/soundEngine.ts';
+import { isEngineFrozen } from '../../../state/orientationLifecycleStore.ts';
+
+const TASKS = {
+  rover: { title: 'Park the rover', detail: 'Leave it safely at base. Its heaters will stay on.' },
+  data: { title: 'Save the discovery', detail: 'Relay every stored record to the mission team.' },
+  samples: { title: 'Seal the rock samples', detail: 'Stow the samples in their return container.' },
+  crew: { title: 'Check our three explorers', detail: 'Two are sheltered on the Moon. One is waiting in orbit.' },
+};
+export function RecoveryScreen({ session, dispatch, frame }: { session: WorkshopSession; dispatch(e: MissionEvent): void; frame: SelectionFrame }) {
+  const { moon, preparation } = session, s = moon.science, h = s.hazards, { effects } = useGameSettings();
+  const [notes, setNotes] = useState(false), navigation = useStoryNavigation(), reviewing = !!navigation?.reviewing;
+  const endpoint = session.progress.stepId === 'surface-secured', active = scienceActive(s), ready = surfaceSecured(moon), task = nextSurfaceTask(moon);
+  const actions = moon.objective === 'lunar-geology' && s.samples.length ? ['rover', 'data', 'samples', 'crew'] as const : ['rover', 'data', 'crew'] as const;
+  const index = task ? actions.findIndex(action => action === task) : actions.length;
+  const act = (event: MissionEvent) => { if (isEngineFrozen() || reviewing) return; sound.setMuted(!effects); sound.playClick(); dispatch(event); };
+  useEffect(() => {
+    if (!active || s.paused || notes || reviewing) return;
+    let last = performance.now();
+    const timer = setInterval(() => { const now = performance.now(); if (!document.hidden && !isEngineFrozen()) dispatch({ type: 'science-tick', seconds: (now - last) / 1000 }); last = now; }, 100);
+    return () => clearInterval(timer);
+  }, [active, s.paused, notes, reviewing, dispatch]);
+  useEffect(() => {
+    const pause = () => dispatch({ type: 'science-pause' }), hide = () => { if (document.hidden) pause(); };
+    const hint = () => { pause(); dispatch({ type: 'science-hint' }); setNotes(true); };
+    window.addEventListener('game-help-open', pause); window.addEventListener('blur', pause); window.addEventListener('replay-game-help', hint); document.addEventListener('visibilitychange', hide);
+    return () => { window.removeEventListener('game-help-open', pause); window.removeEventListener('blur', pause); window.removeEventListener('replay-game-help', hint); document.removeEventListener('visibilitychange', hide); };
+  }, [dispatch]);
+  const next = () => {
+    if (reviewing) { dispatch({ type: 'next' }); return; }
+    if (active) act({ type: s.paused ? 'science-resume' : 'science-pause' });
+    else if (h.evaBlocked) act({ type: 'science-incident', action: 'shelter-wait' });
+    else if (ready || endpoint) { if (!endpoint) act({ type: 'next' }); act({ type: 'next' }); }
+    else if (task) act({ type: 'science-secure', item: task });
+  };
+  const label = ready || endpoint ? 'Leave the Moon' : h.pending ? 'Choose your next move' : active ? s.paused ? 'Resume' : 'Pause' : h.evaBlocked ? 'Wait safely in shelter' : task ? TASKS[task].title : 'Preparing departure';
+  const objective = ready || endpoint ? 'Everything is safe. Bring the crew back to their orbiting teammate.' : h.evaBlocked ? 'Stay sheltered until the space-weather alert clears.' : active ? s.phase === 'transmitting' ? 'Sending the discovery to the mission team.' : 'Wait safely while the current task finishes.' : task ? TASKS[task].detail : 'Finish the surface checks before departure.';
+  return <StoryShell {...frame} controls={<StoryControls onBack={() => { dispatch({ type: 'science-pause' }); dispatch({ type: 'back' }); }} onNext={next} nextLabel={label} nextDisabled={!reviewing && !!h.pending} progress={<span>Moon expedition · Pack up</span>} />}>
+    <MoonStage session={session} title={ready || endpoint ? 'Ready for the journey home' : 'Leave the Moon safely'} objective={objective} step={2} advice={objective} voiceEnabled={frame.voiceEnabled ?? true} onDetails={() => { dispatch({ type: 'science-pause' }); setNotes(true); }} destination="base" science={{ geology: moon.objective === 'lunar-geology', sampleCount: moon.objective === 'lunar-geology' ? s.samples.length : s.records.filter(record => record.instrumentId === 'trident').length, seismometerSite: s.seismometerSite, phase: s.phase, frame: s.frame, frameLimit: INCIDENT_MODEL.recoveryFrames, depthCm: s.depthCm, paused: s.paused || reviewing || notes, target: s.target, dust: h.dust, recovery: h.recovery, radiation: h.evaBlocked }}>
+      {h.pending ? <IncidentPanel session={session} dispatch={act} compact/> : ready || endpoint ? <><Check size={32}/><h2>All set!</h2><p>Rover parked. Evidence saved. Crew accounted for.</p><small>{deliveredPoints(s)} science points delivered.</small></> : active ? <><ShieldCheck size={30}/><h2>{s.phase === 'transmitting' ? 'Saving every record' : 'Crew sheltered safely'}</h2><progress aria-label="Departure preparation" max={s.phase === 'transmitting' ? 25 : INCIDENT_MODEL.recoveryFrames} value={s.frame}/><p>{s.paused ? 'Paused. Resume when ready.' : objective}</p></> : h.evaBlocked ? <><ShieldCheck size={30}/><h2>Wait for the all-clear</h2><p>Our crew stays inside. The mission clock and supplies still count while waiting.</p></> : task ? <><span className="moon-eyebrow">ONE THING AT A TIME · {index + 1} / {actions.length}</span><div className="moon-task-count" aria-label="Departure checklist">{actions.map((action, i) => <span key={action} className={i < index ? 'is-done' : i === index ? 'is-current' : ''}/>)}</div><h2>{TASKS[task].title}</h2><p>{TASKS[task].detail}</p>{index > 0 ? <small>Previous steps complete. Your evidence stays saved.</small> : null}</> : null}
+    </MoonStage>
+    {notes ? <GameInfo title="Moon mission log" onClose={() => setNotes(false)} pages={[
+      <div key="summary"><p>{deliveredPoints(s)} science points delivered. {s.records.length} instrument records.</p><p>Rover parked: {h.roverParked ? 'yes' : 'pending'}. Data archived: {h.dataArchived ? 'yes' : 'pending'}. Crew checked: {h.crewChecked ? 'yes' : 'pending'}.</p><p>{moon.objective === 'lunar-geology' ? `${s.samples.length} physical rock samples; ${s.samples.filter(sample => sample.stowed).length} sealed.` : 'Ice readings come from exposed cuttings. This mission returns the evidence as data.'}</p><p>The rover and descent stage remain on the Moon. The ascent cabin carries two crew back to their orbiting teammate.</p></div>,
+      ...h.log.map(log => <div key={log.id}><h3>{log.kind} · {log.status}</h3><p>{log.reason}</p><p>{log.actions.map(action => action.action).join(' → ')}</p></div>),
+      <div key="equipment"><p>Your installed equipment stays unchanged. {preparation.sciencePartIds.includes('field-care-kit') ? 'A packed care kit can clean tools when safe.' : 'No care kit was packed.'} Radiation alerts keep the crew inside; waiting uses mission supplies.</p></div>,
+    ]}/> : null}
+  </StoryShell>;
 }

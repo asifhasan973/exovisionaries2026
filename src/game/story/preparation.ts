@@ -166,7 +166,7 @@ export function preparationTotals(preparation: PreparationSelection, shadow = fa
 export function quickPreparation(objective: string = 'lunar-ice'): PreparationSelection {
   const ids = ['lander-body', 'landing-engines', 'landing-radar', 'navigation-computer', 'lander-antenna', 'landing-cameras',
     'polar-rover', 'nss', 'nirvss', 'trident', 'stereo-hazard-camera', 'efficient-solar', 'medium-battery', 'basic-thermal', 'basic-communication','field-care-kit'];
-  const plan = objective === 'lunar-geology' ? ids.filter(id => !['nss','nirvss','trident'].includes(id)).map(id => id === 'polar-rover' ? 'basic-rover' : id)
+  const plan = objective === 'lunar-geology' ? ids.filter(id => !['nss','nirvss','trident','field-care-kit'].includes(id)).map(id => id === 'polar-rover' ? 'basic-rover' : id)
     .concat(['geo-camera-basic','geo-ir-basic','geo-xrf-basic','geo-drill-basic']) : ids;
   return plan.reduce(installPart, createPreparationSelection());
 }

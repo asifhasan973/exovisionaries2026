@@ -2,11 +2,12 @@ import { STORY_FLOW, getStoryStep } from '../game/story/flow.ts';
 import type { StoryStepId } from '../game/story/types.ts';
 import { createStoryProgress, reduceStoryProgress } from '../game/story/progress.ts';
 import { quickPreparation } from '../game/story/preparation.ts';
-import { createWorkshopSession } from '../game/story/workshopSession.ts';
+import { createWorkshopSession, reduceMission } from '../game/story/workshopSession.ts';
 import type { WorkshopSession } from '../game/story/workshopSession.ts';
 import { createJudgeMission } from '../game/story/demo.ts';
 import {
   createJourneyDemo,
+  createReadinessDemo,
   createLandingDemo,
   createSurfaceDemo,
   createScienceDemo,
@@ -247,15 +248,7 @@ export function createDebugSession(stepId: StoryStepId): WorkshopSession {
 
   // Module 6: Telemetry Checks, Human Readiness & Packing
   if (moduleNum === 6) {
-    const base = createJudgeMission('female', 'lunar-ice');
-    return {
-      ...base,
-      progress: {
-        ...base.progress,
-        stepId,
-        lineIndex: 0
-      }
-    };
+    return createReadinessDemo('female', 'lunar-ice', stepId);
   }
 
   // Module 7: Interactive Liftoff
@@ -271,17 +264,15 @@ export function createDebugSession(stepId: StoryStepId): WorkshopSession {
     };
   }
 
-  // Module 9: Earth Orbit & Trans-Lunar Journey
+  // Journey previews must enter orbit through the same authorized launch reducer.
   if (moduleNum === 9) {
-    const base = createJourneyDemo('female', 'lunar-ice');
-    return {
-      ...base,
-      progress: {
-        ...base.progress,
-        stepId,
-        lineIndex: 0
-      }
-    };
+    let base = createJourneyDemo('female', 'lunar-ice');
+    for (const event of [{type:'flight-skip'}, {type:'next'}] as const) base=reduceMission(base,event);
+    if(stepId!=='earth-orbit'){
+      for(const event of [{type:'journey-date',date:'2026-11-01'},{type:'journey-route',id:'balanced'},{type:'journey-confirm-route'}] as const)base=reduceMission(base,event);
+      if(stepId==='lunar-orbit')base=reduceMission(base,{type:'journey-skip'});
+    }
+    return {...base,progress:{...base.progress,stepId,lineIndex:0}};
   }
 
   // Module 10: Lunar Descent & Touchdown

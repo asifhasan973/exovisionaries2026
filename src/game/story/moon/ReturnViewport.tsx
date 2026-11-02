@@ -1,74 +1,77 @@
-import { SceneFallback } from './SceneFallback.tsx';
 import {useEffect,useRef,useState} from 'react';
 import * as THREE from 'three';
 import {createCrewedPlatform} from './crewedMeshes.ts';
 import {disposeGroup} from '../workshopMeshes.ts';
 import {returnFrameLimit} from './return.ts';
 import type {ReturnState} from './return.ts';
+import {useLoadingStore} from '../../../state/loadingStore.ts';
+import {SceneFallback} from './SceneFallback.tsx';
 
-/** Cinematic scene units are deliberately not an Earth–Moon distance scale. */
+/** Close mission cameras; world distances and elapsed flight time are compressed. */
 export function ReturnViewport({flight,gentle}:{flight:ReturnState;gentle:boolean}){
-  const host=useRef<HTMLDivElement>(null),latest=useRef(flight),paintRef=useRef(()=>{}),[failed,setFailed]=useState(false);
-  useEffect(()=>{latest.current=flight;paintRef.current();},[flight]);
-  useEffect(()=>{
-    const mount=host.current;if(!mount)return;let disposed=false;let renderer:THREE.WebGLRenderer;
-    try{renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:'low-power'});}catch{queueMicrotask(()=>setFailed(true));return;}
-    renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.5));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;mount.appendChild(renderer.domElement);
-    const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(42,1,.1,150);
-    scene.add(new THREE.HemisphereLight(0xc6ddff,0x24163e,2));const sun=new THREE.DirectionalLight(0xffedcf,3);sun.position.set(-8,12,14);scene.add(sun);
-    const earthTexture=new THREE.TextureLoader().load(`${import.meta.env.BASE_URL}story/flight/earth-blue-marble.jpg`,()=>{if(!disposed)paintRef.current();});earthTexture.colorSpace=THREE.SRGBColorSpace;
-    const earth=new THREE.Mesh(new THREE.SphereGeometry(3,48,32),new THREE.MeshStandardMaterial({map:earthTexture,roughness:1}));earth.position.set(-9,0,-2);earth.rotation.y=1.2;scene.add(earth);
-    const moon=new THREE.Mesh(new THREE.SphereGeometry(1.9,40,30),new THREE.MeshStandardMaterial({color:0xa8a4ad,roughness:1}));moon.position.set(9,0,-2);scene.add(moon);
-    const starGeometry=new THREE.BufferGeometry(),stars:number[]=[];for(let i=0;i<230;i++)stars.push(Math.sin(i*17)*45,Math.cos(i*31)*22,-25-Math.abs(Math.sin(i*8))*30);
-    starGeometry.setAttribute('position',new THREE.Float32BufferAttribute(stars,3));scene.add(new THREE.Points(starGeometry,new THREE.PointsMaterial({size:.07,color:0xf3eeff})));
-    const ground=new THREE.Mesh(new THREE.CircleGeometry(25,80),new THREE.MeshStandardMaterial({color:0x5c5668,roughness:1}));ground.rotation.x=-Math.PI/2;scene.add(ground);
-    const sea=new THREE.Mesh(new THREE.PlaneGeometry(80,80,1,1),new THREE.MeshStandardMaterial({color:0x16516a,roughness:.3,metalness:.35}));sea.rotation.x=-Math.PI/2;sea.position.y=-1.2;scene.add(sea);
-    const hardware=createCrewedPlatform(),ascent=new THREE.Group(),descent=hardware.descentStage,csm=new THREE.Group(),cm=new THREE.Group(),service=new THREE.Group();
-    for(const child of [...hardware.capsule.children]){if(child.position.y>=2.7){cm.add(child);child.position.y-=3.45;}else{service.add(child);child.position.y-=1.5;}}
-    cm.position.y=1.95;csm.add(service,cm);scene.add(csm);
-    hardware.ascentStage.position.y=-1.7;ascent.add(hardware.ascentStage);scene.add(ascent,descent);
-    scene.userData.materials=hardware.root.userData.materials;
-    const plumeMaterial=new THREE.MeshBasicMaterial({color:0x8ad8ff,transparent:true,opacity:.75,blending:THREE.AdditiveBlending,depthWrite:false});
-    const ascentPlume=new THREE.Mesh(new THREE.ConeGeometry(.23,1.5,24),plumeMaterial);ascentPlume.rotation.z=Math.PI;ascentPlume.position.y=-1.45;ascent.add(ascentPlume);
-    const servicePlume=new THREE.Mesh(new THREE.ConeGeometry(.32,2,24),plumeMaterial);servicePlume.rotation.z=Math.PI;servicePlume.position.y=-2.1;csm.add(servicePlume);
-    const trail=new THREE.Mesh(new THREE.ConeGeometry(.8,3.5,32),new THREE.MeshBasicMaterial({color:0xff954d,transparent:true,opacity:.4,blending:THREE.AdditiveBlending,depthWrite:false}));trail.position.y=1.7;cm.add(trail);
-    const glow=new THREE.Mesh(new THREE.TorusGeometry(.75,.06,12,48),new THREE.MeshBasicMaterial({color:0xffc168,transparent:true,opacity:.8}));glow.rotation.x=Math.PI/2;glow.position.y=-.67;cm.add(glow);
-    const chutes=new THREE.Group();scene.add(chutes);
-    for(let i=0;i<3;i++){
-      const x=(i-1)*2.4,z=i===1?-1.2:.4;
-      const canopy=new THREE.Mesh(new THREE.SphereGeometry(1.3,32,16,0,Math.PI*2,0,Math.PI/2),new THREE.MeshStandardMaterial({color:i%2?0xf4e2d3:0xe98651,side:THREE.DoubleSide,roughness:.9}));canopy.position.set(x,6,z);chutes.add(canopy);
-      for(let j=0;j<8;j++){const a=j*Math.PI/4,points=[new THREE.Vector3(0,1.95,0),new THREE.Vector3(x+Math.cos(a)*1.3,6,z+Math.sin(a)*1.3)];chutes.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(points),new THREE.LineBasicMaterial({color:0xddd3c5})));}
-    }
-    const collar=new THREE.Mesh(new THREE.TorusGeometry(.85,.12,12,48),new THREE.MeshStandardMaterial({color:0xffbd68}));collar.rotation.x=Math.PI/2;scene.add(collar);
-    const ring=new THREE.Mesh(new THREE.TorusGeometry(.6,.025,12,48),new THREE.MeshBasicMaterial({color:0x8eeac4}));ring.rotation.y=Math.PI/2;scene.add(ring);
-    const path=new THREE.CatmullRomCurve3([new THREE.Vector3(9,2.7,0),new THREE.Vector3(3,5,0),new THREE.Vector3(-3,4,0),new THREE.Vector3(-9,3.8,0)]);
-    const pathLine=new THREE.Line(new THREE.BufferGeometry().setFromPoints(path.getPoints(80)),new THREE.LineDashedMaterial({color:0xb174d1,dashSize:.3,gapSize:.2,transparent:true,opacity:.7}));pathLine.computeLineDistances();scene.add(pathLine);
-    const draw=()=>{
-      if(disposed||document.hidden)return;const r=latest.current,p=r.frame/returnFrameLimit(r),surface=['ready','ascending'].includes(r.stage),dock=['rendezvous','docked'].includes(r.stage),coast=['burning','coast'].includes(r.stage),entry=['entry-ready','entry','chute-ready'].includes(r.stage),ocean=['chutes','splashdown'].includes(r.stage);
-      ground.visible=surface;sea.visible=ocean;earth.visible=coast||entry;moon.visible=dock||coast;pathLine.visible=coast;
-      descent.visible=surface;descent.position.set(-1.5,0,0);
-      ascent.visible=surface||dock;ascent.scale.setScalar(surface?1:.9);ascent.position.set(-1.5,surface?1.7+(r.stage==='ascending'?p*9:0):1,0);ascent.rotation.set(0,0,surface?0:Math.PI/2);
-      csm.visible=!surface;csm.scale.setScalar(coast?.55:1);csm.rotation.set(0,0,dock?-Math.PI/2:coast?-Math.PI/2:0);csm.position.set(0,0,0);
-      service.visible=(!entry||r.stage==='entry-ready')&&!ocean;service.position.set(0,0,0);cm.position.set(0,1.95,0);cm.rotation.set(0,0,0);
-      if(dock){csm.position.set(-2,1,0);ascent.position.set(r.stage==='docked'?2.0:3.5+r.closingMS,1+r.alignment*2,0);moon.position.set(1,-5,-8);ring.visible=r.stage==='rendezvous';ring.position.set(.6,1,0);}
-      else ring.visible=false;
-      if(coast){moon.position.set(9,0,-2);earth.position.set(-9,0,-2);csm.position.copy(path.getPoint(r.stage==='burning'?0:p));}
-      if(entry){earth.position.set(0,-17,-6);earth.scale.setScalar(5);csm.position.set(0,0,0);cm.rotation.x=-.28;}
-      else earth.scale.setScalar(1);
-      if(ocean){csm.position.y=r.stage==='splashdown'?-2.5:.2-p*2.7;chutes.position.y=csm.position.y;collar.position.y=-1.08;}
-      chutes.visible=r.stage==='chutes';collar.visible=r.stage==='splashdown';
-      ascentPlume.visible=r.stage==='ascending';servicePlume.visible=r.stage==='burning';trail.visible=r.stage==='entry';glow.visible=r.stage==='entry';
-      const pulse=gentle?1:1+Math.sin(r.frame*2)*.07;ascentPlume.scale.y=pulse;servicePlume.scale.y=pulse;
-      if(surface){camera.position.set(5,5.5,12);camera.lookAt(-1.5,r.stage==='ascending'?1.5+p*6:1.3,0);}
-      else if(dock){camera.position.set(2,5,14);camera.lookAt(0,1,0);}
-      else if(coast){camera.position.set(0,11,29);camera.lookAt(0,1,0);}
-      else {camera.position.set(6,ocean?5:4,12);camera.lookAt(0,ocean?1:1.5,0);}
-      renderer.render(scene,camera);
-    };
-    paintRef.current=draw;
-    const resize=()=>{renderer.setSize(Math.max(1,mount.clientWidth),Math.max(1,mount.clientHeight),false);camera.aspect=mount.clientWidth/Math.max(1,mount.clientHeight);camera.updateProjectionMatrix();draw();};
-    const observer=new ResizeObserver(resize);observer.observe(mount);const lost=(e:Event)=>{e.preventDefault();disposed=true;paintRef.current=()=>{};setFailed(true);};renderer.domElement.addEventListener('webglcontextlost',lost);document.addEventListener('visibilitychange',draw);resize();
-    return()=>{disposed=true;paintRef.current=()=>{};observer.disconnect();document.removeEventListener('visibilitychange',draw);renderer.domElement.removeEventListener('webglcontextlost',lost);scene.traverse(o=>{if(o instanceof THREE.Line||o instanceof THREE.Points){o.geometry.dispose();const materials=Array.isArray(o.material)?o.material:[o.material];materials.forEach(m=>m.dispose());}});disposeGroup(scene);earthTexture.dispose();renderer.dispose();renderer.forceContextLoss();renderer.domElement.remove();};
-  },[gentle]);
-  return <div className="return-canvas" ref={host} role="img" aria-label={`Crew return: ${flight.stage}. ${flight.crewLocation==='ocean'?'All three crew recovered on Earth.':'Two crew ascend to meet their orbit specialist, then return in the command module.'}`}>{failed?<SceneFallback scene="return" label={'Crew return'} detail={flight.stage} position={.5}/>:null}</div>;
+ const host=useRef<HTMLDivElement>(null),latest=useRef(flight),paint=useRef(()=>{}),[failed,setFailed]=useState(false);
+ useEffect(()=>{latest.current=flight;paint.current();},[flight]);
+ useEffect(()=>{
+  const mount=host.current;if(!mount)return;
+  let renderer:THREE.WebGLRenderer;
+  try{renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});}catch{queueMicrotask(()=>setFailed(true));return;}
+  renderer.setPixelRatio(Math.min(devicePixelRatio,1.75));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.35;mount.appendChild(renderer.domElement);
+  const scene=new THREE.Scene();scene.background=new THREE.Color('#070d1c');
+  const camera=new THREE.PerspectiveCamera(39,1,.1,250);
+  scene.add(new THREE.HemisphereLight(0xdbeaff,0x4d5366,2.2));
+  const sun=new THREE.DirectionalLight(0xfff3df,4);sun.position.set(-6,12,10);scene.add(sun);
+  const hardware=createCrewedPlatform(),ascent=hardware.ascentStage,descent=hardware.descentStage,csm=hardware.capsule;
+  scene.add(ascent,descent,csm);scene.userData.materials=hardware.root.userData.materials;
+  const silver=new THREE.MeshStandardMaterial({color:0xe4e9ee,metalness:.55,roughness:.35}),dark=new THREE.MeshStandardMaterial({color:0x18283b,roughness:.6});
+  const capsule=new THREE.Group();scene.add(capsule);
+  const add=(parent:THREE.Object3D,g:THREE.BufferGeometry,m:THREE.Material,x=0,y=0,z=0)=>{const mesh=new THREE.Mesh(g,m);mesh.position.set(x,y,z);parent.add(mesh);return mesh;};
+  add(capsule,new THREE.CylinderGeometry(.19,.88,1.4,48),silver,0,.7);
+  add(capsule,new THREE.CylinderGeometry(.91,.86,.15,48),dark);
+  add(capsule,new THREE.CylinderGeometry(.14,.19,.2,24),silver,0,1.5);
+  add(capsule,new THREE.BoxGeometry(.24,.22,.025),new THREE.MeshStandardMaterial({color:0x143b62,emissive:0x183b66,emissiveIntensity:.5}),0,.94,.54);
+  const ground=new THREE.Group();scene.add(ground);
+  const regolith=new THREE.MeshStandardMaterial({color:0x888a92,roughness:1});
+  add(ground,new THREE.CircleGeometry(70,96),regolith).rotation.x=-Math.PI/2;
+  for(let i=0;i<70;i++){const a=i*2.399,r=5+(i%13)*2.5,x=Math.cos(a)*r,z=Math.sin(a)*r;const rock=add(ground,new THREE.DodecahedronGeometry(.15+(i%5)*.15,0),regolith,x,.1,z);rock.scale.y=.6+(i%3)*.3;}
+  for(let i=0;i<12;i++){const a=i*2.4,r=8+i*2;const rim=add(ground,new THREE.TorusGeometry(.7+i%3,.13,8,40),regolith,Math.sin(a)*r,.02,Math.cos(a)*r);rim.rotation.x=-Math.PI/2;}
+  const stars=new THREE.BufferGeometry(),points=[];for(let i=0;i<650;i++)points.push(Math.sin(i*32)*90,Math.cos(i*19)*65,-30-Math.abs(Math.sin(i*7))*70);stars.setAttribute('position',new THREE.Float32BufferAttribute(points,3));scene.add(new THREE.Points(stars,new THREE.PointsMaterial({color:0xdbeeff,size:.09})));
+  let textureReady:()=>void=()=>{};
+  const textureTask=new Promise<void>(resolve=>{textureReady=resolve;});
+  useLoadingStore.getState().registerLoaderTask(textureTask);
+  const earthMap=new THREE.TextureLoader().load(`${import.meta.env.BASE_URL}story/flight/earth-blue-marble.jpg`,textureReady,undefined,textureReady);earthMap.colorSpace=THREE.SRGBColorSpace;
+  const earth=add(scene,new THREE.SphereGeometry(10,64,48),new THREE.MeshStandardMaterial({map:earthMap,roughness:.9}));
+  const atmosphere=add(earth,new THREE.SphereGeometry(10.15,48,32),new THREE.MeshBasicMaterial({color:0x5bafff,transparent:true,opacity:.12,side:THREE.BackSide}));void atmosphere;
+  const moon=add(scene,new THREE.SphereGeometry(9,48,32),regolith);
+  const flame=add(ascent,new THREE.ConeGeometry(.24,2.4,32),new THREE.MeshBasicMaterial({color:0x93e4ff,transparent:true,opacity:.85}));flame.rotation.z=Math.PI;flame.position.y=-.3;
+  const burn=add(csm,new THREE.ConeGeometry(.38,3,32),new THREE.MeshBasicMaterial({color:0x9adfff,transparent:true,opacity:.85}));burn.rotation.z=Math.PI;burn.position.y=-1.2;
+  const heat=add(capsule,new THREE.SphereGeometry(1.01,32,20,0,Math.PI*2,Math.PI/2,Math.PI/2),new THREE.MeshBasicMaterial({color:0xff6b30,transparent:true,opacity:.65,blending:THREE.AdditiveBlending}));heat.scale.y=.4;
+  const sea=add(scene,new THREE.PlaneGeometry(180,180,50,50),new THREE.MeshStandardMaterial({color:0x176a96,metalness:.3,roughness:.32}));sea.rotation.x=-Math.PI/2;sea.position.y=-.05;
+  const waves=sea.geometry.attributes.position;for(let i=0;i<waves.count;i++)waves.setZ(i,Math.sin(waves.getX(i)*.7)*Math.cos(waves.getY(i)*.6)*.11);sea.geometry.computeVertexNormals();
+  const parachutes=new THREE.Group();capsule.add(parachutes);
+  for(let i=0;i<3;i++){const x=(i-1)*2.3,z=i===1?-1:.3;add(parachutes,new THREE.SphereGeometry(1.4,32,16,0,Math.PI*2,0,Math.PI/2),new THREE.MeshStandardMaterial({color:i===1?0xf8f4e8:0xed784e,side:THREE.DoubleSide}),x,5,z);for(let j=0;j<8;j++){const a=j*Math.PI/4;parachutes.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,1.4,0),new THREE.Vector3(x+Math.sin(a)*1.4,5,z+Math.cos(a)*1.4)]),new THREE.LineBasicMaterial({color:0xf8eee0})));}}
+  const recovery=new THREE.Group();scene.add(recovery);
+  const hull=add(recovery,new THREE.BoxGeometry(2.4,.45,1.2),new THREE.MeshStandardMaterial({color:0xf1a335}),4,.25,-2);hull.rotation.y=-.3;add(recovery,new THREE.BoxGeometry(.7,.8,.7),silver,4,.8,-2);
+  const splash=add(scene,new THREE.TorusGeometry(1.6,.035,8,64),new THREE.MeshBasicMaterial({color:0xbce8ff,transparent:true,opacity:.8}));splash.rotation.x=-Math.PI/2;splash.position.set(-2,.06,0);
+  let raf=0,disposed=false;
+  const draw=()=>{if(disposed)return;
+   const r=latest.current,p=r.frame/returnFrameLimit(r),surface=['ready','ascending'].includes(r.stage),dock=['rendezvous','docked'].includes(r.stage),travel=['burning','coast'].includes(r.stage),entry=['entry-ready','entry','chute-ready'].includes(r.stage),ocean=['chutes','splashdown'].includes(r.stage);
+   ground.visible=surface;descent.visible=surface;ascent.visible=surface||dock;csm.visible=dock||travel;capsule.visible=entry||ocean;sea.visible=ocean;recovery.visible=r.stage==='splashdown';splash.visible=r.stage==='splashdown';
+   earth.visible=!surface&&!dock;moon.visible=dock||travel;
+   descent.position.set(-2,0,0);ascent.rotation.set(0,0,0);ascent.position.set(-2,r.stage==='ascending'?p*10:0,0);
+   flame.visible=r.stage==='ascending';burn.visible=r.stage==='burning';heat.visible=r.stage==='entry';parachutes.visible=r.stage==='chutes';
+   const flicker=gentle?1:1+Math.sin(r.frame*2)*.1;flame.scale.y=flicker;burn.scale.y=flicker;
+   csm.rotation.set(0,0,-Math.PI/2);csm.position.set(-3,0,0);capsule.rotation.set(0,0,0);capsule.position.set(-2,ocean?(r.stage==='splashdown'?.05:3-p*2.6):1,0);
+   if(surface){camera.position.set(4,3.5+p*7,8.5);camera.lookAt(0,1.5+(r.stage==='ascending'?p*9:0),0);}
+   if(dock){ascent.rotation.z=Math.PI/2;ascent.position.set(r.stage==='docked'?4:4+r.closingMS*2,r.alignment*2,0);moon.position.set(-8,-12,-17);camera.position.set(1,3,15);camera.lookAt(1,1,0);}
+   if(travel){earth.position.set(1,-2,-17);earth.rotation.y=1.1+p*.5;moon.position.set(-24,-4,-35);csm.position.set(-3,1,2);camera.position.set(1,4,12);camera.lookAt(0,1,0);}
+   if(entry){earth.position.set(-3,-12,-13);camera.position.set(3,3,9);camera.lookAt(0,1,0);}
+   if(ocean){earth.visible=false;scene.background=new THREE.Color('#83bfdc');camera.position.set(6,r.stage==='splashdown'?3.2:7,r.stage==='splashdown'?13:18);camera.lookAt(0,r.stage==='splashdown'?.7:4.2,0);}else scene.background=new THREE.Color('#070d1c');
+   renderer.render(scene,camera);
+  };
+  paint.current=draw;
+  const resize=()=>{const w=Math.max(1,mount.clientWidth),h=Math.max(1,mount.clientHeight);renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();draw();};const observer=new ResizeObserver(resize);observer.observe(mount);resize();const animate=()=>{draw();raf=requestAnimationFrame(animate);};animate();
+  const lost=(e:Event)=>{e.preventDefault();setFailed(true);};renderer.domElement.addEventListener('webglcontextlost',lost);
+  return()=>{disposed=true;paint.current=()=>{};cancelAnimationFrame(raf);observer.disconnect();renderer.domElement.removeEventListener('webglcontextlost',lost);scene.traverse(object=>{if(object instanceof THREE.Line||object instanceof THREE.Points){object.geometry.dispose();const materials=Array.isArray(object.material)?object.material:[object.material];materials.forEach(material=>material.dispose());}});disposeGroup(scene);stars.dispose();earthMap.dispose();renderer.dispose();renderer.forceContextLoss();renderer.domElement.remove();};
+ },[gentle]);
+ return <div className="return-canvas" ref={host} role="img" aria-label={`Crew return: ${flight.stage}. Three crew returning from the Moon to Earth.`}>{failed?<SceneFallback scene="return" label="Crew return" detail={flight.stage}/>:null}</div>;
 }

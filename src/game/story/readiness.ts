@@ -6,14 +6,15 @@ import { emptyTrial, restoreTrial, trialPassed, trialPlan } from './trial.ts';
 import type { TrialState } from './trial.ts';
 import type { MoonSession } from './moon/session.ts';
 import { crewCapabilities, crewReport } from './moon/catalog.ts';
-import { humanCheckAccepted, humanPacked } from './moon/validation.ts';
+import { humanCheckAccepted, humanPacked, rocketReady } from './moon/validation.ts';
 import { MOON_RULES } from './moon/rules.ts';
+import { geologyBudget } from './moon/geologyBudget.ts';
 
 export const CHECK_IDS = ['mass-check', 'power-check', 'budget-check'] as const;
 export type CheckId = typeof CHECK_IDS[number];
 export const PACKING_ACTIONS = ['adapter', 'payload', 'fairing'] as const;
 export type PackingAction = typeof PACKING_ACTIONS[number];
-export const READINESS_RULES_VERSION = 3;
+export const READINESS_RULES_VERSION = 4;
 export const SHADOW_REHEARSAL_MINUTES = MOON_RULES.rehearsalTravelSeconds / 60;
 export const RESERVE_FRACTION = MOON_RULES.reserveFraction;
 export const FAIRING_SOURCE = 'https://science.nasa.gov/blogs/dart/2021/11/22/nasas-dart-spacecraft-secured-in-payload-fairing-flight-readiness-review-complete/';
@@ -31,6 +32,9 @@ export function missionSignature(progress: StoryProgress, preparation: Preparati
 export function evaluateReadiness(progress: StoryProgress, preparation: PreparationSelection, moon?: MoonSession) {
   const shadow = progress.selections.site === 'permanent-shadow';
   const totals = preparationTotals(preparation, shadow);
+  const geology = progress.selections.objective === 'lunar-geology' ? geologyBudget(preparation, moon?.crew, moon?.plan) : null;
+  const credits = geology?.spent ?? totals.credits;
+  const creditLimit = geology?.cap ?? SCRIPT_RESOURCES.budgetCredits;
   const complete = WORKSHOP_STAGES.every(stage => stageReady(stage, preparation, progress.selections.objective)) && progress.selections.destination === 'moon'
     && ['lunar-ice', 'lunar-geology'].includes(progress.selections.objective ?? '') && (progress.selections.objective==='lunar-geology'?['lunar-highlands','ancient-crater']:['crater-rim','permanent-shadow']).includes(progress.selections.site ?? '');
   // Conservative rover-only rehearsal: 15 min of other operations plus drilling at full peak, zero solar.
@@ -41,13 +45,13 @@ export function evaluateReadiness(progress: StoryProgress, preparation: Preparat
   const batteryOK = budget.energyOK;
   const thermalOK = !shadow || preparation.thermalId === 'advanced-thermal';
   const availableW = budget.availableW;
-  return { ...totals, complete, availableW, marginW: availableW - totals.peakW, rehearsalWh, usableWh,
+  return { ...totals, credits, creditLimit, geologyBudget: geology, complete, availableW, marginW: availableW - totals.peakW, rehearsalWh, usableWh,
     remainingWh: Math.round((totals.batteryWh - rehearsalWh) * 10) / 10, batteryOK, thermalOK,
-    remainingCredits: SCRIPT_RESOURCES.budgetCredits - totals.credits,
+    remainingCredits: creditLimit - credits,
     excessKg: Math.max(0, totals.massKg - SCRIPT_RESOURCES.payloadMassLimitKg),
     pass: { 'mass-check': complete && totals.massKg <= SCRIPT_RESOURCES.payloadMassLimitKg && (progress.selections.objective !== 'lunar-geology' || totals.scienceMassKg <= 100),
-      'power-check': complete && totals.peakW <= availableW && batteryOK && thermalOK,
-      'budget-check': complete && totals.credits <= SCRIPT_RESOURCES.budgetCredits } };
+      'power-check': complete && totals.peakW <= availableW && batteryOK && thermalOK && (!geology || geology.missionPeakW <= geology.mainPowerCapacityW),
+      'budget-check': complete && credits <= creditLimit } };
 }
 export function checkAccepted(id: CheckId, progress: StoryProgress, preparation: PreparationSelection, readiness: ReadinessState, moon?: MoonSession) {
   return evaluateReadiness(progress, preparation, moon).pass[id] && readiness.checks[id] === missionSignature(progress, preparation, moon)
@@ -70,7 +74,7 @@ export function missionActivities(progress: StoryProgress, preparation: Preparat
     valid.push('crew-check');
     for (const id of CHECK_IDS) { if (!checkAccepted(id,progress,preparation,readiness,moon)) return valid; valid.push(id); }
     for (const id of ['systems-check','stress-check'] as const) { if (!humanCheckAccepted(id,moon,preparation)) return valid; valid.push(id); }
-    if (humanPacked(moon,preparation)) { valid.push('rocket-pack'); if (moon.human.approved?.signature === moon.designSignature) valid.push('launch-ready'); }
+    if (humanPacked(moon,preparation)) { valid.push('rocket-pack'); if(rocketReady(moon,preparation)){valid.push('rocket-assembly');if (moon.human.approved?.signature === moon.designSignature) valid.push('launch-ready');} }
     return valid;
   }
   for (const id of CHECK_IDS) { if (!checkAccepted(id, progress, preparation, readiness)) return valid; valid.push(id); }
@@ -86,7 +90,8 @@ export interface MissionManifest {
 }
 export const READINESS_ASSUMPTIONS = [
   'All mass, credits and electrical loads are source-script values or documented game estimates, not vendor quotes or flight certification.',
-  'The 350 kg allowance counts selected lander and rover equipment, including the scripted propulsion game part. Carrier, adapter and fairing are supplied separately.',
+  'The 350 kg allowance counts selected Moon equipment; science has its own 100 kg sub-limit for Geology. Carrier, adapter and fairing are supplied separately.',
+  'Ice uses a 1,000-credit equipment kit. Geology uses one 10,000-MC ledger for launch, crew systems, platform and payload, with no double charge for included hardware.',
   'The rover rehearsal assumes a full battery, zero solar for 15 minutes of non-drilling operation plus the selected drill time, and a 20% battery reserve. It is not a full mission-duration estimate.',
   'Drilling assumes 30 seconds per 10 cm at the complete rover peak load; 175 W replaces the drill’s normal 20 W. Battery discharge ceiling is an authored 450 W rule.',
   'Permanent shadow requires advanced thermal protection in this game; this qualitative equipment rule is not a temperature or thermal-survival simulation. No solar recharge occurs there.',

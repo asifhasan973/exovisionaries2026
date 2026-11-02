@@ -1,6 +1,6 @@
 /** Concise game presentation. The full authored script remains in dialogue.ts. */
 export const COMPACT_DIALOGUE: Record<string, string> = {
-  'appointment-01': 'Charlie, good to see you.',
+  'appointment-01': 'Good to see you, Commander.',
   'appointment-02': 'Thank you, Chief!',
   'appointment-03': 'You’re our new Mission Commander!',
   'appointment-04': 'My own mission?',

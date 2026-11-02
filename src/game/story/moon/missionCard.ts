@@ -1,3 +1,4 @@
+import {roverCapability} from './roverEquipment.ts';
 import {returnedSampleKg} from './geologyScience.ts';
 import type {WorkshopSession} from '../workshopSession.ts';
 import {deliveredPoints} from './science.ts';
@@ -5,19 +6,21 @@ import {returnResources,missionOutcome,RETURN_MODEL} from './return.ts';
 import {equipmentIds,equipmentReport} from './catalog.ts';
 import {missionAssistance} from './assistance.ts';
 import {MISSION_SOURCES,MODEL_BOUNDARIES} from './missionSources.ts';
+import {geologyBudget} from './geologyBudget.ts';
 export function missionCard(s:WorkshopSession){
   const m=s.moon,r=m.returnFlight,equipment=equipmentReport(equipmentIds(s.preparation,m.objective??'lunar-ice',m.geologyPartIds),m.objective??'lunar-ice'),resources=returnResources(m,r);
+  const budget=m.objective==='lunar-geology'?geologyBudget(s.preparation,m.crew,m.plan):null;
   const sources=MISSION_SOURCES.filter(source=>['apollo','return','rocket',...(m.objective==='lunar-geology'?['rocks','xray']:['viper','operations','water'])].includes(source.id));
-  return {title:'Zero To Beyond · Moon mission',player:s.progress.playerName,objective:m.objective,site:m.site,seed:m.scenarioSeed,model:RETURN_MODEL.id,scienceModel:m.science.model,
+  return {title:'Zero To Beyond · Moon mission',player:s.progress.playerName,objective:m.objective,site:m.site,seed:m.scenarioSeed,model:RETURN_MODEL.id,scienceModel:m.rover?`crew-rover-v${m.rover.version}`:m.science.model,
     outcome:missionOutcome(m),crew:[m.crew.commander,m.crew.scientist,m.crew.support].map(id=>id==='commander'?s.progress.playerName:id?.replaceAll('-',' ')??'unassigned'),
-    crewRecovered:r.crewLocation==='ocean'?3:0,deliveredSciencePoints:deliveredPoints(m.science),physicalSampleReturnedKg:r.crewLocation==='ocean'?returnedSampleKg(m):0,samples:m.science.samples,seismometerSite:m.science.seismometerSite,
+    crewRecovered:r.crewLocation==='ocean'?3:0,deliveredSciencePoints:deliveredPoints(m.science),physicalSampleReturnedKg:r.crewLocation==='ocean'?returnedSampleKg(m):0,samples:m.rover?m.rover.deposited.map(id=>({id:`crew-sample-${id}`,locationId:id,depthCm:m.rover?.version===4?roverCapability(m).depth:10,massKg:.2,stowed:true})):m.science.samples,seismometerSite:m.science.seismometerSite,
     measurements:m.science.records.map(record=>({...record})),interpretations:{...m.science.accepted},
-    equipment:equipment.parts.map(p=>({id:p.id,name:p.name})),credits:equipment.credits,massKg:equipment.massKg,drillDepthCm:s.preparation.drillDepthCm,
+    equipment:equipment.parts.map(p=>({id:p.id,name:p.name})),credits:budget?.spent??equipment.credits,equipmentCredits:equipment.credits,budgetLimit:budget?.cap??1000,budgetUnit:budget?'MC':'credits',missionMassKg:budget?.plannedSpacecraftMassKg??null,massKg:equipment.massKg,drillDepthCm:s.preparation.drillDepthCm,
     route:m.journey.route,elapsedDays:resources.elapsedMissionSeconds/86400,crewDaysRemaining:resources.supportUnitsRemaining,
     cabinEnergyKWh:(resources.platformEnergyWh??0)/1000,ascentFuelUsedKg:r.ascentUsedKg,earthReturnFuelUsedKg:r.serviceUsedKg,
     assisted:missionAssistance(s).length>0,assistance:missionAssistance(s),corrections:r.mistakes,incidents:m.science.hazards.log,
     decisions:r.commands.filter(c=>c.type==='action'),fieldworkStopped:m.science.fieldworkStopped,
-    assumptions:['Authored game masses and timing, not a certified mission trajectory.','Rover and descent stage remain on the Moon.',m.objective==='lunar-geology'?`Sealed samples: ${returnedSampleKg(m).toFixed(1)} kg. Data and sample receipts required.`:'Data returned; no physical sample was collected for Earth return.','Cabin food and power include the three-day coast.'],modelBoundaries:MODEL_BOUNDARIES,sources:sources.map(source=>source.url),sourceDetails:sources};
+    assumptions:['Authored game masses and timing, not a certified mission trajectory.','Rover and descent stage remain on the Moon.',m.rover||m.objective==='lunar-geology'?`Sealed samples: ${returnedSampleKg(m).toFixed(1)} kg. Data and sample receipts required.`:'Data returned; no physical sample was collected for Earth return.','Cabin food and power include the three-day coast.'],modelBoundaries:MODEL_BOUNDARIES,sources:sources.map(source=>source.url),sourceDetails:sources};
 }
 export function downloadMissionCard(s:WorkshopSession){
   const card=missionCard(s);if(card.crewRecovered!==3)return;
@@ -27,7 +30,7 @@ export function downloadMissionCard(s:WorkshopSession){
   ctx.fillStyle='#fff4ff';ctx.font='bold 42px sans-serif';ctx.fillText(`${card.player.slice(0,32)} · Crew home!`,60,141);
   ctx.fillStyle='#a5edcf';ctx.font='bold 28px sans-serif';ctx.fillText(`3 crew recovered   •   ${card.deliveredSciencePoints} SP delivered   •   ${card.elapsedDays.toFixed(2)} days`,60,199);
   ctx.fillStyle='#eed0ff';ctx.font='22px sans-serif';
-  const rows=[`Finding: ${card.outcome?.status} · ${card.outcome?.reasons[1]??''}`,`Route: ${card.route}   |   Site: ${card.site}   |   ${card.assisted?'Assisted play':'Challenge play'}`,`Equipment: ${card.credits} credits · ${card.massKg} kg · drilling ${card.drillDepthCm??0} cm`,
+  const rows=[`Finding: ${card.outcome?.status} · ${card.outcome?.reasons[1]??''}`,`Route: ${card.route}   |   Site: ${card.site}   |   ${card.assisted?'Assisted play':'Challenge play'}`,`${card.objective==='lunar-geology'?'Mission':'Equipment'}: ${card.credits}/${card.budgetLimit} ${card.budgetUnit} · ${card.massKg} kg Moon payload`,
     `Cabin reserve: ${card.crewDaysRemaining?.toFixed(1)} crew-days · ${card.cabinEnergyKWh.toFixed(1)} kWh`,
     `Fuel used: ascent ${card.ascentFuelUsedKg.toFixed(0)} kg · Earth burn ${card.earthReturnFuelUsedKg.toFixed(0)} kg`,
     `Incidents: ${card.incidents.length} · corrected return choices: ${card.corrections}`];

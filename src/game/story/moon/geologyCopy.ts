@@ -16,3 +16,4 @@ export const GEOLOGY_LINES={...SCIENCE_LINES,
 } as const;
 export const GEOLOGY_LABELS={anorthosite:'Ancient crust rock',basalt:'Lava rock',breccia:'Impact-mixed rock',inconclusive:'Need more evidence'} as const;
 export const GEOLOGY_SITE_BRIEFING=[{id:'geo-site-01',text:'Choose highlands for ancient crust, or an old crater for impact clues.',sourceSpeaker:'Commander',speaker:{character:'commander',expression:'curious',pose:'point'}}] as const;
+export const GEOLOGY_RESOURCE_BRIEFING=[{id:'geo-budget-01',text:'One mission budget: 10,000 MC. Save enough for the trip home!',sourceSpeaker:'Chief',speaker:{character:'chief',expression:'focused',pose:'point'}}] as const;

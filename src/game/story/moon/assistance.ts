@@ -10,6 +10,7 @@ export function missionAssistance(s: WorkshopSession) {
     ...(m.human.stress.assisted ? ['readiness-hint'] : []),
     ...(m.journey.assisted ? ['journey-assistance'] : []),
     ...(m.landing.assisted ? ['landing-assistance'] : []),
+    ...(m.rover?.assisted ? ['rover-checkpoint-assistance'] : []),
     ...(m.surface.assisted ? ['surface-assistance'] : []),
     ...(m.science.assisted ? ['science-assistance'] : []),
     ...(m.returnFlight.assisted ? ['return-assistance'] : []),

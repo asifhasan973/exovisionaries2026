@@ -1,3 +1,4 @@
+import { roverActive } from './moon/rover.ts';
 import type { StoryStepId } from './types.ts';
 import { repairApplied } from './repairGuidance.ts';
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
@@ -30,16 +31,19 @@ import { useLoadingStore } from '../../state/loadingStore';
 import { isEngineFrozen } from '../../state/orientationLifecycleStore';
 import { useAudioStore } from '../../state/audioStore';
 const ReturnScreen=lazy(()=>import('./moon/ReturnScreen.tsx').then(m=>({default:m.ReturnScreen})));
-const RecoveryScreen=lazy(()=>import('./moon/RecoveryScreen.tsx').then(m=>({default:m.RecoveryScreen})));
-const ScienceScreen=lazy(()=>import('./moon/ScienceScreen.tsx').then(m=>({default:m.ScienceScreen})));
-const SurfaceScreen=lazy(()=>import('./moon/SurfaceScreen.tsx').then(m=>({default:m.SurfaceScreen})));
+const RoverScreen=lazy(()=>import('./moon/RoverScreen.tsx').then(m=>({default:m.RoverScreen})));
 const LandingScreen=lazy(()=>import('./moon/LandingScreen.tsx').then(m=>({default:m.LandingScreen})));
 const JourneyScreen=lazy(()=>import('./moon/JourneyScreen.tsx').then(m=>({default:m.JourneyScreen})));
+const RocketAssemblyScreen=lazy(()=>import('./moon/RocketAssemblyScreen.tsx').then(m=>({default:m.RocketAssemblyScreen})));
 const HumanReadinessScreen = lazy(() => import('./moon/HumanReadinessScreen.tsx').then(module => ({ default: module.HumanReadinessScreen })));
 const CrewScreen = lazy(() => import('./moon/CrewScreen.tsx').then(module => ({ default: module.CrewScreen })));
 const NasaMissionArchive = lazy(() => import('../../components/archive/NasaMissionArchive').then(module => ({ default: module.NasaMissionArchive })));
 
 import { createDebugSession } from '../../debug/debugConfig';
+import { MilestonePage } from './MilestonePage.tsx';
+import { milestoneProgress, trackMilestoneTransition } from './missionMilestones.ts';
+import { pauseMission, savedMissionProgress } from './missionNavigation.ts';
+import { StoryNavigationContext } from './storyNavigationContext.ts';
 
 export interface ExactStoryProps {
   debugStepId?: string;
@@ -88,18 +92,20 @@ export default function ExactStory({ debugStepId, debugDemoChapter, initialHome,
   });
   const [autoBuilding, setAutoBuilding] = useState(false);
   const [autoplay, setAutoplay] = useState(true);
+  const [overviewOpen,setOverviewOpen]=useState<'map'|'start'|null>(null);
   const [restart, setRestart] = useState(false);
   const [demo, setDemo] = useState(false);
   const [demoAvailable, setDemoAvailable] = useState(hasBrowserDemoCheckpoint);
   const [demoGender, setDemoGender] = useState<PlayerGender | null>(null);
   const [demoBusy, setDemoBusy] = useState(false);
   const [demoError, setDemoError] = useState<string | null>(null);
+  const [skipBusy,setSkipBusy]=useState(false),[skipError,setSkipError]=useState<string|null>(null);
   const demoRequest = useRef(0);
   const normalMission = useRef(mission);
   const step = getStoryStep(progress.stepId,progress.selections.objective);
   useEffect(() => { window.scrollTo({ top: 0, behavior: 'instant' }); }, [progress.stepId, home]);
-  const latest = useRef({ progress, voiceEnabled: voicesEnabled, preparation, readiness, flight, moon, demo, repair: mission.repair });
-  useEffect(() => { latest.current = { progress, voiceEnabled: voicesEnabled, preparation, readiness, flight, moon, demo, repair: mission.repair }; }, [progress, voicesEnabled, preparation, readiness, flight, moon, demo, mission.repair]);
+  const latest = useRef({ progress:savedMissionProgress(mission), voiceEnabled: voicesEnabled, preparation, readiness, flight, moon, demo, repair: mission.repair });
+  useEffect(() => { latest.current = { progress:savedMissionProgress(mission), voiceEnabled: voicesEnabled, preparation, readiness, flight, moon, demo, repair: mission.repair }; }, [progress, voicesEnabled, preparation, readiness, flight, moon, demo, mission.repair,mission.review]);
 
   useEffect(() => {
     if (debugStepId) {
@@ -121,8 +127,9 @@ export default function ExactStory({ debugStepId, debugDemoChapter, initialHome,
   const incidentCheckpoint=[incident.pending,incident.dust,incident.kitUsed,incident.sensorCalibrated,incident.radiationUntil,incident.evaBlocked,incident.autoWaitAtBase,incident.recovery,incident.feedback,incident.roverParked,incident.dataArchived,incident.crewChecked,incident.log.map(r=>`${r.id}:${r.status}:${r.action}`).join(',')].join('|');
   const returnCheckpoint=[moon.returnFlight.stage,Math.floor(moon.returnFlight.frame/5),moon.returnFlight.paused,moon.returnFlight.speed,moon.returnFlight.mode,moon.returnFlight.mistakes,moon.returnFlight.alignment,moon.returnFlight.closingMS,moon.returnFlight.assisted].join('|');
   const scienceCheckpoint=Math.floor(moon.science.frame/5);
+  const roverCheckpoint=moon.rover?`${moon.rover.phase}|${moon.rover.line}|${moon.rover.commands.length}|${Math.floor(moon.rover.frames/20)}|${moon.rover.paused}|${moon.rover.attempts}`:'';
   const surfaceCheckpoint=Math.floor((moon.surface.phaseFrame+moon.surface.legFrame)/5);
-  const landingInputCheckpoint=moon.landing.mode==='challenge'?`${moon.landing.throttle}|${moon.landing.steer}`:'';
+  const landingInputCheckpoint=moon.landing.mode==='medium'?`${moon.landing.direction}|${moon.landing.brake}`:moon.landing.mode==='challenge'?`${moon.landing.throttle}|${moon.landing.steer}`:'';
   const landingCheckpoint=Math.floor(moon.landing.steps/30);
   const journeyCheckpoint=Math.floor(moon.journey.elapsed*2);
   const trialCheckpoint = Math.floor(readiness.trial.progress * 10);
@@ -133,7 +140,7 @@ export default function ExactStory({ debugStepId, debugDemoChapter, initialHome,
     // Report external storage results after this render. Cancel obsolete status updates.
     const timer = setTimeout(() => setStorageAvailable(saved), 0);
     return () => clearTimeout(timer);
-  }, [isDebugSession, returnCheckpoint, mission.repair, progress, voiceEnabled, voicesEnabled, preparation, moon.designSignature, moon.human, moon.phase, moon.journey.stage, moon.journey.route, moon.journey.direction, moon.journey.mode, moon.journey.speed, moon.journey.paused, moon.journey.assisted, moon.journey.attempts, journeyCheckpoint, landingCheckpoint, surfaceCheckpoint, scienceCheckpoint, moon.science.phase, moon.science.target, moon.science.depthCm, moon.science.program, moon.science.useGas, moon.science.sensorPlan, moon.science.samples, moon.science.seismometerSite, moon.science.paused, moon.science.records, moon.science.accepted, moon.science.feedback, moon.science.attempts, moon.science.assisted, incidentCheckpoint, moon.science.committed, moon.science.fieldworkStopped, moon.surface.stage, moon.surface.location, moon.surface.selected, moon.surface.mode, moon.surface.pace, moon.surface.paused, moon.surface.held, moon.surface.autonomyArmed, moon.surface.assisted, moon.surface.attempts, moon.landing.stage, moon.landing.paused, moon.landing.mode, moon.landing.target, landingInputCheckpoint, moon.landing.assisted, moon.landing.attempts, moon.landing.decisionPending, readiness.checks, readiness.packing, readiness.approved, readiness.radarConnected, trialCheckpoint, readiness.trial.phase, readiness.trial.paused, flightCheckpoint, flight.status, flight.speed, flight.events, flight.skipped, flight.mode, flight.missedWindow, demo]);
+  }, [isDebugSession, roverCheckpoint, returnCheckpoint, mission.repair, progress, voiceEnabled, voicesEnabled, preparation, moon.designSignature, moon.human, moon.phase, moon.journey.stage, moon.journey.route, moon.journey.direction, moon.journey.mode, moon.journey.speed, moon.journey.paused, moon.journey.assisted, moon.journey.attempts, journeyCheckpoint, landingCheckpoint, surfaceCheckpoint, scienceCheckpoint, moon.science.phase, moon.science.target, moon.science.depthCm, moon.science.program, moon.science.useGas, moon.science.sensorPlan, moon.science.samples, moon.science.seismometerSite, moon.science.paused, moon.science.records, moon.science.accepted, moon.science.feedback, moon.science.attempts, moon.science.assisted, incidentCheckpoint, moon.science.committed, moon.science.fieldworkStopped, moon.surface.stage, moon.surface.location, moon.surface.selected, moon.surface.mode, moon.surface.pace, moon.surface.paused, moon.surface.held, moon.surface.autonomyArmed, moon.surface.assisted, moon.surface.attempts, moon.landing.stage, moon.landing.paused, moon.landing.mode, moon.landing.target, landingInputCheckpoint, moon.landing.assisted, moon.landing.attempts, moon.landing.decisionPending, readiness.checks, readiness.packing, readiness.approved, readiness.radarConnected, trialCheckpoint, readiness.trial.phase, readiness.trial.paused, flightCheckpoint, flight.status, flight.speed, flight.events, flight.skipped, flight.mode, flight.missedWindow, demo]);
   useEffect(() => {
     if (isDebugSession) return;
     const save = () => { const current = latest.current; if (current.demo) writeBrowserDemoSession(current); else writeBrowserSelectionSession(current.progress, current.voiceEnabled, current.preparation, current.readiness, current.flight, current.moon, current.repair); };
@@ -142,9 +149,12 @@ export default function ExactStory({ debugStepId, debugDemoChapter, initialHome,
   }, [isDebugSession]);
   // Global suspension gates progress without changing a subsystem's manual pause.
   // Timers keep their wall-clock baseline current, so releasing it adds no time debt.
-  const dispatch = useCallback((event: MissionEvent) => setMission(current =>
-    isEngineFrozen() && !event.type.endsWith('-pause') ? current : reduceMission(current, event)), []);
-  const pausedFromMenu = useRef({ flight: false, trial: false, journey:false,landing:false,surface:false,science:false,returning:false });
+  const dispatch = useCallback((event: MissionEvent) => {
+    if(event.type==='next'||event.type==='skip-briefing')setAutoplay(true);
+    setMission(current => isEngineFrozen() && !event.type.endsWith('-pause') ? current
+      : trackMilestoneTransition(current,reduceMission(current,event)));
+  }, []);
+  const pausedFromMenu = useRef({ flight: false, trial: false, journey:false,landing:false,surface:false,science:false,returning:false,rover:false });
   const pauseGame = useCallback(() => {
     const current = latest.current;
     const shouldPause = {
@@ -153,10 +163,12 @@ export default function ExactStory({ debugStepId, debugDemoChapter, initialHome,
       returning: current.progress.stepId === 'crew-return' && !current.moon.returnFlight.paused,
       science: ['ice-science', 'surface-recovery'].includes(current.progress.stepId) && !current.moon.science.paused,
       surface: ['lunar-surface', 'surface-explore'].includes(current.progress.stepId) && !current.moon.surface.paused,
+      rover: !!current.moon.rover && roverActive(current.moon.rover) && !current.moon.rover.paused,
       landing: current.progress.stepId === 'lunar-descent' && !current.moon.landing.paused,
       journey: ['moon-transfer'].includes(current.progress.stepId) && !current.moon.journey.paused && current.moon.journey.stage !== 'complete',
     };
 
+    if (shouldPause.rover) pausedFromMenu.current.rover = true;
     if (shouldPause.flight) pausedFromMenu.current.flight = true;
     if (shouldPause.trial) pausedFromMenu.current.trial = true;
     if (shouldPause.returning) pausedFromMenu.current.returning = true;
@@ -165,6 +177,7 @@ export default function ExactStory({ debugStepId, debugDemoChapter, initialHome,
     if (shouldPause.landing) pausedFromMenu.current.landing = true;
     if (shouldPause.journey) pausedFromMenu.current.journey = true;
 
+    if (shouldPause.rover) dispatch({ type: 'rover-pause' });
     if (shouldPause.flight) dispatch({ type: 'flight-pause' });
     if (shouldPause.trial) dispatch({ type: 'trial-pause' });
     if (shouldPause.returning) dispatch({ type: 'return-pause' });
@@ -177,6 +190,7 @@ export default function ExactStory({ debugStepId, debugDemoChapter, initialHome,
   }, [dispatch]);
   const resumeGame = useCallback(() => {
     if (isEngineFrozen()) return;
+    if (pausedFromMenu.current.rover) dispatch({ type: 'rover-resume' });
     if (pausedFromMenu.current.flight) dispatch({ type: 'flight-resume' });
     if (pausedFromMenu.current.returning) dispatch({ type: 'return-resume' });
     if (pausedFromMenu.current.science) dispatch({ type: 'science-resume' });
@@ -184,13 +198,14 @@ export default function ExactStory({ debugStepId, debugDemoChapter, initialHome,
     if (pausedFromMenu.current.landing) dispatch({ type: 'landing-resume' });
     if (pausedFromMenu.current.journey) dispatch({ type: 'journey-resume' });
     if (pausedFromMenu.current.trial) dispatch({ type: 'trial-resume' });
-    pausedFromMenu.current = { flight: false, trial: false, journey:false,landing:false,surface:false,science:false,returning:false };
+    pausedFromMenu.current = { flight: false, trial: false, journey:false,landing:false,surface:false,science:false,returning:false,rover:false };
   }, [dispatch]);
 
   const enterMission = () => {
     useLoadingStore.getState().startLoading('mission_start');
     setAutoplay(true);
     setHome(false);
+    setOverviewOpen(null);
   };
   const reset = () => {
     useLoadingStore.getState().startLoading('mission_start', 'Preparing fresh mission…');
@@ -200,6 +215,7 @@ export default function ExactStory({ debugStepId, debugDemoChapter, initialHome,
     setDemo(false);
     setRestart(false);
     setHome(false);
+    setOverviewOpen(null);
   };
   const closeDemo = () => { demoRequest.current++; setDemoGender(null); setDemoBusy(false); setDemoError(null); };
   const startDemo = async (chapter: DemoChapterId) => {
@@ -229,12 +245,35 @@ export default function ExactStory({ debugStepId, debugDemoChapter, initialHome,
     setDemoGender(null);
     setHome(false);
   };
-  const goHome = () => { setAutoBuilding(false); if (demo) { setMission(normalMission.current); setDemo(false); } setHome(true); };
+  const goHome = () => { setAutoBuilding(false);setOverviewOpen(null);setMission(current=>{
+    const paused=pauseMission(current);if(!paused.review)return paused;
+    const {review,...live}=paused;return {...live,progress:review.anchor};
+  }); if (demo) { setMission(normalMission.current); setDemo(false); } setHome(true); };
   const requestRestart = () => { if (progress.playerName) setRestart(true); else reset(); };
   const back = () => { setAutoBuilding(false);
     setAutoplay(false);
-    if (progress.stepId === 'player-name') setHome(true);
+    if (progress.stepId === 'player-name') setOverviewOpen('start');
     else dispatch({ type: 'back' });
+  };
+  const chapter=milestoneProgress(mission);
+  const pending=mission.review?undefined:progress.milestones?.pending;
+  const introduction=!isDebugSession&&!demo&&!progress.milestones?.introduced;
+  const milestoneCard=!home&&(!!overviewOpen||!!pending||introduction);
+  const skipPage=async()=>{
+    if(skipBusy||isEngineFrozen())return;
+    if(milestoneCard){setOverviewOpen(null);setAutoplay(true);dispatch({type:pending?'milestone-continue':'milestone-start'});return;}
+    if(mission.review){setAutoplay(true);dispatch({type:'next'});return;}
+    setAutoBuilding(false);setSkipBusy(true);setSkipError(null);
+    const paused=pauseMission(mission);setMission(paused);
+    void useLoadingStore.getState().startLoading('mission_start','Opening the next judge preview…');
+    const task=import('./judgeTour.ts').then(module=>module.skipJudgePage(paused));
+    useLoadingStore.getState().registerLoaderTask(task.then(()=>{},()=>{}));
+    try{
+      const prepared=await task;
+      if(!demo)normalMission.current=mission;
+      setDemo(true);setDemoAvailable(true);setMission(prepared);setAutoplay(true);setOverviewOpen(null);
+    }catch{setSkipError('Preview unavailable. Your mission is safe; try Next or return home.');}
+    finally{setSkipBusy(false);}
   };
   useEffect(() => { const stop = () => setAutoBuilding(false); window.addEventListener('game-help-open', stop); return () => window.removeEventListener('game-help-open', stop); }, []);
   const frame: SelectionFrame = {
@@ -253,12 +292,13 @@ export default function ExactStory({ debugStepId, debugDemoChapter, initialHome,
           Debug · {debugStepId ?? debugDemoChapter} · Exit
         </button>
       ) : demo ? (
-        <button className="story-demo-exit" onClick={goHome}>Demo · Exit</button>
+        <button className="story-demo-exit" onClick={goHome}>{progress.assistance?.includes('judge-demo')?'Judge preview':'Demo'} · Exit</button>
       ) : null}
       <span className={`selection-save-status ${storageAvailable && !isDebugSession ? '' : 'is-unsaved'}`} role="status"
         title={isDebugSession ? 'Ephemeral debug session: local progress preserved' : storageAvailable ? 'Progress saved on this device' : 'Saving unavailable. Keep this tab open.'}>
         <i aria-hidden="true" /><span>{isDebugSession ? 'Debug Mode' : storageAvailable ? 'Saved' : 'Not saved'}</span>
       </span>
+      {skipError?<span role="alert" className="story-skip-error">{skipError}</span>:null}
 
     </>,
   };
@@ -283,16 +323,19 @@ export default function ExactStory({ debugStepId, debugDemoChapter, initialHome,
     }); }} />;
   else if (step.module === 8) screen = <Suspense fallback={<div className="crew-loading" role="status">Opening crew selection…</div>}><CrewScreen key={progress.stepId} session={mission} dispatch={dispatch} onBack={back} frame={frame} /></Suspense>;
   else if(step.module===14)screen=<Suspense fallback={<div className="crew-loading">Opening crew return…</div>}><ReturnScreen session={mission} dispatch={dispatch} frame={frame}/></Suspense>;
-  else if(step.module===13)screen=<Suspense fallback={<div className="crew-loading">Opening recovery…</div>}><RecoveryScreen session={mission} dispatch={dispatch} frame={frame}/></Suspense>;
-  else if(step.module===12)screen=<Suspense fallback={<div className="crew-loading">Opening science lab…</div>}><ScienceScreen session={mission} dispatch={dispatch} frame={frame}/></Suspense>;
-  else if(step.module===11)screen=<Suspense fallback={<div className="crew-loading">Opening Moon surface…</div>}><SurfaceScreen session={mission} dispatch={dispatch} frame={frame}/></Suspense>;
+  else if([11,12,13].includes(step.module))screen=<Suspense fallback={<div className="crew-loading">Opening your rover expedition…</div>}><RoverScreen session={mission} dispatch={dispatch} frame={frame}/></Suspense>;
   else if(step.module===10)screen=<Suspense fallback={<div className="crew-loading">Opening Moon landing…</div>}><LandingScreen session={mission} dispatch={dispatch} frame={frame}/></Suspense>;
   else if(step.module===9)screen=<Suspense fallback={<div className="crew-loading">Opening Moon journey…</div>}><JourneyScreen session={mission} dispatch={dispatch} frame={frame}/></Suspense>;
   else if (step.module === 7) screen = <FlightScreen session={mission} dispatch={dispatch} onBack={back} frame={frame} />;
+  else if(step.id==='rocket-assembly')screen=<Suspense fallback={<div className="crew-loading">Opening rocket hangar…</div>}><RocketAssemblyScreen session={mission} dispatch={dispatch} onBack={back} frame={frame}/></Suspense>;
   else if (['crew-check','systems-check','stress-check','rocket-pack','launch-ready'].includes(step.id)) screen = <Suspense fallback={<div className="crew-loading" role="status">Opening mission checks…</div>}><HumanReadinessScreen key={step.id} session={mission} dispatch={dispatch} onBack={back} frame={frame}/></Suspense>;
   else if (step.module === 6) screen = <ReadinessScreen key={progress.stepId} session={mission} dispatch={dispatch} onBack={back} frame={frame} />;
   else screen = <WorkshopScreen key={progress.stepId} session={mission} dispatch={dispatch} onBack={back} frame={frame}
     autoBuilding={autoBuilding} onStopAutoBuild={() => setAutoBuilding(false)} onAutoBuild={() => { dispatch({ type: 'begin-auto-build' }); setAutoBuilding(true); }} />;
+
+  if(milestoneCard)screen=<MilestonePage frame={frame} mode={pending?'complete':overviewOpen==='map'?'map':'intro'} current={chapter.index} completed={pending}
+    onBack={()=>{if(overviewOpen==='map')setOverviewOpen(null);else if(pending)back();else goHome();}}
+    onNext={()=>{setOverviewOpen(null);setAutoplay(true);dispatch({type:pending?'milestone-continue':'milestone-start'});}}/>;
 
   if (archiveOpen) {
     return (
@@ -303,13 +346,15 @@ export default function ExactStory({ debugStepId, debugDemoChapter, initialHome,
   }
 
   return <PlayerCharacterProvider value={progress.playerGender}><GameSettingsProvider voiceEnabled={voiceEnabled} onToggleVoice={toggleAudioMute} onRestart={requestRestart}><LearningProvider>
+    <StoryNavigationContext.Provider value={home?null:{progress:chapter,reviewing:!!mission.review,autoplay:autoplay&&!mission.review,card:milestoneCard,back,skip:step.kind==='endpoint'&&!milestoneCard?undefined:skipPage,skipping:skipBusy,
+      forward:()=>dispatch({type:'next'}),overview:()=>{setAutoBuilding(false);setAutoplay(false);setMission(current=>pauseMission(current));setOverviewOpen('map');}}}>
     <MobileGameProvider active={!home} voiceEnabled={voiceEnabled} onToggleVoice={toggleAudioMute} onHome={goHome} onPause={pauseGame} onResume={resumeGame}>
-      <MissionBoundary key={`${home}-${demo}-${progress.stepId}`} frame={frame} onReload={() => {
+      <MissionBoundary key={`${home}-${demo}-${progress.stepId}-${milestoneCard}`} frame={frame} onReload={() => {
         const current = latest.current;
         const saved = current.demo ? writeBrowserDemoSession(current) : writeBrowserSelectionSession(current.progress,current.voiceEnabled,current.preparation,current.readiness,current.flight,current.moon,current.repair);
         if (saved) window.location.reload(); else { setStorageAvailable(false); goHome(); }
-      }}>{screen}</MissionBoundary><GestureGuide key={`${progress.stepId}-${home}`} step={progress.stepId} repair={mission.repair && !repairApplied(mission.repair, mission.preparation, mission.moon.crew) ? mission.repair : undefined} hidden={home || restart || autoBuilding || demoGender !== null} /><RestartStoryDialog open={restart} onClose={() => setRestart(false)} onConfirm={reset} />
+      }}>{screen}</MissionBoundary><GestureGuide key={`${progress.stepId}-${home}`} step={progress.stepId} repair={mission.repair && !repairApplied(mission.repair, mission.preparation, mission.moon.crew, mission.progress.selections.objective ?? 'lunar-ice', mission.moon.plan) ? mission.repair : undefined} hidden={home || milestoneCard || !!mission.review || restart || autoBuilding || demoGender !== null} /><RestartStoryDialog open={restart} onClose={() => setRestart(false)} onConfirm={reset} />
     {demoGender !== null ? <DemoMenu onClose={closeDemo} busy={demoBusy} error={demoError} resumeAvailable={demoAvailable} onResume={resumeDemo} onChoose={startDemo}/> : null}
     </MobileGameProvider>
-  </LearningProvider></GameSettingsProvider></PlayerCharacterProvider>;
+  </StoryNavigationContext.Provider></LearningProvider></GameSettingsProvider></PlayerCharacterProvider>;
 }

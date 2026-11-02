@@ -1,3 +1,4 @@
+import {roverReady} from './rover.ts';
 import type {MoonSession} from './session.ts';
 import type {SurfaceState} from './surface.ts';
 import type {PreparationSelection} from '../design.ts';
@@ -29,4 +30,4 @@ export function updateIncidents(h:IncidentState,surface:SurfaceState,linked:bool
   return next;
 }
 export function careKitAvailable(h:IncidentState,prep:PreparationSelection){return prep.sciencePartIds.includes('field-care-kit')&&!h.kitUsed;}
-export function surfaceSecured(moon:MoonSession){const h=moon.science.hazards,s=moon.surface;return moon.science.committed&&s.location==='base'&&s.stage==='idle'&&s.crewSheltered&&!h.pending&&!h.recovery&&!h.evaBlocked&&h.roverParked&&h.dataArchived&&h.crewChecked&&moon.science.records.every(r=>r.transmitted)&&(moon.objective!=='lunar-geology'||moon.science.samples.every(p=>p.stowed));}
+export function surfaceSecured(moon:MoonSession){if(moon.rover)return roverReady(moon.rover);const h=moon.science.hazards,s=moon.surface;return moon.science.committed&&s.location==='base'&&s.stage==='idle'&&s.crewSheltered&&!h.pending&&!h.recovery&&!h.evaBlocked&&h.roverParked&&h.dataArchived&&h.crewChecked&&moon.science.records.every(r=>r.transmitted)&&(moon.objective!=='lunar-geology'||moon.science.samples.every(p=>p.stowed));}

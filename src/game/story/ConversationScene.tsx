@@ -27,6 +27,7 @@ export function ConversationScene({ title, lines, lineIndex, playerName, onNext,
   const line = lines[lineIndex];
   if (!line) throw new Error(`Missing conversation line: ${title}/${lineIndex}`);
   const text = getDialogueText({ ...line, text: COMPACT_DIALOGUE[line.id] ?? line.text }, playerName);
+  const voiceId = line.id === 'appointment-01' ? 'greeting-welcome' : COMPACT_DIALOGUE[line.id] ? `short-${line.id}` : line.id;
   const label = `${getSpeakerLabel(line, playerName)} · ${line.speaker.character === 'chief' ? 'Mission director' : line.sourceSpeaker === 'Charlie' ? 'You' : 'Mission engineer'}`;
   const [controller] = useState(() => new NarrationController(browserNarrationEnvironment()));
   const narration = useSyncExternalStore(controller.subscribe, controller.getSnapshot, controller.getSnapshot);
@@ -40,11 +41,11 @@ export function ConversationScene({ title, lines, lineIndex, playerName, onNext,
   useEffect(() => {
     // Defer one turn so StrictMode's setup/cleanup probe cannot submit duplicate audio.
     const timer = enabled && autoplay ? setTimeout(() => {
-      if (!document.hidden) controller.speak(text, line.speaker.character, COMPACT_DIALOGUE[line.id] ? `short-${line.id}` : line.id, gender);
+      if (!document.hidden) controller.speak(text, line.speaker.character, voiceId, gender);
     }, 0) : undefined;
     if (!enabled) controller.stop();
     return () => { clearTimeout(timer); controller.stop(); };
-  }, [controller, text, line.id, line.speaker.character, enabled, autoplay, gender]);
+  }, [controller, text, voiceId, line.speaker.character, enabled, autoplay, gender]);
   useEffect(() => {
     const hide = () => { if (document.hidden) controller.pause(); };
     document.addEventListener('visibilitychange', hide);
@@ -72,8 +73,7 @@ export function ConversationScene({ title, lines, lineIndex, playerName, onNext,
 
   return <StoryShell onHome={onHome} exitURL={exitURL} headerExtra={headerExtra} voiceEnabled={enabled}
     onToggleVoice={toggleVoice} voiceAvailable={available} skipTarget="conversation-dialogue"
-    controls={<StoryControls onBack={back} onNext={next} nextLabel={nextLabel} progress={<div className="story-briefing-progress">
-      <span aria-label={`Line ${lineIndex + 1} of ${lines.length}`}>Briefing · {lineIndex + 1}/{lines.length}</span>
+    controls={<StoryControls keepProgress onBack={back} onNext={next} nextLabel={nextLabel} progress={<div className="story-briefing-progress">
       {onSkip ? <button className="story-skip-briefing" aria-label="Skip briefing" title="Skip briefing" onClick={() => { controller.stop(); onSkip(); }}><SkipForward size={18} /><span>Skip briefing</span></button> : null}
     </div>} />}>
     <main className="conversation-main" aria-label={title}>
@@ -90,7 +90,7 @@ export function ConversationScene({ title, lines, lineIndex, playerName, onNext,
         <div className="conversation-dialogue" id="conversation-dialogue" tabIndex={0}>
           <div className="conversation-speaker"><AudioLines size={22} /><strong>{label}</strong>
             <button className="conversation-icon" aria-label="Replay this line" title="Replay this line"
-              disabled={!available || !enabled} onClick={() => controller.speak(text, line.speaker.character, COMPACT_DIALOGUE[line.id] ? `short-${line.id}` : line.id, gender)}><Volume2 size={20} /></button>
+              disabled={!available || !enabled} onClick={() => controller.speak(text, line.speaker.character, voiceId, gender)}><Volume2 size={20} /></button>
           </div>
           <p key={line.id} data-line-id={line.id} aria-live="polite" aria-atomic="true"><LearningText text={text} /></p>
         </div>

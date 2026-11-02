@@ -1,5 +1,5 @@
 import { missionSignature, packingComplete, allChecksAccepted } from './readiness.ts';
-import { humanPacked } from './moon/validation.ts';
+import { rocketReady } from './moon/validation.ts';
 import type { MoonSession } from './moon/session.ts';
 import type { ReadinessState } from './readiness.ts';
 import type { PreparationSelection } from './design.ts';
@@ -10,13 +10,13 @@ export const FLIGHT_GATES = [{ t: 16, event: 'booster', label: 'Separate booster
 export type FlightAction = 'booster' | 'fairing';
 export type FlightMode = 'guided' | 'challenge';
 export const RELEASE_WINDOW_SECONDS = 4;
-export interface FlightState { version: 1; signature: string | null; t: number; status: 'ready' | 'running' | 'paused' | 'awaiting' | 'complete'; speed: 1 | 1.5 | 2; events: FlightAction[]; skipped: boolean; mode: FlightMode; missedWindow: boolean; attempts: number; feedback: string | null }
+export interface FlightState { version: 1; signature: string | null; t: number; status: 'ready' | 'running' | 'paused' | 'awaiting' | 'complete'; speed: 1 | 1.5 | 2; events: FlightAction[]; releaseTimes?: Partial<Record<FlightAction, number>>; skipped: boolean; mode: FlightMode; missedWindow: boolean; attempts: number; feedback: string | null }
 export type FlightEvent = { type: 'flight-start' } | { type: 'flight-tick'; seconds: number } | { type: 'flight-pause' } | { type: 'flight-resume' }
   | { type: 'flight-speed'; speed: number } | { type: 'flight-action'; action: FlightAction } | { type: 'flight-skip' } | { type: 'flight-replay' }
   | { type: 'flight-mode'; mode: FlightMode } | { type: 'flight-retry-window' };
 export function emptyFlight(): FlightState { return { version: 1, signature: null, t: 0, status: 'ready', speed: 1, events: [], skipped: false, mode: 'guided', missedWindow: false, attempts: 0, feedback: null }; }
 export function launchAuthorized(progress: StoryProgress, preparation: PreparationSelection, readiness: ReadinessState, moon?: MoonSession) {
-  if(moon)return !!moon.human.approved&&moon.human.approved.signature===moon.designSignature&&humanPacked(moon,preparation)&&allChecksAccepted(progress,preparation,readiness,moon);
+  if(moon)return !!moon.human.approved&&moon.human.approved.signature===moon.designSignature&&rocketReady(moon,preparation)&&allChecksAccepted(progress,preparation,readiness,moon);
   return !!readiness.approved && readiness.approved.signature === missionSignature(progress, preparation) && packingComplete(progress, preparation, readiness);
 }
 export function pendingFlightAction(state: FlightState) { return FLIGHT_GATES.find(gate => state.t >= gate.t && !state.events.includes(gate.event)); }
@@ -27,7 +27,7 @@ export function reduceFlight(state: FlightState, event: FlightEvent, signature: 
   if (event.type === 'flight-mode') return state.status === 'ready' && ['guided', 'challenge'].includes(event.mode) ? { ...state, mode: event.mode } : state;
   if (event.type === 'flight-speed') return [1, 1.5, 2].includes(event.speed) ? { ...state, speed: event.speed as FlightState['speed'] } : state;
   if (event.type === 'flight-start') return state.status === 'ready' ? { ...state, signature, status: 'running' } : state;
-  if (event.type === 'flight-skip') return { ...state, signature, t: FLIGHT_DURATION, events: ['booster', 'fairing'], status: 'complete', skipped: true };
+  if (event.type === 'flight-skip') return { ...state, signature, t: FLIGHT_DURATION, events: ['booster', 'fairing'], releaseTimes: { booster: 16, fairing: 24 }, status: 'complete', skipped: true };
   if (state.signature !== signature) return emptyFlight();
   if (event.type === 'flight-retry-window') {
     const gate = nextFlightGate(state);
@@ -39,11 +39,11 @@ export function reduceFlight(state: FlightState, event: FlightEvent, signature: 
   if (event.type === 'flight-action') {
     const gate = nextFlightGate(state);
     if (state.mode === 'guided') return state.status === 'awaiting' && gate?.event === event.action
-      ? { ...state, events: [...state.events, event.action], status: 'running' } : state;
+      ? { ...state, events: [...state.events, event.action], releaseTimes: { ...state.releaseTimes, [event.action]: state.t }, status: 'running' } : state;
     if (state.status !== 'running' || !gate) return state;
     if (gate.event !== event.action || !releaseIsSafe(state)) return { ...state, attempts: state.attempts + 1,
       feedback: gate.event !== event.action ? 'Wrong order. Separate the booster first.' : gate.event === 'booster' ? 'Too soon! The booster is still pushing. Wait for green.' : 'Too soon! Keep the fairing through the thick air.' };
-    return { ...state, events: [...state.events, event.action], status: 'running', feedback: 'Clean release! Great timing.' };
+    return { ...state, events: [...state.events, event.action], releaseTimes: { ...state.releaseTimes, [event.action]: state.t }, status: 'running', feedback: 'Clean release! Great timing.' };
   }
   if (event.type !== 'flight-tick' || state.status !== 'running' || !Number.isFinite(event.seconds) || event.seconds <= 0) return state;
   // A suspended tab or stalled callback cannot leap over an interaction.
@@ -67,6 +67,13 @@ export function restoreFlight(raw: unknown, signature: string, authorized: boole
   const missedWindow = mode === 'challenge' && !!gate && saved.t === gate.t + RELEASE_WINDOW_SECONDS;
   const clean: FlightState = { ...emptyFlight(), signature, t: saved.t, speed: saved.speed, events: [...saved.events], skipped: saved.skipped, mode, missedWindow,
     attempts: Number.isInteger(saved.attempts) && saved.attempts >= 0 ? saved.attempts : 0 };
+  // Older saves have no release clock; retain their milestone timing.
+  clean.releaseTimes = {};
+  for (const gate of FLIGHT_GATES) if (clean.events.includes(gate.event)) {
+    const releasedAt = saved.releaseTimes?.[gate.event];
+    clean.releaseTimes[gate.event] = typeof releasedAt === 'number' && Number.isFinite(releasedAt) && releasedAt >= gate.t
+      && releasedAt <= Math.min(saved.t, gate.t + allowance) ? releasedAt : gate.t;
+  }
   if (saved.t === FLIGHT_DURATION && saved.status === 'complete' && clean.events.length === 2) return { ...clean, status: 'complete' };
   if (saved.skipped || saved.status === 'complete' || !['running', 'paused', 'awaiting'].includes(saved.status)) return emptyFlight();
   return { ...clean, status: mode === 'guided' && pendingFlightAction(clean) || missedWindow ? 'awaiting' : 'paused' };

@@ -3,6 +3,8 @@ import {RETURN_LINES} from './moon/returnCopy.ts';
 import { CHECK_LINES } from './moon/checkCopy.ts';
 import { CREW_ADVICE, CREW_BRIEFING } from './moon/crewDialogue.ts';
 import { STORY_DIALOGUE } from './dialogue.ts';
+import { ROVER_TALKS, ROVER_RADIO } from './moon/roverCopy.ts';
+import { ROCKET_LINES } from './moon/rocketAssemblyCopy.ts';
 import { GLOSSARY } from './glossary.ts';
 import { COMPACT_DIALOGUE } from './compactCopy.ts';
 import type { StoryCharacterId } from './types.ts';
@@ -89,6 +91,9 @@ import { SURFACE_LINES } from './moon/surfaceCopy.ts';
 import { LANDING_LINES } from './moon/landingCopy.ts';
 import { JOURNEY_LINES } from './moon/journeyCopy.ts';
 export const VOICE_CLIPS: Record<string, { text: string; character: StoryCharacterId }> = Object.fromEntries([
+  ...Object.entries(ROVER_TALKS).flatMap(([talk,lines])=>lines.map((line,index)=>[`rover-run-${talk}-${index}`,{text:line.text,character:line.speaker==='Commander'?'commander' as const:'chief' as const}])),
+  ...Object.entries(ROVER_RADIO).map(([id,line])=>[`rover-radio-${id}`,{text:line.text,character:line.speaker==='Commander'?'commander' as const:'chief' as const}]),
+  ...Object.entries(ROCKET_LINES).map(([id,text])=>[`rocket-${id}`,{text,character:'commander' as const}]),
   ...GEOLOGY_SITE_BRIEFING.map(line=>[line.id,{text:line.text,character:'commander' as const}]),
   ['geo-scout',{text:'Visit the rock patch, then return to Base.',character:'commander' as const}],
   ...Object.entries(GEOLOGY_LINES).map(([id,text])=>[`geo-${id}`,{text,character:'commander' as const}]),

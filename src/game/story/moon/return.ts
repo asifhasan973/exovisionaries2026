@@ -27,7 +27,7 @@ export function returnResources(moon:MoonSession,r:ReturnState):MissionResources
   const origin=surfaceResources(moon,moon.surface);
   return {...origin,elapsedMissionSeconds:origin.elapsedMissionSeconds+r.elapsedSeconds,
     supportUnitsRemaining:Math.max(0,(origin.supportUnitsRemaining??0)-3*r.elapsedSeconds/86400),
-    platformEnergyWh:Math.max(0,(origin.platformEnergyWh??0)-PLATFORM_MODEL.lifeSupportLoadW*r.elapsedSeconds/3600),
+    platformEnergyWh:Math.max(0,(origin.platformEnergyWh??0)-(moon.human.approved?.accounting.lifeSupportLoadW??PLATFORM_MODEL.lifeSupportLoadW)*r.elapsedSeconds/3600),
     ascentPropellantKg:Math.max(0,(origin.ascentPropellantKg??0)-r.ascentUsedKg),
     returnPropellantKg:Math.max(0,(origin.returnPropellantKg??0)-r.serviceUsedKg)};
 }
@@ -42,7 +42,7 @@ export function returnReport(moon:MoonSession,r:ReturnState){
   const tripSeconds=RETURN_MODEL.ascentSeconds+RETURN_MODEL.rendezvousSeconds+RETURN_MODEL.burnSeconds+TRANSFER_MODEL.returnDays*86400+RETURN_MODEL.entrySeconds+RETURN_MODEL.chuteSeconds;
   // Contingency is a consumable reserve, not a reason to strand a crew who can still get home.
   const supplyOK=(origin.supportUnitsRemaining??0)>=3*tripSeconds/86400;
-  const energyOK=(origin.platformEnergyWh??0)>=PLATFORM_MODEL.lifeSupportLoadW*tripSeconds/3600;
+  const energyOK=(origin.platformEnergyWh??0)>=(account?.lifeSupportLoadW??PLATFORM_MODEL.lifeSupportLoadW)*tripSeconds/3600;
   const contingencyOK=(origin.supportUnitsRemaining??0)>=3*(tripSeconds/86400+PLATFORM_MODEL.contingencyDays);
   return {ascentBurn,dockingBurn,earthBurn,contingencyOK,supplyOK,energyOK,fuelOK:ascentFuel>=ascentBurn+dockingBurn&&serviceFuel>=earthBurn,
     feasible:!!account&&supplyOK&&energyOK&&ascentFuel>=ascentBurn+dockingBurn&&serviceFuel>=earthBurn,
@@ -139,10 +139,11 @@ export function restoreReturn(raw:unknown,moon:MoonSession):ReturnState {
 export const returnComplete=(r:ReturnState,signature:string)=>r.signature===signature&&r.stage==='splashdown'&&r.crewLocation==='ocean';
 export function missionOutcome(moon:MoonSession){
   if(!returnComplete(moon.returnFlight,moon.designSignature))return null;
+  if(moon.rover&&moon.rover.version<4){const collected=moon.rover.deposited.length;return {status:collected>=2?'success' as const:'safe-return' as const,reasons:['Three crew recovered on Earth.',`${collected} sealed samples returned; composition remains unconfirmed.`,'Rover and descent stage left on the Moon.',`${returnedSampleKg(moon).toFixed(1)} kg of physical samples returned.`]};}
   const records=moon.science.records.filter(r=>r.transmitted),confirmed=records.some(r=>r.kind==='water-evidence'&&r.result==='confirmed');
   const geological=records.some(r=>r.classification&&r.classification!=='inconclusive'),achieved=moon.objective==='lunar-geology'?geological:confirmed;
   const status=achieved&&!moon.science.fieldworkStopped?'success':records.length?'partial':'safe-return';
   const reasons=['Three crew recovered on Earth.',moon.objective==='lunar-geology'?geological?'Rock classification supported by delivered clues.':records.length?'Rock data delivered; classification remains uncertain.':'Crew returned without a rock finding.':confirmed?'Water evidence delivered.':records.length?'Useful data delivered; water was not confirmed.':'Crew returned without a water finding.',
-    ...(moon.science.fieldworkStopped?['Fieldwork stopped early for safety.']:[]),'Rover and descent stage left on the Moon.',moon.objective==='lunar-geology'?`${returnedSampleKg(moon).toFixed(1)} kg of sealed rock samples returned.`:'No physical sample collected for Earth return.'];
+    ...(moon.science.fieldworkStopped?['Fieldwork stopped early for safety.']:[]),'Rover and descent stage left on the Moon.',moon.rover||moon.objective==='lunar-geology'?`${returnedSampleKg(moon).toFixed(1)} kg of sealed samples returned.`:'No physical sample collected for Earth return.'];
   return {status:status as 'success'|'partial'|'safe-return',reasons};
 }

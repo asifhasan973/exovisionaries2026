@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
+import { LockKeyhole } from 'lucide-react';
 import { createLaunchHardware } from './launchHardware.ts';
 import { createLaunchSite } from './launchSite.ts';
 import { disposeGroup } from './workshopMeshes.ts';
 import type { PreparationSelection } from './design.ts';
 import { flightTelemetry } from './flight.ts';
 import type { FlightState } from './flight.ts';
+import { isEngineFrozen, useOrientationLifecycleStore } from '../../state/orientationLifecycleStore.ts';
 
 export function FlightViewport({ preparation, flight, reducedMotion, crewed = false }: { preparation: PreparationSelection; flight: FlightState; reducedMotion: boolean; crewed?: boolean }) {
   const host = useRef<HTMLDivElement>(null), model = useRef({ flight, reducedMotion }), repaint = useRef(() => {});
@@ -16,7 +18,7 @@ export function FlightViewport({ preparation, flight, reducedMotion, crewed = fa
     let disposed = false, frame = 0;
     let renderer: THREE.WebGLRenderer;
     const fail = () => queueMicrotask(() => { if (!disposed) setFailed(true); });
-    try { renderer = new THREE.WebGLRenderer({ alpha: false, antialias: true, powerPreference: 'low-power' }); } catch { fail(); return () => { disposed = true; }; }
+    try { renderer = new THREE.WebGLRenderer({ alpha: false, antialias: true, preserveDrawingBuffer: true, powerPreference: 'low-power' }); } catch { fail(); return () => { disposed = true; }; }
     renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5)); renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.15; renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap; mount.appendChild(renderer.domElement);
     const scene = new THREE.Scene(), camera = new THREE.PerspectiveCamera(35, 1, .1, 250); camera.position.set(15, 10, 24); camera.lookAt(0, 6, 0);
     scene.add(new THREE.HemisphereLight(0xc2def4, 0x263348, 1.4));
@@ -24,6 +26,18 @@ export function FlightViewport({ preparation, flight, reducedMotion, crewed = fa
     const rim = new THREE.DirectionalLight(0x96c7ff, 2); rim.position.set(8, 3, -5); scene.add(rim);
     const hardware = createLaunchHardware(preparation,crewed); scene.add(hardware.root);
     hardware.root.traverse(object => { if (object instanceof THREE.Mesh) object.castShadow = true; });
+    // Each fairing first tips about its base rim, then becomes an independent
+    // inertial body. Cargo never belongs to either removable shell.
+    hardware.halves.forEach((half,i) => {
+      const sign = i ? -1 : 1;
+      for (const child of half.children) { child.position.x -= sign*1.08; child.position.y -= 8.08; }
+      half.matrixAutoUpdate = false; scene.add(half);
+    });
+    const ejectionFrame = new THREE.Object3D(), hinge = new THREE.Object3D();
+    const rocketPose = (object: THREE.Object3D, t: number) => {
+      const progress = THREE.MathUtils.clamp((t-4)/34,0,1), angle = progress*Math.PI*.47;
+      object.rotation.z = -angle; object.position.set(-Math.sin(angle)*5,6-Math.cos(angle)*6,0); object.updateMatrixWorld(true);
+    };
     const site = createLaunchSite(); scene.add(site.root);
     site.root.add(hardware.platform); hardware.platform.visible = false;
     const map = new THREE.TextureLoader().load(`${import.meta.env.BASE_URL}story/flight/earth-blue-marble.jpg`, texture => {
@@ -47,8 +61,10 @@ export function FlightViewport({ preparation, flight, reducedMotion, crewed = fa
     let visualT = model.current.flight.t, previousTime = 0;
     const paint = (time: number) => {
       const state = model.current.flight, quiet = reduced.matches || model.current.reducedMotion;
-      visualT = quiet ? state.t < 4 ? 0 : state.t < 16 ? 8 : state.t < 24 ? 16 : state.t < 38 ? 24 : 38
-        : !previousTime ? state.t : visualT + (state.t - visualT) * .28; previousTime = time;
+      if (!isEngineFrozen() && !document.hidden) {
+        visualT = state.status === 'ready' ? 0 : quiet ? state.t < 4 ? 0 : state.t < 16 ? 8 : state.t < 24 ? 16 : state.t < 38 ? 24 : 38
+          : !previousTime ? state.t : visualT + (state.t - visualT) * .28; previousTime = time;
+      }
       const telemetry = flightTelemetry({ ...state, t: visualT });
       const progress = THREE.MathUtils.clamp((visualT - 4) / 34, 0, 1), radius = THREE.MathUtils.lerp(80, 16, progress);
       const reveal = THREE.MathUtils.smoothstep(visualT,10,16);
@@ -58,13 +74,21 @@ export function FlightViewport({ preparation, flight, reducedMotion, crewed = fa
       atmosphere.material.opacity = .12 * reveal; atmosphere.scale.setScalar(radius * 1.018); atmosphere.position.copy(earth.position);
       starsMaterial.opacity = THREE.MathUtils.clamp((telemetry.altitudeKm - 30) / 80, 0, 1);
       scene.background = new THREE.Color(0x759bb7).lerp(new THREE.Color(0x060c1c), THREE.MathUtils.smoothstep(visualT,4,20));
-      const angle = progress * Math.PI * .47;
-      hardware.root.rotation.z = -angle; hardware.root.position.set(-Math.sin(angle) * 5, 6 - Math.cos(angle) * 6, 0);
-      const fall = Math.max(0, visualT - 16);
+      rocketPose(hardware.root,visualT);
+      const fall = Math.max(0, visualT - (state.releaseTimes?.booster ?? 16));
       hardware.booster.position.set(state.events.includes('booster') ? -fall * .4 : 0, state.events.includes('booster') ? -fall * .8 : 0, 0);
       hardware.booster.rotation.z = state.events.includes('booster') ? -fall * .04 : 0; hardware.booster.visible = fall < 10;
-      const opening = state.events.includes('fairing') ? Math.min(9, Math.max(0, visualT - 24) * 1.1 + .1) : 0;
-      hardware.halves.forEach((half, i) => { half.position.x = (i ? -1 : 1) * opening; half.position.y = -opening * .25; half.rotation.z = (i ? 1 : -1) * opening * .08; half.visible = opening < 8; });
+      const released = state.events.includes('fairing'), releasedAt = state.releaseTimes?.fairing ?? 24;
+      const age = released ? Math.max(0,visualT-releasedAt) : 0;
+      const tip = THREE.MathUtils.smoothstep(age,0,.75), freeTime = Math.max(0,age-.75);
+      rocketPose(ejectionFrame,released && age>.75 ? releasedAt+.75 : visualT);
+      hardware.halves.forEach((half,i) => {
+        const sign = i ? -1 : 1;
+        hinge.position.set(sign*(1.08+.06*tip+.65*freeTime),8.08-.015*tip-.25*freeTime,sign*.05*freeTime);
+        hinge.rotation.set(0,0,-sign*(.52*tip+.1*freeTime)); hinge.updateMatrix();
+        half.matrix.multiplyMatrices(ejectionFrame.matrixWorld,hinge.matrix); half.matrixWorldNeedsUpdate = true;
+        half.visible = !released || !quiet && age<7;
+      });
       hardware.escapeTower.visible=crewed&&visualT<21;hardware.escapeTower.position.set(Math.max(0,visualT-18)*.6,Math.max(0,visualT-18)*1.2,0);
       const upperBurn = state.events.includes('booster'); plume.position.y = upperBurn ? 5.4 : 0;
       plume.visible = telemetry.engineOn && (state.status === 'running' || state.status === 'paused' || state.status === 'awaiting'); flameMaterial.uniforms.time.value = quiet ? 0 : visualT * 2;
@@ -82,9 +106,11 @@ export function FlightViewport({ preparation, flight, reducedMotion, crewed = fa
       renderer.render(scene, camera);
     };
     let last = 0;
-    const animate = (time: number) => { if (disposed || document.hidden) return; if (time - last >= 32) { paint(time); last = time; }
+    const animate = (time: number) => { if (disposed || document.hidden || isEngineFrozen()) return; if (time - last >= 32) { paint(time); last = time; }
       if (!reduced.matches && !model.current.reducedMotion && (model.current.flight.status === 'running' || Math.abs(visualT - model.current.flight.t) > .01)) frame = requestAnimationFrame(animate); };
-    const wake = () => { cancelAnimationFrame(frame); if (!document.hidden) { paint(performance.now()); if (!reduced.matches && !model.current.reducedMotion && (model.current.flight.status === 'running' || Math.abs(visualT - model.current.flight.t) > .01)) frame = requestAnimationFrame(animate); } };
+    // A remounted or resized canvas still needs its frozen pose drawn once.
+    const wake = () => { cancelAnimationFrame(frame); paint(performance.now()); if (!document.hidden && !isEngineFrozen() && !reduced.matches && !model.current.reducedMotion && (model.current.flight.status === 'running' || Math.abs(visualT - model.current.flight.t) > .01)) frame = requestAnimationFrame(animate); };
+    const unsubscribe = useOrientationLifecycleStore.subscribe((state,previous) => { if(state.isFrozen!==previous.isFrozen)wake(); });
     repaint.current = wake;
     const resize = () => {
       renderer.setSize(Math.max(1, mount.clientWidth), Math.max(1, mount.clientHeight), false);
@@ -98,12 +124,13 @@ export function FlightViewport({ preparation, flight, reducedMotion, crewed = fa
     const observer = new ResizeObserver(resize); observer.observe(mount);
     const lost = (e: Event) => { e.preventDefault(); cancelAnimationFrame(frame); fail(); };
     renderer.domElement.addEventListener('webglcontextlost', lost); document.addEventListener('visibilitychange', wake); resize();
-    return () => { disposed = true; cancelAnimationFrame(frame); observer.disconnect(); document.removeEventListener('visibilitychange', wake); renderer.domElement.removeEventListener('webglcontextlost', lost);
+    return () => { disposed = true; cancelAnimationFrame(frame); unsubscribe(); observer.disconnect(); document.removeEventListener('visibilitychange', wake); renderer.domElement.removeEventListener('webglcontextlost', lost);
       repaint.current = () => {}; disposeGroup(scene); map.dispose(); sunlight.shadow.map?.dispose(); renderer.dispose(); renderer.forceContextLoss(); renderer.domElement.remove(); };
   }, [preparation,crewed]);
   return <div className="flight-viewport"><div ref={host} className="flight-canvas" role="img" aria-label={`${flightTelemetry(flight).title} — Earth ascent scene`} />
     {failed ? <div className="flight-fallback" role="status"><span>3D unavailable</span><RocketFallback /><p>Flight controls and telemetry still work.</p></div> : null}
     <span className="story-flight-scene-note">ILLUSTRATIVE FLIGHT · TIME COMPRESSED</span>{flight.t > 10 ? <span className="flight-sun-note">SUN · ≈150 million km away</span> : null}
+    {flight.events.includes('fairing') ? <span className="flight-cargo-lock"><LockKeyhole size={15}/>Cargo locked</span> : null}
   </div>;
 }
 function RocketFallback() { return <svg viewBox="0 0 120 240" role="img" aria-label="Spacecraft"><path d="M40 205V65Q60 5 80 65V205Z" fill="#ddddea" /><path d="M40 155h40v15H40Z" fill="#4f3a65" /><path d="M40 205 25 228h30m25-23 15 23H65" fill="#9d76bd" /><circle cx="60" cy="82" r="10" fill="#5699b7" /></svg>; }

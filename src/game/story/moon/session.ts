@@ -5,19 +5,21 @@ import type { CrewAssignment, CrewId, MoonObjective } from './catalog.ts';
 import { MOON_IMPLEMENTED, MOON_RULES, CREW_PLATFORM } from './rules.ts';
 import { defaultFlightPlan, restoreFlightPlan, PLATFORM_MODEL } from './platform.ts';
 import type { FlightPlan } from './platform.ts';
-import { emptyHuman, restoreHuman, humanPacked } from './validation.ts';
+import { emptyHuman, restoreHuman, rocketReady } from './validation.ts';
 import type { HumanValidation } from './validation.ts';
 import { emptyJourney, TRANSFER_MODEL } from './journey.ts';
 import type { JourneyState } from './journey.ts';
 import { emptyLanding } from './landing.ts';
 import type { LandingState } from './landing.ts';
 import { emptySurface } from './surface.ts';
+import type { RoverState } from './rover.ts';
 import type { SurfaceState } from './surface.ts';
 import { emptyScience } from './science.ts';
 import type { ScienceState } from './science.ts';
 import {emptyReturn} from './return.ts';
 import type {ReturnState} from './return.ts';
 import { rehearsalBudget } from './resources.ts';
+import { geologyBudget } from './geologyBudget.ts';
 
 export type MoonPhase = 'prepare' | 'validate' | 'earth-orbit' | 'transfer' | 'lunar-orbit' | 'descent' | 'surface' | 'ascent' | 'docking' | 'earth-return' | 'reentry' | 'debrief';
 export const MOON_PHASE_ORDER: readonly MoonPhase[] = ['prepare', 'validate', 'earth-orbit', 'transfer', 'lunar-orbit', 'descent', 'surface', 'ascent', 'docking', 'earth-return', 'reentry', 'debrief'];
@@ -37,6 +39,7 @@ export interface MissionResources {
 }
 export interface MoonCheckpoint { id: string; phase: MoonPhase; designSignature: string; resources: MissionResources }
 export interface MoonSession {
+  rover?: RoverState;
   version: 1; rulesVersion: number; architecture: typeof CREW_PLATFORM.id;
   objective: MoonObjective | null; site: MoonSite; phase: MoonPhase; designSignature: string;
   crew: CrewAssignment; plan: FlightPlan; human: HumanValidation; journey: JourneyState; landing: LandingState; surface: SurfaceState; science: ScienceState; returnFlight: ReturnState; geologyPartIds: string[]; scenarioSeed: number;
@@ -85,11 +88,11 @@ export function createMoonSession(progress: StoryProgress, preparation: Preparat
 }
 
 /** Only design-time fields restore during preparation modules. Saved flags cannot enable unimplemented human flight/science. */
-export function restoreMoonSession(raw: unknown, progress: StoryProgress, preparation: PreparationSelection): MoonSession {
+export function restoreMoonSession(raw: unknown, progress: StoryProgress, preparation: PreparationSelection, legacyInFlight=false): MoonSession {
   const fresh = createMoonSession(progress, preparation);
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return fresh;
   const saved = raw as Partial<MoonSession>;
-  if (saved.version !== 1 || ![1,MOON_RULES.version].includes(saved.rulesVersion as number) || saved.architecture !== CREW_PLATFORM.id) return fresh;
+  if (saved.version !== 1 || ![1,2,MOON_RULES.version].includes(saved.rulesVersion as number) || saved.architecture !== CREW_PLATFORM.id) return fresh;
   const crew = emptyCrew();
   for (const role of ['scientist', 'support'] as const) {
     const person = CREW_CANDIDATES.find(person => person.id === saved.crew?.[role]);
@@ -103,7 +106,7 @@ export function restoreMoonSession(raw: unknown, progress: StoryProgress, prepar
   const report = equipmentReport(equipmentIds(preparation, fresh.objective ?? 'lunar-ice', geologyPartIds), fresh.objective ?? 'lunar-ice');
   if (report.errors.some(error => error.startsWith('Choose one option'))) return fresh;
   const restored = { ...fresh, crew, plan, geologyPartIds, designSignature: canonical };
-  return { ...restored, human: restoreHuman(saved.human, restored, preparation),
+  return { ...restored, human: restoreHuman(saved.human, restored, preparation,progress.stepId==='systems-check',progress.stepId==='rocket-pack',legacyInFlight),
     migration: saved.migration === 'legacy-design-revalidation' ? saved.migration : 'fresh' };
 }
 
@@ -128,12 +131,13 @@ export function moonDesignReport(state: MoonSession, preparation: PreparationSel
   if (!state.objective || !state.site) issues.push('Choose a mission objective and site.');
   if (equipment.parts.some(part => part.id === 'trident' || part.family === 'drill') && preparation.drillDepthCm === null) issues.push('Choose a drill depth.');
   if (!crew.complete) issues.push('Assign a science and an orbit-support specialist.');
-  if (crew.credits > MOON_RULES.crewCredits) issues.push('Crew exceeds its separate credit allocation.');
+  if (objective === 'lunar-ice' && crew.credits > MOON_RULES.crewCredits) issues.push('Crew exceeds its separate credit allocation.');
+  if (objective === 'lunar-geology' && !geologyBudget(preparation,state.crew,state.plan).valid) issues.push('Geology mission exceeds its 10,000 MC or 100 kg science limit.');
   if (state.site === 'permanent-shadow' && !equipment.parts.some(part => part.id === 'advanced-thermal')) issues.push('Deep shadow needs advanced thermal protection.');
   if (!rehearsal.peakOK) issues.push('Battery cannot support the simultaneous peak load.');
   if (!rehearsal.energyOK) issues.push('Rehearsal needs more energy while preserving return reserve.');
   return { equipment, crew, rehearsal, issues, designReady: issues.length === 0,
-    crewedDepartureAuthorized: !!state.human.approved && humanPacked(state, preparation), readinessApproved: !!state.human.approved && humanPacked(state, preparation),
+    crewedDepartureAuthorized: !!state.human.approved && rocketReady(state, preparation), readinessApproved: !!state.human.approved && rocketReady(state, preparation),
     platformIssues: state.human.approved ? ['Departure plan checked. Route feasibility still gates the Moon-bound burns.'] : ['Complete crew, equipment, return and practice checks before locking the departure plan.'],
     earnedScience: state.evidence.reduce((sum, observation) => sum + observation.points, 0) };
 }

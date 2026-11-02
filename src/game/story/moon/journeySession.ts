@@ -20,7 +20,7 @@ export function reduceJourneyMission(s:WorkshopSession,event:JourneyMissionEvent
   if(event.type==='journey-confirm-route'){
     const j=s.moon.journey;
     if(s.progress.stepId!=='earth-orbit'||j.stage!=='route'||!j.route||!routeReport(s.moon,j.route).feasible)return s;
-    const journey={...j,stage:'tli-window' as const,elapsed:0,paused:false};
+    const journey=j.version===2?reduceJourney(j,{type:'journey-confirm'},s.moon):{...j,stage:'tli-window' as const,elapsed:0,paused:false};
     const completed=reduceStoryProgress(s.progress,{type:'complete-activity',activity:'earth-orbit'});
     return {...s,moon:{...s.moon,trajectory:j.route,journey},progress:reduceStoryProgress(completed,{type:'next'})};
   }

@@ -1,6 +1,7 @@
 """Build-time neural voice assets. No speech service or API key is used by players.
 Requires edge-tts in a Python virtual environment. Existing files are reusable.
 """
+import argparse
 import asyncio
 import json
 import pathlib
@@ -19,6 +20,13 @@ async def main():
     ], cwd=ROOT, text=True))
     lines = [(key, clip['text'], clip['character']) for key, clip in catalogue.items()]
     lines += [('male-' + key, clip['text'], 'commander-male') for key, clip in catalogue.items() if clip['character'] == 'commander']
+    all_lines = list(lines)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--ids', nargs='+', help='Record only these line IDs (both Commander voices).')
+    selected = parser.parse_args().ids
+    if selected:
+        requested = set(selected) | {'male-' + key for key in selected}
+        lines = [line for line in lines if line[0] in requested]
     semaphore = asyncio.Semaphore(1)
     async def build(item):
         key, text, character = item
@@ -37,6 +45,6 @@ async def main():
                     await asyncio.sleep(2 * (attempt + 1))
             print('Recorded', key, flush=True)
     await asyncio.gather(*(build(item) for item in lines))
-    (OUT / 'credits.json').write_text(json.dumps({'voices': VOICES, 'format': 'MP3', 'purpose': 'Synthetic character narration', 'lines': [{'id': key, 'character': actor, 'text': text} for key, text, actor in lines]}, indent=2))
+    (OUT / 'credits.json').write_text(json.dumps({'voices': VOICES, 'format': 'MP3', 'purpose': 'Synthetic character narration', 'lines': [{'id': key, 'character': actor, 'text': text} for key, text, actor in all_lines]}, indent=2))
 
 asyncio.run(main())

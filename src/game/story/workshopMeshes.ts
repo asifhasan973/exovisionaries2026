@@ -142,3 +142,14 @@ export function buildAssembly(preparation: PreparationSelection) {
   }
   return group;
 }
+
+/** The same selected rover and instruments are used in every cargo/surface scene. */
+export function buildRoverAssembly(preparation: PreparationSelection) {
+  const kit=buildAssembly(preparation),rover=new THREE.Group();
+  for(const part of [...kit.children]){
+    if(preparation.landerPartIds.includes(part.name)||partById(part.name)?.category==='lander')continue;
+    part.position.x-=2.1;rover.add(part);
+  }
+  disposeGroup(kit);
+  return rover;
+}

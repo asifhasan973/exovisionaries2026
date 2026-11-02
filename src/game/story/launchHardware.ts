@@ -1,10 +1,10 @@
 import * as THREE from 'three';
 import { createCrewedPlatform } from './moon/crewedMeshes.ts';
-import { buildAssembly } from './workshopMeshes.ts';
+import { buildAssembly, buildRoverAssembly } from './workshopMeshes.ts';
 import { partById } from './preparation.ts';
 import type { PreparationSelection } from './design.ts';
 
-/** A generic two-stage robotic launcher. Dimensions are illustrative, not a vehicle replica. */
+/** Shared two-stage game launcher. Dimensions are illustrative, not a vehicle replica. */
 export function createLaunchHardware(preparation: PreparationSelection, crewed = false) {
   const white = new THREE.MeshStandardMaterial({ color: 0xe8e9eb, metalness: .18, roughness: .46 });
   const silver = new THREE.MeshStandardMaterial({ color: 0xa7adb6, metalness: .82, roughness: .34 });
@@ -13,6 +13,8 @@ export function createLaunchHardware(preparation: PreparationSelection, crewed =
   const gold = new THREE.MeshStandardMaterial({ color: 0xbda36a, metalness: .66, roughness: .4 });
   const root = new THREE.Group(), booster = new THREE.Group(), upper = new THREE.Group();
   root.add(booster, upper);
+  const engines=new THREE.Group(),core=new THREE.Group(),interstage=new THREE.Group();
+  booster.add(engines,core,interstage);
   const cylinder = (top: number, bottom: number, height: number, y: number, material: THREE.Material, parent: THREE.Group) => {
     const mesh = new THREE.Mesh(new THREE.CylinderGeometry(top, bottom, height, 64), material);
     mesh.position.y = y; parent.add(mesh); return mesh;
@@ -27,18 +29,18 @@ export function createLaunchHardware(preparation: PreparationSelection, crewed =
   };
 
   // Continuous tank diameter, recessed joints, and a short interstage replace the exposed skinny neck.
-  cylinder(.91, .91, 4.6, 2.75, white, booster);
-  cylinder(.91, .86, .42, .25, graphite, booster);
-  cylinder(.91, .91, .78, 5.44, dark, booster);
-  for (const y of [.46, 1.2, 3.94, 5.05, 5.83]) ring(.916, y, booster);
-  rail(.925, 2.76, 4.45, -1.1, booster);
-  rail(.925, 2.76, 4.45, Math.PI - 1.1, booster);
+  cylinder(.91, .91, 4.6, 2.75, white, core);
+  cylinder(.91, .86, .42, .25, graphite, engines);
+  cylinder(.91, .91, .78, 5.44, dark, interstage);
+  for (const y of [.46, 1.2, 3.94, 5.05, 5.83]) ring(.916, y, y>5.1?interstage:core);
+  rail(.925, 2.76, 4.45, -1.1, core);
+  rail(.925, 2.76, 4.45, Math.PI - 1.1, core);
   // Small flush access panels and hold-down fittings, rather than full-height decorative ribs.
   for (const angle of [0, Math.PI / 2, Math.PI, Math.PI * 1.5]) {
     const panel = new THREE.Mesh(new THREE.BoxGeometry(.19, .32, .018), silver);
-    panel.position.set(Math.sin(angle) * .915, .72, Math.cos(angle) * .915); panel.rotation.y = angle; booster.add(panel);
+    panel.position.set(Math.sin(angle) * .915, .72, Math.cos(angle) * .915); panel.rotation.y = angle; core.add(panel);
     const fitting = new THREE.Mesh(new THREE.BoxGeometry(.14, .12, .09), dark);
-    fitting.position.set(Math.sin(angle) * .9, .14, Math.cos(angle) * .9); fitting.rotation.y = angle; booster.add(fitting);
+    fitting.position.set(Math.sin(angle) * .9, .14, Math.cos(angle) * .9); fitting.rotation.y = angle; engines.add(fitting);
   }
   const engineBell = (x: number, y: number, z: number, scale: number, parent: THREE.Group) => {
     const profile = [[.12,.52],[.11,.43],[.13,.32],[.2,.16],[.28,.04],[.3,0]].map(([r,h]) => new THREE.Vector2(r * scale, h * scale));
@@ -51,10 +53,10 @@ export function createLaunchHardware(preparation: PreparationSelection, crewed =
     const throat = new THREE.Mesh(new THREE.CircleGeometry(.12 * scale,24), dark);
     throat.rotation.x = Math.PI / 2; throat.position.set(x,y + .43 * scale,z); parent.add(throat);
   };
-  engineBell(0,-.18,0,1,booster);
+  engineBell(0,-.18,0,1,engines);
   for (let i = 0; i < 6; i++) {
     const a = i * Math.PI / 3;
-    engineBell(Math.sin(a) * .56,-.18,Math.cos(a) * .56,.8,booster);
+    engineBell(Math.sin(a) * .56,-.18,Math.cos(a) * .56,.8,engines);
   }
   engineBell(0,5.37,0,1.45,upper);
   cylinder(.91, .91, 1.96, 6.8, white, upper);
@@ -68,7 +70,15 @@ export function createLaunchHardware(preparation: PreparationSelection, crewed =
   ring(1.086,8.075,adapter,.019,dark);
 
   const payload = crewed ? new THREE.Group() : buildAssembly(preparation); root.add(payload);
-  if(crewed){const crew=createCrewedPlatform();crew.capsule.position.set(0,2.1,0);crew.capsule.scale.setScalar(.5);crew.lander.position.set(0,0,0);crew.lander.scale.setScalar(.55);payload.add(crew.capsule,crew.lander);}
+  let crewCapsule:THREE.Group|undefined,lunarLander:THREE.Group|undefined,roverCargo:THREE.Group|undefined;
+  if(crewed){
+    const crew=createCrewedPlatform();crew.hatchDoor.rotation.y=0;crew.sealIndicator.material=crew.sealedLight;
+    crew.capsule.position.set(0,1.8,0);crew.capsule.scale.setScalar(.45);crew.lander.position.set(-.25,0,0);crew.lander.scale.setScalar(.48);
+    const rover=buildRoverAssembly(preparation);
+    rover.position.set(.62,.2,.15);rover.scale.setScalar(.32);
+    payload.add(crew.capsule,crew.lander,rover);crewCapsule=crew.capsule;lunarLander=crew.lander;roverCargo=rover;
+    payload.userData.materials=crew.root.userData.materials;
+  }
 
   for (const child of crewed ? [] : payload.children) {
     const lander = partById(child.name)?.category === 'lander';
@@ -86,6 +96,41 @@ export function createLaunchHardware(preparation: PreparationSelection, crewed =
     }
   }
   payload.position.y = 8.1;
+
+  // Fairings carry aerodynamic loads, not the cargo. A separate adapter frame
+  // holds the spacecraft and rover throughout ascent, including fairing release.
+  const retention = new THREE.Group(); retention.name = 'payload-retention-frame'; retention.position.y = payload.position.y;
+  adapter.add(retention);
+  const brace = (from: THREE.Vector3, to: THREE.Vector3, radius = .025) => {
+    const direction = to.clone().sub(from), length = direction.length();
+    if (length < .001) return;
+    const beam = new THREE.Mesh(new THREE.CylinderGeometry(radius,radius,length,10),silver);
+    beam.position.copy(from).lerp(to,.5); beam.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),direction.normalize()); retention.add(beam);
+  };
+  ring(.84,.025,retention,.035,dark);
+  const deck = new THREE.Mesh(new THREE.CylinderGeometry(.82,.82,.07,32),graphite); deck.position.y = .035; retention.add(deck);
+  payload.updateMatrixWorld(true);
+  const toBay = payload.matrixWorld.clone().invert();
+  for (const cargo of crewed ? [lunarLander,roverCargo,crewCapsule] : [payload]) {
+    if (!cargo) continue;
+    // Compute the real contact plane after the common payload fit transform.
+    const box = new THREE.Box3().setFromObject(cargo).applyMatrix4(toBay);
+    const centre = box.getCenter(new THREE.Vector3()), size = box.getSize(new THREE.Vector3());
+    const capsuleSupport = cargo===crewCapsule;
+    const y = capsuleSupport ? cargo.position.y+.7*cargo.scale.y : Math.max(.08,box.min.y);
+    const halfX = Math.min(.64,Math.max(.1,size.x*(capsuleSupport ? .25 : .32))), halfZ = Math.min(.64,Math.max(.1,size.z*(capsuleSupport ? .25 : .32)));
+    if(capsuleSupport){
+      const collar = new THREE.Mesh(new THREE.TorusGeometry(.75*cargo.scale.x,.04,8,40),silver);
+      collar.rotation.x = Math.PI/2; collar.position.set(centre.x,y,centre.z); retention.add(collar);
+    }
+    for (const sx of [-1,1]) for (const sz of [-1,1]) {
+      const x = centre.x + sx*halfX, z = centre.z + sz*halfZ;
+      brace(new THREE.Vector3(sx*.67,.06,sz*.67),new THREE.Vector3(x,y,z),capsuleSupport ? .065 : .035);
+      const pad = new THREE.Mesh(new THREE.BoxGeometry(.16,.065,.14),gold); pad.position.set(x,y+.015,z); retention.add(pad);
+      const clamp = new THREE.Mesh(new THREE.BoxGeometry(.04,.13,.16),dark); clamp.position.set(x+sx*.055,y+.07,z); retention.add(clamp);
+    }
+    for (const sz of [-1,1]) brace(new THREE.Vector3(centre.x-halfX,y,centre.z+sz*halfZ),new THREE.Vector3(centre.x+halfX,y,centre.z+sz*halfZ),.035);
+  }
 
   // Tangent ogive: the shoulder flows smoothly into the curved nose instead of ending in a cone.
   const fairingRadius = 1.08, shoulder = 10.5, noseLength = 2.45;
@@ -130,7 +175,7 @@ export function createLaunchHardware(preparation: PreparationSelection, crewed =
       const material = new THREE.MeshStandardMaterial({ map,roughness:.46,metalness:.18 });
       material.addEventListener('dispose',() => map.dispose());
       const decal = new THREE.Mesh(new THREE.CylinderGeometry(.918,.918,2.85,24,1,true,.17,.7),material);
-      decal.position.y = 2.74; booster.add(decal);
+      decal.position.y = 2.74; core.add(decal);
     }
   }
   const escapeTower=new THREE.Group();root.add(escapeTower);escapeTower.visible=crewed;
@@ -140,5 +185,6 @@ export function createLaunchHardware(preparation: PreparationSelection, crewed =
   platform.position.y = -.37; root.add(platform); platform.name = 'launch-platform';
   const platformRing = new THREE.Mesh(new THREE.TorusGeometry(2.35,.015,6,64),silver);
   platformRing.rotation.x = Math.PI / 2; platformRing.position.y = .08; platform.add(platformRing);
-  return { root,booster,upper,adapter,payload,halves,platform,escapeTower };
+  return { root,booster,upper,adapter,payload,halves,platform,escapeTower,
+    assemblyParts:{engines,core,interstage,upper,adapter,lander:lunarLander,rover:roverCargo,capsule:crewCapsule,'cover-left':halves[0],'cover-right':halves[1],tower:escapeTower} };
 }

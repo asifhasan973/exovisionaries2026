@@ -8,10 +8,12 @@ import type { EngineerReaction } from './voiceClips.ts';
 import { engineerCue } from './engineer.ts';
 import './playability.css';
 import { LearningText } from './Learning.tsx';
+import { useStoryNavigation } from './storyNavigationContext.ts';
 
 export type { EngineerReaction } from './voiceClips.ts';
 export function EngineerCompanion({ reaction, token, voiceEnabled, statusText, scriptedReply }: { reaction: EngineerReaction; token: number; voiceEnabled: boolean; statusText?: string; scriptedReply?: { id: string; text: string } }) {
   const gender = usePlayerGender();
+  const autoplay=useStoryNavigation()?.autoplay!==false;
   const [controller] = useState(() => new NarrationController(browserNarrationEnvironment()));
   const narration = useSyncExternalStore(controller.subscribe, controller.getSnapshot, controller.getSnapshot);
   const [reply, setReply] = useState(() => ENGINEER_REPLIES[reaction][0]);
@@ -27,14 +29,14 @@ export function EngineerCompanion({ reaction, token, voiceEnabled, statusText, s
       setReply(chosen);
     }
     const chosen = scriptedReply ?? selection.current.reply;
-    const timer = (token || scriptedReply) && voiceEnabled && !statusText ? setTimeout(() => {
+    const timer = autoplay && (token || scriptedReply) && voiceEnabled && !statusText ? setTimeout(() => {
       if (!document.hidden) controller.speak(chosen.text, 'commander', chosen.id, gender);
     }, 0) : undefined;
     const hide = () => { if (document.hidden) controller.pause(); };
     document.addEventListener('visibilitychange', hide);
     const pause = () => controller.pause(); window.addEventListener('game-help-open', pause);
     return () => { clearTimeout(timer); controller.stop(); document.removeEventListener('visibilitychange', hide); window.removeEventListener('game-help-open', pause); };
-  }, [controller, reaction, token, voiceEnabled, gender, scriptedReply?.id, scriptedReply?.text, statusText]);
+  }, [controller, reaction, token, voiceEnabled, gender, scriptedReply?.id, scriptedReply?.text, statusText,autoplay]);
   return <aside className={`workshop-engineer ${celebrate ? 'is-celebrating' : reaction === 'warning' || reaction === 'trialFail' ? 'is-warning' : ''}`} data-speaking={narration.status === 'speaking'} aria-label="Mission engineer">
     <div className="engineer-character"><CharacterStage cue={cue} active speechTime={controller.getSpeechTime} speaking={narration.status === 'speaking'} label="Commander" /></div>
     <div className="engineer-bubble"><span>COMMANDER · MISSION ENGINEER</span><p role="status" aria-live="polite"><LearningText text={statusText ?? scriptedReply?.text ?? reply.text} /></p></div>

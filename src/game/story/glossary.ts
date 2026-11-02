@@ -22,7 +22,7 @@ export const GLOSSARY = {
   lander: { name: 'Lander', icon: '🛬', text: 'A spacecraft that lands on the ground.', example: 'It carries our rover safely down to the Moon.' },
   rover: { name: 'Rover', icon: '🛞', text: 'A robot with wheels that explores the ground.', example: 'Like a little car that can work on the Moon!' },
   mass: { name: 'Mass', icon: '⚖️', text: 'How much stuff is in something. We count it in kilograms (kg).', example: 'More parts add more mass. Our rocket can only carry so much.' },
-  budget: { name: 'Budget', icon: '🪙', text: 'How many coins you can spend.', example: 'You have 1,000 game coins. Save some by choosing smaller parts.' },
+  budget: { name: 'Budget', icon: '🪙', text: 'How many game coins you can spend.', example: 'Your mission shows a coin limit. Keep your choices under it.' },
   credits: { name: 'Credits', icon: '🪙', text: 'The pretend coins we use to buy game parts.', example: '100 credits means 100 game coins. It is not a real price.' },
   power: { name: 'Power', icon: '⚡', text: 'How fast something uses energy.', example: 'A busy drill uses energy faster than a small camera.' },
   peak: { name: 'Peak load', icon: '⚡', text: 'The most power your equipment needs at one time.', example: 'When the drill starts, it may need a big burst of power.' },

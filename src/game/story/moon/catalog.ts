@@ -43,7 +43,7 @@ export function equipmentReport(ids: readonly string[], objective: MoonObjective
   const credits = parts.reduce((sum, part) => sum + part.credits, 0);
   const massKg = parts.reduce((sum, part) => sum + part.massKg, 0);
   const scienceMassKg = parts.filter(part => part.category === 'science').reduce((sum, part) => sum + part.massKg, 0);
-  if (credits > MOON_RULES.equipmentCredits) errors.push('Equipment exceeds its credit allocation.');
+  if (objective === 'lunar-ice' && credits > MOON_RULES.equipmentCredits) errors.push('Equipment exceeds its credit allocation.');
   if (massKg > MOON_RULES.equipmentMassKg) errors.push('Equipment exceeds its mass allocation.');
   if (objective === 'lunar-geology' && scienceMassKg > MOON_RULES.geologyScienceMassKg) errors.push('Geology science exceeds 100 kg.');
   return { parts, credits, massKg, scienceMassKg, potentialSP: parts.reduce((sum, part) => sum + part.potentialSP, 0), errors };
@@ -72,7 +72,8 @@ export function missingEquipment(report: EquipmentReport, objective: MoonObjecti
 /** Examples use arithmetic from their parts, never the incorrect totals in the source table. */
 export const GEOLOGY_LOADOUTS = Object.freeze({
   budget: ['geo-camera-basic','geo-ir-basic','geo-xrf-basic','geo-drill-basic'],
-  balanced: ['geo-camera-balanced','geo-ir-balanced','geo-xrf-balanced','geo-xrd-balanced','geo-seismometer-basic','geo-scoop-basic'],
+  // The five-instrument reference kit is 38 kg / 390 MC; add a scoop or drill before a sample mission.
+  balanced: ['geo-camera-balanced','geo-ir-balanced','geo-xrf-balanced','geo-xrd-balanced','geo-seismometer-basic'],
   deep: ['geo-ir-advanced','geo-xrf-advanced','geo-xrd-advanced','geo-gpr-balanced','geo-drill-advanced','geo-camera-balanced'],
 });
 
