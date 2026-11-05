@@ -1,14 +1,12 @@
 # Cloudflare production deployment
 
-Production: https://zero-to-beyond.pages.dev/
-
-Project: `zero-to-beyond` · production branch: `main` · output: `dist/`.
+Production branch: `main` · output: `apps/web/dist/`.
 
 ## Automatic releases
 
 `.github/workflows/deploy.yml` runs for pushes and merges to `main`, or a manual
-workflow dispatch on `main`. It installs locked npm dependencies with Node.js 22,
-builds the production frontend, deploys through Wrangler 4.151.2, and verifies the
+workflow dispatch on `main`. It installs locked pnpm dependencies via `pnpm/action-setup@v4` with Node.js 22,
+builds the production frontend via `pnpm run build`, deploys through Wrangler 4.151.2, and verifies the
 live URL. Releases run sequentially. Action versions are pinned to commit SHAs.
 
 Missing credentials fail immediately; a green run cannot silently skip deployment.
@@ -34,7 +32,7 @@ Optional public GitHub Actions variables control loading timing:
 
 ## Caching and previous host
 
-`public/_headers` enables immutable caching for hashed assets, daily revalidation
+`apps/web/public/_headers` enables immutable caching for hashed assets, daily revalidation
 for audio, and fresh HTML/service-worker checks. Pages serves the SPA fallback.
 
 `vercel.json` disables automatic Git deployments to Vercel. Existing Vercel
@@ -45,8 +43,8 @@ releases are retained; Cloudflare is the production URL for new releases.
 After authenticating Wrangler to the same account:
 
 ```sh
-VITE_APP_ENV=production npm run build
-wrangler pages deploy dist --project-name=zero-to-beyond --branch=main
+VITE_APP_ENV=production pnpm run build
+wrangler pages deploy apps/web/dist --project-name=zero-to-beyond --branch=main
 ```
 
 ## Troubleshooting

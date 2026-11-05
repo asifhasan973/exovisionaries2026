@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "target": "es2023",
+    "lib": ["ES2023", "DOM"],
+    "module": "esnext",
+    "types": ["vite/client"],
+    "allowArbitraryExtensions": true,
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": false,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@exo/engine": ["../../packages/engine/src/index.ts"],
+      "@exo/engine/*": ["../../packages/engine/src/*"],
+      "@exo/audio": ["../../packages/audio/src/index.ts"],
+      "@exo/audio/*": ["../../packages/audio/src/*"],
+      "@exo/ui": ["../../packages/ui/src/index.ts"],
+      "@exo/ui/*": ["../../packages/ui/src/*"]
+    },
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "erasableSyntaxOnly": false,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["src"]
+}

@@ -1,16 +1,16 @@
 # Zero To Beyond · A Mission Forge Adventure
 
-The active game covers the Moon mission from choosing an objective through spacecraft assembly, crew selection, engineering checks, launch, lunar travel, landing, surface science, crew return and debrief. Ice and Geology have different instruments and evidence tasks. The opening uses short playable dialogue beats; the longer source transcript remains archived. Hardware decisions affect power, mass, routes and repair. The flight scenes are educational game models, not certified mission planning. See the [Moon mission design](docs/story/FULL-MOON-MISSION-PLAN.md), [Geology economy](docs/story/geology-economy.md), and [Laptop rover driving game](docs/story/free-rover.md), and [Crew return game](docs/story/return-game.md). The surface chapter is a remote rover sample run with sequential targets, held charging and animated delivery/storage. A centered [Judge preview Skip](docs/story/milestones-and-navigation.md#judge-preview-skip) provides a separate assisted tour through the mission.
+The active game covers the Moon mission from choosing an objective through spacecraft assembly, crew selection, engineering checks, launch, lunar travel, landing, surface science, crew return and debrief. Ice and Geology have different instruments and evidence tasks. The opening uses short playable dialogue beats; the longer source transcript remains archived. Hardware decisions affect power, mass, routes and repair. The flight scenes are educational game models, not certified mission planning. See the [Moon mission design](temp/old_backup/docs/story/FULL-MOON-MISSION-PLAN.md), [Geology economy](temp/old_backup/docs/story/geology-economy.md), and [Laptop rover driving game](temp/old_backup/docs/story/free-rover.md), and [Crew return game](temp/old_backup/docs/story/return-game.md). The surface chapter is a remote rover sample run with sequential targets, held charging and animated delivery/storage. A centered [Judge preview Skip](temp/old_backup/docs/story/milestones-and-navigation.md#judge-preview-skip) provides a separate assisted tour through the mission.
 
-The adventure has eight milestones, introduced before play and celebrated between chapters. A small circular header indicator replaces the long stage strips and starts at 0% for each new milestone. Back/Next share one navigation policy across the full mission; reviewing earlier flight pages preserves the live checkpoint and resources. See [Milestones and navigation](docs/story/milestones-and-navigation.md).
+The adventure has eight milestones, introduced before play and celebrated between chapters. A small circular header indicator replaces the long stage strips and starts at 0% for each new milestone. Back/Next share one navigation policy across the full mission; reviewing earlier flight pages preserves the live checkpoint and resources. See [Milestones and navigation](temp/old_backup/docs/story/milestones-and-navigation.md).
 
-The home scene now introduces both mission guides, the crew board uses individual specialist portraits, and the crew check shows a closing pressure hatch with visual and audio feedback. See [Mission visual systems](docs/story/visual-systems.md).
+The home scene now introduces both mission guides, the crew board uses individual specialist portraits, and the crew check shows a closing pressure hatch with visual and audio feedback. See [Mission visual systems](temp/old_backup/docs/story/visual-systems.md).
 
-Return preparation now includes four playable rehearsals: hold ascent thrust, aim an orbital burn, orient a heat shield and deploy Earth parachutes. Each has visible motion, sound, retry and saved progress. See [Return test lab](docs/story/return-test-lab.md).
+Return preparation now includes four playable rehearsals: hold ascent thrust, aim an orbital burn, orient a heat shield and deploy Earth parachutes. Each has visible motion, sound, retry and saved progress. See [Return test lab](temp/old_backup/docs/story/return-test-lab.md).
 
-Spacecraft packing has three visual cargo games: fit and clamp the capsule, align and lower the lander, and match supply cases to their lockers. Receipts require completed gameplay. See [Packing lab](docs/story/packing-lab.md).
+Spacecraft packing has three visual cargo games: fit and clamp the capsule, align and lower the lander, and match supply cases to their lockers. Receipts require completed gameplay. See [Packing lab](temp/old_backup/docs/story/packing-lab.md).
 
-Pack now leads to a separate 3D rocket assembly game before Ready. Fit eleven launch/payload parts, recover from an early cover, inspect the bay or use animated Quick build. The built rocket shares its geometry and selected rover with ascent. See [Main rocket assembly](docs/story/main-rocket-assembly.md).
+Pack now leads to a separate 3D rocket assembly game before Ready. Fit eleven launch/payload parts, recover from an early cover, inspect the bay or use animated Quick build. The built rocket shares its geometry and selected rover with ascent. See [Main rocket assembly](temp/old_backup/docs/story/main-rocket-assembly.md).
 
 During ascent, fairing halves tip from their base rims and drift clear while the cargo stays clamped to a visible adapter frame. Back pauses and returns to the previous screen; Notes has its own button.
 
@@ -32,28 +32,28 @@ The legacy chapter follows a three-person ice-exploration mission from its first
 
 The **Field notes** button opens a normally closed sidebar. Click a part in the shelf or on the rocket to show its real-world name, learning note and model values. The workshop has both illustrated 2D and interactive 3D building views.
 
-The flight is an educational story sequence with a compressed, authored timeline, not a trajectory solver. Hardware prices are game planning allocations and estimates, not verified vendor prices. The fictional crew and illustrative site concepts are labeled as such. Sources and assumptions are linked in Field notes and recorded in `ASSUMPTIONS.md`.
+The flight is an educational story sequence with a compressed, authored timeline, not a trajectory solver. Hardware prices are game planning allocations and estimates, not verified vendor prices. The fictional crew and illustrative site concepts are labeled as such. Sources and assumptions are linked in Field notes and recorded in `temp/old_backup/ASSUMPTIONS.md`.
 
 ## Run locally
 
-Requires Node.js and npm. From the project folder:
+Requires Node.js 22+ and pnpm. From the repository root:
 
 ```bash
-npm install
-npm run dev
+pnpm install
+pnpm dev
 ```
 
-Open `http://localhost:5173/`. `npm run build` produces a production bundle, and `npm run lint` runs the code checker. The following settings describe the preserved legacy experience at `/?experience=legacy`: **Settings → Start a new adventure** clears it and returns to an empty workshop. Night mode is the default. The header moon/sun button and Settings can switch to the original light palette; the choice saves separately from mission progress. The home cover keeps the story focused without a journey strip. Field notes can be dragged wider or narrower on desktop, and its width is saved. The workshop has 2D and 3D tabs that build the same rocket; the 3D view uses interactive procedural hardware meshes and supports placing, inspecting, undoing, and removing parts. Settings also includes sound and gentle motion controls.
+Open `http://localhost:5173/`. `pnpm build` produces production bundles across the workspace via Turborepo, and `pnpm lint` runs the code checker. The following settings describe the preserved legacy experience at `/?experience=legacy`: **Settings → Start a new adventure** clears it and returns to an empty workshop. Night mode is the default. The header moon/sun button and Settings can switch to the original light palette; the choice saves separately from mission progress. The home cover keeps the story focused without a journey strip. Field notes can be dragged wider or narrower on desktop, and its width is saved. The workshop has 2D and 3D tabs that build the same rocket; the 3D view uses interactive procedural hardware meshes and supports placing, inspecting, undoing, and removing parts. Settings also includes sound and gentle motion controls.
 
 ## Fixed-screen game layout
 
 The active game now stays within one viewport: the header and Back/Next bar remain in place while the current stage changes. Equipment uses category tabs and previous/next page arrows instead of a scrolling shelf. Short screens show one part per page; taller desktop screens show two. Drill planning, equipment details, receipts and science notes remain reachable through tabs or paged dialogs. The 3D assembly camera adapts to narrow canvases.
 
-Adjust the layout in `src/game/story/viewport.css`; equipment pagination is in `WorkshopScreen.tsx`, and shared paged overlays are in `GameInfo.tsx`. The preserved legacy experience keeps its separate layout.
+Adjust the layout in `apps/web/src/game/story/viewport.css`; equipment pagination is in `WorkshopScreen.tsx`, and shared paged overlays are in `GameInfo.tsx`. The preserved legacy experience keeps its separate layout.
 
 ## Landscape mode enforcement
 
-The mission flight deck, 3D workshop, and interactive launch screens require landscape orientation. Root-level orientation enforcement is provided by `OrientationGuard` (`src/components/common/OrientationGuard.tsx`).
+The mission flight deck, 3D workshop, and interactive launch screens require landscape orientation. Root-level orientation enforcement is provided by `OrientationGuard` (`@exo/ui`, `packages/ui/src/components/OrientationGuard.tsx`).
 
 - **Automatic detection**: Portrait viewports and vertical screen orientations trigger a full-screen cosmic advisory overlay.
 - **State safety**: Game components are safely set to `inert` during orientation lock, preventing accidental taps while preserving all active state.
@@ -62,10 +62,10 @@ The mission flight deck, 3D workshop, and interactive launch screens require lan
 
 ## Space-themed loading screen & asset preloader
 
-A high-performance cinematic loading screen (`src/components/common/LoadingScreen.tsx`) displays upon initial application landing and prior to launching any mission.
+A high-performance cinematic loading screen (`@exo/ui`, `packages/ui/src/components/LoadingScreen.tsx`) displays upon initial application landing and prior to launching any mission.
 
 - **Cinematic entry**: Displays an exclusive pitch-black `"ExoVisionaries-2k26 Presents"` intro splash on the user's first visit of the day/session, fading into a continuous looping carousel of authentic NASA space exploration imagery.
-- **Real engineering preloader**: Progress tracks actual background subsystem preparation (`src/engine/assetPreloader.ts`)—dynamic JS modules, Three.js 3D Moon & rocket meshes, textures, and audio synthesis—dismissing immediately when backend tasks hit 100%.
+- **Real engineering preloader**: Progress tracks actual background subsystem preparation (`apps/web/src/services/assetPreloader.ts` and `@exo/engine`)—dynamic JS modules, Three.js 3D Moon & rocket meshes, textures, and audio synthesis—dismissing immediately when backend tasks hit 100%.
 - **Orientation pause synchronization**: Carousel cycling pauses in portrait while background asset loading continues. Underlying game views and keyboard input stay inert during loading; manual mission pauses survive orientation changes.
 - **Browser-managed cache with 7-day TTL**: Leverages the browser's Cache Storage API (`caches.open('exovisionaries-assets-v1')`) and automatically purges cached assets once they exceed their universal 7-day lifecycle.
 - **Developer delay**: Configure `VITE_LOADING_PROGRESS_MULTIPLIER`, `VITE_SLIDE_DISPLAY_MIN_MS`, and `VITE_INTRO_SPLASH_DISPLAY_MS` in `.env.local`. See [Loading Screen documentation](docs/loading-screen.md).
@@ -94,20 +94,22 @@ When developing locally (`VITE_APP_ENV=development`), every screen, module, stan
 - **Interactive Debug Toolbar**: Press **`~`** (tilde / backquote) to toggle the in-game search & navigation drawer.
 - **Production Guard**: In production builds (`VITE_APP_ENV=production`), debug routes are safely ignored and the toolbar is excluded. See [Debug Endpoints Documentation](docs/debug-endpoints.md) for full reference.
 
-
-
 ## Project layout
 
-- `src/game/story/`: the active exact-script story, character renderer, shared frame, five workshop stages, procedural lander/rover/part meshes, validated preparation reducer, resource calculations, correctable readiness checks, lazy 3D packing, immutable approval snapshots, gated interactive flight and atomic saved progress.
-- `src/game/`: preserved legacy screens, 2D rocket and part art, interactive 3D builder, launch sequence, responsive styles in `src/index.css`. The 3D shelf renders part thumbnails from the same hardware meshes as the rocket; the enlarged drop bay accepts nearby releases and shows a quick snap animation. A full compatible bay offers a reversible swap.
-- `src/state/`: reactive Zustand state stores including `audioStore.ts` (independent voice/effects preferences plus a temporary master mute), `loadingStore.ts` (cinematic loading engine & task registration), `pwaStore.ts` (multi-platform PWA install lifecycle), and `missionStore.ts` (validated placements, crew choices, launch readiness gate).
-- `src/data/` and `src/engine/`: catalogue, mission references, budget and mass accounting, readiness checks and authored ascent values.
-- `public/story/`: the character illustrations supplied by the project team.
-- `backups/before-story-redesign-20260926-130824/`: a local copy of the previous source and documentation.
+- `apps/web/`: Primary Vite 8 + React 19 spaceflight simulation and canonical narrative engine.
+  - `src/game/story/`: Exact-script story, 3D interactive viewports, and domain-driven feature slices (assembly, crew, flight, landing, surface, rover, readiness, archive).
+  - `src/services/assetPreloader.ts`: Coordinated background preloading for dynamic chunks, 3D meshes, textures, and audio.
+  - `public/`: Public runtime assets, WebP sprite atlases, NASA image slides, and PWA manifest.
+- `packages/engine/`: Platform-independent NASA physics, Apollo datasets, mass/power budget accounting, and asset cache management.
+- `packages/audio/`: Web Audio API sound synthesis (`SoundEngine`) for rocket rumbles, UI chirps, and reactive `useAudioStore`.
+- `packages/ui/`: Reusable aerospace HUD overlays, `OrientationGuard`, `LoadingScreen`, and `InstallAppModal`.
+- `packages/tsconfig/`: Shared base TypeScript compiler configurations.
+- `docs/`: Mission specifications, monorepo architecture, CI/CD pipelines, and debugging reference documents.
+- `temp/old_backup/`: Preserved historical documents (`docs/story/`), validation suites, and legacy components.
 
-The original view components are retained in `src/components/` for reference; `src/App.tsx` selects the active story, legacy experience or conversation review route lazily.
+The original view components are retained in `temp/old_backup/src/components/` for reference; `apps/web/src/App.tsx` selects the active story, legacy experience or conversation review route lazily.
 
-The lunar landing now uses a single medium game with a full 3D landscape, A/D steering, a Space descent brake, mouse controls, contextual hints and touchdown feedback. See [Landing game](docs/story/landing-game.md) for handling, save compatibility and scene lifecycle.
+The lunar landing now uses a single medium game with a full 3D landscape, A/D steering, a Space descent brake, mouse controls, contextual hints and touchdown feedback. See [Landing game](temp/old_backup/docs/story/landing-game.md) for handling, save compatibility and scene lifecycle.
 
 ## Current mission debrief and controls
 
@@ -115,6 +117,6 @@ The Ice and Geology rover runs use launched instruments for simulated evidence a
 
 Driving requires a keyboard and mouse: W/S accelerate/brake/reverse, A/D steer, E interact/hold charge, M map, P/Escape pause, mouse drag look and C center. Compact landscape layouts are provided, but touch-only driving is unsupported. WebGL-capable laptop/desktop landscape browsers are the supported play target.
 
-See [release verification and scientific limits](docs/story/release-readiness.md), [the 90-second judge walkthrough](docs/story/judge-demo-90-seconds.md), and [the rover model and compatibility notes](docs/story/free-rover.md). New debrief checks: `node --experimental-strip-types scripts/check-mission-debrief.mjs`. Judge-tour checks use assistance and must not be represented as manual unassisted playthroughs.
+See [release verification and scientific limits](temp/old_backup/docs/story/release-readiness.md), [the 90-second judge walkthrough](temp/old_backup/docs/story/judge-demo-90-seconds.md), and [the rover model and compatibility notes](temp/old_backup/docs/story/free-rover.md). Preserved debrief verification checks: `node --experimental-strip-types temp/old_backup/scripts/check-mission-debrief.mjs`. Judge-tour checks use assistance and must not be represented as manual unassisted playthroughs.
 
-The Moon route planner includes a bounded NASA/JPL ephemeris dataset, computed transfer candidates, throttle/alignment burn controls, a local lunar-capture orbit preview and a solar-system overview. See [Moon transfer game](docs/story/moon-transfer-game.md) for dates, controls, reproducibility, source URLs and the distinction between measured celestial data and educational spacecraft assumptions.
+The Moon route planner includes a bounded NASA/JPL ephemeris dataset, computed transfer candidates, throttle/alignment burn controls, a local lunar-capture orbit preview and a solar-system overview. See [Moon transfer game](temp/old_backup/docs/story/moon-transfer-game.md) for dates, controls, reproducibility, source URLs and the distinction between measured celestial data and educational spacecraft assumptions.
