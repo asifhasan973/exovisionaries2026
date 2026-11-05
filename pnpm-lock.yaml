@@ -23,6 +23,12 @@ importers:
       '@exo/audio':
         specifier: workspace:*
         version: link:../../packages/audio
+      '@exo/data':
+        specifier: workspace:*
+        version: link:../../packages/data
+      '@exo/debug':
+        specifier: workspace:*
+        version: link:../../packages/debug
       '@exo/engine':
         specifier: workspace:*
         version: link:../../packages/engine
@@ -95,7 +101,48 @@ importers:
         specifier: ~6.0.2
         version: 6.0.3
 
+  packages/data:
+    devDependencies:
+      '@exo/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
+      typescript:
+        specifier: ~6.0.2
+        version: 6.0.3
+
+  packages/debug:
+    dependencies:
+      '@exo/audio':
+        specifier: workspace:*
+        version: link:../audio
+      lucide-react:
+        specifier: ^1.48.0
+        version: 1.57.0(@types/react@19.3.0)(react@19.3.1)
+    devDependencies:
+      '@exo/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
+      '@types/react':
+        specifier: ^19.2.18
+        version: 19.3.0
+      '@types/react-dom':
+        specifier: ^19.2.7
+        version: 19.3.0(@types/react@19.3.0)
+      react:
+        specifier: ^19.2.8
+        version: 19.3.1
+      react-dom:
+        specifier: ^19.2.8
+        version: 19.3.1(react@19.3.1)
+      typescript:
+        specifier: ~6.0.2
+        version: 6.0.3
+
   packages/engine:
+    dependencies:
+      '@exo/data':
+        specifier: workspace:*
+        version: link:../data
     devDependencies:
       '@exo/tsconfig':
         specifier: workspace:*

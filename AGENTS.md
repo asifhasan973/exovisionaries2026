@@ -1,140 +1,209 @@
 # Repository Agent Guidelines & Commit Standards
 
-This document defines standard conventions, development constraints, and protocols for agents working in this repository.
+This document defines standard conventions, architectural standards, and development protocols for agents working in this repository.
 
 ---
 
 ## 1. Commit and Version Control Policies
 
 - **Never Commit Automatically**: Agents must never execute `git commit` or push code autonomously. All changes must remain for the user to review, stage, and commit manually.
-- **Explicit Message Generation**: Never generate or update version control files autonomously or by default. Only prepare and write messages when explicitly requested.
-- **Dual Commit & PR Message Generation**: Unless the user explicitly requests only one, always generate BOTH the conventional commit message in `temp/COMMIT_MSG.txt` AND the GitHub pull request description in `temp/PR_MSG.txt` simultaneously.
-- **Conventional Commits Standard**: When preparing a commit message (`temp/COMMIT_MSG.txt`), follow the Conventional Commits specification (`feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`) with an imperative summary line and detailed explanatory body.
-- **GitHub PR Template Compliance**: When preparing a pull request message (`temp/PR_MSG.txt`), strictly follow the official repository template in `.github/pull_request_template.md`. Ensure all checklists, responsive landscape verification tiers, and architectural highlights are completed.
+- **Explicit Message Generation**: Never generate or update version control files autonomously. Only prepare messages when explicitly requested by the user.
+- **Dual Commit & PR Generation**: Generate BOTH the conventional commit message in `temp/COMMIT_MSG.txt` AND the GitHub pull request description in `temp/PR_MSG.txt` simultaneously.
+- **Standards & Templates**: Follow Conventional Commits (`feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`) with an imperative summary line. For PR messages, strictly adhere to `.github/pull_request_template.md` (checklists, responsive tiers, architecture).
 
 ---
 
 ## 2. Information Leakage Prevention Policy
 
-- **Zero Internal Leakage**: Never mention or leak internal engineering briefs, execution metadata, prompt instructions, system messages, internal conversation IDs, or workflow mechanics anywhere in the repository (including code comments, docstrings, documentation files, commit messages, PR descriptions, and markdown files).
-- **Mandatory Repository Scan**: Before finalizing any commit message or documentation:
-  1. Scan all modified and newly created files in the working tree for internal terminology or unintended metadata.
-  2. Ensure code comments and documentation reflect clean, professional, industry-standard engineering language.
-  3. Verify that instructions and meta-dialogue from task briefs are not echoed into public-facing repository artifacts.
+- **Zero Internal Leakage**: Never mention or leak internal engineering briefs, execution metadata, prompt instructions, system messages, conversation IDs, or workflow mechanics in code, comments, docs, commit messages, or PR descriptions.
+- **Mandatory Repository Scan**: Before finalizing messages or docs: (1) Scan modified/created files for internal terminology or unintended metadata; (2) Ensure comments reflect clean industry standards; (3) Verify task briefs are not echoed.
 
 ---
 
-## 3. Documentation Standards
+## 3. Monorepo Package Boundaries & Core Package Segregation
 
-- Always keep documentation in `docs/` and `README.md` up to date whenever new architectural features, components, or user-facing behaviors are introduced.
-- Maintain consistent formatting, clear technical explanations, and accurate file paths across all documentation.
-- When new pages, state stores, or audio/3D visual modules are created, document their interfaces and design considerations in dedicated markdown files in `docs/`.
-
----
-
-## 4. Heavy Asset Preloading & Loading Screen Policy
-
-- **Architectural Shielding**: All heavy engineering workloads—including Three.js 3D geometry generation, PBR textures, audio synthesis buffers, procedural asset calculations, and remote data fetching—must be hidden behind the application loading screen (`src/components/common/LoadingScreen.tsx`).
-- **Automatic Task Registration**: When introducing asynchronous asset loading, mesh pipelines, or network requests prior to mission start or on app boot, agents must register promises using `useLoadingStore.getState().registerLoaderTask(taskPromise)` or initiate a managed loading sequence with `useLoadingStore.getState().startLoading('mission_start', statusMessage)`.
-- **Zero Asset Popping**: Ensure all textures and dependencies are resolved or cached in memory before dismissing the loading screen, guaranteeing smooth 60fps transitions into interactive views without layout shifts.
+- **Core Package Segregation**: Generic primitives, datasets, and pure mathematical engines live strictly in packages; `apps/web` acts purely as an orchestration layer:
+  - `@exo/engine` (`packages/engine`): NASA physics models, orbital mechanics, mass/power budget accounting, flight trajectory velocity calculations, and loader engine scheduling.
+  - `@exo/data` (`packages/data`): Historical flight archives (`archive/`), aerospace parts catalog (`parts/`), candidate crew dossiers (`missions/`), and landing site manifests.
+  - `@exo/audio` (`packages/audio`): Web Audio synthesizer (`soundEngine.ts`, `synthEffects.ts`) and global audio state (`audioStore.ts`).
+  - `@exo/ui` (`packages/ui`): Aerospace HUD primitives, `OrientationGuard`, `LoadingScreen`, `CosmicBackground`, `ProgressRing`, `GameInfo`, and vector icon sets.
+  - `@exo/tsconfig` (`packages/tsconfig`): Shared TypeScript compiler configurations (`base.json`, `react-library.json`, `node-library.json`).
+- **Application Orchestration (`apps/web`)**: Coordinates game routing, screen rendering, Three.js 3D viewport canvas mounts, and player session persistence.
+- **Dependency Flow**: Strict downward flow from `apps/web` into `@exo/*`. Packages never import `apps/web`. Link packages with `"workspace:*"` and mirror in Vite `resolve.alias`.
 
 ---
 
-## 5. Orientation Guard & Universal State Freeze Protocol
+## 4. Domain-Driven Feature Slices & Codebase Layout
 
-- **Centralized Lifecycle Management (Zero Prop-Drilling)**: Halting and resuming application states during an orientation block (or any universal suspension event such as the mission loading screen) must strictly be orchestrated through the central lifecycle store (`src/state/orientationLifecycleStore.ts` and the unified lifecycle events `game-orientation-pause` / `game-orientation-resume`), never passed down through prop-drilling across component hierarchies.
-- **Universal State Freeze & In-Place Resume**: Whenever the orientation guard triggers (`isBlocked = true`) or a mission loading sequence is active (`isLoading = true`):
-  - **Game Simulation Progress**: All active mission progressions, flight ascent timers, descent physics, lunar rover telemetry, and automated assembly sequences must halt immediately at the exact current frame and sub-second.
-  - **Audio & Spoken Narration**: Web Audio synthesizer contexts must suspend in-place via `SoundEngine.pauseAll()`, and active spoken narration (browser SpeechSynthesis and recorded audio clips) must pause immediately. When unfreezing, dialogue replays cleanly from the beginning of the line so the player hears the full context without browser synthesis glitches or missing words.
-  - **Loading Screen & Visual Timers**: While orientation is blocked, carousel slide intervals, splash screen countdowns, and progress bar interpolation freeze at their exact elapsed milliseconds. When loading is active in landscape, the loading screen runs smoothly while the underlying game remains completely frozen until the progress bar reaches 100%.
-  - **Visual Animations**: All CSS animations within the interactive viewport must be paused instantly using `.orientation-guard-wrapper.is-blocked * { animation-play-state: paused !important; }`.
-  - **Seamless Continuation**: When all suspension blocks are released, all frozen states resume seamlessly from their exact saved parameters and dialogue starts/replays cleanly.
-  - **No Accidental Unpausing**: If a subsystem was already manually paused by the user before the suspension block appeared, releasing the block must never erroneously unpause that subsystem.
-- **Background Asset Preloading Exemption**: Heavy asynchronous asset preloading tasks (Three.js geometry generation, remote texture streaming, audio synthesis buffers, and preload promises) must continue spinning and accumulating progress in the background unhindered during orientation blocks. Only the front-end visual display and user interactions are paused.
+- **Feature Directory Taxonomy (`apps/web/src/features/`)**:
+  - `features/narrative/`: Mission flow definitions, branching choices, character dialogue engine, and voice narration controllers.
+  - `features/workshop/`: Lander & rover design bay, component assembly grid, and auto-build engine.
+  - `features/crew/`: Candidate crew dossiers, skill matrices, seat assignments, and 3D crew viewer.
+  - `features/readiness/`: Pre-flight checklists, packing bay, systems telemetry verification, and radar repair.
+  - `features/flight/`: Launch countdown, multi-stage ascent, staging physics, and Earth orbit insertion.
+  - `features/landing/`: Trans-lunar injection, powered descent steering, shadow hazard detection, and touchdown.
+  - `features/surface/`: Lunar surface deployment, EVA operations, rover course navigation, and fieldwork.
+  - `features/science/`: Subsurface ice drill, spectrometry, core sample analysis, and thermal logging.
+  - `features/hazards/`: Dust mitigation, sensor recalibration, emergency holds, and hazard recovery.
+  - `features/return/`: Ascent staging, lunar departure, Earth atmospheric re-entry, and mission debrief.
+  - `features/archive/`: Historical NASA flight timeline, mission detail modals, and educational manifests.
+- **Shared Application Slices (`apps/web/src/shared/`)**: `shared/shell/` (StoryShell, MissionBoundary, GestureGuide), `shared/styles/` (design tokens, typography, App.css), `shared/services/` (assetPreloader, nasaApiService), `shared/debug/` (toolbar, catalogs, seeders).
 
 ---
 
-## 6. Strict Landscape Architecture & Multi-Tier Responsive Layouts
+## 5. File Size Ceiling & Directory Density Guard
 
-- **Enforced Landscape Viewport**: The application is strictly optimized for landscape mode. All components, scenes, dialogs, and HUD overlays must be designed specifically for horizontal game viewports across all devices.
+- **Strict 250-Line Non-CSS Guard**: Any TypeScript or TSX file exceeding 250 lines must be proactively modularized into focused sub-components, custom hooks, or utility helpers.
+- **Directory Density Limit**: Directories must contain at most 12 files. Group larger sets into domain subdirectories with a unifying `index.ts` barrel export.
+- **CSS Stylesheet Preservation**: Do NOT split internal lines of CSS stylesheets. Keep CSS files intact, cohesive, and format/prettify cleanly.
+- **Facades & Exports**: Preserve backwards-compatible re-export facades at legacy paths during migrations. Prefer explicit named exports over default exports.
+
+---
+
+## 6. Static Asset Taxonomy & Type-Safe Registry
+
+- **Domain-Categorized Public Hierarchy**: Static assets in `apps/web/public/` strictly reside in domain folders: Audio (`public/story/audio/<domain>/` with 16 categorized domains), Character Sprites (`public/story/characters-v1/`), Textures/Models (`textures/<domain>/`, `models/<domain>/`).
+- **Type-Safe Asset Registry**: All static assets must be cataloged in `assetRegistry.ts` with automated path verification against disk, preventing 404 runtime errors.
+- **Asset Formats**: Prefer modern WebP for images/sprites and compressed MP3/OGG for audio to minimize mobile download payloads.
+
+---
+
+## 7. Heavy Asset Preloading & Loading Screen Policy
+
+- **Architectural Shielding**: All heavy workloads (Three.js geometry generation, PBR textures, audio buffers, procedural calculations, remote data) must hide behind `LoadingScreen`.
+- **Automatic Task Registration**: Register async promises via `useLoadingStore.getState().registerLoaderTask(taskPromise)` or launch managed sequences with `useLoadingStore.getState().startLoading('mission_start', statusMessage)`.
+- **Zero Asset Popping & Carousel**: Ensure all textures/dependencies resolve before dismissing the loading screen for smooth 60fps transitions. Display educational carousel tips during loading.
+
+---
+
+## 8. Orientation Guard & Universal State Freeze Protocol
+
+- **Centralized Lifecycle (Zero Prop-Drilling)**: Suspend/resume states strictly through `useOrientationLifecycleStore` and `game-orientation-pause` / `game-orientation-resume` events.
+- **Universal State Freeze**: When `isBlocked = true` or `isLoading = true`:
+  - *Simulation*: Progression, flight ascent, descent physics, rover telemetry, and assembly halt at exact frame/sub-second.
+  - *Audio/Speech*: Web Audio suspends via `SoundEngine.pauseAll()`; speech narration pauses and replays line cleanly on resume.
+  - *Timers & CSS*: Progress bar and slide intervals freeze; CSS animations pause via `.orientation-guard-wrapper.is-blocked * { animation-play-state: paused !important; }`.
+  - *Preloading Exemption*: Asynchronous asset preloading continues unhindered in the background. Manually paused subsystems remain paused on resume.
+
+---
+
+## 9. Strict Landscape Architecture & Multi-Tier Responsive Layouts
+
+- **Enforced Landscape Viewport**: Optimized strictly for horizontal viewports across all devices. Zero vertical page scrolling (`overflow: hidden`).
 - **Responsive Viewport Tiers**:
-  - **Tier 1: Compact Mobile Landscape** (Height <= 450px, Width >= 600px):
-    - Zero vertical page scrolling.
-    - Two-column or side-by-side horizontal splits using `grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr)`.
-    - Compact typography scaling via `clamp()` formulas (e.g., `font-size: clamp(20px, 4vw, 32px)`).
-    - Reduced padding/margins (`padding: 8px 16px`) and compact interactive buttons (`height: 42px to 48px`).
-  - **Tier 2: Tablet & Mid-Sized Landscape** (Height 451px–720px, Width 800px–1280px):
-    - Balanced spacing with generous touch targets (minimum 48x48px).
-    - Prominent character/3D stages with accompanying dialog and telemetry cards.
-  - **Tier 3: Desktop Standard** (Height 721px–1080px, Width 1280px–1920px):
-    - Full-featured aerospace HUD layout with high-fidelity visual effects, glow borders, and detailed status bars.
-  - **Tier 4: Ultra-Wide & 4K** (Width > 1920px, 21:9 to 32:9 ratios):
-    - Prevent unnatural horizontal stretching. Use max-width containers (`max-width: 1680px`) centered with cosmic ambient gradients.
-- **Zero Layout Shifts**: Dynamic contents, async data, and 3D canvases must preserve strict aspect ratio boxes and container bounds to eliminate visual jumping during load or resize events.
+  - *Tier 1: Compact Mobile Landscape* (H <= 450px, W >= 600px): Side-by-side splits (`grid-template-columns: minmax(0,1fr) minmax(0,1.1fr)`), `clamp()` typography, compact buttons (42-48px).
+  - *Tier 2: Tablet Landscape* (H 451-720px, W 800-1280px): Balanced spacing, >= 48px touch targets, character/3D stages with dialog cards.
+  - *Tier 3: Desktop Standard* (H 721-1080px, W 1280-1920px): Full aerospace HUD, glow borders, and telemetry status bars.
+  - *Tier 4: Ultra-Wide/4K* (W > 1920px): Max-width container (`max-width: 1680px`) centered with cosmic ambient gradients.
+- **Zero Layout Shifts**: Canvases and containers must preserve strict aspect ratio boxes during load and resize events.
 
 ---
 
-## 7. Playful UI/UX, Gamification & Visual Excellence
+## 10. Playful UI/UX, Gamification & Visual Excellence
 
-- **Senior Frontend Craftsmanship**: Apply expert frontend standards built on decades of game UI experience. Every screen must feel lively, tactile, engaging, and premium, turning routine interactions into exciting gameplay moments that keep players engaged.
-- **Rich Visual Aesthetics**:
-  - Deep space color palettes with vibrant neon and bioluminescent highlights (cyan `#8ce2c2`, electric purple `#ed8def`, solar amber `#ffdf89`, neon emerald `#5df2b2`).
-  - Glassmorphic aerospace HUD panels, frosted blur backgrounds (`backdrop-filter: blur(12px)`), subtle glowing borders, and cosmic depth gradients.
-  - Dynamic micro-animations: pulsating call-to-actions, orbital radar sweeps, floating debris particles, and smooth cubic-bezier transitions (`cubic-bezier(0.25, 0.45, 0.3, 1)`).
-- **Interactive Tactility & Feedback**:
-  - Interactive elements must react with hover scale shifts (`transform: scale(1.03)`), active pressed states (`transform: scale(0.97)`), and tactile visual cues.
-  - Integrated Web Audio sound effects: synthesised UI chirps, rocket thruster hums, telemetry clicks, and mission confirmation chimes.
-  - Device haptic feedback on supported mobile browsers (`navigator.vibrate`) during key gameplay milestones and primary button taps.
-- **Narrative Immersion**: Seamlessly connect story dialogue, character reactions, telemetry meters, and 3D scenes so players stay captivated throughout the mission arc.
+- **Aesthetics & Micro-Animations**: Deep space palettes with vibrant neon (cyan `#8ce2c2`, purple `#ed8def`, amber `#ffdf89`, emerald `#5df2b2`), glassmorphic HUDs (`backdrop-filter: blur(12px)`), glow borders, pulsing CTAs, radar sweeps, and cubic-bezier transitions (`cubic-bezier(0.25, 0.45, 0.3, 1)`).
+- **Tactility & Audio-Haptic Feedback**: Hover scale shifts (`transform: scale(1.03)`), active press states (`scale(0.97)`), synthesized UI chirps/hums, and mobile haptic feedback (`navigator.vibrate`) on key milestones.
 
 ---
 
-## 8. Web Audio Synthesis & Sound Engine Protocols
+## 11. Web Audio Synthesis & Sound Engine Protocols
 
-- **Centralized Sound Management**: All UI sound effects must route through `SoundEngine` (`src/audio/soundEngine.ts`) or dedicated synthesizer modules.
-- **Synthesized UI Feedback Sounds**:
-  - `playButtonHover()`: Gentle high-frequency sine pip (800Hz–1200Hz, 30ms, soft exponential decay).
-  - `playButtonClick()`: Crisp resonant dual-tone confirmation click (440Hz -> 880Hz, 60ms).
-  - `playMissionLaunch()`: Low-frequency resonant frequency sweep with filtered white noise burst.
-  - `playTelemetryChime()`: Triple harmonic arpeggio denoting milestone unlocks or readiness pass.
-- **Mute & Volume Synchronization**: Sound effects must respect the global mute status (`voiceEnabled`, sound toggle in `GameSettingsContext`, and `orientationLifecycleStore`).
-- **Suspension Invariant**: When orientation is blocked or game freezes, Web Audio `AudioContext.suspend()` must trigger immediately to prevent audio bleeding.
+- **Centralized Sound Management**: UI sound effects route through `sound` (`packages/audio/src/soundEngine.ts`) and generators in `synthEffects.ts`.
+- **Synthesized UI Sounds**: `playButtonHover()` (sine pip 800-1200Hz, 30ms), `playButtonClick()` (dual-tone click 440->880Hz, 60ms), `playMissionLaunch()` (resonant sweep + filtered noise), `playTelemetryChime()` (triple harmonic arpeggio). Respects global mute (`useAudioStore`) and suspends during orientation blocks.
 
 ---
 
-## 9. Interactive Consultation & Design Interview Protocol
+## 12. Interactive Consultation & Design Interview Protocol
 
-- **Zero Unilateral Assumptions**: Never begin customizing any page, component, or UX subsystem without prior consultation with the user.
-- **Mandatory Question Tool Utilization**: Before writing or modifying component code, formulate structured queries using the `ask_question` tool.
-- **Comprehensive Option Presentation**: Each inquiry must present clear, distinct implementation options along with concrete architectural, visual, performance, and UX trade-offs.
-- **Full Coverage Requirement**: Ensure all facets—including layout structure, responsive scaling, playful animations, sound/haptic cues, and telemetry integrations—are clarified before beginning code implementation.
+- **Zero Unilateral Assumptions**: Never customize pages, components, or subsystems without prior consultation.
+- **Structured Questions**: Formulate queries using `ask_question` presenting distinct implementation options with architectural, visual, performance, and UX trade-offs across layout, scaling, gamification, and audio.
 
 ---
 
-## 10. Contradiction & Duplication Resolution
+## 13. Contradiction & Duplication Resolution
 
-- **Pre-Implementation Code Audit**: Always inspect existing code, styles, and documentation before adding new implementations to avoid duplicate definitions or conflicting CSS rules.
-- **Conflict Escalation Protocol**: If an instruction or prompt appears to contradict existing recorded patterns (e.g. navigation autoplay policies, store structures, or orientation behavior), pause and consult the user with trade-off analysis before proceeding.
-- **Navigation Audio Standards**: Forward progression (Next, Skip, Resume) automatically triggers spoken narration; Back button navigation intentionally silences narration (no autoplay, preventing redundant replay of earlier lines), while manual playback remains available via the replay icon.
-
----
-
-## 11. Code Quality, AI-Agent Readability & Document Compression Guard
-
-- **Engineering Excellence**: Write clean, modular, self-documenting TypeScript and vanilla CSS. Keep components focused, decoupling business logic and stores from visual presentation.
-- **Dual Readability (Human & AI)**: Structure code, state reducers, and interfaces with explicit types, descriptive function signatures, and concise docstrings so future developers and AI agents can seamlessly navigate and maintain the codebase.
-- **Document Length Guard**: This `AGENTS.md` file must strictly stay within **200~250 lines**. All updates must be tightly compressed, dense with technical precision, and void of unnecessary verbose phrasing.
+- **Code Audit First**: Inspect existing code, styles, and docs before adding implementations to prevent duplicate definitions or conflicting CSS rules. Consult user on conflicts.
+- **Navigation Audio**: Forward navigation (Next, Skip, Resume) autoplays spoken narration; Back navigation silences autoplay to avoid redundant replay (replay button remains available).
 
 ---
 
-## 12. Component Customization Workflow
+## 14. Code Quality, AI-Agent Readability & Document Compression Guard
 
-- **Step 1: Visual & Layout Audit**: Inspect existing component DOM hierarchy, CSS rules, touch targets, and responsive behavior across ultra-wide, desktop, tablet, and compact mobile landscape viewports.
-- **Step 2: Interactive Consultation**: Deploy `ask_question` with structured trade-off options covering layout composition, gamified interactions, visual animation intensity, and audio-tactile polish.
-- **Step 3: Foundational Layout & Grid Implementation**: Refactor styles with responsive CSS custom properties, clamp sizing, and landscape-first media queries avoiding vertical scrolling.
-- **Step 4: Gamification & Animation Integration**: Add rich micro-interactions, glowing HUD states, particles, and smooth transitions.
-- **Step 5: Audio & Haptic Binding**: Connect tactile audio cues and haptic triggers to interactive elements.
-- **Step 6: Lifecycle & Freeze Compliance**: Ensure all animations, timers, and canvases register with `orientationLifecycleStore` and pause cleanly during orientation blocks or loading screens.
-- **Step 7: Verification**: Test across varied viewport ratios and verify zero console errors, zero layout shifts, and 60fps performance.
+- **Engineering Standards**: Clean, modular, self-documenting TypeScript and vanilla CSS. Decouple business logic and stores from visual presentation.
+- **Dual Readability & Type Safety**: Explicit types, descriptive function signatures, concise docstrings, and zero `any` types. Model mission events with discriminated unions.
+- **Document Length Guard**: This `AGENTS.md` file must strictly stay within **200~250 lines**. Updates must be tightly compressed and dense with technical precision.
+
+---
+
+## 15. Component Customization Workflow
+
+- **Execution Flow**: (1) Visual & Layout Audit across viewport tiers; (2) Interactive Consultation via `ask_question`; (3) Foundational Layout & Grid Implementation with clamp sizing; (4) Gamification & Animation Integration; (5) Audio & Haptic Binding; (6) Lifecycle & Freeze Compliance with `orientationLifecycleStore`; (7) Multi-ratio verification with zero errors and 60fps performance.
+
+---
+
+## 16. Subsystem Verification & CI Build Pipeline
+
+- **Automated Validation Sequence**: Before completing tasks, execute:
+  1. `pnpm run lint`: Zero warnings and zero errors across workspace packages via `oxlint`.
+  2. `pnpm --filter <pkg> exec tsc --noEmit`: Strict TypeScript type checking without emitting artifacts.
+  3. `pnpm run build`: Full Turborepo build pipeline and Vite production bundling.
+- **Zero Degradation Invariant**: Refactorings and features must preserve 100% backwards compatibility and existing gameplay mechanics.
+
+---
+
+## 17. Progressive Web App (PWA) & Offline Continuity
+
+- **Platform Guides & Precaching**: Tailored install guides (`DesktopInstructions`, `AndroidInstructions`, `IosInstructions`) via `usePwaStore`. Workbox service worker precaches game bundles, 3D assets, and audio for offline aerospace simulation.
+- **Storage Resilience**: Handle localStorage quota limits and Safari private mode via fallback in-memory stores without interrupting missions.
+
+---
+
+## 18. Three.js WebGL & 3D Rendering Performance Protocols
+
+- **Resource Disposal**: Recursively traverse mesh hierarchies and invoke `geometry.dispose()` and `material.dispose()` via `disposeGroup()` on unmount to prevent WebGL memory leaks.
+- **Resilience & Budgets**: Intercept `webglcontextlost` and render `SceneFallback.tsx`. Limit mobile draw calls to <= 65 per frame. Use instanced meshes and compressed geometry for repeating terrain/starfields.
+
+---
+
+## 19. Mission State Machine & Immutable Reducer Architecture
+
+- **Predictable Transitions**: State progression flows strictly through pure reducers (`reduceMission()`, `reduceStoryProgress()`) producing immutable state snapshots.
+- **Milestones & Seeding**: Track chapter completions via `trackMilestoneTransition()`. Maintain deterministic mock session builders (`createDebugSession()`) for rapid developer testing.
+
+---
+
+## 20. Accessibility & Universal Usability Standards
+
+- **Accessible Semantics**: Semantic `<main>`, `<header>`, `<nav>` landmarks, ARIA live region announcements for canvas telemetry, focus trapping in modal dialogs with instant `Escape` key support, and >= 4.5:1 text contrast ratios against deep space backgrounds.
+
+---
+
+## 21. Error Boundaries & Fault-Tolerant Viewport Mounts
+
+- **Component Shielding**: Wrap dynamically loaded screens in `<MissionBoundary frame={frame} onReload={...} />`. Preserve latest valid progress session during runtime failures and provide transparent recovery actions (retry, mission control hub, diagnostics).
+
+---
+
+## 22. NASA Historical Data Integrity & Educational Compliance
+
+- **Empirical Accuracy**: Flight specifications, lunar site geology, and mission timelines must reflect authentic NASA technical publications. Cite primary sources in `MissionSources.tsx` and provide interactive term definitions in `glossary.ts`.
+
+---
+
+## 23. Design System & CSS Token Architecture
+
+- **Token Architecture**: Enforce unified CSS custom properties across stylesheets (`--ink`, `--purple`, `--lavender`, `--cream`, `--yellow`, `--mint`, `--line`). Utilize fluid `clamp()` scaling and maintain the zero-scroll invariant (`overflow: hidden`).
+
+---
+
+## 24. Security, Isolation & Environment Boundaries
+
+- **Sandboxed Execution**: Run commands within sandboxed runtime boundaries by default. Production builds must never leak development flags (`isDevelopment`), mock seeders, or debug toolbar routes. Prevent unsafe eval or unsanitized dynamic scripts.
+
+---
+
+## 25. Performance Profiling & React Render Cycle Optimization
+
+- **Render Optimization**: Memoize expensive Three.js calculations (`useMemo`, `useCallback`), cancel `requestAnimationFrame` IDs on unmount, scope telemetry to dedicated Zustand slices, pre-allocate Three.js vector/quaternion instances outside animation loops, and audit code-split chunks.
 
 ---

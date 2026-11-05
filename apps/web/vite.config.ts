@@ -10,8 +10,10 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      '@exo/data': path.resolve(__dirname, '../../packages/data/src'),
       '@exo/engine': path.resolve(__dirname, '../../packages/engine/src'),
       '@exo/audio': path.resolve(__dirname, '../../packages/audio/src'),
+      '@exo/debug': path.resolve(__dirname, '../../packages/debug/src'),
       '@exo/ui': path.resolve(__dirname, '../../packages/ui/src'),
     },
   },

@@ -1,0 +1,206 @@
+import type { SlotDefinition } from '../types';
+
+export const SLOTS: SlotDefinition[] = [
+  // Full Stack Slots
+  {
+    id: 'booster-stage-1',
+    name: 'Stage 1 Booster (S-IC Class)',
+    category: 'launchVehicle',
+    viewMode: 'fullStack',
+    position: [0, -18, 0],
+    acceptedCategories: ['launchVehicle'],
+    acceptedPartIds: ['stage-1-booster'],
+    isMandatory: true
+  },
+  {
+    id: 'interstage-1',
+    name: 'Interstage 1-2 Ring',
+    category: 'launchVehicle',
+    viewMode: 'fullStack',
+    position: [0, -7.5, 0],
+    acceptedCategories: ['launchVehicle'],
+    acceptedPartIds: ['interstage-1-2'],
+    isMandatory: true
+  },
+  {
+    id: 'booster-stage-2',
+    name: 'Stage 2 Cryogenic Stage (S-II Class)',
+    category: 'launchVehicle',
+    viewMode: 'fullStack',
+    position: [0, -1.5, 0],
+    acceptedCategories: ['launchVehicle'],
+    acceptedPartIds: ['stage-2-cryo'],
+    isMandatory: true
+  },
+  {
+    id: 'interstage-2',
+    name: 'Interstage 2-3 Adapter',
+    category: 'launchVehicle',
+    viewMode: 'fullStack',
+    position: [0, 4.5, 0],
+    acceptedCategories: ['launchVehicle'],
+    acceptedPartIds: ['interstage-2-3'],
+    isMandatory: true
+  },
+  {
+    id: 'booster-stage-3',
+    name: 'Stage 3 Insertion/Departure (S-IVB Class)',
+    category: 'launchVehicle',
+    viewMode: 'fullStack',
+    position: [0, 8.5, 0],
+    acceptedCategories: ['launchVehicle'],
+    acceptedPartIds: ['stage-3-departure'],
+    isMandatory: true
+  },
+  {
+    id: 'instrument-unit',
+    name: 'Guidance & Instrument Unit Ring',
+    category: 'launchVehicle',
+    viewMode: 'fullStack',
+    position: [0, 13.0, 0],
+    acceptedCategories: ['launchVehicle'],
+    acceptedPartIds: ['instrument-unit-ring'],
+    isMandatory: true
+  },
+  {
+    id: 'lunar-payload-bay',
+    name: 'Stowed Lunar Payload Enclosure',
+    category: 'launchVehicle',
+    viewMode: 'fullStack',
+    position: [0, 16.5, 0],
+    acceptedCategories: ['launchVehicle'],
+    acceptedPartIds: ['stowed-lunar-payload'],
+    isMandatory: true
+  },
+  {
+    id: 'service-module',
+    name: 'Service Module (SM)',
+    category: 'crewSpacecraft',
+    viewMode: 'crewSpacecraft',
+    position: [0, 21.0, 0],
+    acceptedCategories: ['crewSpacecraft'],
+    acceptedPartIds: ['service-module-core'],
+    isMandatory: true
+  },
+  {
+    id: 'crew-capsule',
+    name: 'Three-Seat Crew Command Module (CM)',
+    category: 'crewSpacecraft',
+    viewMode: 'crewSpacecraft',
+    position: [0, 25.2, 0],
+    acceptedCategories: ['crewSpacecraft'],
+    acceptedPartIds: ['crew-capsule-command'],
+    isMandatory: true
+  },
+  {
+    id: 'launch-escape-system',
+    name: 'Launch Escape Tower (LES)',
+    category: 'crewSpacecraft',
+    viewMode: 'crewSpacecraft',
+    position: [0, 31.0, 0],
+    acceptedCategories: ['crewSpacecraft'],
+    acceptedPartIds: ['launch-escape-tower'],
+    isMandatory: true
+  },
+
+  // Crew Spacecraft Internal & Subsystem Bays
+  {
+    id: 'eclss-bay',
+    name: 'Environmental Control & Life Support (ECLSS)',
+    category: 'crewSupport',
+    viewMode: 'crewSpacecraft',
+    position: [-1.2, 24.8, 0],
+    acceptedCategories: ['crewSupport'],
+    acceptedPartIds: ['eclss-primary-scrubber'],
+    isMandatory: true,
+    isInternal: true
+  },
+  {
+    id: 'avionics-bay',
+    name: 'Primary Flight Guidance & Avionics',
+    category: 'avionics',
+    viewMode: 'crewSpacecraft',
+    position: [1.2, 24.8, 0],
+    acceptedCategories: ['avionics'],
+    acceptedPartIds: ['primary-flight-avionics'],
+    isMandatory: true,
+    isInternal: true
+  },
+  {
+    id: 'power-bay',
+    name: 'Service Module Fuel Cell Bus',
+    category: 'crewSupport',
+    viewMode: 'crewSpacecraft',
+    position: [-1.5, 20.8, 0],
+    acceptedCategories: ['crewSupport'],
+    acceptedPartIds: ['fuel-cell-power-bus'],
+    isMandatory: true,
+    isInternal: true
+  },
+  {
+    id: 'comms-mast',
+    name: 'High-Gain Steerable Comm Array',
+    category: 'avionics',
+    viewMode: 'crewSpacecraft',
+    position: [2.2, 19.5, 0],
+    acceptedCategories: ['avionics'],
+    acceptedPartIds: ['high-gain-comm-array'],
+    isMandatory: true
+  },
+
+  // Science Payload Rack Slots (inside lunar payload interface adapter)
+  {
+    id: 'science-slot-1',
+    name: 'Science Instrument Bay 1 (Primary)',
+    category: 'science',
+    viewMode: 'sciencePayload',
+    position: [-1.4, 15.5, 1.4],
+    acceptedCategories: ['science'],
+    isMandatory: false
+  },
+  {
+    id: 'science-slot-2',
+    name: 'Science Instrument Bay 2 (Spectrometry)',
+    category: 'science',
+    viewMode: 'sciencePayload',
+    position: [1.4, 15.5, 1.4],
+    acceptedCategories: ['science'],
+    isMandatory: false
+  },
+  {
+    id: 'science-slot-3',
+    name: 'Science Instrument Bay 3 (Drill/Sampling)',
+    category: 'science',
+    viewMode: 'sciencePayload',
+    position: [-1.4, 15.5, -1.4],
+    acceptedCategories: ['science'],
+    isMandatory: false
+  },
+  {
+    id: 'science-slot-4',
+    name: 'Science Instrument Bay 4 (Environmental/Cameras)',
+    category: 'science',
+    viewMode: 'sciencePayload',
+    position: [1.4, 15.5, -1.4],
+    acceptedCategories: ['science'],
+    isMandatory: false
+  },
+  {
+    id: 'upgrade-slot-1',
+    name: 'Payload Upgrade Bay Alpha',
+    category: 'upgrades',
+    viewMode: 'sciencePayload',
+    position: [0, 14.5, 1.8],
+    acceptedCategories: ['upgrades', 'science'],
+    isMandatory: false
+  },
+  {
+    id: 'upgrade-slot-2',
+    name: 'Payload Upgrade Bay Beta',
+    category: 'upgrades',
+    viewMode: 'sciencePayload',
+    position: [0, 14.5, -1.8],
+    acceptedCategories: ['upgrades', 'science'],
+    isMandatory: false
+  }
+];

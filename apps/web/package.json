@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@exo/audio": "workspace:*",
+    "@exo/data": "workspace:*",
+    "@exo/debug": "workspace:*",
     "@exo/engine": "workspace:*",
     "@exo/ui": "workspace:*",
     "@types/three": "^0.186.0",

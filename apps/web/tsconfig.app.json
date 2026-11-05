@@ -15,10 +15,14 @@
     "jsx": "react-jsx",
     "paths": {
       "@/*": ["./src/*"],
+      "@exo/data": ["../../packages/data/src/index.ts"],
+      "@exo/data/*": ["../../packages/data/src/*"],
       "@exo/engine": ["../../packages/engine/src/index.ts"],
       "@exo/engine/*": ["../../packages/engine/src/*"],
       "@exo/audio": ["../../packages/audio/src/index.ts"],
       "@exo/audio/*": ["../../packages/audio/src/*"],
+      "@exo/debug": ["../../packages/debug/src/index.ts"],
+      "@exo/debug/*": ["../../packages/debug/src/*"],
       "@exo/ui": ["../../packages/ui/src/index.ts"],
       "@exo/ui/*": ["../../packages/ui/src/*"]
     },

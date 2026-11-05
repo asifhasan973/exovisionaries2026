@@ -6,9 +6,15 @@ import {
   useLoadingStore,
   registerPreloaderHandlers,
 } from '@exo/ui';
-import { preloadEntrySubsystems, preloadMissionSubsystems } from './services/assetPreloader';
-import { isDevelopment, parseDebugHash, type DebugRoute } from './debug/debugConfig';
-import { DebugToolbar } from './debug/DebugToolbar';
+import { preloadEntrySubsystems, preloadMissionSubsystems } from './shared/services';
+import { AppErrorBoundary } from './shared/shell';
+import {
+  isDevelopment,
+  parseDebugHash,
+  DebugToolbar,
+  type DebugRoute,
+} from '@exo/debug';
+import './game/moon/debug';
 
 // Register web-specific preloading logic with central loading store
 registerPreloaderHandlers({
@@ -16,8 +22,10 @@ registerPreloaderHandlers({
   preloadMission: preloadMissionSubsystems,
 });
 
-const ConversationPreview = lazy(() => import('./game/story/ConversationPreview'));
-const ExactStory = lazy(() => import('./game/story/ExactStory'));
+const ConversationPreview = lazy(() =>
+  import('./game/moon/narrative').then(m => ({ default: m.ConversationPreview }))
+);
+const ExactStory = lazy(() => import('./game/moon/stages/ExactStory'));
 
 export default function App() {
   const isLoading = useLoadingStore(state => state.isLoading);
@@ -66,15 +74,20 @@ export default function App() {
   }
 
   return (
-    <OrientationGuard forceBlock={forceBlock}>
-      <LoadingScreen />
-      <InstallAppModal />
-      <div inert={isLoading} aria-hidden={isLoading || undefined} style={{ height: '100%', minHeight: 0 }}>
-      <Suspense key={debugRoute ? `${debugRoute.type}:${debugRoute.id}` : `normal:${preview}`}>
-        {content}
-      </Suspense>
-      {isDevelopment && <DebugToolbar />}
-      </div>
-    </OrientationGuard>
+    <AppErrorBoundary>
+      <OrientationGuard forceBlock={forceBlock}>
+        <LoadingScreen />
+        <InstallAppModal />
+        <div inert={isLoading} aria-hidden={isLoading || undefined} style={{ height: '100%', minHeight: 0 }}>
+          <Suspense
+            key={debugRoute ? `${debugRoute.type}:${debugRoute.id}` : `normal:${preview}`}
+            fallback={<div style={{ width: '100%', height: '100%', minHeight: '100vh', background: '#0a0616' }} />}
+          >
+            {content}
+          </Suspense>
+          {isDevelopment && <DebugToolbar />}
+        </div>
+      </OrientationGuard>
+    </AppErrorBoundary>
   );
 }

@@ -1,0 +1,35 @@
+{
+  "name": "@exo/data",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts"
+    },
+    "./archive": {
+      "types": "./src/archive/index.ts",
+      "import": "./src/archive/index.ts"
+    },
+    "./parts": {
+      "types": "./src/parts/index.ts",
+      "import": "./src/parts/index.ts"
+    },
+    "./missions": {
+      "types": "./src/missions/index.ts",
+      "import": "./src/missions/index.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "lint": "oxlint"
+  },
+  "devDependencies": {
+    "@exo/tsconfig": "workspace:*",
+    "typescript": "~6.0.2"
+  }
+}
+
