@@ -74,6 +74,6 @@ export function trackMilestoneTransition(previous:WorkshopSession,next:WorkshopS
   const from=milestoneFor(previous.progress.stepId),to=milestoneFor(next.progress.stepId);
   const state=next.progress.milestones??restoreMilestones(undefined,next.progress.stepId);
   const forward=MILESTONES.indexOf(to)>MILESTONES.indexOf(from)||next.progress.stepId==='mission-debrief'&&previous.progress.stepId==='crew-return';
-  if(!forward||state.celebrated.includes(from.id))return next;
+  if(!forward)return next;
   return {...next,progress:{...next.progress,milestones:{...state,introduced:true,pending:from.id}}};
 }

@@ -4,22 +4,15 @@ import { useAudioStore } from '@exo/audio';
 export function useStoryAudioControls(initialVoiceEnabled?: boolean) {
   const isMuted = useAudioStore(s => s.isMuted);
   const voicesEnabled = useAudioStore(s => s.voicesEnabled);
-  const setAudioMuted = useAudioStore(s => s.setMuted);
+  const effectsEnabled = useAudioStore(s => s.effectsEnabled);
+  const toggleMute = useAudioStore(s => s.toggleMute);
   const setVoicesEnabled = useAudioStore(s => s.setVoicesEnabled);
   const voiceEnabled = !isMuted && voicesEnabled;
+  const soundActive = !isMuted && (voicesEnabled || effectsEnabled);
 
-  const setVoiceEnabled = useCallback(
-    (valueOrUpdater: boolean | ((prev: boolean) => boolean)) => {
-      const audio = useAudioStore.getState();
-      const current = !audio.isMuted && audio.voicesEnabled;
-      const nextVal = typeof valueOrUpdater === 'function' ? valueOrUpdater(current) : valueOrUpdater;
-      setVoicesEnabled(nextVal);
-      if (nextVal && audio.isMuted) setAudioMuted(false);
-    },
-    [setAudioMuted, setVoicesEnabled],
-  );
-
-  const toggleAudioMute = useCallback(() => setVoiceEnabled(value => !value), [setVoiceEnabled]);
+  const toggleAudioMute = useCallback(() => {
+    toggleMute();
+  }, [toggleMute]);
 
   useEffect(() => {
     if (initialVoiceEnabled === false) {
@@ -31,7 +24,8 @@ export function useStoryAudioControls(initialVoiceEnabled?: boolean) {
     isMuted,
     voicesEnabled,
     voiceEnabled,
-    setVoiceEnabled,
+    soundActive,
+    setVoiceEnabled: setVoicesEnabled,
     toggleAudioMute,
   };
 }

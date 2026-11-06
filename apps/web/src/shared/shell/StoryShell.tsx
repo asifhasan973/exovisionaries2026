@@ -16,6 +16,7 @@ export interface StoryShellProps {
   onHome?: () => void;
   exitURL?: string;
   voiceEnabled?: boolean;
+  soundActive?: boolean;
   onToggleVoice?: () => void;
   voiceAvailable?: boolean;
   skipTarget?: string;
@@ -23,7 +24,8 @@ export interface StoryShellProps {
 
 /** Shared navigation frame for conversations, mission cards and the workshop handoff. */
 export function StoryShell({ children, controls, headerExtra, onHome, exitURL = import.meta.env.BASE_URL,
-  voiceEnabled = true, onToggleVoice, voiceAvailable = true, skipTarget = 'story-content' }: StoryShellProps) {
+  voiceEnabled = true, soundActive, onToggleVoice, voiceAvailable = true, skipTarget = 'story-content' }: StoryShellProps) {
+  const isSoundOn = soundActive ?? voiceEnabled;
   const mobileGame = useMobileGame();
   const navigation=useStoryNavigation(),shell=useRef<HTMLDivElement>(null);
   const reviewing=!!navigation?.reviewing&&!navigation.card;
@@ -77,11 +79,11 @@ export function StoryShell({ children, controls, headerExtra, onHome, exitURL = 
                 className="conversation-icon labeled-control"
                 onClick={onToggleVoice}
                 disabled={!voiceAvailable}
-                aria-label={!voiceAvailable ? 'Sound unavailable' : voiceEnabled ? 'Mute sound' : 'Enable sound'}
-                aria-pressed={voiceEnabled && voiceAvailable}
-                title={!voiceAvailable ? 'Sound unavailable' : voiceEnabled ? 'Mute sound' : 'Enable sound'}
+                aria-label={!voiceAvailable ? 'Sound unavailable' : isSoundOn ? 'Mute sound' : 'Enable sound'}
+                aria-pressed={isSoundOn && voiceAvailable}
+                title={!voiceAvailable ? 'Sound unavailable' : isSoundOn ? 'Mute sound' : 'Enable sound'}
               >
-                {voiceEnabled && voiceAvailable ? <Volume2 size={21} /> : <VolumeX size={21} />}
+                {isSoundOn && voiceAvailable ? <Volume2 size={21} /> : <VolumeX size={21} />}
                 <span>Sound</span>
               </button>
             ) : null}
@@ -95,17 +97,80 @@ export function StoryShell({ children, controls, headerExtra, onHome, exitURL = 
   );
 }
 
-export function StoryControls({ onBack, onNext, nextLabel = 'Next', nextDisabled = false, nextForm, progress, nextHint, backHidden = false, hintDisabled = false, keepProgress=false }: {
-  onBack(): void; onNext?: () => void; nextLabel?: string; nextDisabled?: boolean; nextForm?: string; progress?: ReactNode; nextHint?: string; backHidden?: boolean; hintDisabled?: boolean;keepProgress?:boolean;
-}) {
-  const navigation=useStoryNavigation();
-  return <footer className="conversation-controls">
-    {backHidden&&!navigation ? <span /> : <button className="conversation-back" type="button" onClick={navigation&&!navigation.card?navigation.back:onBack}><ArrowLeft size={21} />Back</button>}
-    <div className="conversation-progress">{navigation?.skip?<JudgeSkip/>:!navigation||keepProgress?progress:null}</div>
-    <div className="next-control">{!navigation?.card?<HintButton disabled={hintDisabled} />:null}<span className="next-hint" id="next-action-hint">{nextHint}</span><button aria-describedby={nextHint ? "next-action-hint" : undefined} data-primary-action className="conversation-next" type={nextForm ? 'submit' : 'button'} form={nextForm} disabled={nextDisabled} onClick={onNext}>
-      {nextLabel}<ArrowRight size={22} />
-    </button></div>
-  </footer>;
+export interface StoryControlsProps {
+  onBack(): void;
+  onNext?: () => void;
+  nextLabel?: string;
+  nextDisabled?: boolean;
+  nextForm?: string;
+  progress?: ReactNode;
+  nextHint?: string;
+  backHidden?: boolean;
+  hintDisabled?: boolean;
+  hintHidden?: boolean;
+  skipHidden?: boolean;
+  keepProgress?: boolean;
+}
+
+export function StoryControls({
+  onBack,
+  onNext,
+  nextLabel = 'Next',
+  nextDisabled = false,
+  nextForm,
+  progress,
+  nextHint,
+  backHidden = false,
+  hintDisabled = false,
+  hintHidden = false,
+  skipHidden = false,
+  keepProgress = false,
+}: StoryControlsProps) {
+  const navigation = useStoryNavigation();
+
+  return (
+    <footer className="conversation-controls">
+      {backHidden ? (
+        <span />
+      ) : (
+        <button
+          className="conversation-back"
+          type="button"
+          onClick={navigation && !navigation.card ? navigation.back : onBack}
+        >
+          <ArrowLeft size={21} />
+          Back
+        </button>
+      )}
+      <div className="conversation-progress">
+        {!skipHidden && navigation?.skip ? (
+          <JudgeSkip />
+        ) : !navigation || keepProgress ? (
+          progress
+        ) : null}
+      </div>
+      <div className="next-control">
+        {!hintHidden && !navigation?.card ? (
+          <HintButton disabled={hintDisabled} />
+        ) : null}
+        <span className="next-hint" id="next-action-hint">
+          {nextHint}
+        </span>
+        <button
+          aria-describedby={nextHint ? 'next-action-hint' : undefined}
+          data-primary-action
+          className="conversation-next"
+          type={nextForm ? 'submit' : 'button'}
+          form={nextForm}
+          disabled={nextDisabled}
+          onClick={onNext}
+        >
+          {nextLabel}
+          <ArrowRight size={22} />
+        </button>
+      </div>
+    </footer>
+  );
 }
 
 export function JudgeSkip(){

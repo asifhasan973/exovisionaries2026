@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import type { MutableRefObject } from 'react';
 import type { WorkshopSession } from '@/game/moon/workshop/lander/workshopSession';
 import { writeBrowserSelectionSession, writeBrowserDemoSession } from '@/game/moon/crew/selectionSession';
@@ -22,7 +22,9 @@ export function useStoryPersistence(
   voicesEnabled: boolean,
   demo: boolean,
   setStorageAvailable: (available: boolean) => void,
+  setIsSaving?: (saving: boolean) => void,
 ) {
+  const isInitial = useRef(true);
   const { progress, preparation, readiness, flight, moon } = mission;
 
   const flightCheckpoint = Math.floor(flight.t * 2);
@@ -70,6 +72,24 @@ export function useStoryPersistence(
 
   useEffect(() => {
     if (isDebugSession) return;
+    if (isInitial.current) {
+      isInitial.current = false;
+      const current = latestRef.current;
+      const saved = current.demo
+        ? writeBrowserDemoSession(current)
+        : writeBrowserSelectionSession(
+            current.progress,
+            current.voiceEnabled,
+            current.preparation,
+            current.readiness,
+            current.flight,
+            current.moon,
+            current.repair,
+          );
+      setStorageAvailable(saved);
+      return;
+    }
+    setIsSaving?.(true);
     const current = latestRef.current;
     const saved = current.demo
       ? writeBrowserDemoSession(current)
@@ -82,7 +102,10 @@ export function useStoryPersistence(
           current.moon,
           current.repair,
         );
-    const timer = setTimeout(() => setStorageAvailable(saved), 0);
+    setStorageAvailable(saved);
+    const timer = setTimeout(() => {
+      setIsSaving?.(false);
+    }, 700);
     return () => clearTimeout(timer);
   }, [
     isDebugSession,
@@ -160,6 +183,7 @@ export function useStoryPersistence(
     demo,
     latestRef,
     setStorageAvailable,
+    setIsSaving,
   ]);
 
   useEffect(() => {

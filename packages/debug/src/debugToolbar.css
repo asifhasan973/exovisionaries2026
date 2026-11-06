@@ -458,3 +458,42 @@
   border-color: #ed8def;
   transform: scale(1.04);
 }
+
+/* Compact Landscape Viewport Optimization */
+@media (max-height: 500px) {
+  .debug-drawer {
+    width: min(620px, calc(100vw - 20px));
+    max-height: calc(100vh - 16px);
+    border-radius: 12px;
+  }
+  .debug-drawer-header {
+    padding: 8px 14px;
+    gap: 8px;
+  }
+  .debug-header-title {
+    font-size: 13px;
+  }
+  .debug-search-input {
+    height: 30px;
+    font-size: 11px;
+    padding: 4px 10px 4px 28px;
+  }
+  .debug-category-tab {
+    padding: 5px 10px;
+    font-size: 11px;
+  }
+  .debug-entry-card {
+    padding: 8px 12px;
+  }
+  .debug-entry-name {
+    font-size: 12px;
+  }
+  .debug-entry-desc {
+    font-size: 10px;
+  }
+  .debug-jump-btn {
+    padding: 4px 10px;
+    font-size: 10.5px;
+    min-height: 28px;
+  }
+}

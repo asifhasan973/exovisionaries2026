@@ -3,8 +3,11 @@ import type { ReactNode } from 'react';
 import { Expand, Home, Pause, Play, Volume2, VolumeX } from 'lucide-react';
 import { MobileGameContext, MOBILE_GAME_QUERY } from './mobileGameContext';
 import { GameInfo } from '@exo/ui';
+import { useAudioStore } from '@exo/audio';
 import { SettingsButton } from '../settings/GameSettings';
 import { LearningControls } from '@/game/moon/core/learning/Learning';
+import { StorySaveBadge } from '../StorySaveBadge';
+import { MilestoneRing } from '@/game/moon/stages/milestones/MilestoneRing';
 import './mobileGame.css';
 
 type LockableOrientation = ScreenOrientation & { lock?: (orientation: 'landscape') => Promise<void> };
@@ -13,8 +16,8 @@ type LockableOrientation = ScreenOrientation & { lock?: (orientation: 'landscape
 export function MobileGameProvider({
   children,
   active = true,
-  voiceEnabled = true,
-  onToggleVoice = () => {},
+  voiceEnabled: propVoiceEnabled,
+  onToggleVoice: propOnToggleVoice,
   onHome = () => {},
   onPause = () => {},
   onResume = () => {},
@@ -27,6 +30,15 @@ export function MobileGameProvider({
   onPause?(): void;
   onResume?(): void;
 }) {
+  const isMuted = useAudioStore(s => s.isMuted);
+  const voicesEnabled = useAudioStore(s => s.voicesEnabled);
+  const effectsEnabled = useAudioStore(s => s.effectsEnabled);
+  const toggleMute = useAudioStore(s => s.toggleMute);
+
+  const soundActive = !isMuted && (voicesEnabled || effectsEnabled);
+  const isSoundOn = propVoiceEnabled !== undefined ? propVoiceEnabled : soundActive;
+  const handleToggleSound = propOnToggleVoice ?? toggleMute;
+
   const [mobile, setMobile] = useState(() => matchMedia(MOBILE_GAME_QUERY).matches);
   const [menu, setMenu] = useState(false);
   const [fullscreen, setFullscreen] = useState(!!document.fullscreenElement);
@@ -113,14 +125,16 @@ export function MobileGameProvider({
       {children}
       {mode ? (
         <aside className="mobile-game-tools" aria-label="Quick game controls">
+          <StorySaveBadge />
+          <MilestoneRing />
           <button
             type="button"
-            aria-label={voiceEnabled ? 'Mute voices' : 'Turn on voices'}
-            title={voiceEnabled ? 'Mute voices' : 'Turn on voices'}
-            aria-pressed={voiceEnabled}
-            onClick={onToggleVoice}
+            aria-label={isSoundOn ? 'Mute sound' : 'Enable sound'}
+            title={isSoundOn ? 'Mute sound' : 'Enable sound'}
+            aria-pressed={isSoundOn}
+            onClick={handleToggleSound}
           >
-            {voiceEnabled ? <Volume2 size={20} /> : <VolumeX size={20} />}
+            {isSoundOn ? <Volume2 size={20} /> : <VolumeX size={20} />}
           </button>
           <button
             type="button"
@@ -144,13 +158,17 @@ export function MobileGameProvider({
               </button>
               <div className="mobile-menu-grid">
                 <button
+                  type="button"
+                  aria-label={isSoundOn ? 'Mute sound' : 'Enable sound'}
+                  title={isSoundOn ? 'Mute sound' : 'Enable sound'}
+                  aria-pressed={isSoundOn}
                   onClick={() => {
                     setMenu(false);
-                    onToggleVoice();
+                    handleToggleSound();
                   }}
                 >
-                  {voiceEnabled ? <VolumeX size={18} /> : <Volume2 size={18} />}
-                  {voiceEnabled ? 'Mute voices' : 'Voice on'}
+                  {isSoundOn ? <VolumeX size={18} /> : <Volume2 size={18} />}
+                  {isSoundOn ? 'Mute sound' : 'Sound on'}
                 </button>
                 <button onClick={toggleFullscreen}>
                   <Expand size={18} />

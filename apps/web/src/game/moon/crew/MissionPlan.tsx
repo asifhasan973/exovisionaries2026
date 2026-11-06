@@ -8,7 +8,7 @@ import { READY, selectionSteps } from './selectionConfig';
 export function MissionPlan({ progress, onBack, frame }: { progress: StoryProgress; onBack(): void; frame: SelectionFrame }) {
   const icons = [Moon, Sparkles, MapPin];
   return (
-    <StoryShell {...frame} controls={<StoryControls onBack={onBack} nextLabel="Workshop" nextDisabled progress={<span>READY</span>} />}>
+    <StoryShell {...frame} controls={<StoryControls onBack={onBack} nextLabel="Workshop" nextDisabled hintHidden skipHidden progress={<span>READY</span>} />}>
       <main className="conversation-main selection-main" id="story-content" tabIndex={-1} aria-labelledby="mission-plan-title">
         <GuideStage cue={READY} />
         <section className="conversation-panel selection-plan-panel">

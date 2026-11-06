@@ -207,3 +207,8 @@ This document defines standard conventions, architectural standards, and develop
 - **Render Optimization**: Memoize expensive Three.js calculations (`useMemo`, `useCallback`), cancel `requestAnimationFrame` IDs on unmount, scope telemetry to dedicated Zustand slices, pre-allocate Three.js vector/quaternion instances outside animation loops, and audit code-split chunks.
 
 ---
+
+## 26. Subsystem UI Isolation & In-Game Modal Uniformity
+
+- **Subsystem Boundary Enforcement**: Strictly decouple core game UI styles from external educational archives (`NasaMissionArchive`) and developer tools (`DebugModal`). The Mission Archive timeline/records and Debug tooling retain their independent styling and must never inherit or collide with gameplay modal rules.
+- **Unified Game Central Modals**: All in-game central modal dialogs (`RestartStoryDialog`, `QuickBuildDialog`, `GameSettings`, `DemoMenu`, contextual part/flight notes) must strictly adhere to the unified aerospace HUD layout: portaled container (`.hud-modal-container`), glowing icon badge, bold Fredoka title, monospace uppercase subtitle, corner `[X]` close button, scrollable body with thin cyan scrollbar, and standardized secondary/primary action footer.

@@ -76,17 +76,25 @@ export function StoryScreenRouter({
   }
 
   if (milestoneCard) {
+    const allComplete = progress.stepId === 'mission-debrief' || Boolean(progress.milestones?.celebrated.includes('home'));
     return (
       <MilestonePage
         frame={frame}
         mode={overviewOpen === 'map' ? 'map' : pending ? 'complete' : 'intro'}
         current={chapterIndex}
         completed={pending}
+        destination={progress.selections.destination}
+        allComplete={allComplete}
         onBack={back}
         onNext={() => {
-          setOverviewOpen(null);
           setAutoplay(true);
-          dispatch({ type: pending ? 'milestone-continue' : 'milestone-start' });
+          if (pending) {
+            dispatch({ type: 'milestone-continue' });
+            setOverviewOpen('map');
+          } else {
+            setOverviewOpen(null);
+            dispatch({ type: 'milestone-start' });
+          }
         }}
       />
     );
@@ -102,6 +110,8 @@ export function StoryScreenRouter({
         playerName={progress.playerName}
         autoplay={autoplay}
         narrationEnabled={frame.voiceEnabled}
+        onNarrationEnabledChange={frame.onToggleVoice}
+        headerExtra={frame.headerExtra}
         onNext={() => {
           setAutoplay(true);
           dispatch({ type: 'next' });
@@ -123,6 +133,8 @@ export function StoryScreenRouter({
         onSubmit={(name: string, gender: PlayerGender) => {
           setAutoplay(true);
           dispatch({ type: 'set-name', name, gender });
+          dispatch({ type: 'next' });
+          setOverviewOpen('start');
         }}
       />
     );

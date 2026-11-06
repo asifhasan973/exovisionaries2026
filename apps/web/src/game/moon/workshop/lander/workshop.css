@@ -136,9 +136,12 @@
 .workshop-drag-ghost img{width:100%;height:100%;object-fit:contain;}
 .workshop-render-fallback{position:absolute;inset:40px 20px;display:grid;place-items:center;text-align:center;color:#d9c1e8;pointer-events:none;}
 .workshop-handoff{padding:18px;max-height:none;}
-.workshop-dialog{position:fixed;inset:0;margin:auto;max-width:510px;width:calc(100% - 32px);max-height:80dvh;overflow:auto;border:1px solid #9165aa;border-radius:24px;padding:24px;background:#241439;color:#f5e9ff;box-shadow:0 20px 100px #0008;font-family:Outfit,sans-serif;}
-.workshop-dialog::backdrop{background:#080515b8;backdrop-filter:blur(6px);}
-.workshop-dialog-actions{display:flex;gap:12px;margin-top:20px;align-items:center;}
+.workshop-dialog{position:fixed;inset:0;margin:auto;max-width:500px;width:min(92vw,500px);max-height:min(88vh,440px);box-sizing:border-box;overflow-y:auto;border:1.5px solid rgba(145,101,170,0.65);border-radius:clamp(16px,2vw,24px);padding:clamp(16px,3vh,28px) clamp(18px,3.2vw,30px);background:linear-gradient(150deg,rgba(36,20,57,0.98),rgba(18,12,32,0.99));color:#f5e9ff;box-shadow:0 20px 80px rgba(0,0,0,0.75),0 0 35px rgba(145,101,170,0.2);font-family:Outfit,sans-serif;scrollbar-width:thin;}
+.workshop-dialog::backdrop{background:rgba(8,5,21,0.75);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);}
+.workshop-dialog h2{font-family:Fredoka,sans-serif;font-size:clamp(20px,2.8vh + 1vw,28px);margin:4px 0 clamp(8px,1.4vh,12px) 0;line-height:1.15;}
+.workshop-dialog p{font-size:clamp(13px,1.5vh + 0.4vw,15.5px);color:#d6c4e6;line-height:1.4;margin:0;}
+.workshop-dialog-actions{display:flex;align-items:center;justify-content:flex-end;gap:clamp(8px,1.8vw,14px);margin-top:clamp(16px,2.8vh,24px);}
+.workshop-dialog-actions button{min-height:clamp(38px,6vh,46px);padding:8px clamp(12px,2vw,20px);font-size:clamp(13px,1.4vw,15px);border-radius:clamp(9px,1.1vw,13px);}
 @media(max-height:600px),(max-width:900px){
   .workshop-feedback{display:none;}
   .workshop-live-strip,.workshop-power-strip{display:none;}

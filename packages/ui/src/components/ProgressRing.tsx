@@ -1,4 +1,5 @@
 import type { MouseEvent } from 'react';
+import { sound } from '@exo/audio';
 
 export interface ProgressRingProps {
   percent: number;
@@ -17,34 +18,42 @@ export function ProgressRing({
   label,
   title,
   onClick,
-  className = 'mission-progress-ring'
+  className = 'mission-progress-ring',
 }: ProgressRingProps) {
   const ariaLabel = label ?? `Milestone ${current} of ${total}, ${percent}% complete.`;
-  const ringTitle = title ?? `${current}/${total} · ${percent}%`;
+  const ringTitle = title ?? `Milestone ${current}/${total} · ${percent}% (Open mission map)`;
+
+  const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
+    sound.playClick(720);
+    onClick?.(event);
+  };
 
   return (
     <button
+      type="button"
       className={className}
-      onClick={onClick}
+      onClick={handleClick}
       aria-label={ariaLabel}
       title={ringTitle}
     >
-      <svg viewBox="0 0 52 52" aria-hidden="true">
-        <circle cx="26" cy="26" r="23" />
-        <circle
-          className="mission-progress-arc"
-          cx="26"
-          cy="26"
-          r="23"
-          pathLength="100"
-          strokeDasharray={`${percent} 100`}
-        />
-      </svg>
-      <span>
+      <div className="ring-svg-container">
+        <svg viewBox="0 0 52 52" aria-hidden="true">
+          <circle className="ring-track" cx="26" cy="26" r="21" />
+          <circle
+            className="mission-progress-arc"
+            cx="26"
+            cy="26"
+            r="21"
+            pathLength="100"
+            strokeDasharray={`${percent} 100`}
+            transform="rotate(-90 26 26)"
+          />
+        </svg>
+      </div>
+      <div className="ring-content">
         <strong>{percent}%</strong>
         <small>{current}/{total}</small>
-      </span>
+      </div>
     </button>
   );
 }
-

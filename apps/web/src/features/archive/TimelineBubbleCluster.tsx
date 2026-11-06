@@ -87,21 +87,21 @@ export const TimelineBubbleCluster: React.FC<TimelineBubbleClusterProps> = ({
       <div className={`bubble-cluster-triangle ${isAbove ? 'triangle-above' : 'triangle-below'}`}>
         {isAbove ? (
           <>
-            <div className="triangle-row-top">
+            <div className="triangle-row triangle-apex-row triangle-row-top">
               {renderBubble(bubbles[0])}
             </div>
-            <div className="triangle-row-bottom">
+            <div className="triangle-row triangle-base-row triangle-row-bottom">
               {renderBubble(bubbles[1])}
               {renderBubble(bubbles[2])}
             </div>
           </>
         ) : (
           <>
-            <div className="triangle-row-top">
+            <div className="triangle-row triangle-base-row triangle-row-top">
               {renderBubble(bubbles[1])}
               {renderBubble(bubbles[2])}
             </div>
-            <div className="triangle-row-bottom">
+            <div className="triangle-row triangle-apex-row triangle-row-bottom">
               {renderBubble(bubbles[0])}
             </div>
           </>
@@ -112,4 +112,3 @@ export const TimelineBubbleCluster: React.FC<TimelineBubbleClusterProps> = ({
 
   return null;
 };
-

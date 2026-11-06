@@ -5,6 +5,7 @@ import { StoryHeaderExtra } from './StoryHeaderExtra';
 export interface UseStoryFramesOptions {
   onHome: () => void;
   voiceEnabled: boolean;
+  soundActive?: boolean;
   toggleAudioMute: () => void;
   isDebugSession: boolean;
   debugStepId?: string;
@@ -12,12 +13,14 @@ export interface UseStoryFramesOptions {
   demo: boolean;
   judgePreview: boolean;
   storageAvailable: boolean;
+  isSaving?: boolean;
   skipError: string | null;
 }
 
 export function useStoryFrames({
   onHome,
   voiceEnabled,
+  soundActive,
   toggleAudioMute,
   isDebugSession,
   debugStepId,
@@ -25,11 +28,13 @@ export function useStoryFrames({
   demo,
   judgePreview,
   storageAvailable,
+  isSaving,
   skipError,
 }: UseStoryFramesOptions): { frame: SelectionFrame; homeFrame: SelectionFrame } {
   const frame: SelectionFrame = {
     onHome,
     voiceEnabled,
+    soundActive,
     onToggleVoice: toggleAudioMute,
     voiceAvailable: typeof Audio !== 'undefined',
     headerExtra: (
@@ -40,6 +45,7 @@ export function useStoryFrames({
         demo={demo}
         judgePreview={judgePreview}
         storageAvailable={storageAvailable}
+        isSaving={isSaving}
         skipError={skipError}
         onHome={onHome}
         showSaveStatus={true}
@@ -57,6 +63,7 @@ export function useStoryFrames({
         demo={demo}
         judgePreview={judgePreview}
         storageAvailable={storageAvailable}
+        isSaving={isSaving}
         skipError={skipError}
         onHome={onHome}
         showSaveStatus={false}

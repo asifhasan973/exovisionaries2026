@@ -16,18 +16,22 @@ function saved(key: string, fallback: boolean) {
 
 export function GameSettingsProvider({
   children,
-  voiceEnabled,
-  onToggleVoice,
+  voiceEnabled: _propVoiceEnabled,
+  onToggleVoice: _propOnToggleVoice,
   onRestart,
 }: {
   children: ReactNode;
-  voiceEnabled: boolean;
-  onToggleVoice(): void;
+  voiceEnabled?: boolean;
+  onToggleVoice?(): void;
   onRestart(): void;
 }) {
   const isMuted = useAudioStore(s => s.isMuted);
+  const voicesEnabled = useAudioStore(s => s.voicesEnabled);
   const effectsEnabled = useAudioStore(s => s.effectsEnabled);
+  const setVoicesEnabled = useAudioStore(s => s.setVoicesEnabled);
   const setEffects = useAudioStore(s => s.setEffectsEnabled);
+
+  const voiceActive = !isMuted && voicesEnabled;
   const effects = !isMuted && effectsEnabled;
   const [gentle, setGentle] = useState(() => saved('gentle', window.matchMedia('(prefers-reduced-motion: reduce)').matches));
   const [open, setOpen] = useState(false);
@@ -65,12 +69,20 @@ export function GameSettingsProvider({
               <label>
                 <Volume2 />
                 Character voices
-                <input type="checkbox" checked={voiceEnabled} onChange={onToggleVoice} />
+                <input
+                  type="checkbox"
+                  checked={voiceActive}
+                  onChange={e => setVoicesEnabled(e.target.checked)}
+                />
               </label>
               <label>
                 <Volume2 />
                 Sound effects
-                <input type="checkbox" checked={effectsEnabled} onChange={e => setEffects(e.target.checked)} />
+                <input
+                  type="checkbox"
+                  checked={effects}
+                  onChange={e => setEffects(e.target.checked)}
+                />
               </label>
               <label>
                 <Sparkles />

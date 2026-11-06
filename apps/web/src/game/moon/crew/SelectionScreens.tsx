@@ -36,14 +36,25 @@ export function NameScreen({ playerName, playerGender, onSubmit, onBack, frame, 
   const [draft, setDraft] = useState(playerName);
   const [gender, setGender] = useState(playerGender);
   const [error, setError] = useState(false);
-  return <StoryShell {...frame} controls={<StoryControls onBack={onBack} nextLabel="Start" nextForm="commander-name"
+  const isSubmitting = useRef(false);
+
+  const handleSubmit = () => {
+    const trimmed = draft.trim();
+    if (!trimmed) { setError(true); return; }
+    if (isSubmitting.current) return;
+    isSubmitting.current = true;
+    sound.playClick(880);
+    onSubmit(trimmed, gender);
+  };
+
+  return <StoryShell {...frame} controls={<StoryControls backHidden onBack={onBack} onNext={handleSubmit} nextLabel="Start" nextForm="commander-name"
     nextDisabled={!draft.trim()} nextHint={!draft.trim() ? "Enter your name" : `Ready, ${draft.trim()}!`} progress={<span>NAME</span>} />}>
     <main className="conversation-main selection-main name-main" id="story-content" tabIndex={-1} aria-labelledby="name-title">
       <PlayerCharacterProvider value={gender}><GuideStage /></PlayerCharacterProvider>
       <section className="conversation-panel selection-name-panel">
         <span className="selection-eyebrow"><Sparkles size={17} />ZERO TO BEYOND</span>
         <h1 id="name-title">Your name</h1>
-        <form id="commander-name" onSubmit={event => { event.preventDefault(); if (!draft.trim()) { setError(true); return; } onSubmit(draft, gender); }}>
+        <form id="commander-name" onSubmit={event => { event.preventDefault(); handleSubmit(); }}>
           <label htmlFor="commander-name-input">Your explorer name</label>
           <input id="commander-name-input" name="commanderName" value={draft} placeholder="Charlie" maxLength={40} autoComplete="nickname"
             autoFocus={!mobile} required aria-describedby={error ? 'name-error' : undefined}

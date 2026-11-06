@@ -3,15 +3,19 @@ html:has(.conversation-game),body:has(.conversation-game){height:100%;overflow:h
 .conversation-game.conversation-game{height:100dvh;min-height:0;overflow:hidden;grid-template-rows:56px minmax(0,1fr) 64px;}
 .conversation-game>.conversation-header{min-height:0;height:56px;padding:8px clamp(12px,2.5vw,38px);position:relative;}
 .conversation-game .conversation-brand{font-size:23px;gap:10px;}.conversation-game .conversation-brand>span{width:36px;height:37px;border-radius:12px;}
-.conversation-game>.conversation-controls{height:64px;min-height:0;position:relative;bottom:auto;margin:0;max-width:none;padding:8px clamp(12px,2.5vw,38px);grid-template-columns:1fr auto 1fr;gap:12px;z-index:3;}
-.conversation-game>.conversation-controls .conversation-back,.conversation-game>.conversation-controls .conversation-next{min-height:42px;height:42px;padding:9px 18px;font-size:16px;border-radius:13px;}
-.conversation-game>.conversation-controls .conversation-next{min-width:120px;gap:14px;box-shadow:0 3px 0 #752b95;}
+.conversation-game>.conversation-controls{height:64px;min-height:0;position:relative;bottom:auto;margin:0;max-width:none;padding:8px clamp(12px,2.5vw,38px);display:grid;grid-template-columns:minmax(0,auto) minmax(0,1fr) minmax(0,auto);gap:12px;align-items:center;z-index:3;}
+.conversation-game>.conversation-controls .conversation-back,.conversation-game>.conversation-controls .conversation-next{min-height:clamp(36px,5.8vh,44px);height:clamp(36px,5.8vh,44px);padding:6px clamp(12px,1.8vw,20px);font-size:clamp(13px,1.4vw,16px);font-weight:700;border-radius:clamp(10px,1.2vw,14px);display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;}
+.conversation-game>.conversation-controls .conversation-next{min-width:clamp(100px,11vw,132px);gap:clamp(8px,1vw,14px);box-shadow:0 3px 0 #752b95;font-weight:800;}
+.conversation-game>.conversation-controls .conversation-back{gap:8px;}
+.conversation-game>.conversation-controls .conversation-back-spacer{display:block;min-width:0;}
+.conversation-game>.conversation-controls .next-control{display:flex;align-items:center;justify-content:flex-end;gap:clamp(6px,1vw,10px);min-width:0;}
+.conversation-game>.conversation-controls .next-hint{font-size:clamp(11px,1.2vw,13px);color:#dac5e6;max-width:clamp(110px,16vw,200px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:right;}
 .conversation-game>.conversation-main,.conversation-game>.workshop-main{height:100%;min-height:0;width:100%;margin:0 auto;overflow:hidden;padding:14px clamp(12px,2.5vw,38px);}
 .conversation-game>.conversation-main{grid-template-columns:minmax(0,.9fr) minmax(0,1.2fr);gap:24px;}
 .conversation-game .conversation-stage{height:100%;min-height:0;max-height:none;}
 .conversation-game .conversation-panel{max-height:100%;padding:22px;min-height:0;}
 .conversation-game h1{font-size:clamp(24px,2.5vw,36px);margin:6px 0 12px;}
-.conversation-game .conversation-dialogue{overflow:hidden;max-height:none;min-height:0;padding:18px;}
+.conversation-game .conversation-dialogue{overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:#a967c4 #211137;max-height:none;min-height:0;padding:18px;}
 .conversation-game .conversation-dialogue p{font-size:clamp(19px,2vw,27px);line-height:1.4;}
 .conversation-game .conversation-speaker{font-size:14px;margin-bottom:10px;}.conversation-game .conversation-audio-status{margin-top:8px;}
 .conversation-game .story-skip-briefing{min-height:38px;padding:8px 12px;margin-top:9px;font-size:14px;}
@@ -200,3 +204,125 @@ html:has(.conversation-game),body:has(.conversation-game){height:100%;overflow:h
 @media(max-height:550px){.conversation-judge-skip{min-height:32px;padding:5px 12px;font-size:12px}}
 .conversation-game.conversation-game>footer.conversation-controls:has(.conversation-judge-skip){grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)!important}
 .conversation-controls:has(.conversation-judge-skip)>.next-control{justify-self:end}
+
+/* Aerospace HUD Doughnut Progress Ring */
+.mission-progress-ring {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: clamp(5px, 0.8vw, 8px);
+  height: clamp(34px, 5.2vh, 40px);
+  padding: 3px clamp(6px, 1vw, 10px) 3px 4px;
+  border: 1.5px solid rgba(140, 226, 194, 0.45);
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(32, 18, 50, 0.92), rgba(16, 10, 30, 0.96));
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #f7eeff;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4), inset 0 0 12px rgba(140, 226, 194, 0.08);
+  touch-action: manipulation;
+  transition: transform 0.15s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  user-select: none;
+  flex-shrink: 0;
+}
+.mission-progress-ring:hover {
+  transform: scale(1.03);
+  border-color: #8ce2c2;
+  box-shadow: 0 6px 20px rgba(140, 226, 194, 0.25), inset 0 0 15px rgba(140, 226, 194, 0.15);
+}
+.mission-progress-ring:active { transform: scale(0.97); }
+.mission-progress-ring:focus-visible { outline: 3px solid #ffe168; outline-offset: 3px; }
+.mission-progress-ring .ring-svg-container {
+  width: clamp(25px, 3.8vh, 30px);
+  height: clamp(25px, 3.8vh, 30px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.mission-progress-ring svg { width: 100%; height: 100%; overflow: visible; }
+.mission-progress-ring .ring-track { fill: none; stroke: rgba(255, 255, 255, 0.12); stroke-width: 4; }
+.mission-progress-ring .mission-progress-arc {
+  fill: none;
+  stroke: #8ce2c2;
+  stroke-width: 4.5;
+  stroke-linecap: round;
+  transition: stroke-dasharray 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  filter: drop-shadow(0 0 4px rgba(140, 226, 194, 0.7));
+}
+.mission-progress-ring .ring-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  line-height: 1.1;
+  text-align: left;
+}
+.mission-progress-ring strong {
+  font-family: Fredoka, sans-serif;
+  font-size: clamp(11.5px, 1.3vw, 14px);
+  color: #8ce2c2;
+  letter-spacing: 0.2px;
+}
+.mission-progress-ring small {
+  font-family: Outfit, monospace, sans-serif;
+  font-size: clamp(8.5px, 0.9vw, 10px);
+  color: #d6bde2;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+}
+
+/* Aerospace HUD Save Status Badge */
+.selection-save-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: clamp(28px, 4.2vh, 34px);
+  padding: 4px clamp(8px, 1.1vw, 12px);
+  border: 1px solid rgba(140, 226, 194, 0.35);
+  border-radius: 20px;
+  background: rgba(22, 14, 38, 0.78);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #8ce2c2;
+  font: 700 clamp(11px, 1.2vw, 13px)/1 Outfit, sans-serif;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  user-select: none;
+  transition: all 0.25s ease;
+  flex-shrink: 0;
+}
+.selection-save-status.is-saved {
+  border-color: rgba(93, 242, 178, 0.45);
+  color: #5df2b2;
+  box-shadow: 0 0 10px rgba(93, 242, 178, 0.15);
+}
+.selection-save-status.is-saving {
+  border-color: rgba(255, 223, 107, 0.55);
+  color: #ffdf6b;
+  box-shadow: 0 0 12px rgba(255, 223, 107, 0.25);
+}
+.selection-save-status.is-unsaved { border-color: rgba(246, 213, 142, 0.4); color: #f6d58e; }
+.selection-save-status.is-debug { border-color: rgba(200, 160, 255, 0.4); color: #d8b8ff; }
+.selection-save-status .save-spinner { animation: spin 1s linear infinite; flex-shrink: 0; }
+.selection-save-status .save-check { color: #5df2b2; flex-shrink: 0; }
+.selection-save-status > i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #5df2b2;
+  box-shadow: 0 0 6px #5df2b2;
+  flex-shrink: 0;
+}
+.selection-save-status.is-unsaved > i { background: #f6d58e; box-shadow: 0 0 6px #f6d58e; }
+
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+@media (max-height: 480px), (max-width: 700px) {
+  .mission-progress-ring { height: 32px; padding: 2px 6px 2px 3px; gap: 4px; }
+  .mission-progress-ring .ring-svg-container { width: 24px; height: 24px; }
+  .mission-progress-ring strong { font-size: 11px; }
+  .mission-progress-ring small { font-size: 8px; }
+  .selection-save-status { height: 28px; padding: 3px 7px; font-size: 10.5px; }
+}

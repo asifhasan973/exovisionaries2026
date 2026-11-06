@@ -14,7 +14,7 @@ const MainRocketViewport=lazy(()=>import('@/game/moon/workshop/rocket/MainRocket
 export function DepartureSuccess({session,dispatch,frame,onBack}:{session:WorkshopSession;dispatch(event:MissionEvent):void;frame:SelectionFrame;onBack():void}){
   const {effects,gentle}=useGameSettings(),navigation=useStoryNavigation();
   useEffect(()=>{if(effects&&navigation?.autoplay!==false&&!navigation?.reviewing){sound.setMuted(false);sound.playFanfare();}},[effects,navigation?.autoplay,navigation?.reviewing]);
-  return <StoryShell {...frame} controls={<StoryControls onBack={onBack} onNext={()=>dispatch({type:'next'})} nextLabel={session.flight.t>0?'Return to flight':'Launch pad'} hintDisabled/>}>
+  return <StoryShell {...frame} controls={<StoryControls onBack={onBack} onNext={()=>dispatch({type:'next'})} nextLabel={session.flight.t>0?'Return to flight':'Launch pad'} hintDisabled hintHidden/>}>
     <main id="story-content" tabIndex={-1} className={`departure-success ${gentle?'is-gentle':''}`} aria-labelledby="departure-title">
       <div className="departure-orbit departure-orbit-one" aria-hidden="true"/><div className="departure-orbit departure-orbit-two" aria-hidden="true"/>
       <section className="departure-message">

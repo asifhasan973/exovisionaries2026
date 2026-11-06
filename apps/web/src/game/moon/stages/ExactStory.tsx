@@ -66,10 +66,11 @@ export default function ExactStory({
   });
   const { progress, preparation, readiness, flight, moon } = mission;
 
-  const { voiceEnabled, voicesEnabled, toggleAudioMute } =
+  const { voiceEnabled, voicesEnabled, soundActive, toggleAudioMute } =
     useStoryAudioControls(session.voiceEnabled);
 
   const [storageAvailable, setStorageAvailable] = useState(session.storageAvailable);
+  const [isSaving, setIsSaving] = useState(false);
 
   const dispatch = useCallback((event: MissionEvent) => {
     setMission(current =>
@@ -119,7 +120,7 @@ export default function ExactStory({
     };
   }, [mission, progress, voicesEnabled, preparation, readiness, flight, moon, demoState.demo]);
 
-  useStoryPersistence(mission, latest, isDebugSession, voiceEnabled, voicesEnabled, demoState.demo, setStorageAvailable);
+  useStoryPersistence(mission, latest, isDebugSession, voiceEnabled, voicesEnabled, demoState.demo, setStorageAvailable, setIsSaving);
   useStoryPauseResume(dispatch, latest);
 
   useEffect(() => {
@@ -131,6 +132,7 @@ export default function ExactStory({
   const { frame, homeFrame } = useStoryFrames({
     onHome: nav.goHome,
     voiceEnabled,
+    soundActive,
     toggleAudioMute,
     isDebugSession,
     debugStepId,
@@ -138,6 +140,7 @@ export default function ExactStory({
     demo: demoState.demo,
     judgePreview: Boolean(progress.assistance?.includes('judge-demo')),
     storageAvailable,
+    isSaving,
     skipError: nav.skipError,
   });
 
@@ -173,11 +176,18 @@ export default function ExactStory({
                       nav.setOverviewOpen('map');
                     },
                     overviewOpen: nav.overviewOpen,
+                    storageAvailable,
+                    isSaving,
                   }
             }
           >
             <GestureGuide step={nav.home ? 'player-name' : mission.progress.stepId} hidden={nav.overviewOpen !== null} repair={mission.repair} />
-            <MobileGameProvider active={!nav.home}>
+            <MobileGameProvider
+              active={!nav.home}
+              voiceEnabled={voiceEnabled}
+              onToggleVoice={toggleAudioMute}
+              onHome={nav.goHome}
+            >
               <div className={`story-viewport-root ${nav.milestoneCard ? 'is-milestone-overview' : ''}`}>
                 <MissionBoundary frame={frame} onReload={nav.reset}>
                   <StoryScreenRouter

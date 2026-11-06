@@ -16,6 +16,8 @@ import {
 import { NASA_MISSION_EVENTS, NASA_BUBBLE_PLACEHOLDER } from '@exo/engine';
 import { fetchNasaYearUpdates, type NasaLiveMediaItem } from '@/shared/services/nasaApiService';
 import { sound } from '@exo/audio';
+import { formatOrdinalDate } from './archiveFormatters';
+import { LiveMediaSection } from './LiveMediaSection';
 
 interface MissionEventTreeProps {
   year: number | null;
@@ -23,6 +25,8 @@ interface MissionEventTreeProps {
   onClose: () => void;
   isVisible: boolean;
 }
+
+const EVENT_DESC_LIMIT = 150;
 
 export const MissionEventTree: React.FC<MissionEventTreeProps> = ({
   year,
@@ -34,12 +38,12 @@ export const MissionEventTree: React.FC<MissionEventTreeProps> = ({
   const queryTerm = events.length > 0 ? events[0].title.split(' ')[0] : 'NASA';
   const [liveMedia, setLiveMedia] = useState<NasaLiveMediaItem[]>([]);
   const [loadedYear, setLoadedYear] = useState<number | null>(null);
+  const [expandedEvents, setExpandedEvents] = useState<Record<string, boolean>>({});
   const isLoadingLive = year !== null && loadedYear !== year;
 
   useEffect(() => {
     if (!year) return;
 
-    // Asynchronously fetch live NASA image library enrichment on demand
     let isCancelled = false;
 
     fetchNasaYearUpdates(year, queryTerm)
@@ -60,11 +64,18 @@ export const MissionEventTree: React.FC<MissionEventTreeProps> = ({
     };
   }, [year, queryTerm]);
 
+  const toggleEventExpand = (id: string) => {
+    sound.playClick(650);
+    setExpandedEvents((prev) => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
+  };
+
   if (!year) return null;
 
   return (
     <div className={`nasa-event-tree-panel ${isVisible ? 'is-slid-in' : 'is-slid-down'}`}>
-      {/* Panel Navigation Bar */}
       <div className="tree-panel-header">
         <button
           type="button"
@@ -96,9 +107,7 @@ export const MissionEventTree: React.FC<MissionEventTreeProps> = ({
         </div>
       </div>
 
-      {/* Main Scrollable Content */}
       <div className="tree-panel-body">
-        {/* On-Demand Loading Spinner */}
         {isLoadingLive && (
           <div className="tree-live-sync-indicator" role="status">
             <Loader2 size={16} className="animate-spin text-cyan-400" />
@@ -106,7 +115,6 @@ export const MissionEventTree: React.FC<MissionEventTreeProps> = ({
           </div>
         )}
 
-        {/* Tree Track and Events */}
         {events.length > 0 ? (
           <div className="tree-structure-container">
             <div className="tree-vertical-spine" aria-hidden="true" />
@@ -115,6 +123,11 @@ export const MissionEventTree: React.FC<MissionEventTreeProps> = ({
               <AnimatePresence>
                 {events.map((event, idx) => {
                   const isHighlight = selectedEventId === event.id;
+                  const isExpanded = Boolean(expandedEvents[event.id]);
+                  const isLong = event.description.length > EVENT_DESC_LIMIT;
+                  const descText = isLong && !isExpanded
+                    ? `${event.description.slice(0, EVENT_DESC_LIMIT)}…`
+                    : event.description;
 
                   return (
                     <motion.article
@@ -129,15 +142,12 @@ export const MissionEventTree: React.FC<MissionEventTreeProps> = ({
                         ease: [0.25, 0.45, 0.3, 1]
                       }}
                     >
-                      {/* Spine Connector Node */}
                       <div className="event-spine-node">
                         <span className="spine-dot" />
                         <span className="spine-pulse" />
                       </div>
 
-                      {/* Card Inner Content */}
                       <div className="event-card-inner">
-                        {/* Header Badges */}
                         <div className="event-card-top">
                           <span className="event-category-badge">
                             {event.category === 'Crewed' && <Rocket size={12} />}
@@ -151,7 +161,7 @@ export const MissionEventTree: React.FC<MissionEventTreeProps> = ({
                           <div className="event-time-badges">
                             <span className="time-pill period-pill">
                               <Calendar size={12} className="text-cyan-400" />
-                              <span>{event.period}</span>
+                              <span>{formatOrdinalDate(event.period)}</span>
                             </span>
                             <span className="time-pill duration-pill">
                               <Clock size={12} className="text-amber-400" />
@@ -160,10 +170,8 @@ export const MissionEventTree: React.FC<MissionEventTreeProps> = ({
                           </div>
                         </div>
 
-                        {/* Event Title */}
                         <h3 className="event-card-title">{event.title}</h3>
 
-                        {/* Media Banner & Description Grid */}
                         <div className="event-media-grid">
                           <div className="event-thumbnail-box">
                             <img
@@ -179,9 +187,20 @@ export const MissionEventTree: React.FC<MissionEventTreeProps> = ({
                           </div>
 
                           <div className="event-copy-box">
-                            <p className="event-description">{event.description}</p>
+                            <p className="event-description">
+                              <span>{descText}</span>
+                              {isLong && (
+                                <button
+                                  type="button"
+                                  className="see-more-toggle-btn"
+                                  onClick={() => toggleEventExpand(event.id)}
+                                  aria-expanded={isExpanded}
+                                >
+                                  {isExpanded ? 'See less' : 'See more'}
+                                </button>
+                              )}
+                            </p>
 
-                            {/* Highlighted Milestones */}
                             {event.highlights && event.highlights.length > 0 && (
                               <div className="event-highlights-list">
                                 {event.highlights.map((hl, hIdx) => (
@@ -193,7 +212,6 @@ export const MissionEventTree: React.FC<MissionEventTreeProps> = ({
                               </div>
                             )}
 
-                            {/* Action Link: Redirect to official NASA page */}
                             <div className="event-actions-bar">
                               <a
                                 href={event.nasaUrl}
@@ -230,38 +248,7 @@ export const MissionEventTree: React.FC<MissionEventTreeProps> = ({
           </div>
         )}
 
-        {/* Live Enriched Media Library Strip */}
-        {liveMedia.length > 0 && (
-          <div className="tree-live-media-section">
-            <div className="live-media-heading">
-              <Sparkles size={14} className="text-amber-400" />
-              <span>NASA IMAGE & VIDEO LIBRARY ARCHIVAL RECORDS ({year})</span>
-            </div>
-
-            <div className="live-media-grid">
-              {liveMedia.map((item) => (
-                <div key={item.nasaId} className="live-media-card">
-                  {item.imageUrl && (
-                    <img
-                      src={item.imageUrl}
-                      alt={item.title}
-                      className="live-media-img"
-                      loading="lazy"
-                      onError={(e) => {
-                        e.currentTarget.src = NASA_BUBBLE_PLACEHOLDER;
-                      }}
-                    />
-                  )}
-                  <div className="live-media-caption">
-                    <span className="live-media-date">{item.dateCreated}</span>
-                    <strong className="live-media-title">{item.title}</strong>
-                    <p className="live-media-desc">{item.description.slice(0, 110)}…</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        <LiveMediaSection liveMedia={liveMedia} year={year} />
       </div>
     </div>
   );

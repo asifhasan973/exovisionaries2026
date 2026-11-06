@@ -8,12 +8,15 @@ import { useGameSettings } from '@/shared/shell';
 import { sound } from '@exo/audio';
 import { isEngineFrozen, useOrientationLifecycleStore } from '@exo/ui';
 import '@/shared/shell/missionExperience.css';
+import './milestones.css';
 
 export function MilestonePage({
   frame,
   mode,
   current,
   completed,
+  destination,
+  allComplete,
   onBack,
   onNext,
 }: {
@@ -21,6 +24,8 @@ export function MilestonePage({
   mode: 'intro' | 'map' | 'complete';
   current: number;
   completed?: MilestoneId;
+  destination?: string;
+  allComplete?: boolean;
   onBack(): void;
   onNext(): void;
 }) {
@@ -28,12 +33,17 @@ export function MilestonePage({
   const done = MILESTONES.find(m => m.id === completed);
   const index = done ? MILESTONES.indexOf(done) : current;
   const frozen = useOrientationLifecycleStore(state => state.isFrozen);
-  const last = done?.id === 'home';
+  const last = done?.id === 'home' || current >= MILESTONES.length - 1;
   const main = useRef<HTMLElement>(null);
+  const activeItemRef = useRef<HTMLLIElement>(null);
 
   useEffect(() => {
     main.current?.focus({ preventScroll: true });
   }, [mode, completed]);
+
+  useEffect(() => {
+    activeItemRef.current?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  }, [current, mode]);
 
   useEffect(() => {
     if (mode !== 'complete' || !effects) return;
@@ -49,6 +59,55 @@ export function MilestonePage({
     return () => window.removeEventListener('game-orientation-resume', celebrate);
   }, [mode, completed, effects]);
 
+  const isIntro = mode === 'intro';
+  const isComplete = mode === 'complete';
+  const isMars = destination === 'mars';
+
+  let heroSrc = `/story/milestone-${Math.min(MILESTONES.length, current + 1)}-v1.webp`;
+  let heroAria = 'Your Moon adventure';
+  let heroTag = 'YOUR MISSION AWAITS';
+  let heroText: React.ReactNode = <>From Earth to the Moon<br />and back again.</>;
+  let eyebrow = 'YOUR MOON ADVENTURE';
+  let titleNode: React.ReactNode = <>{MILESTONES.length} milestones.<br /><em>One Moon mission.</em></>;
+
+  if (isIntro) {
+    heroSrc = '/assets/loading/orion_earth_view.jpg';
+    heroAria = 'Planetary Exploration Journey';
+    heroTag = 'MISSION ROADMAP';
+    heroText = 'Planetary Exploration Journey';
+    eyebrow = 'PLANETARY EXPLORATION JOURNEY';
+    titleNode = <>{MILESTONES.length} milestones.<br /><em>One space expedition.</em></>;
+  } else if (isComplete && done) {
+    heroSrc = `/story/milestone-${index + 1}-v1.webp`;
+    heroAria = `${done.name} complete`;
+    heroTag = 'MISSION MILESTONE COMPLETE';
+    heroText = `${done.name} complete!`;
+    eyebrow = `MILESTONE ${index + 1} / ${MILESTONES.length}`;
+    titleNode = <>{done.name}<br /><em>complete!</em></>;
+  } else if (allComplete) {
+    heroSrc = '/story/milestone-8-v1.webp';
+    heroAria = 'Mission Accomplished';
+    heroTag = 'MISSION ACCOMPLISHED';
+    heroText = <>All 8 milestones completed!<br />Ready for debrief.</>;
+    eyebrow = 'MISSION COMPLETED';
+    titleNode = <>All milestones.<br /><em>Safe return home.</em></>;
+  } else if (isMars) {
+    heroSrc = '/assets/loading/mars_perseverance.jpg';
+    heroAria = 'Your Mars adventure';
+    heroTag = 'DESTINATION: MARS';
+    heroText = <>Scouting the Red Planet<br />and scientific discovery.</>;
+    eyebrow = 'YOUR MARS ADVENTURE';
+    titleNode = <>{MILESTONES.length} milestones.<br /><em>One Mars mission.</em></>;
+  }
+
+  const nextLabel = isIntro
+    ? 'Start mission'
+    : isComplete
+      ? (last ? 'See mission results' : 'Next milestone')
+      : allComplete
+        ? 'See mission results'
+        : 'Keep playing';
+
   return (
     <StoryShell
       {...frame}
@@ -56,14 +115,14 @@ export function MilestonePage({
         <StoryControls
           onBack={onBack}
           onNext={onNext}
-          nextLabel={mode === 'intro' ? 'Start mission' : mode === 'map' ? 'Keep playing' : last ? 'See mission results' : 'Next milestone'}
+          nextLabel={nextLabel}
           hintDisabled
         />
       }
     >
       <main
         ref={main}
-        className={`milestone-page ${mode === 'complete' ? 'is-complete' : ''} ${gentle ? 'is-gentle' : ''} ${frozen ? 'is-frozen' : ''}`}
+        className={`milestone-page ${isComplete ? 'is-complete' : ''} ${gentle ? 'is-gentle' : ''} ${frozen ? 'is-frozen' : ''}`}
         id="story-content"
         tabIndex={-1}
         aria-labelledby="milestone-title"
@@ -73,23 +132,17 @@ export function MilestonePage({
           <i />
           <i />
         </div>
-        <section className="milestone-hero" aria-label={done ? `${done.name} complete` : 'Your Moon adventure'}>
-          <img src={`/story/milestone-${done ? index + 1 : 6}-v1.webp`} alt="" />
+        <section className="milestone-hero" aria-label={heroAria}>
+          <img src={heroSrc} alt="" />
           <div className="milestone-hero-caption">
-            <small>{done ? 'MISSION MILESTONE COMPLETE' : 'YOUR MISSION AWAITS'}</small>
-            <strong>
-              {done ? `${done.name} complete!` : <>From Earth to the Moon<br />and back again.</>}
-            </strong>
+            <small>{heroTag}</small>
+            <strong>{heroText}</strong>
           </div>
         </section>
         <section className="milestone-copy">
-          <span className="milestone-eyebrow">
-            {mode === 'complete' ? `MILESTONE ${index + 1} / ${MILESTONES.length}` : 'YOUR MOON ADVENTURE'}
-          </span>
-          <h1 id="milestone-title">
-            {done ? <>{done.name}<br /><em>complete!</em></> : <>{MILESTONES.length} milestones.<br /><em>One Moon mission.</em></>}
-          </h1>
-          {done ? (
+          <span className="milestone-eyebrow">{eyebrow}</span>
+          <h1 id="milestone-title">{titleNode}</h1>
+          {isComplete && done ? (
             <div className="milestone-next-card">
               {last ? (
                 <>
@@ -108,7 +161,7 @@ export function MilestonePage({
               )}
             </div>
           ) : null}
-          {done ? (
+          {isComplete && done ? (
             <div className="milestone-earned-stars" aria-hidden="true">
               <Star />
               <Star />
@@ -117,12 +170,15 @@ export function MilestonePage({
           ) : (
             <ol className="milestone-map" aria-label="Eight mission milestones">
               {MILESTONES.map((m, i) => {
-                const passed = i < current;
+                const passed = allComplete ? true : i < current;
+                const isCurrent = !allComplete && i === current;
+                const isUpcoming = !allComplete && i > current;
                 return (
                   <li
-                    className={`${passed ? 'is-done' : ''} ${i === current ? 'is-current' : ''}`}
+                    ref={isCurrent || (allComplete && i === MILESTONES.length - 1) ? activeItemRef : undefined}
+                    className={`milestone-item ${passed ? 'is-done' : ''} ${isCurrent ? 'is-current' : ''} ${isUpcoming ? 'is-upcoming' : ''}`}
                     key={m.id}
-                    aria-current={i === current ? 'step' : undefined}
+                    aria-current={isCurrent ? 'step' : undefined}
                   >
                     <img src={`/story/milestone-${i + 1}-v1.webp`} alt="" />
                     <strong>{m.name}</strong>

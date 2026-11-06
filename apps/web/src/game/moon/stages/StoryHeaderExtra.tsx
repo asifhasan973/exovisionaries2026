@@ -1,4 +1,5 @@
 import React from 'react';
+import { StorySaveBadge } from '@/shared/shell/StorySaveBadge';
 
 export interface StoryHeaderExtraProps {
   isDebugSession: boolean;
@@ -7,6 +8,7 @@ export interface StoryHeaderExtraProps {
   demo: boolean;
   judgePreview: boolean;
   storageAvailable: boolean;
+  isSaving?: boolean;
   skipError: string | null;
   onHome: () => void;
   showSaveStatus?: boolean;
@@ -19,6 +21,7 @@ export function StoryHeaderExtra({
   demo,
   judgePreview,
   storageAvailable,
+  isSaving,
   skipError,
   onHome,
   showSaveStatus = true,
@@ -42,20 +45,11 @@ export function StoryHeaderExtra({
         </button>
       ) : null}
       {showSaveStatus ? (
-        <span
-          className={`selection-save-status ${storageAvailable && !isDebugSession ? '' : 'is-unsaved'}`}
-          role="status"
-          title={
-            isDebugSession
-              ? 'Ephemeral debug session: local progress preserved'
-              : storageAvailable
-              ? 'Progress saved on this device'
-              : 'Saving unavailable. Keep this tab open.'
-          }
-        >
-          <i aria-hidden="true" />
-          <span>{isDebugSession ? 'Debug Mode' : storageAvailable ? 'Saved' : 'Not saved'}</span>
-        </span>
+        <StorySaveBadge
+          storageAvailable={storageAvailable}
+          isSaving={isSaving}
+          isDebugSession={isDebugSession}
+        />
       ) : null}
       {skipError ? <span role="alert" className="story-skip-error">{skipError}</span> : null}
     </>

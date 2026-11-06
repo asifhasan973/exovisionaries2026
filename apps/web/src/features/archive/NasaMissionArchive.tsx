@@ -19,7 +19,13 @@ export const NasaMissionArchive: React.FC<NasaMissionArchiveProps> = ({ onBack }
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const isMuted = useAudioStore((s) => s.isMuted);
-  const toggleMute = useAudioStore((s) => s.toggleMute);
+  const effectsEnabled = useAudioStore((s) => s.effectsEnabled);
+  const setEffectsEnabled = useAudioStore((s) => s.setEffectsEnabled);
+  const sfxActive = !isMuted && effectsEnabled;
+
+  const toggleSfx = () => {
+    setEffectsEnabled(!sfxActive);
+  };
 
   // Activate archive sound containment on mount; stop and deactivate on unmount
   useEffect(() => {
@@ -99,15 +105,15 @@ export const NasaMissionArchive: React.FC<NasaMissionArchiveProps> = ({ onBack }
 
         {/* Right Tools: Sound */}
         <div className="navbar-right">
-          {/* Sound Mute Toggle */}
+          {/* Sound SFX Toggle: Archive specifically controls SFX audio */}
           <button
             type="button"
             className="navbar-sound-toggle"
-            onClick={toggleMute}
-            title={isMuted ? 'Unmute all game audio' : 'Mute all game audio'}
-            aria-label={isMuted ? 'Unmute all game audio' : 'Mute all game audio'}
+            onClick={toggleSfx}
+            title={sfxActive ? 'Mute sound effects' : 'Enable sound effects'}
+            aria-label={sfxActive ? 'Mute sound effects' : 'Enable sound effects'}
           >
-            {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} className="text-cyan-400" />}
+            {sfxActive ? <Volume2 size={18} className="text-cyan-400" /> : <VolumeX size={18} />}
           </button>
         </div>
       </header>

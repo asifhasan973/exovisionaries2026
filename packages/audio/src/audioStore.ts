@@ -23,31 +23,109 @@ export interface AudioState {
 }
 
 const initialMuted = saved(STORAGE_KEY, false);
+const initialVoices = saved(VOICE_KEY, true, 'on');
 const initialEffects = saved(EFFECTS_KEY, true);
 sound.setMuted(initialMuted || !initialEffects);
 
 /** Master mute temporarily silences both channels without overwriting preferences. */
 export const useAudioStore = create<AudioState>((set, get) => ({
   isMuted: initialMuted,
-  voicesEnabled: saved(VOICE_KEY, true, 'on'),
+  voicesEnabled: initialVoices,
   effectsEnabled: initialEffects,
   setMuted: muted => {
-    set({ isMuted: muted });
-    sound.setMuted(muted || !get().effectsEnabled);
-    if (muted) sound.stopAll();
-    try { localStorage.setItem(STORAGE_KEY, String(muted)); } catch { /* In-memory preference remains. */ }
-    window.dispatchEvent(new CustomEvent('game-audio-mute-change', { detail: { isMuted: muted } }));
+    const prev = get();
+    if (muted) {
+      set({ isMuted: true });
+      sound.setMuted(true);
+      sound.stopAll();
+      try {
+        localStorage.setItem(STORAGE_KEY, 'true');
+      } catch {
+        /* In-memory preference remains. */
+      }
+      window.dispatchEvent(new CustomEvent('game-audio-mute-change', { detail: { isMuted: true } }));
+    } else {
+      const bothDisabled = !prev.voicesEnabled && !prev.effectsEnabled;
+      const nextVoices = bothDisabled ? true : prev.voicesEnabled;
+      const nextEffects = bothDisabled ? true : prev.effectsEnabled;
+      set({ isMuted: false, voicesEnabled: nextVoices, effectsEnabled: nextEffects });
+      sound.setMuted(!nextEffects);
+      try {
+        localStorage.setItem(STORAGE_KEY, 'false');
+        if (bothDisabled) {
+          localStorage.setItem(VOICE_KEY, 'on');
+          localStorage.setItem(EFFECTS_KEY, 'true');
+        }
+      } catch {
+        /* In-memory preference remains. */
+      }
+      window.dispatchEvent(new CustomEvent('game-audio-mute-change', { detail: { isMuted: false } }));
+      if (bothDisabled) {
+        window.dispatchEvent(new CustomEvent('game-audio-voices-change', { detail: { enabled: true } }));
+      }
+    }
   },
-  toggleMute: () => get().setMuted(!get().isMuted),
+  toggleMute: () => {
+    const s = get();
+    const isActive = !s.isMuted && (s.voicesEnabled || s.effectsEnabled);
+    s.setMuted(isActive);
+  },
   setVoicesEnabled: enabled => {
-    set({ voicesEnabled: enabled });
-    try { localStorage.setItem(VOICE_KEY, enabled ? 'on' : 'off'); } catch { /* In-memory preference remains. */ }
-    window.dispatchEvent(new CustomEvent('game-audio-voices-change', { detail: { enabled } }));
+    const prev = get();
+    if (enabled) {
+      set({ voicesEnabled: true, isMuted: false });
+      sound.setMuted(!prev.effectsEnabled);
+      try {
+        localStorage.setItem(VOICE_KEY, 'on');
+        localStorage.setItem(STORAGE_KEY, 'false');
+      } catch {
+        /* In-memory preference remains. */
+      }
+      window.dispatchEvent(new CustomEvent('game-audio-voices-change', { detail: { enabled: true } }));
+      window.dispatchEvent(new CustomEvent('game-audio-mute-change', { detail: { isMuted: false } }));
+    } else {
+      const allOff = !prev.effectsEnabled;
+      set({ voicesEnabled: false, ...(allOff ? { isMuted: true } : {}) });
+      try {
+        localStorage.setItem(VOICE_KEY, 'off');
+        if (allOff) localStorage.setItem(STORAGE_KEY, 'true');
+      } catch {
+        /* In-memory preference remains. */
+      }
+      window.dispatchEvent(new CustomEvent('game-audio-voices-change', { detail: { enabled: false } }));
+      if (allOff) {
+        sound.setMuted(true);
+        sound.stopAll();
+        window.dispatchEvent(new CustomEvent('game-audio-mute-change', { detail: { isMuted: true } }));
+      }
+    }
   },
   setEffectsEnabled: enabled => {
-    set({ effectsEnabled: enabled });
-    sound.setMuted(get().isMuted || !enabled);
-    if (!enabled) sound.stopAll();
-    try { localStorage.setItem(EFFECTS_KEY, String(enabled)); } catch { /* In-memory preference remains. */ }
+    const prev = get();
+    if (enabled) {
+      set({ effectsEnabled: true, isMuted: false });
+      sound.setMuted(false);
+      try {
+        localStorage.setItem(EFFECTS_KEY, 'true');
+        localStorage.setItem(STORAGE_KEY, 'false');
+      } catch {
+        /* In-memory preference remains. */
+      }
+      window.dispatchEvent(new CustomEvent('game-audio-mute-change', { detail: { isMuted: false } }));
+    } else {
+      const allOff = !prev.voicesEnabled;
+      set({ effectsEnabled: false, ...(allOff ? { isMuted: true } : {}) });
+      sound.setMuted(true);
+      sound.stopAll();
+      try {
+        localStorage.setItem(EFFECTS_KEY, 'false');
+        if (allOff) localStorage.setItem(STORAGE_KEY, 'true');
+      } catch {
+        /* In-memory preference remains. */
+      }
+      if (allOff) {
+        window.dispatchEvent(new CustomEvent('game-audio-mute-change', { detail: { isMuted: true } }));
+      }
+    }
   },
 }));

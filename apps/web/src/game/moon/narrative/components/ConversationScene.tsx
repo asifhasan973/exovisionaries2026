@@ -1,6 +1,7 @@
 import { usePlayerGender } from '../hooks/playerCharacterContext';
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { AudioLines, SkipForward, Volume2 } from 'lucide-react';
+import { useAudioStore } from '@exo/audio';
 import { CharacterStage } from './CharacterStage.tsx';
 import { StoryControls, StoryShell } from '@/shared/shell';
 import { getDialogueText, getSpeakerLabel } from '@/game/moon/core/flow';
@@ -20,7 +21,7 @@ export function ConversationScene({ title, lines, lineIndex, playerName, onNext,
   nextLabel = 'Next', exitURL = import.meta.env.BASE_URL, onHome, narrationEnabled, onNarrationEnabledChange, onSkip, autoplay = true }: {
   title: string; lines: readonly StoryLine[]; lineIndex: number; playerName: string;
   onNext(): void; onBack(): void; headerExtra?: ReactNode; nextLabel?: string; exitURL?: string;
-  onHome?: () => void; narrationEnabled?: boolean; onNarrationEnabledChange?: (enabled: boolean) => void;
+  onHome?: () => void; narrationEnabled?: boolean; onNarrationEnabledChange?: ((enabled: boolean) => void) | (() => void);
   onSkip?: () => void; autoplay?: boolean;
 }) {
   const gender = usePlayerGender();
@@ -31,11 +32,16 @@ export function ConversationScene({ title, lines, lineIndex, playerName, onNext,
   const label = `${getSpeakerLabel(line, playerName)} · ${line.speaker.character === 'chief' ? 'Mission director' : line.sourceSpeaker === 'Charlie' ? 'You' : 'Mission engineer'}`;
   const [controller] = useState(() => new NarrationController(browserNarrationEnvironment()));
   const narration = useSyncExternalStore(controller.subscribe, controller.getSnapshot, controller.getSnapshot);
+  const isMuted = useAudioStore(s => s.isMuted);
+  const voicesEnabled = useAudioStore(s => s.voicesEnabled);
+  const effectsEnabled = useAudioStore(s => s.effectsEnabled);
+  const soundActive = !isMuted && (voicesEnabled || effectsEnabled);
+  const voiceActive = !isMuted && voicesEnabled;
   const [localEnabled, setLocalEnabled] = useState(true);
-  const enabled = narrationEnabled ?? localEnabled;
+  const enabled = narrationEnabled ?? (voiceActive && localEnabled);
   const toggleVoice = () => {
     controller.stop();
-    if (onNarrationEnabledChange) onNarrationEnabledChange(!enabled);
+    if (onNarrationEnabledChange) (onNarrationEnabledChange as (arg?: boolean) => void)(!enabled);
     else setLocalEnabled(!enabled);
   };
   useEffect(() => {
@@ -71,7 +77,7 @@ export function ConversationScene({ title, lines, lineIndex, playerName, onNext,
   const commander = line.speaker.character === 'commander' ? line.speaker : line.listener?.character === 'commander' ? line.listener : COMMANDER_LISTEN;
   const available = narration.status !== 'unavailable';
 
-  return <StoryShell onHome={onHome} exitURL={exitURL} headerExtra={headerExtra} voiceEnabled={enabled}
+  return <StoryShell onHome={onHome} exitURL={exitURL} headerExtra={headerExtra} voiceEnabled={enabled} soundActive={soundActive}
     onToggleVoice={toggleVoice} voiceAvailable={available} skipTarget="conversation-dialogue"
     controls={<StoryControls keepProgress onBack={back} onNext={next} nextLabel={nextLabel} progress={<div className="story-briefing-progress">
       {onSkip ? <button className="story-skip-briefing" aria-label="Skip briefing" title="Skip briefing" onClick={() => { controller.stop(); onSkip(); }}><SkipForward size={18} /><span>Skip briefing</span></button> : null}
