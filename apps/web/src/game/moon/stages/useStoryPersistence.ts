@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import type { MutableRefObject } from 'react';
 import type { WorkshopSession } from '@/game/moon/workshop/lander/workshopSession';
-import { writeBrowserSelectionSession, writeBrowserDemoSession } from '@/game/moon/crew/selectionSession';
+import { writeBrowserSelectionSession } from '@/game/moon/crew/selectionSession';
 
 export interface StoryPersistenceState {
   progress: WorkshopSession['progress'];
@@ -10,7 +10,6 @@ export interface StoryPersistenceState {
   readiness: WorkshopSession['readiness'];
   flight: WorkshopSession['flight'];
   moon: WorkshopSession['moon'];
-  demo: boolean;
   repair: WorkshopSession['repair'];
 }
 
@@ -20,7 +19,6 @@ export function useStoryPersistence(
   isDebugSession: boolean,
   voiceEnabled: boolean,
   voicesEnabled: boolean,
-  demo: boolean,
   setStorageAvailable: (available: boolean) => void,
   setIsSaving?: (saving: boolean) => void,
 ) {
@@ -75,33 +73,29 @@ export function useStoryPersistence(
     if (isInitial.current) {
       isInitial.current = false;
       const current = latestRef.current;
-      const saved = current.demo
-        ? writeBrowserDemoSession(current)
-        : writeBrowserSelectionSession(
-            current.progress,
-            current.voiceEnabled,
-            current.preparation,
-            current.readiness,
-            current.flight,
-            current.moon,
-            current.repair,
-          );
+      const saved = writeBrowserSelectionSession(
+        current.progress,
+        current.voiceEnabled,
+        current.preparation,
+        current.readiness,
+        current.flight,
+        current.moon,
+        current.repair,
+      );
       setStorageAvailable(saved);
       return;
     }
     setIsSaving?.(true);
     const current = latestRef.current;
-    const saved = current.demo
-      ? writeBrowserDemoSession(current)
-      : writeBrowserSelectionSession(
-          current.progress,
-          current.voiceEnabled,
-          current.preparation,
-          current.readiness,
-          current.flight,
-          current.moon,
-          current.repair,
-        );
+    const saved = writeBrowserSelectionSession(
+      current.progress,
+      current.voiceEnabled,
+      current.preparation,
+      current.readiness,
+      current.flight,
+      current.moon,
+      current.repair,
+    );
     setStorageAvailable(saved);
     const timer = setTimeout(() => {
       setIsSaving?.(false);
@@ -180,7 +174,6 @@ export function useStoryPersistence(
     flight.skipped,
     flight.mode,
     flight.missedWindow,
-    demo,
     latestRef,
     setStorageAvailable,
     setIsSaving,
@@ -190,17 +183,15 @@ export function useStoryPersistence(
     if (isDebugSession) return;
     const save = () => {
       const current = latestRef.current;
-      if (current.demo) writeBrowserDemoSession(current);
-      else
-        writeBrowserSelectionSession(
-          current.progress,
-          current.voiceEnabled,
-          current.preparation,
-          current.readiness,
-          current.flight,
-          current.moon,
-          current.repair,
-        );
+      writeBrowserSelectionSession(
+        current.progress,
+        current.voiceEnabled,
+        current.preparation,
+        current.readiness,
+        current.flight,
+        current.moon,
+        current.repair,
+      );
     };
     window.addEventListener('pagehide', save);
     return () => window.removeEventListener('pagehide', save);

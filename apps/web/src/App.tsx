@@ -62,8 +62,6 @@ export default function App() {
       } else {
         content = <ExactStory initialHome={true} />;
       }
-    } else if (debugRoute.type === 'demo') {
-      content = <ExactStory debugDemoChapter={debugRoute.id} />;
     } else if (debugRoute.type === 'step') {
       content = <ExactStory debugStepId={debugRoute.id} />;
     } else {

@@ -13,7 +13,7 @@ export function DebugToolbar() {
 function DevelopmentDebugToolbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
-  const [filterType, setFilterType] = useState<'all' | 'page' | 'step' | 'demo'>('all');
+  const [filterType, setFilterType] = useState<'all' | 'page' | 'step'>('all');
   const [currentHash, setCurrentHash] = useState(() => window.location.hash);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -25,6 +25,7 @@ function DevelopmentDebugToolbar() {
   const {
     position,
     isDragging,
+    isCompact,
     pillRef,
     handlePointerDown,
     handlePointerMove,
@@ -114,7 +115,7 @@ function DevelopmentDebugToolbar() {
           ref={pillRef}
           className={`debug-launcher-btn ${isDragging ? 'is-dragging' : ''} ${
             position.dockSide ? `is-docked-${position.dockSide}` : ''
-          }`}
+          } ${isCompact ? 'is-compact' : ''}`}
           style={{
             left: `${position.x}px`,
             top: `${position.y}px`,
@@ -128,21 +129,29 @@ function DevelopmentDebugToolbar() {
               openModal();
             }
           }}
-          title="Drag to dock anywhere on screen • Click or press ~ to open navigator"
+          title="Tap to open navigator • Drag to reposition • Long-press to toggle width"
         >
-          <span className="debug-grip-handle" title="Drag handle">
-            <GripVertical size={13} />
-          </span>
-          <span className="debug-launcher-icon">
-            <Compass size={14} />
-          </span>
-          <span>DEBUG</span>
-          {activeRoute ? (
-            <span className="debug-active-pill" title={`Active: ${activeRoute.id}`}>
-              {activeRoute.id}
+          {isCompact ? (
+            <span className="debug-launcher-icon" aria-label="Debug Launcher">
+              <Compass size={18} />
             </span>
-          ) : null}
-          <span className="debug-launcher-hotkey">~</span>
+          ) : (
+            <>
+              <span className="debug-grip-handle" title="Drag handle">
+                <GripVertical size={13} />
+              </span>
+              <span className="debug-launcher-icon">
+                <Compass size={14} />
+              </span>
+              <span>DEBUG</span>
+              {activeRoute ? (
+                <span className="debug-active-pill" title={`Active: ${activeRoute.id}`}>
+                  {activeRoute.id}
+                </span>
+              ) : null}
+              <span className="debug-launcher-hotkey">~</span>
+            </>
+          )}
         </button>
       )}
 

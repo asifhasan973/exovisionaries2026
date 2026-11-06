@@ -173,7 +173,8 @@ export function StoryControls({
   );
 }
 
-export function JudgeSkip(){
+export function StorySkip(){
   const navigation=useStoryNavigation();
-  return navigation?.skip?<button type="button" className="conversation-judge-skip" onClick={navigation.skip} disabled={navigation.skipping} title="Skip this page in an assisted judge preview. Your main mission is saved separately."><SkipForward size={17}/>{navigation.skipping?'Opening…':'Skip'}</button>:null;
+  return navigation?.skip?<button type="button" className="conversation-judge-skip" onClick={navigation.skip} disabled={navigation.skipping} title="Skip this page and advance to the next mission stage."><SkipForward size={17}/>{navigation.skipping?'Advancing…':'Skip'}</button>:null;
 }
+export const JudgeSkip = StorySkip;

@@ -3,6 +3,7 @@ import type { WorkshopSession, MissionEvent } from '@/game/moon/workshop/lander/
 import { createWorkshopSession } from '@/game/moon/workshop/lander/workshopSession';
 import { createStoryProgress } from '@/game/moon/core/progress';
 import { pauseMission } from '@/game/moon/core/missionNavigation';
+import { executeSkip } from '@exo/debug';
 import { milestoneProgress } from '@/game/moon/core/missionMilestones';
 import { useLoadingStore, isEngineFrozen } from '@exo/ui';
 
@@ -10,14 +11,11 @@ export interface UseStoryNavigationStateOptions {
   mission: WorkshopSession;
   setMission: React.Dispatch<React.SetStateAction<WorkshopSession>>;
   dispatch: (event: MissionEvent) => void;
-  isDebugSession: boolean;
+  isDebugSession?: boolean;
   initialHome?: boolean;
   initialArchive?: boolean;
   debugStepId?: string;
   debugDemoChapter?: string;
-  demo: boolean;
-  setDemo: (demo: boolean) => void;
-  exitDemo: () => void;
 }
 
 export function useStoryNavigationState({
@@ -29,9 +27,6 @@ export function useStoryNavigationState({
   initialArchive,
   debugStepId,
   debugDemoChapter,
-  demo,
-  setDemo,
-  exitDemo,
 }: UseStoryNavigationStateOptions) {
   const { progress } = mission;
 
@@ -63,11 +58,10 @@ export function useStoryNavigationState({
     setAutoBuilding(false);
     setAutoplay(true);
     setMission(createWorkshopSession(createStoryProgress()));
-    setDemo(false);
     setRestart(false);
     setHome(false);
     setOverviewOpen(null);
-  }, [setMission, setDemo]);
+  }, [setMission]);
 
   const goHome = useCallback(() => {
     setAutoBuilding(false);
@@ -78,9 +72,8 @@ export function useStoryNavigationState({
       const { review, ...live } = paused;
       return { ...live, progress: review.anchor };
     });
-    exitDemo();
     setHome(true);
-  }, [exitDemo, setMission]);
+  }, [setMission]);
 
   const requestRestart = useCallback(() => {
     setRestart(true);
@@ -102,7 +95,7 @@ export function useStoryNavigationState({
 
   const chapter = milestoneProgress(mission);
   const pending = mission.review ? undefined : progress.milestones?.pending;
-  const introduction = !demo && !progress.milestones?.introduced && progress.stepId === 'appointment';
+  const introduction = !progress.milestones?.introduced && progress.stepId === 'appointment';
   const milestoneCard = !home && (Boolean(overviewOpen) || Boolean(pending) || introduction);
 
   const skipPage = useCallback(async () => {
@@ -128,21 +121,18 @@ export function useStoryNavigationState({
     setSkipError(null);
     const paused = pauseMission(mission);
     setMission(paused);
-    void useLoadingStore.getState().startLoading('mission_start', 'Opening the next judge preview…');
-    const task = import('./demo/judgeTour').then(module => module.skipJudgePage(paused));
-    useLoadingStore.getState().registerLoaderTask(task.then(() => {}, () => {}));
+    void useLoadingStore.getState().startLoading('mission_start', 'Advancing to next stage…');
     try {
-      const prepared = await task;
-      setDemo(true);
-      setMission(prepared);
+      const advanced = executeSkip(paused);
+      setMission(advanced);
       setAutoplay(true);
       setOverviewOpen(null);
     } catch {
-      setSkipError('Preview unavailable. Your mission is safe; try Next or return home.');
+      setSkipError('Skip unavailable. Try Next or return home.');
     } finally {
       setSkipBusy(false);
     }
-  }, [dispatch, milestoneCard, mission, pending, setDemo, setMission, skipBusy]);
+  }, [dispatch, milestoneCard, mission, pending, setMission, skipBusy]);
 
   useEffect(() => {
     const stop = () => setAutoBuilding(false);

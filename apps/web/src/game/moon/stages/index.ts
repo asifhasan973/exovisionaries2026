@@ -6,5 +6,4 @@ export { useStoryAudioControls } from './useStoryAudioControls';
 export { useStoryNavigationState } from './useStoryNavigationState';
 export * from './useStoryPersistence';
 export * from './useStoryPauseResume';
-export * from './demo';
 export * from './milestones';

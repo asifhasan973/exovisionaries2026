@@ -223,3 +223,235 @@
     font-size: 13px;
   }
 }
+
+/* Judge Instructions Modal & Trigger */
+.home-other-actions .home-judge-demo-btn {
+  display: flex;
+  align-items: center;
+  gap: clamp(4px, 0.6vw, 8px);
+  border: 0;
+  border-bottom: 1px solid rgba(255, 223, 137, 0.55);
+  background: none;
+  color: #ffdf89;
+  font-family: Outfit, sans-serif;
+  font-size: clamp(11px, 1vh + 0.3vw, 14px);
+  font-weight: 700;
+  padding: clamp(3px, 0.6vh, 6px) 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.home-other-actions .home-judge-demo-btn:hover {
+  color: #ffeaa5;
+  border-bottom-color: #ffdf89;
+  text-shadow: 0 0 10px rgba(255, 223, 137, 0.45);
+  transform: translateY(-1px);
+}
+.home-other-actions .home-judge-demo-btn:active {
+  transform: scale(0.97);
+}
+.judge-instructions-dialog {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  width: min(92vw, 620px);
+  max-width: 620px;
+  max-height: min(90vh, 540px);
+  height: fit-content;
+  display: flex;
+  flex-direction: column;
+  z-index: 99999;
+  border: 1.5px solid rgba(140, 226, 194, 0.55);
+  border-radius: clamp(16px, 2vw, 24px);
+  padding: clamp(14px, 2.2vh, 22px) clamp(16px, 2.4vw, 26px);
+  box-sizing: border-box;
+  color: #f7eeff;
+  background: linear-gradient(150deg, rgba(28, 18, 48, 0.98), rgba(14, 20, 40, 0.99));
+  box-shadow: 0 24px 90px rgba(0, 0, 0, 0.85), 0 0 35px rgba(140, 226, 194, 0.22);
+  overflow: hidden;
+}
+.judge-instructions-dialog:not([open]) {
+  display: none;
+}
+.judge-instructions-dialog::backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(9, 7, 29, 0.8);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  z-index: 99998;
+}
+.judge-instructions-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+  flex-shrink: 0;
+}
+.judge-instructions-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  color: #8ce2c2;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: rgba(140, 226, 194, 0.12);
+  border: 1px solid rgba(140, 226, 194, 0.35);
+  border-radius: 9999px;
+  padding: 3px 10px;
+}
+.judge-instructions-close {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #d6bde2;
+  cursor: pointer;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+}
+.judge-instructions-close:hover {
+  color: #ffffff;
+  border-color: #8ce2c2;
+  background: rgba(140, 226, 194, 0.2);
+  transform: scale(1.05);
+}
+.judge-instructions-dialog h2 {
+  font-family: Fredoka, sans-serif;
+  font-size: clamp(18px, 2.4vh + 0.6vw, 24px);
+  color: #ffffff;
+  margin: 6px 0 2px 0;
+  line-height: 1.2;
+  flex-shrink: 0;
+}
+.judge-instructions-intro {
+  font-family: Outfit, sans-serif;
+  font-size: clamp(12px, 1.2vh + 0.3vw, 13.5px);
+  color: #cbb4df;
+  margin: 0 0 10px 0;
+  line-height: 1.4;
+  flex-shrink: 0;
+}
+.judge-instructions-sections {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 6px;
+  margin: 0 0 10px 0;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(140, 226, 194, 0.4) transparent;
+}
+.judge-instructions-sections::-webkit-scrollbar {
+  width: 5px;
+}
+.judge-instructions-sections::-webkit-scrollbar-track {
+  background: transparent;
+}
+.judge-instructions-sections::-webkit-scrollbar-thumb {
+  background: rgba(140, 226, 194, 0.35);
+  border-radius: 4px;
+}
+.judge-instructions-card {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(140, 226, 194, 0.2);
+  border-radius: 12px;
+  padding: clamp(8px, 1.3vh, 12px) clamp(10px, 1.5vw, 14px);
+  transition: border-color 0.2s ease, background 0.2s ease;
+  flex-shrink: 0;
+}
+.judge-instructions-card:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(140, 226, 194, 0.45);
+}
+.judge-instructions-card-icon {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  border-radius: 8px;
+  background: rgba(140, 226, 194, 0.15);
+  border: 1px solid rgba(140, 226, 194, 0.3);
+  display: grid;
+  place-items: center;
+  color: #8ce2c2;
+  margin-top: 1px;
+}
+.judge-instructions-card-body h3 {
+  font-family: Fredoka, sans-serif;
+  font-size: clamp(13px, 1.4vw, 14.5px);
+  color: #8ce2c2;
+  margin: 0 0 3px 0;
+  line-height: 1.25;
+}
+.judge-instructions-card-body p {
+  font-family: Outfit, sans-serif;
+  font-size: clamp(11.5px, 1.2vw, 12.5px);
+  color: #e2d1eb;
+  line-height: 1.4;
+  margin: 0;
+}
+.judge-instructions-footer {
+  display: flex !important;
+  justify-content: flex-end !important;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 4px;
+  flex-shrink: 0;
+}
+.judge-instructions-footer .conversation-next {
+  min-height: clamp(34px, 5vh, 40px);
+  padding: 6px clamp(14px, 2vw, 22px);
+  font-size: clamp(12.5px, 1.3vw, 14px);
+  font-weight: 800;
+  border-radius: 10px;
+}
+@media (max-height: 480px) {
+  .judge-instructions-dialog {
+    max-height: 94vh;
+    padding: 10px 16px;
+  }
+  .judge-instructions-dialog h2 {
+    font-size: 17px;
+    margin: 2px 0;
+  }
+  .judge-instructions-intro {
+    font-size: 11px;
+    margin-bottom: 6px;
+  }
+  .judge-instructions-sections {
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+  .judge-instructions-card {
+    padding: 6px 10px;
+    gap: 8px;
+  }
+  .judge-instructions-card-icon {
+    width: 22px;
+    height: 22px;
+    min-width: 22px;
+  }
+  .judge-instructions-card-body h3 {
+    font-size: 12px;
+    margin-bottom: 2px;
+  }
+  .judge-instructions-card-body p {
+    font-size: 10.5px;
+    line-height: 1.35;
+  }
+  .judge-instructions-footer .conversation-next {
+    min-height: 30px;
+    padding: 4px 12px;
+    font-size: 12px;
+  }
+}

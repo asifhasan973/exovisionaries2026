@@ -1,6 +1,5 @@
 import { registerDebugCategories, type DebugCategory, type DebugItem } from '@exo/debug';
 import { STORY_FLOW } from '../core/flow';
-import { DEMO_CHAPTERS } from '../stages/demo/demoChapters';
 
 /**
  * Pages catalogue outside of standard linear mission steps
@@ -45,19 +44,19 @@ export function getDebugCategories(): DebugCategory[] {
     items: [...DEBUG_PAGES],
   });
 
-  // Story Steps grouped by Module
+  // Story Steps grouped by Module (Modules 01 - 11 in chronological order)
   const moduleGroups: Record<number, { title: string; description: string; steps: typeof STORY_FLOW[number][] }> = {
-    4: { title: '🎙️ Module 4 · Briefings & Mission Choices', description: 'Name entry, commander dialogue, destination & site choices', steps: [] },
-    5: { title: '🛠️ Module 5 · Spacecraft & Rover Workshop', description: 'Lander assembly, rover chassis, science package, power & survival', steps: [] },
-    8: { title: '👨‍🚀 Module 8 · Astronaut Crew Selection', description: 'Dossier reviews and astronaut crew assignments', steps: [] },
-    6: { title: '📋 Module 6 · Flight Readiness & Rocket Packing', description: 'Crew supplies, mass/power/budget telemetry checks, rocket packing', steps: [] },
-    7: { title: '🚀 Module 7 · Interactive Liftoff & Flight', description: 'Countdown, engine burn, staging, and Earth orbit insertion', steps: [] },
-    9: { title: '🌍 Module 9 · Orbit & Trans-Lunar Injection', description: 'Route selection, translunar coast, and lunar orbital entry', steps: [] },
-    10: { title: '🌕 Module 10 · Lunar Descent & Landing', description: 'Braking maneuvers, descent steering, and touchdown', steps: [] },
-    11: { title: '🚜 Module 11 · Lunar Surface Exploration', description: 'Lander ramp deployment, rover driving, and navigation', steps: [] },
-    12: { title: '🔬 Module 12 · Ice Science & Subsurface Drill', description: 'Core sampling, thermal profiling, and spectrometry', steps: [] },
-    13: { title: '⚠️ Module 13 · Hazard Recovery & Safety', description: 'Dust mitigation, sensor recalibration, and site securing', steps: [] },
-    14: { title: '🏆 Module 14 · Crew Return & Mission Debrief', description: 'Ascent staging, Earth re-entry, recovery, and final mission debrief', steps: [] },
+    1: { title: '🎙️ Module 01 · Briefings & Mission Choices', description: 'Name entry, commander dialogue, destination & site choices', steps: [] },
+    2: { title: '🛠️ Module 02 · Spacecraft & Rover Workshop', description: 'Lander assembly, rover chassis, science package, power & survival', steps: [] },
+    3: { title: '👨‍🚀 Module 03 · Astronaut Crew Selection', description: 'Dossier reviews and astronaut crew assignments', steps: [] },
+    4: { title: '📋 Module 04 · Flight Readiness & Staging', description: 'Crew supplies, mass/power/budget telemetry checks, rocket packing', steps: [] },
+    5: { title: '🚀 Module 05 · Liftoff & Earth Orbit', description: 'Countdown, engine burn, staging, and Earth orbit insertion', steps: [] },
+    6: { title: '🌍 Module 06 · Orbit & Trans-Lunar Injection', description: 'Route selection, translunar coast, and lunar orbital entry', steps: [] },
+    7: { title: '🌕 Module 07 · Lunar Descent & Landing', description: 'Braking maneuvers, descent steering, and touchdown', steps: [] },
+    8: { title: '🚜 Module 08 · Lunar Surface Exploration', description: 'Lander ramp deployment, rover driving, and navigation', steps: [] },
+    9: { title: '🔬 Module 09 · Ice Science & Subsurface Drill', description: 'Core sampling, thermal profiling, and spectrometry', steps: [] },
+    10: { title: '⚠️ Module 10 · Hazard Recovery & Safety', description: 'Dust mitigation, sensor recalibration, and site securing', steps: [] },
+    11: { title: '🏆 Module 11 · Crew Return & Mission Debrief', description: 'Ascent staging, Earth re-entry, recovery, and final mission debrief', steps: [] },
   };
 
   for (const step of STORY_FLOW) {
@@ -81,20 +80,6 @@ export function getDebugCategories(): DebugCategory[] {
       });
     }
   }
-
-  // Demo Chapters
-  categories.push({
-    title: '🎬 Stage Demo Checkpoints',
-    description: 'Jump directly to key chapter milestones with pre-configured mission states',
-    items: DEMO_CHAPTERS.map(ch => ({
-      id: ch.id,
-      label: ch.label,
-      description: `${ch.group} · ${ch.objective}`,
-      badge: 'Demo',
-      type: 'demo',
-      hash: `#/debug/demo/${ch.id}`,
-    })),
-  });
 
   return categories;
 }

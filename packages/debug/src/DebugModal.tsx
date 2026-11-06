@@ -5,8 +5,8 @@ import type { DebugCategory, DebugItem, DebugRoute } from './debugConfig';
 export interface DebugModalProps {
   search: string;
   setSearch(val: string): void;
-  filterType: 'all' | 'page' | 'step' | 'demo';
-  setFilterType(val: 'all' | 'page' | 'step' | 'demo'): void;
+  filterType: 'all' | 'page' | 'step';
+  setFilterType(val: 'all' | 'page' | 'step'): void;
   searchInputRef: React.RefObject<HTMLInputElement | null>;
   filteredCategories: DebugCategory[];
   activeRoute: DebugRoute | null;
@@ -86,7 +86,7 @@ export function DebugModal({
               ref={searchInputRef}
               type="text"
               className="debug-search-input"
-              placeholder="Filter pages, steps, activities, demos (e.g. 'lander', 'liftoff', 'science')…"
+              placeholder="Filter pages, steps, activities (e.g. 'lander', 'liftoff', 'science')…"
               value={search}
               onChange={e => setSearch(e.target.value)}
             />
@@ -109,12 +109,6 @@ export function DebugModal({
               onClick={() => setFilterType('step')}
             >
               Story Steps
-            </button>
-            <button
-              className={`debug-filter-pill ${filterType === 'demo' ? 'is-active' : ''}`}
-              onClick={() => setFilterType('demo')}
-            >
-              Demo Chapters
             </button>
           </div>
         </div>

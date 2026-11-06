@@ -3,6 +3,7 @@ import { STORY_FLOW, getStoryStep } from './flow';
 import { reduceStoryProgress } from './progress';
 import type { StoryProgress } from './types';
 import type { WorkshopSession } from '@/game/moon/workshop/lander/workshopSession';
+import { createDebugSession, registerSkipResolver } from '@exo/debug';
 
 export type StoryCursor=Pick<StoryProgress,'stepId'|'lineIndex'>;
 export interface MissionReview { anchor:StoryProgress; forward:StoryCursor[] }
@@ -54,3 +55,70 @@ export function navigateForward(s:WorkshopSession):WorkshopSession{
   if(!target||!forward.length){const {review,...rest}=s;return {...rest,progress:review!.anchor};}
   return {...s,review:{...s.review,forward},progress:{...s.progress,...target,history:[...s.progress.history,{stepId:s.progress.stepId,lineIndex:s.progress.lineIndex}]}};
 }
+
+/** Unified in-session stage advancement using the seeder engine directly on active session. */
+export function advanceMissionSkip(source: WorkshopSession): WorkshopSession {
+  const currentStep = getStoryStep(source.progress.stepId, source.progress.selections.objective);
+  if (currentStep.kind === 'endpoint') return source;
+
+  let s = source;
+  if (currentStep.kind === 'name') {
+    s = {
+      ...s,
+      progress: reduceStoryProgress(s.progress, {
+        type: 'set-name',
+        name: s.progress.playerName || 'Explorer',
+        gender: s.progress.playerGender,
+      }),
+    };
+  }
+  if (currentStep.kind === 'choice') {
+    const choice =
+      s.progress.selections[currentStep.choiceKey] ||
+      currentStep.options.find(option => option.available)!.id;
+    s = {
+      ...s,
+      progress: reduceStoryProgress(s.progress, { type: 'select', choiceId: choice }),
+    };
+  }
+
+  const nextProgress = reduceStoryProgress(s.progress, {
+    type: currentStep.kind === 'conversation' ? 'skip-briefing' : 'next',
+  });
+
+  if (nextProgress.stepId !== source.progress.stepId || nextProgress.lineIndex !== source.progress.lineIndex) {
+    return { ...s, progress: nextProgress };
+  }
+
+  const currentIndex = STORY_FLOW.findIndex(item => item.id === currentStep.id);
+  const targetStep = STORY_FLOW[currentIndex + 1];
+  if (!targetStep) return source;
+
+  const seeded = createDebugSession(targetStep.id);
+  return {
+    ...seeded,
+    progress: {
+      ...seeded.progress,
+      playerName: source.progress.playerName || seeded.progress.playerName,
+      playerGender: source.progress.playerGender ?? seeded.progress.playerGender,
+      selections: { ...seeded.progress.selections, ...source.progress.selections },
+      history: [
+        ...source.progress.history,
+        { stepId: source.progress.stepId, lineIndex: source.progress.lineIndex },
+      ],
+      milestones: {
+        ...seeded.progress.milestones,
+        introduced: true,
+        celebrated: [
+          ...new Set([
+            ...(source.progress.milestones?.celebrated ?? []),
+            ...(seeded.progress.milestones?.celebrated ?? []),
+          ]),
+        ],
+      },
+    },
+  };
+}
+
+// Register authoritative skip execution handler with @exo/debug package
+registerSkipResolver(advanceMissionSkip);

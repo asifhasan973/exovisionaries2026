@@ -8,7 +8,7 @@ export const isDevelopment: boolean =
   Boolean(import.meta.env?.DEV) &&
   import.meta.env?.VITE_APP_ENV !== 'production';
 
-export type DebugTargetType = 'page' | 'step' | 'demo';
+export type DebugTargetType = 'page' | 'step';
 
 export interface DebugRoute {
   type: DebugTargetType;
@@ -70,7 +70,7 @@ export function parseDebugHash(hash: string): DebugRoute | null {
   if (parts.length >= 3) {
     const type = parts[1];
     const id = parts[2];
-    if (type === 'page' || type === 'step' || type === 'demo') {
+    if (type === 'page' || type === 'step') {
       return { type, id };
     }
     return null;

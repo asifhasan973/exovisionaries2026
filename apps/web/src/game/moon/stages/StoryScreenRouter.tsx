@@ -1,4 +1,3 @@
-import type { ReactNode } from 'react';
 import type { WorkshopSession, MissionEvent } from '@/game/moon/workshop/lander/workshopSession';
 import type { SelectionFrame } from '@/game/moon/crew/SelectionScreens';
 import type { PlayerGender } from '@/game/moon/core/types';
@@ -32,7 +31,6 @@ export interface StoryScreenRouterProps {
   enterMission: () => void;
   requestRestart: () => void;
   onOpenArchive: () => void;
-  demoModal?: ReactNode;
 }
 
 export function StoryScreenRouter({
@@ -57,7 +55,6 @@ export function StoryScreenRouter({
   enterMission,
   requestRestart,
   onOpenArchive,
-  demoModal: _demoModal,
 }: StoryScreenRouterProps) {
   const { progress } = mission;
   const step = getStoryStep(progress.stepId, progress.selections.objective);

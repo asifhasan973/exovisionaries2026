@@ -2,7 +2,7 @@ import { quickPreparation, removePart, installPart } from '@/game/moon/core/prep
 import { scienceResult } from '@/game/moon/science/science';
 import { primaryIncident } from '@/game/moon/hazards/incidents';
 import type { PreparationSelection } from '@/game/moon/core/design';
-import { createJudgeMission } from '@/game/moon/stages/demo';
+import { createBaseMission } from '@/game/moon/core/baseMission';
 import { reduceMission } from '@/game/moon/workshop/lander/workshopSession';
 import type { MissionEvent } from '@/game/moon/workshop/lander/workshopSession';
 import type { PlayerGender, StoryStepId } from '@/game/moon/core/types';
@@ -13,7 +13,7 @@ import { CAPSULE_SOCKET, SUPPLY_ITEMS, SUPPLY_SOCKETS } from '@/game/moon/worksh
 import { ROCKET_ORDER } from '@/game/moon/workshop/rocket/rocketAssembly';
 /** Explicit assisted showcase: real readiness rules still have to accept the prepared kit. */
 export function createReadinessDemo(gender:PlayerGender,objective:MoonObjective,target:StoryStepId,options?:{preparation?:PreparationSelection;playerName?:string}){
-  let s=createJudgeMission(gender,objective,options);const act=(e:MissionEvent)=>{s=reduceMission(s,e);};
+  let s=createBaseMission(gender,objective,options);const act=(e:MissionEvent)=>{s=reduceMission(s,e);};
   act({type:'moon-assign-crew',role:'scientist',id:objective==='lunar-ice'?'astrobiologist':'geologist'});
   act({type:'moon-assign-crew',role:'support',id:'robotics-specialist'});act({type:'next'});act({type:'next'});
   if(s.progress.stepId===target)return s;

@@ -78,7 +78,7 @@ export function restoreStoryProgress(raw: string | null): StoryProgress {
     let progress = reduceStoryProgress(fresh, { type: 'set-name', name: saved.playerName, gender: saved.playerGender === 'male' ? 'male' : 'female' });
     progress = {...progress,milestones:restoreMilestones(saved.milestones,target.id)};
     progress = { ...progress, assistance: Array.isArray(saved.assistance)
-      ? [...new Set(saved.assistance.filter((id: unknown) => id === 'auto-build' || id === 'judge-demo'))] as NonNullable<StoryProgress['assistance']> : [] };
+      ? [...new Set(saved.assistance.filter((id: unknown) => id === 'auto-build'))] as NonNullable<StoryProgress['assistance']> : [] };
     // Back navigation may leave valid later choices in the save. Keep them across reloads,
     // while validating each option and still reconstructing the current cursor through gates.
     for (const baseStep of STORY_FLOW) {

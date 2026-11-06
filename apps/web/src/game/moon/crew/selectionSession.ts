@@ -124,7 +124,6 @@ function validEnvelope(raw: string | null) {
   } catch { return null; }
 }
 const SAVE_KEYS = [FULL_MOON_SAVE_KEY, PREVIOUS_MOON_SAVE_KEY, ...[11,10,9,8,7,6,5,4,3,2].map(version => `zero_to_beyond_full_moon_v${version}`)];
-const DEMO_KEYS = [13,12,11,10,9,8,7,6,5].map(version => `zero_to_beyond_demo_checkpoint_v${version}`);
 /** A corrupt newer envelope must not hide an intact older checkpoint. */
 function firstCompatibleSave(storage: StoryStorage, keys: readonly string[], minVersion = 2) {
   for (const key of keys) {
@@ -174,30 +173,4 @@ export function readBrowserSelectionSession(): SelectionSession {
 }
 export function writeBrowserSelectionSession(progress: StoryProgress, voiceEnabled: boolean, preparation = createPreparationSelection(), readiness = emptyReadiness(), flight = emptyFlight(), moon = createMoonSession(progress, preparation), repair?: RepairGuide): boolean {
   try { return writeSelectionSession(window.localStorage, progress, voiceEnabled, preparation, readiness, flight, moon, repair); } catch { return false; }
-}
-
-// A tab-local demo checkpoint uses the same validation as a real save, without touching it.
-const DEMO_CHECKPOINT_KEY = 'zero_to_beyond_demo_checkpoint_v13';
-/** Menu availability only; expensive receipt replay happens when Resume is actually chosen. */
-export function hasBrowserDemoCheckpoint(): boolean {
-  try {
-    return firstCompatibleSave(window.sessionStorage, DEMO_KEYS, 5) !== null;
-  }catch{return false;}
-}
-export function readBrowserDemoSession(): SelectionSession | null {
-  try {
-    const compatible = firstCompatibleSave(window.sessionStorage, DEMO_KEYS, 5);
-    if (!compatible) return null;
-    const { raw, envelope } = compatible;
-    return { ...readSaved(raw), voiceEnabled: envelope.voiceEnabled !== false, storageAvailable: true };
-  } catch { return null; }
-}
-export function writeBrowserDemoSession(session: Omit<SelectionSession, 'storageAvailable'>): boolean {
-  try {
-    const storage: StoryStorage = {
-      getItem: key => key === FULL_MOON_SAVE_KEY ? window.sessionStorage.getItem(DEMO_CHECKPOINT_KEY) : null,
-      setItem: (_key, value) => window.sessionStorage.setItem(DEMO_CHECKPOINT_KEY, value),
-    };
-    return writeSelectionSession(storage, session.progress, session.voiceEnabled, session.preparation, session.readiness, session.flight, session.moon, session.repair);
-  } catch { return false; }
 }

@@ -10,8 +10,8 @@ export interface UseStoryFramesOptions {
   isDebugSession: boolean;
   debugStepId?: string;
   debugDemoChapter?: string;
-  demo: boolean;
-  judgePreview: boolean;
+  demo?: boolean;
+  judgePreview?: boolean;
   storageAvailable: boolean;
   isSaving?: boolean;
   skipError: string | null;
@@ -25,8 +25,6 @@ export function useStoryFrames({
   isDebugSession,
   debugStepId,
   debugDemoChapter,
-  demo,
-  judgePreview,
   storageAvailable,
   isSaving,
   skipError,
@@ -42,8 +40,6 @@ export function useStoryFrames({
         isDebugSession={isDebugSession}
         debugStepId={debugStepId}
         debugDemoChapter={debugDemoChapter}
-        demo={demo}
-        judgePreview={judgePreview}
         storageAvailable={storageAvailable}
         isSaving={isSaving}
         skipError={skipError}
@@ -60,8 +56,6 @@ export function useStoryFrames({
         isDebugSession={isDebugSession}
         debugStepId={debugStepId}
         debugDemoChapter={debugDemoChapter}
-        demo={demo}
-        judgePreview={judgePreview}
         storageAvailable={storageAvailable}
         isSaving={isSaving}
         skipError={skipError}

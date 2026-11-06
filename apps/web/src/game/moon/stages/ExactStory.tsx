@@ -6,9 +6,8 @@ import { RestartStoryDialog } from '@/game/moon/crew/SelectionScreens';
 import { getStoryStep } from '@/game/moon/core/flow';
 import { readBrowserSelectionSession } from '@/game/moon/crew/selectionSession';
 import { createWorkshopSession, reduceMission } from '@/game/moon/workshop/lander/workshopSession';
-import { DemoMenu } from './demo';
 import { MissionBoundary } from '@/shared/shell/MissionBoundary';
-import type { MissionEvent } from '@/game/moon/workshop/lander/workshopSession';
+import type { MissionEvent, WorkshopSession } from '@/game/moon/workshop/lander/workshopSession';
 import '@/game/moon/narrative/components/conversation.css';
 import '@/game/moon/crew/selection.css';
 import '@/shared/shell/playability.css';
@@ -16,14 +15,13 @@ import { LearningProvider } from '@/game/moon/core/learning/Learning';
 import { GestureGuide } from '@/shared/shell/GestureGuide';
 import { MobileGameProvider } from '@/shared/shell';
 import { isEngineFrozen } from '@exo/ui';
-import { createDebugSession } from '@/game/moon/debug/debugSessionSeeder';
+import { createDebugSession } from '@exo/debug';
 import { trackMilestoneTransition } from '@/game/moon/core/missionMilestones';
 import { pauseMission, savedMissionProgress } from '@/game/moon/core/missionNavigation';
 import { StoryNavigationContext } from '@/game/moon/core/storyNavigationContext';
 import { useStoryPersistence, type StoryPersistenceState } from './useStoryPersistence';
 import { useStoryPauseResume } from './useStoryPauseResume';
 import { StoryScreenRouter } from './StoryScreenRouter';
-import { useStoryDemo } from './demo';
 import { useStoryNavigationState } from './useStoryNavigationState';
 import { useStoryFrames } from './useStoryFrames';
 import { useStoryAudioControls } from './useStoryAudioControls';
@@ -51,7 +49,7 @@ export default function ExactStory({
   const isDebugSession = Boolean(debugStepId || debugDemoChapter);
   const [archiveOpen, setArchiveOpen] = useState(() => Boolean(initialArchive));
   const [session] = useState(readBrowserSelectionSession);
-  const [mission, setMission] = useState(() => {
+  const [mission, setMission] = useState<WorkshopSession>(() => {
     if (debugStepId) {
       return createDebugSession(debugStepId as StoryStepId);
     }
@@ -80,8 +78,6 @@ export default function ExactStory({
     );
   }, []);
 
-  const demoState = useStoryDemo(mission, setMission, () => {}, () => {}, () => {}, debugDemoChapter);
-
   const nav = useStoryNavigationState({
     mission,
     setMission,
@@ -91,9 +87,6 @@ export default function ExactStory({
     initialArchive,
     debugStepId,
     debugDemoChapter,
-    demo: demoState.demo,
-    setDemo: demoState.setDemo,
-    exitDemo: demoState.exitDemo,
   });
 
   const latest = useRef<StoryPersistenceState>({
@@ -103,7 +96,6 @@ export default function ExactStory({
     readiness,
     flight,
     moon,
-    demo: demoState.demo,
     repair: mission.repair,
   });
 
@@ -115,12 +107,11 @@ export default function ExactStory({
       readiness,
       flight,
       moon,
-      demo: demoState.demo,
       repair: mission.repair,
     };
-  }, [mission, progress, voicesEnabled, preparation, readiness, flight, moon, demoState.demo]);
+  }, [mission, progress, voicesEnabled, preparation, readiness, flight, moon]);
 
-  useStoryPersistence(mission, latest, isDebugSession, voiceEnabled, voicesEnabled, demoState.demo, setStorageAvailable, setIsSaving);
+  useStoryPersistence(mission, latest, isDebugSession, voiceEnabled, voicesEnabled, setStorageAvailable, setIsSaving);
   useStoryPauseResume(dispatch, latest);
 
   useEffect(() => {
@@ -137,8 +128,6 @@ export default function ExactStory({
     isDebugSession,
     debugStepId,
     debugDemoChapter,
-    demo: demoState.demo,
-    judgePreview: Boolean(progress.assistance?.includes('judge-demo')),
     storageAvailable,
     isSaving,
     skipError: nav.skipError,
@@ -212,18 +201,6 @@ export default function ExactStory({
                     enterMission={nav.enterMission}
                     requestRestart={nav.requestRestart}
                     onOpenArchive={() => setArchiveOpen(true)}
-                    demoModal={
-                      demoState.demoAvailable && demoState.demo ? (
-                        <DemoMenu
-                          onClose={demoState.closeDemo}
-                          onChoose={demoState.startDemo}
-                          onResume={demoState.resumeDemo}
-                          resumeAvailable={Boolean(demoState.resumeDemo)}
-                          busy={demoState.demoBusy}
-                          error={demoState.demoError}
-                        />
-                      ) : null
-                    }
                   />
                 </MissionBoundary>
               </div>
