@@ -149,6 +149,7 @@ export function WorkshopScreen({
           canUndo={!autoBuilding && !!stage && !!session.past.length} canRedo={!autoBuilding && !!stage && !!session.future.length} onUndo={() => dispatch({ type: 'undo' })} onRedo={() => dispatch({ type: 'redo' })}
           onThumbnails={setThumbnails} onMeshError={() => setMeshError(true)} />
       </Suspense>
+      <div className="workshop-docked-meters"><ManifestMeters session={session} /></div>
     </div>
   );
 
@@ -192,9 +193,9 @@ export function WorkshopScreen({
   const nextLabel = repair ? 'Retest mission' : autoBuilding ? 'Auto-building…' : nextAction?.kind === 'install' ? 'Next' : nextAction?.kind === 'shelf' ? `Next: ${nextAction.category === activeCategory ? 'parts' : (CATEGORY_NAMES as Record<string, string>)[nextAction.category]}` : nextAction?.kind === 'depth' ? 'Next: drill plan' : stage === 'survival-build' ? 'Choose crew' : 'Next stage';
 
   return (
-    <StoryShell {...frame} controls={<StoryControls keepProgress onBack={autoBuilding ? onStopAutoBuild : repair ? onBack : back} onNext={retestReady ? () => dispatch({ type: 'repair-recheck' }) : next} hintDisabled={autoBuilding} nextDisabled={autoBuilding || !!repair && !appliedRepair || !retestReady && nextDisabled}
+    <StoryShell {...frame} controls={<StoryControls keepProgress skipWithHint onBack={autoBuilding ? onStopAutoBuild : repair ? onBack : back} onNext={retestReady ? () => dispatch({ type: 'repair-recheck' }) : next} hintDisabled={autoBuilding} nextDisabled={autoBuilding || !!repair && !appliedRepair || !retestReady && nextDisabled}
       nextHint={autoBuilding ? `${ids.length}/${autoIds.length} parts` : nextAction?.kind === 'install' ? `Install ${nextAction.remaining} ${nextAction.remaining === 1 ? 'part' : 'parts'}` : undefined} nextLabel={nextLabel}
-      progress={<div className="workshop-footer-communicator"><EngineerCompanion scriptedReply={repair && !appliedRepair ? { id: repair.voiceId, text: repair.text } : undefined} statusText={autoBuilding ? `Watch your ${stageNames[stageIndex].toLowerCase()} system come together!` : undefined} reaction={repair && !appliedRepair ? 'warning' : autoBuilding || reaction === 'complete' && !ready(stage) ? 'intro' : reaction} token={reactionToken} voiceEnabled={!autoBuilding && (frame.voiceEnabled ?? true)} /></div>} />}>
+      dialog={<EngineerCompanion scriptedReply={repair && !appliedRepair ? { id: repair.voiceId, text: repair.text } : undefined} statusText={autoBuilding ? `Watch your ${stageNames[stageIndex].toLowerCase()} system come together!` : undefined} reaction={repair && !appliedRepair ? 'warning' : autoBuilding || reaction === 'complete' && !ready(stage) ? 'intro' : reaction} token={reactionToken} voiceEnabled={!autoBuilding && (frame.voiceEnabled ?? true)} />} />}>
       <main className={`workshop-main ${geology && stage === 'science-build' ? 'is-geology' : ''} ${autoBuilding ? 'is-auto-building' : ''} ${repair && !appliedRepair ? 'is-repairing' : ''}`} id="story-content" tabIndex={-1} aria-labelledby="workshop-title" aria-busy={autoBuilding}>
         <header className="workshop-header-area">
           <div className="workshop-top-header"><h1 id="workshop-title">{WORKSHOP_HEADINGS[stage]}</h1><button className="workshop-quick" onClick={() => autoBuilding ? onStopAutoBuild() : setQuickConfirm(true)}><WandSparkles size={16} />{autoBuilding ? 'Stop' : 'Auto build'}</button></div>
@@ -202,7 +203,6 @@ export function WorkshopScreen({
             <button className={`workshop-drawer-toggle ${shelfOpen ? 'is-open' : ''}`} onClick={toggleShelf} aria-label={shelfOpen ? 'Close inventory drawer' : 'Open inventory drawer'} title={shelfOpen ? 'Close inventory drawer' : 'Open inventory drawer'}>
               <span>Inventory ({parts.filter(part => ids.includes(part.id)).length}/{parts.length})</span>
             </button>
-            <div className="workshop-top-meters"><ManifestMeters session={session} /></div>
           </div>
         </header>
 

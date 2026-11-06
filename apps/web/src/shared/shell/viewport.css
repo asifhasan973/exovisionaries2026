@@ -8,6 +8,8 @@ html:has(.conversation-game),body:has(.conversation-game){height:100%;overflow:h
 .conversation-game>.conversation-controls .conversation-next{min-width:clamp(100px,11vw,132px);gap:clamp(8px,1vw,14px);box-shadow:0 3px 0 #752b95;font-weight:800;}
 .conversation-game>.conversation-controls .conversation-back{gap:8px;}
 .conversation-game>.conversation-controls .conversation-back-spacer{display:block;min-width:0;}
+.conversation-game>.conversation-controls .conversation-left-group{display:flex;align-items:center;gap:clamp(8px,1.2vw,14px);min-width:0;}
+.conversation-game>.conversation-controls .conversation-bottom-dialog{display:flex;align-items:center;min-width:0;flex:1;}
 .conversation-game>.conversation-controls .next-control{display:flex;align-items:center;justify-content:flex-end;gap:clamp(6px,1vw,10px);min-width:0;}
 .conversation-game>.conversation-controls .next-hint{font-size:clamp(11px,1.2vw,13px);color:#dac5e6;max-width:clamp(110px,16vw,200px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:right;}
 .conversation-game>.conversation-main,.conversation-game>.workshop-main{height:100%;min-height:0;width:100%;margin:0 auto;overflow:hidden;padding:14px clamp(12px,2.5vw,38px);}
@@ -138,7 +140,7 @@ html:has(.conversation-game),body:has(.conversation-game){height:100%;overflow:h
 .conversation-game .workshop-engineer{position:relative;}
 @media(max-width:700px){
  .conversation-game .workshop-viewport-badge{display:none!important;}
- .conversation-game .workshop-camera-controls{top:8px;right:8px;gap:4px;}.conversation-game .workshop-camera-controls .conversation-icon{width:27px;height:27px;}
+ .conversation-game .workshop-camera-controls{bottom:8px!important;right:8px!important;top:auto!important;gap:4px;}.conversation-game .workshop-camera-controls .conversation-icon{width:27px;height:27px;}
  .conversation-game .workshop-vehicle-labels{display:none!important;}
  .conversation-game .workshop-resource-cards{margin:10px 0;}.conversation-game .workshop-resource-cards>div{padding:12px 5px;}.conversation-game .workshop-resource-cards strong{font-size:21px;}.conversation-game .workshop-resource-start{font-size:12px;}
 }
@@ -176,7 +178,7 @@ html:has(.conversation-game),body:has(.conversation-game){height:100%;overflow:h
  .conversation-game>.workshop-main{padding:6px 12px;gap:5px;}.conversation-game .workshop-top-row{height:auto;min-height:30px;}.conversation-game .workshop-top-row .workshop-heading h1{font-size:18px;margin:0;}.conversation-game .workshop-heading p{font-size:11px;}.conversation-game .workshop-engineer{height:46px;}.conversation-game .engineer-character{height:42px;}.conversation-game .engineer-bubble p{font-size:11px;}.conversation-game .workshop-stage-tabs button{min-height:24px;padding:3px 8px;}
  .conversation-game .workshop-feedback{position:absolute;width:1px;height:1px;padding:0;clip-path:inset(50%);overflow:hidden;}
  .conversation-game .workshop-vehicle-labels,.conversation-game .workshop-orbit-controls span{display:none!important;}.conversation-game .workshop-orbit-controls{bottom:6px;gap:8px;}.conversation-game .workshop-orbit-controls .conversation-icon{width:26px;height:26px;}
- .conversation-game .workshop-camera-controls{top:8px;right:8px;gap:4px;}.conversation-game .workshop-camera-controls .conversation-icon{width:26px;height:26px;}.conversation-game .workshop-viewport-badge{display:none!important;}
+ .conversation-game .workshop-camera-controls{bottom:8px!important;right:8px!important;top:auto!important;gap:4px;}.conversation-game .workshop-camera-controls .conversation-icon{width:26px;height:26px;}.conversation-game .workshop-viewport-badge{display:none!important;}
 }
 @media(max-height:450px){.conversation-game .workshop-top-row .workshop-heading p{display:none;}}
 @media(max-height:550px){
@@ -204,6 +206,28 @@ html:has(.conversation-game),body:has(.conversation-game){height:100%;overflow:h
 @media(max-height:550px){.conversation-judge-skip{min-height:32px;padding:5px 12px;font-size:12px}}
 .conversation-game.conversation-game>footer.conversation-controls:has(.conversation-judge-skip){grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)!important}
 .conversation-controls:has(.conversation-judge-skip)>.next-control{justify-self:end}
+.conversation-game.conversation-game>footer.conversation-controls:has(.conversation-bottom-dialog){grid-template-columns:minmax(0,1fr) auto auto!important}
+.conversation-controls:has(.conversation-bottom-dialog)>.next-control{justify-self:end}
+.conversation-bottom-dialog{display:flex;align-items:center;justify-content:flex-start;width:auto;max-width:clamp(260px,48vw,680px);min-width:0;flex:1;}
+.conversation-bottom-dialog .workshop-engineer{display:flex!important;align-items:center;gap:8px;width:100%;height:clamp(36px,5.8vh,44px)!important;min-height:clamp(36px,5.8vh,44px)!important;max-height:clamp(36px,5.8vh,44px)!important;padding:3px 10px 3px 6px!important;background:rgba(28,16,44,0.75)!important;border:1px solid rgba(162,105,198,0.35)!important;border-radius:clamp(10px,1.2vw,14px)!important;box-shadow:none!important;overflow:hidden;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);position:relative;box-sizing:border-box;}
+.conversation-bottom-dialog .engineer-character{width:32px!important;height:32px!important;min-width:32px!important;border-radius:50%!important;overflow:hidden!important;border:1.5px solid #d18ff0!important;background:#1b102a!important;position:relative!important;box-shadow:0 0 6px rgba(209,143,240,0.3);flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.conversation-bottom-dialog .engineer-character .conversation-actor{width:48px!important;height:84px!important;transform:translateY(-4px)!important;position:absolute!important;left:50%;margin-left:-24px;top:0;margin-top:0;margin-bottom:0;}
+.conversation-bottom-dialog .engineer-character .conversation-actor canvas{width:100%!important;height:100%!important;display:block;}
+.conversation-bottom-dialog .engineer-character figcaption,.conversation-bottom-dialog .engineer-character .actor-status{display:none!important;}
+.conversation-bottom-dialog .engineer-bubble{flex:1;min-width:0;padding:0 4px!important;display:flex;flex-direction:column;justify-content:center;overflow:hidden;}
+.conversation-bottom-dialog .engineer-bubble>span{display:none!important;}
+.conversation-bottom-dialog .engineer-bubble p{font:500 clamp(11.5px,1.15vw,13px)/1.24 Fredoka,sans-serif!important;color:#f7ecfd!important;margin:0!important;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-overflow:ellipsis;word-break:break-word;}
+.conversation-bottom-dialog .conversation-icon{width:26px!important;height:26px!important;min-width:26px!important;border-radius:8px!important;background:rgba(56,28,80,0.75)!important;border:1px solid rgba(175,115,215,0.4)!important;color:#eed6ff!important;display:grid;place-items:center;padding:0!important;flex-shrink:0;cursor:pointer;transition:all .15s ease;margin-left:auto;}
+.conversation-bottom-dialog .conversation-icon:hover:not(:disabled){background:rgba(85,38,122,0.9)!important;color:#fff!important;border-color:#d18ff0!important;transform:scale(1.05);}
+.conversation-bottom-dialog .conversation-icon:disabled{opacity:0.45;cursor:default;}
+@media(max-height:500px){
+.conversation-bottom-dialog{max-width:480px;}
+.conversation-bottom-dialog .workshop-engineer{height:clamp(34px,5vh,40px)!important;min-height:34px!important;max-height:40px!important;padding:2px 8px 2px 4px!important;border-radius:clamp(8px,1.2vw,12px)!important;gap:6px;}
+.conversation-bottom-dialog .engineer-character{width:28px!important;height:28px!important;min-width:28px!important;}
+.conversation-bottom-dialog .engineer-character .conversation-actor{width:40px!important;height:72px!important;margin-left:-20px;transform:translateY(-3px)!important;}
+.conversation-bottom-dialog .engineer-bubble p{font-size:11px!important;line-height:1.2!important;}
+.conversation-bottom-dialog .conversation-icon{width:24px!important;height:24px!important;min-width:24px!important;}
+}
 
 /* Aerospace HUD Doughnut Progress Ring */
 .mission-progress-ring {

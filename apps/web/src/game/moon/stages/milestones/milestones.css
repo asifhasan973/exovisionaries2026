@@ -123,6 +123,20 @@
   overflow: hidden;
 }
 
+.milestone-header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: clamp(14px, 2vw, 32px);
+  width: 100%;
+}
+
+.milestone-heading-group {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
 .milestone-eyebrow {
   color: #dba3ef;
   font-family: Outfit, sans-serif;
@@ -352,30 +366,76 @@
   font-size: clamp(13px, 1.1vw, 17px);
 }
 
-.milestone-reset {
+.milestone-progress-badge {
   margin-left: auto;
-  font-family: Fredoka, sans-serif;
-  font-weight: 600;
-  font-size: clamp(18px, 2vw, 26px);
+  display: flex;
+  align-items: center;
+  gap: clamp(8px, 1.2vw, 14px);
+  padding: clamp(4px, 0.8vh, 8px) clamp(10px, 1.2vw, 16px);
+  background: rgba(14, 28, 38, 0.75);
+  border: 1px solid rgba(140, 226, 194, 0.5);
+  border-radius: clamp(10px, 1.2vw, 14px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), inset 0 0 10px rgba(140, 226, 194, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.milestone-progress-details {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  line-height: 1.1;
+}
+
+.milestone-progress-details small {
+  font-family: Outfit, sans-serif;
+  font-weight: 800;
+  font-size: clamp(8px, 0.75vw, 9.5px);
+  letter-spacing: 1.2px;
   color: #8ce2c2;
+  text-transform: uppercase;
+}
+
+.milestone-progress-details span {
+  font-family: Outfit, sans-serif;
+  font-weight: 600;
+  font-size: clamp(10px, 0.9vw, 12px);
+  color: #c9e8dc;
+}
+
+.milestone-progress-value {
+  font-family: Fredoka, sans-serif;
+  font-weight: 700;
+  font-size: clamp(18px, 2vw, 26px);
+  color: #5df2b2;
+  text-shadow: 0 0 10px rgba(93, 242, 178, 0.5);
+  line-height: 1;
 }
 
 .milestone-earned-stars {
   display: flex;
-  gap: clamp(10px, 1.2vw, 16px);
-  margin-top: clamp(12px, 2vh, 24px);
+  align-items: center;
+  gap: clamp(8px, 1.2vw, 16px);
   color: #ffdf89;
+  flex-shrink: 0;
+  padding: clamp(2px, 0.5vh, 6px) 0;
 }
 
 .milestone-earned-stars svg {
-  width: clamp(24px, 2.4vw, 36px);
-  height: clamp(24px, 2.4vw, 36px);
-  fill: rgba(255, 223, 137, 0.3);
-  filter: drop-shadow(0 0 10px rgba(255, 223, 137, 0.45));
+  width: clamp(34px, 3.8vw, 54px);
+  height: clamp(34px, 3.8vw, 54px);
+  fill: rgba(255, 223, 137, 0.4);
+  stroke: #ffe494;
+  stroke-width: 1.5;
+  filter: drop-shadow(0 0 14px rgba(255, 223, 137, 0.65)) drop-shadow(0 0 28px rgba(237, 141, 239, 0.3));
+  transition: transform 0.25s cubic-bezier(0.25, 0.45, 0.3, 1);
 }
 
 .milestone-earned-stars svg:nth-child(2) {
-  transform: translateY(-6px);
+  transform: translateY(-8px) scale(1.1);
+  fill: rgba(255, 223, 137, 0.6);
+  filter: drop-shadow(0 0 18px rgba(255, 223, 137, 0.85)) drop-shadow(0 0 32px rgba(237, 141, 239, 0.4));
 }
 
 /* ==========================================================================
@@ -501,6 +561,28 @@
 
   .milestone-next-card strong {
     font-size: 17px;
+  }
+
+  .milestone-earned-stars svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  .milestone-earned-stars svg:nth-child(2) {
+    transform: translateY(-4px) scale(1.1);
+  }
+
+  .milestone-progress-badge {
+    padding: 3px 8px;
+    gap: 6px;
+  }
+
+  .milestone-progress-details {
+    display: none;
+  }
+
+  .milestone-progress-value {
+    font-size: 15px;
   }
 }
 

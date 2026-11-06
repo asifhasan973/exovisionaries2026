@@ -42,7 +42,7 @@ export function ManifestMeters({ session }: { session: WorkshopSession }) {
     <div className="workshop-meters">
       <Meter
         term="budget"
-        label={geology ? 'Mission budget' : 'Budget'}
+        label="Budget"
         value={geology?.spent ?? totals.credits}
         limit={geology?.cap ?? SCRIPT_RESOURCES.budgetCredits}
         unit={geology ? 'MC' : 'cr'}

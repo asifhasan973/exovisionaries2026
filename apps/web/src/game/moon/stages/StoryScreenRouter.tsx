@@ -153,10 +153,7 @@ export function StoryScreenRouter({
           setAutoplay(true);
           setMission(current => {
             if (current.progress.stepId !== step.id) return current;
-            const selected = reduceMission(current, { type: 'select', choiceId });
-            return step.choiceKey === 'destination' && selected.progress.selections.destination === 'moon'
-              ? reduceMission(selected, { type: 'next' })
-              : selected;
+            return reduceMission(current, { type: 'select', choiceId });
           });
         }}
       />

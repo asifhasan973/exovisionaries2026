@@ -48,7 +48,7 @@ export function WorkshopPartCard({
   onPointerMove,
   onPointerUp,
   onPointerCancel,
-  dragRef,
+  dragRef: _dragRef,
   suppressClickRef,
   install,
   dispatch,
@@ -108,7 +108,6 @@ export function WorkshopPartCard({
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerCancel}
-        onLostPointerCapture={() => { if (dragRef.current?.id === part.id) onPointerCancel(); }}
         onClick={event => {
           event.preventDefault();
           if (suppressClickRef.current) {
@@ -116,8 +115,7 @@ export function WorkshopPartCard({
             return;
           }
           if (!installed) {
-            if (!multi || event.detail === 0 || meshError) install([part.id]);
-            else setMessage('Drag the part onto your spacecraft!');
+            install([part.id]);
           }
         }}
       >

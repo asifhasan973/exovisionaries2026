@@ -13,7 +13,7 @@ import { useStoryNavigation } from '@/game/moon/core/storyNavigationContext';
 export type { EngineerReaction } from '../voice/voiceClips.ts';
 export function EngineerCompanion({ reaction, token, voiceEnabled, statusText, scriptedReply }: { reaction: EngineerReaction; token: number; voiceEnabled: boolean; statusText?: string; scriptedReply?: { id: string; text: string } }) {
   const gender = usePlayerGender();
-  const autoplay=useStoryNavigation()?.autoplay!==false;
+  const autoplay = useStoryNavigation()?.autoplay !== false;
   const [controller] = useState(() => new NarrationController(browserNarrationEnvironment()));
   const narration = useSyncExternalStore(controller.subscribe, controller.getSnapshot, controller.getSnapshot);
   const [reply, setReply] = useState(() => ENGINEER_REPLIES[reaction][0]);
@@ -21,22 +21,43 @@ export function EngineerCompanion({ reaction, token, voiceEnabled, statusText, s
   const previousReplies = useRef<Partial<Record<EngineerReaction, string>>>({});
   const celebrate = reaction === 'complete' || reaction === 'trialPass';
   const cue = engineerCue(reaction, scriptedReply?.id);
+  const chosen = scriptedReply ?? reply;
+  const lastSpoken = useRef<{ id: string; text: string; token: number } | null>(null);
+
+  useEffect(() => {
+    return () => {
+      controller.stop();
+    };
+  }, [controller]);
+
   useEffect(() => {
     if (selection.current.reaction !== reaction || selection.current.token !== token) {
-      const chosen = pickEngineerReply(reaction, previousReplies.current[reaction]);
-      selection.current = { reaction, token, reply: chosen };
-      previousReplies.current[reaction] = chosen.id;
-      setReply(chosen);
+      const selectedReply = pickEngineerReply(reaction, previousReplies.current[reaction]);
+      selection.current = { reaction, token, reply: selectedReply };
+      previousReplies.current[reaction] = selectedReply.id;
+      setReply(selectedReply);
     }
-    const chosen = scriptedReply ?? selection.current.reply;
-    const timer = autoplay && (token || scriptedReply) && voiceEnabled && !statusText ? setTimeout(() => {
+  }, [reaction, token]);
+
+  useEffect(() => {
+    if (!autoplay || (!token && !scriptedReply) || !voiceEnabled || !!statusText) return;
+    if (lastSpoken.current && lastSpoken.current.id === chosen.id && lastSpoken.current.text === chosen.text && lastSpoken.current.token === token) return;
+    lastSpoken.current = { id: chosen.id, text: chosen.text, token };
+
+    const timer = setTimeout(() => {
       if (!document.hidden) controller.speak(chosen.text, 'commander', chosen.id, gender);
-    }, 0) : undefined;
+    }, 0);
     const hide = () => { if (document.hidden) controller.pause(); };
     document.addEventListener('visibilitychange', hide);
-    const pause = () => controller.pause(); window.addEventListener('game-help-open', pause);
-    return () => { clearTimeout(timer); controller.stop(); document.removeEventListener('visibilitychange', hide); window.removeEventListener('game-help-open', pause); };
-  }, [controller, reaction, token, voiceEnabled, gender, scriptedReply, statusText, autoplay]);
+    const pause = () => controller.pause();
+    window.addEventListener('game-help-open', pause);
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener('visibilitychange', hide);
+      window.removeEventListener('game-help-open', pause);
+    };
+  }, [controller, token, voiceEnabled, gender, chosen.id, chosen.text, statusText, autoplay, scriptedReply]);
+
   return <aside className={`workshop-engineer ${celebrate ? 'is-celebrating' : reaction === 'warning' || reaction === 'trialFail' ? 'is-warning' : ''}`} data-speaking={narration.status === 'speaking'} aria-label="Mission engineer">
     <div className="engineer-character"><CharacterStage cue={cue} active speechTime={controller.getSpeechTime} speaking={narration.status === 'speaking'} label="Commander" /></div>
     <div className="engineer-bubble"><span>COMMANDER · MISSION ENGINEER</span><p role="status" aria-live="polite"><LearningText text={statusText ?? scriptedReply?.text ?? reply.text} /></p></div>

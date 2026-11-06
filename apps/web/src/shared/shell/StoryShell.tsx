@@ -104,12 +104,15 @@ export interface StoryControlsProps {
   nextDisabled?: boolean;
   nextForm?: string;
   progress?: ReactNode;
+  dialog?: ReactNode;
+  dialogHidden?: boolean;
   nextHint?: string;
   backHidden?: boolean;
   hintDisabled?: boolean;
   hintHidden?: boolean;
   skipHidden?: boolean;
   keepProgress?: boolean;
+  skipWithHint?: boolean;
 }
 
 export function StoryControls({
@@ -119,37 +122,50 @@ export function StoryControls({
   nextDisabled = false,
   nextForm,
   progress,
+  dialog,
+  dialogHidden = false,
   nextHint,
   backHidden = false,
   hintDisabled = false,
   hintHidden = false,
   skipHidden = false,
   keepProgress = false,
+  skipWithHint = false,
 }: StoryControlsProps) {
   const navigation = useStoryNavigation();
+  const showSkip = !skipHidden && !!navigation?.skip;
+  const showDialog = !dialogHidden && Boolean(dialog);
 
   return (
-    <footer className="conversation-controls">
-      {backHidden ? (
-        <span />
-      ) : (
-        <button
-          className="conversation-back"
-          type="button"
-          onClick={navigation && !navigation.card ? navigation.back : onBack}
-        >
-          <ArrowLeft size={21} />
-          Back
-        </button>
-      )}
+    <footer className={`conversation-controls ${showDialog ? 'has-bottom-dialog' : ''}`}>
+      <div className="conversation-left-group">
+        {backHidden ? (
+          <span className="conversation-back-spacer" aria-hidden="true" />
+        ) : (
+          <button
+            className="conversation-back"
+            type="button"
+            onClick={navigation && !navigation.card ? navigation.back : onBack}
+          >
+            <ArrowLeft size={21} />
+            Back
+          </button>
+        )}
+        {showDialog && (
+          <div className="conversation-bottom-dialog">
+            {dialog}
+          </div>
+        )}
+      </div>
       <div className="conversation-progress">
-        {!skipHidden && navigation?.skip ? (
+        {showSkip && !skipWithHint ? (
           <JudgeSkip />
         ) : !navigation || keepProgress ? (
           progress
         ) : null}
       </div>
       <div className="next-control">
+        {showSkip && skipWithHint ? <JudgeSkip /> : null}
         {!hintHidden && !navigation?.card ? (
           <HintButton disabled={hintDisabled} />
         ) : null}

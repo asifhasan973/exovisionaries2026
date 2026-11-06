@@ -140,8 +140,19 @@ export function MilestonePage({
           </div>
         </section>
         <section className="milestone-copy">
-          <span className="milestone-eyebrow">{eyebrow}</span>
-          <h1 id="milestone-title">{titleNode}</h1>
+          <div className="milestone-header-row">
+            <div className="milestone-heading-group">
+              <span className="milestone-eyebrow">{eyebrow}</span>
+              <h1 id="milestone-title">{titleNode}</h1>
+            </div>
+            {isComplete && done ? (
+              <div className="milestone-earned-stars" aria-hidden="true">
+                <Star />
+                <Star />
+                <Star />
+              </div>
+            ) : null}
+          </div>
           {isComplete && done ? (
             <div className="milestone-next-card">
               {last ? (
@@ -156,16 +167,17 @@ export function MilestonePage({
                     <small>UP NEXT</small>
                     <strong>{MILESTONES[current].name}</strong>
                   </div>
-                  <span className="milestone-reset">0%</span>
+                  <div className="milestone-progress-badge">
+                    <div className="milestone-progress-details">
+                      <small>MISSION PROGRESS</small>
+                      <span>{index + 1} of {MILESTONES.length} complete</span>
+                    </div>
+                    <strong className="milestone-progress-value">
+                      {Math.round(((index + 1) / MILESTONES.length) * 100)}%
+                    </strong>
+                  </div>
                 </>
               )}
-            </div>
-          ) : null}
-          {isComplete && done ? (
-            <div className="milestone-earned-stars" aria-hidden="true">
-              <Star />
-              <Star />
-              <Star />
             </div>
           ) : (
             <ol className="milestone-map" aria-label="Eight mission milestones">

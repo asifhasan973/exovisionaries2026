@@ -80,8 +80,8 @@ export function ChoiceScreen({ step, progress, onSelect, onNext, onBack, frame }
   const selected = (progress.selections as Record<string, string | null | undefined>)[step.choiceKey];
   const title = useRef<HTMLHeadingElement>(null);
   useEffect(() => { title.current?.focus({ preventScroll: true }); }, [step.id]);
-  return <StoryShell {...frame} controls={<StoryControls onBack={onBack} onNext={onNext}
-    nextHint={!selected ? "Pick a card" : "Choice saved"} nextDisabled={!step.options.some((option: any) => option.available && option.id === selected)} progress={<ProgressDots index={index} />} />}>
+  return <StoryShell {...frame} controls={<StoryControls skipHidden keepProgress onBack={onBack} onNext={onNext}
+    nextHint={!selected ? (step.choiceKey === 'destination' ? 'Select a planet' : 'Pick a card') : 'Choice saved'} nextDisabled={!step.options.some((option: any) => option.available && option.id === selected)} progress={<ProgressDots index={index} />} />}>
     <main className="conversation-main selection-main" id="story-content" tabIndex={-1} aria-labelledby="selection-title">
       <GuideStage cue={step.choiceKey === 'site' ? READY : GUIDE} />
       <section className={`selection-board board-${step.choiceKey}`}>
@@ -90,14 +90,14 @@ export function ChoiceScreen({ step, progress, onSelect, onNext, onBack, frame }
         <div className="selection-cards" role="group" aria-label={step.title}>
           {step.options.filter((option: any) => option.id !== 'coming-soon').map((option: any) => <article className="selection-choice" key={option.id}><button type="button" key={option.id} disabled={!option.available}
             className={`selection-card ${selected === option.id ? 'is-selected' : ''}`} aria-pressed={selected === option.id}
-            aria-label={option.label} onClick={() => onSelect(option.id)}>
+            aria-label={option.label} onClick={() => { sound.playClick(660); onSelect(option.id); }}>
             <span className="selection-card-state" aria-hidden="true">{!option.available ? <LockKeyhole size={19} /> : selected === option.id ? <Check size={20} /> : <ArrowMarker />}</span>
             <SelectionArt kind={option.id} />
             <span className="selection-card-copy"><strong>{option.id === 'lunar-ice' ? 'Find ice clues' : option.id === 'lunar-geology' ? 'Explore Moon rocks' : option.id === 'crater-rim' ? 'Crater rim' : option.id === 'permanent-shadow' ? 'Deep shadow' : option.id === 'coming-soon' ? 'Coming soon' : option.label}</strong>
               {option.description ? <span className="selection-card-description">{option.id === 'crater-rim' ? 'More light · safer route' : option.id === 'permanent-shadow' ? 'Dark & cold · harder route' : option.description}</span> : null}
               {!option.available && option.id === 'mars' ? <span className="selection-card-lock">Coming soon</span> : null}
             </span>
-          </button><div className="selection-choice-hint">{option.id === 'moon' ? 'Tap to start →' : option.id === 'crater-rim' ? <Term term="crater">Sunlit start · solar can work</Term> : option.id === 'permanent-shadow' ? <Term term="shadow">No solar · better warmth needed</Term> : option.id === 'lunar-ice' ? <Term term="nss">Look for water clues</Term> : option.id === 'lunar-geology' ? <Term term="geology">Study rocks & soil</Term> : option.id==='lunar-highlands'?<Term term="geology">Explore old crust</Term>:option.id==='ancient-crater'?<Term term="crater">Explore impact clues</Term>:'Locked'}</div></article>)}
+          </button><div className="selection-choice-hint">{option.id === 'moon' ? (selected === 'moon' ? 'Target selected' : 'Earth’s Moon') : option.id === 'crater-rim' ? <Term term="crater">Sunlit start · solar can work</Term> : option.id === 'permanent-shadow' ? <Term term="shadow">No solar · better warmth needed</Term> : option.id === 'lunar-ice' ? <Term term="nss">Look for water clues</Term> : option.id === 'lunar-geology' ? <Term term="geology">Study rocks & soil</Term> : option.id==='lunar-highlands'?<Term term="geology">Explore old crust</Term>:option.id==='ancient-crater'?<Term term="crater">Explore impact clues</Term>:'Locked'}</div></article>)}
         </div>
         <div className="selection-word-help">{step.choiceKey === 'site'&&progress.selections.objective==='lunar-geology'?<Term term="geology">Rock origins</Term>:step.choiceKey === 'site' ? <><Term term="crater">Crater rim</Term><Term term="shadow">Permanent shadow</Term></> : step.choiceKey === 'objective' ? <Term term="geology">Geology</Term> : null}</div>
       </section>

@@ -11,6 +11,7 @@ import type { MissionEvent, WorkshopSession } from '../workshopSession';
 import type { ShelfNext } from '../workshopNavigation';
 import { CATEGORY_NAMES } from '../workshopNavigation';
 import { WorkshopPartCard } from './WorkshopPartCard';
+import { ScienceFamilyDropdown } from './ScienceFamilyDropdown';
 
 export interface WorkshopInventoryDrawerProps {
   drawerRef: React.RefObject<HTMLElement | null>;
@@ -80,30 +81,22 @@ export function WorkshopInventoryDrawer({
       </div>
 
       {geology && stage === 'science-build' ? (
-        <label className="geology-compact-family">
-          <span className="visually-hidden">Science tool family</span>
-          <select
-            aria-label="Science tool family"
-            value={depthOpen ? 'depth' : scienceFamily}
-            onChange={event => {
-              if (event.target.value === 'depth') {
-                setShelfTab('depth');
-              } else {
-                setScienceFamily(event.target.value as ScienceFamily);
-                setShelfTab('science');
-              }
-              setShelfPage(0);
-            }}
-          >
-            {GEOLOGY_FAMILIES.map(family => (
-              <option value={family} key={family}>
-                {SCIENCE_FAMILY_NAMES[family]}
-                {parts.some(part => ids.includes(part.id) && part.scienceFamily === family) ? ' ✓' : ''}
-              </option>
-            ))}
-            {drill ? <option value="depth">Drill plan</option> : null}
-          </select>
-        </label>
+        <ScienceFamilyDropdown
+          depthOpen={depthOpen}
+          scienceFamily={scienceFamily}
+          parts={parts}
+          ids={ids}
+          drill={Boolean(drill)}
+          onSelectFamily={family => {
+            setScienceFamily(family);
+            setShelfTab('science');
+            setShelfPage(0);
+          }}
+          onSelectDepth={() => {
+            setShelfTab('depth');
+            setShelfPage(0);
+          }}
+        />
       ) : null}
 
       {geology && stage === 'science-build' ? (

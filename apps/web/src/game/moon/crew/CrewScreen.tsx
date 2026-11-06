@@ -1,20 +1,18 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { Bot, Check, CheckCircle2, Coins, FlaskConical, Gem, Info, Orbit, Rocket, Trash2, Users, Wrench } from 'lucide-react';
-import { CREW_CANDIDATES, crewCapabilities, crewReport } from '@/game/moon/shared/catalog';
-import { moonDesignReport } from '@/game/moon/shared/session';
+import { CREW_CANDIDATES, crewReport } from '@/game/moon/shared/catalog';
 import { CREW_ADVICE } from './crewDialogue';
 import { MOON_RULES, MOON_SOURCES } from '@/game/moon/shared/rules';
 import { preparationTotals } from '@/game/moon/core/preparation';
-import { rehearsalBudget } from '@/game/moon/shared/resources';
 import { geologyBudget } from '@/game/moon/science/geologyBudget';
 import type { MissionEvent, WorkshopSession } from '@/game/moon/workshop/lander/workshopSession';
 import type { SelectionFrame } from './SelectionScreens';
-import { StoryShell, StoryControls } from '@/shared/shell';
+import { StoryShell, StoryControls, useGameSettings, useMobileGame } from '@/shared/shell';
 import { EngineerCompanion } from '@/game/moon/narrative/components/EngineerCompanion';
 import { GameInfo } from '@exo/ui';
 import { sound } from '@exo/audio';
-import { useGameSettings } from '@/shared/shell';
 import './selection.css';
+import '@/game/moon/readiness/preparation.css';
 
 const CrewViewport=lazy(()=>import('./CrewViewport.tsx').then(module=>({default:module.CrewViewport})));
 const roster = {
@@ -30,14 +28,21 @@ function CandidatePortrait({id}:{id:Specialist}){
 
 export function CrewScreen({session,dispatch,frame,onBack}:{session:WorkshopSession;dispatch(event:MissionEvent):void;frame:SelectionFrame;onBack():void}){
   const {effects}=useGameSettings(),review=session.progress.stepId==='crew-plan';
+  const {mobile}=useMobileGame();
+  const [compact,setCompact]=useState(()=>typeof window!=='undefined'&&window.matchMedia('(max-height: 700px)').matches);
+  useEffect(()=>{
+    const mq=window.matchMedia('(max-height: 700px)');
+    const update=()=>setCompact(mq.matches);
+    mq.addEventListener('change',update);
+    return()=>mq.removeEventListener('change',update);
+  },[]);
+  const showBottomDialog=mobile||compact;
   const [selected,setSelected]=useState<Specialist|null>(null),[dragging,setDragging]=useState<{id:Specialist;x:number;y:number}|null>(null);
   const [advice,setAdvice]=useState<keyof typeof CREW_ADVICE>('intro'),[token,setToken]=useState(0),[info,setInfo]=useState<Specialist|'platform'|'budget'|null>(null);
   const pointer=useRef<{id:Specialist;pointerId:number;startX:number;startY:number;moved:boolean}|null>(null),suppress=useRef(false);
   const slots=useRef<Partial<Record<'scientist'|'support',HTMLButtonElement|null>>>({});
-  const crew=crewReport(session.moon.crew),report=moonDesignReport(session.moon,session.preparation),totals=preparationTotals(session.preparation);
+  const crew=crewReport(session.moon.crew),totals=preparationTotals(session.preparation);
   const geology=session.moon.objective==='lunar-geology'?geologyBudget(session.preparation,session.moon.crew,session.moon.plan):null;
-  const baseline=rehearsalBudget(report.equipment.parts,session.preparation.drillDepthCm),savedWh=Math.max(0,baseline.requiredWh-report.rehearsal.requiredWh);
-  const capabilities=crewCapabilities(session.moon.crew);
   const message=CREW_ADVICE[review?'complete':advice];
   const say=(id:keyof typeof CREW_ADVICE)=>{setAdvice(id);setToken(value=>value+1);};
   const assign=(role:'scientist'|'support',id:Specialist|null)=>{
@@ -56,10 +61,11 @@ export function CrewScreen({session,dispatch,frame,onBack}:{session:WorkshopSess
   useEffect(() => { const stop = () => { pointer.current = null; setDragging(null); suppress.current = true; }; window.addEventListener('blur', stop); window.addEventListener('game-help-open', stop); return () => { window.removeEventListener('blur', stop); window.removeEventListener('game-help-open', stop); }; }, []);
   const complete=crew.complete&&(geology?.valid??crew.credits<=MOON_RULES.crewCredits);
   const next=()=>{sound.setMuted(!effects);sound.playFanfare();dispatch({type:'next'});};
-  return <StoryShell {...frame} controls={<StoryControls onBack={onBack} onNext={next} nextDisabled={!complete} nextLabel={review?'Flight checks':'Save crew'} progress={<span>Prepare · Crew</span>} nextHint={review?'Flight checks come next':!session.moon.crew.scientist?'Match a science expert':!session.moon.crew.support?'Match a support expert':undefined}/> }>
+  const companion=useMemo(()=><EngineerCompanion reaction={review?'complete':'intro'} token={token} voiceEnabled={frame.voiceEnabled??true} scriptedReply={{id:`crew-advice-${review?'complete':advice}`,text:message}}/>,[review,token,frame.voiceEnabled,advice,message]);
+  return <StoryShell {...frame} controls={<StoryControls skipWithHint dialog={showBottomDialog?companion:undefined} onBack={onBack} onNext={next} nextDisabled={!complete} nextLabel={review?'Flight checks':'Save crew'} progress={<span>Prepare · Crew</span>} nextHint={review?'Flight checks come next':!session.moon.crew.scientist?'Match a science expert':!session.moon.crew.support?'Match a support expert':undefined}/> }>
     <main className="crew-main" data-moon-objective={session.moon.objective} id="story-content" tabIndex={-1} aria-labelledby="crew-title">
       <div className="workshop-top-row crew-top"><div className="workshop-heading"><div><h1 id="crew-title">{review?'Crew assembled!':'Choose your crew'}</h1><p>{review?'Your team and equipment are ready.':'Drag an expert to a job, or tap an expert and a seat.'}</p></div></div>
-        <EngineerCompanion reaction={review?'complete':'intro'} token={token} voiceEnabled={frame.voiceEnabled??true} scriptedReply={{id:`crew-advice-${review?'complete':advice}`,text:message}}/>
+        {!showBottomDialog?companion:null}
       </div>
       <div className="crew-layout">
         <section className="crew-roster" aria-label="Crew candidates">
@@ -81,8 +87,7 @@ export function CrewScreen({session,dispatch,frame,onBack}:{session:WorkshopSess
               {id?<CandidatePortrait id={id}/>:role==='scientist'?<FlaskConical size={23}/>:<Orbit size={23}/>}<span>{role==='scientist'?'Science seat':'Support seat'}</span><strong>{id?roster[id].name:'Choose an expert'}</strong><small>{role==='scientist'?'Lands with you':'Stays in lunar orbit'}</small>{id?<Check size={18}/>:null}
             </button>{id&&!review?<button className="crew-unassign" aria-label={`Remove ${role==='scientist'?'scientist':'support expert'}`} onClick={()=>{dispatch({type:'moon-remove-crew',role});say('open');}}><Trash2 size={14}/></button>:null}
           </div>;})}</div>
-          <div className="crew-platform-bay"><span className="crew-platform-badge">YOUR MISSION SPACECRAFT</span><button className="crew-platform-info" aria-label="Explain mission spacecraft" onClick={()=>setInfo('platform')}><Info size={18}/></button><Suspense fallback={<div className="crew-model-fallback">Opening your spacecraft…</div>}><CrewViewport/></Suspense><div className="crew-platform-labels"><span>Crew capsule · return shield</span><span>Lunar lander · ascent stage</span></div></div>
-          <div className="crew-skills" aria-label="Selected crew abilities"><div><FlaskConical size={17}/><span>{capabilities.interpretation==='minerals'?'Rock clues helped':capabilities.interpretation==='volatiles'?'Water clues helped':'Choose a science helper'}</span></div><div>{session.moon.crew.support==='robotics-specialist'?<Bot size={17}/>:<Wrench size={17}/>}<span>{session.moon.crew.support==='robotics-specialist'?`Drive rehearsal saves ${savedWh.toFixed(1)} Wh`:session.moon.crew.support==='systems-engineer'?'Repair advice: power · heat · radio':'Choose a support helper'}</span></div><small>Game abilities · equipment limits still apply</small></div>
+          <div className="crew-platform-bay"><span className="crew-platform-badge">YOUR MISSION SPACECRAFT</span><button className="crew-platform-info" aria-label="Explain mission spacecraft" onClick={()=>setInfo('platform')}><Info size={18}/></button><Suspense fallback={<div className="crew-model-fallback">Opening your spacecraft…</div>}><CrewViewport/></Suspense></div>
         </section>
       </div>
       <span className="visually-hidden" role="status">{message}</span>
