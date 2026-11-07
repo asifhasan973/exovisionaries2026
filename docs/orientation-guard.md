@@ -2,7 +2,7 @@
 
 ## Overview
 
-The spacecraft cockpit, assembly hangars, 3D flight viewport, and telemetry consoles are designed for widescreen landscape presentation. To prevent distorted layouts, hidden interaction panels, and suboptimal touch targets, **Landscape Mode Enforcement** is integrated at the root application level via the `OrientationGuard` component (`src/components/common/OrientationGuard.tsx`).
+The spacecraft cockpit, assembly hangars, 3D flight viewport, and telemetry consoles are designed for widescreen landscape presentation. To prevent distorted layouts, hidden interaction panels, and suboptimal touch targets, **Landscape Mode Enforcement** is integrated at the root application level via the `OrientationGuard` component (`@exo/ui`, `packages/ui/src/components/OrientationGuard.tsx`).
 
 Whenever a user accesses the application in portrait orientation or resizes their viewport below a 1:1 aspect ratio, the game presentation is safely suspended and an illustrated flight deck advisory screen directs the player to rotate their device.
 
@@ -26,10 +26,10 @@ Whenever a user accesses the application in portrait orientation or resizes thei
 
 ## Universal State Freeze & Resumption
 
-Orientation halts are coordinated centrally via `src/state/orientationLifecycleStore.ts` and unified lifecycle events (`game-orientation-pause` / `game-orientation-resume`):
+Orientation halts are coordinated centrally via `packages/ui/src/state/orientationLifecycleStore.ts` (`@exo/ui`) and unified lifecycle events (`game-orientation-pause` / `game-orientation-resume`):
 
 - **Simulation Loops**: Active mission progressions, flight ascent timers, descent physics, lunar rover telemetry, and automated assembly sequences halt immediately.
-- **Audio & Spoken Narration**: Web Audio synthesizer contexts suspend in-place via `SoundEngine.pauseAll()`, and active narration pauses immediately. When resumed, dialogue replays cleanly from the beginning of the line to ensure full context.
+- **Audio & Spoken Narration**: Web Audio synthesizer contexts suspend in-place via `SoundEngine.pauseAll()` (`@exo/audio`), and active narration pauses immediately. When resumed, dialogue replays cleanly from the beginning of the line to ensure full context.
 - **CSS Animations**: Interactive viewport animations freeze instantly via `.orientation-guard-wrapper.is-blocked * { animation-play-state: paused !important; }`.
 - **Preloading Workloads**: Background asset preloading tasks continue accumulating unhindered during orientation blocks.
 

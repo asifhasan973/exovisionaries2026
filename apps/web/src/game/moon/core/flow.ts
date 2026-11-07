@@ -1,0 +1,89 @@
+import { GEOLOGY_SITE_BRIEFING, GEOLOGY_RESOURCE_BRIEFING } from '@/game/moon/science/geologyCopy';
+import { STORY_DIALOGUE } from '@/game/moon/narrative/dialogue';
+import type { StoryLine, StoryStep, StoryStepId } from './types';
+import { CREW_BRIEFING } from '@/game/moon/crew/crewDialogue';
+
+// The source script is preserved in dialogue.ts. The playable briefing keeps
+// only the lines that introduce a decision, so players reach each choice sooner.
+export const PLAYABLE_BRIEFINGS = {
+  appointment: STORY_DIALOGUE.appointment.filter((line: StoryLine) => ['appointment-01', 'appointment-02', 'appointment-03', 'appointment-04', 'appointment-05'].includes(line.id)),
+  companionIntro: STORY_DIALOGUE.companionIntro.filter((line: StoryLine) => line.id === 'companionIntro-01'),
+  objectiveBriefing: STORY_DIALOGUE.objectiveBriefing.filter((line: StoryLine) => line.id === 'objectiveBriefing-01'),
+  siteBriefing: STORY_DIALOGUE.siteBriefing,
+  resourceBriefing: STORY_DIALOGUE.resourceBriefing.filter((line: StoryLine) => line.id === 'resourceBriefing-01'),
+} as const satisfies Record<string, readonly StoryLine[]>;
+
+/** Ordered screen contract; the later modules implement these screens. */
+export const STORY_FLOW: readonly StoryStep[] = [
+  { id: 'player-name', title: 'Enter ur name', kind: 'name', module: 1 },
+  { id: 'appointment', title: 'Mission Commander', kind: 'conversation', lines: PLAYABLE_BRIEFINGS.appointment, module: 1 },
+  { id: 'companion-intro', title: 'Your mission companion', kind: 'conversation', lines: PLAYABLE_BRIEFINGS.companionIntro, module: 1 },
+  { id: 'destination', title: 'Planet selection', kind: 'choice', choiceKey: 'destination', module: 1, options: [
+    { id: 'moon', label: 'Moon', available: true },
+    { id: 'mars', label: 'Mars', available: false },
+    { id: 'coming-soon', label: 'Comming Soon', available: false }
+  ] },
+  { id: 'objective-briefing', title: 'Mission Objective', kind: 'conversation', lines: PLAYABLE_BRIEFINGS.objectiveBriefing, module: 1 },
+  { id: 'objective', title: 'Mission Objective', kind: 'choice', choiceKey: 'objective', module: 1, options: [
+    { id: 'lunar-ice', label: 'Mission A — Lunar South Pole Ice Explorer', available: true },
+    { id: 'lunar-geology', label: 'Mission B — Lunar Geology Explorer', available: true }
+  ] },
+  { id: 'site-briefing', title: 'Landing Site', kind: 'conversation', lines: PLAYABLE_BRIEFINGS.siteBriefing, module: 1 },
+  { id: 'site', title: 'Landing Site Selection', kind: 'choice', choiceKey: 'site', module: 1, options: [
+    { id: 'crater-rim', label: '🧊 SITE A — Ice-Proximity Crater Rim', description: 'Balanced exploration mission ⭐\nModerate risk • Short ice traverse • High science', available: true },
+    { id: 'permanent-shadow', label: '🌑 SITE B — Permanently Shadowed Region', description: 'Extreme science mission\nVery high risk • Maximum ice access • Severe power/thermal challenges', available: true }
+  ] },
+  { id: 'resource-briefing', title: 'Make every decision count', kind: 'conversation', lines: PLAYABLE_BRIEFINGS.resourceBriefing, module: 1 },
+  { id: 'resource-limits', title: 'Spacecraft Design Specifications', kind: 'activity', activity: 'resource-limits', module: 2 },
+  { id: 'lander-build', title: '🚀 LANDER SYSTEM', kind: 'activity', activity: 'lander-build', module: 2 },
+  { id: 'rover-select', title: '🤖 CHOOSE YOUR ROVER', kind: 'activity', activity: 'rover-select', module: 2 },
+  { id: 'science-build', title: 'Choose science package - Mandatory', kind: 'activity', activity: 'science-build', module: 2 },
+  { id: 'power-build', title: 'Power management', kind: 'activity', activity: 'power-build', module: 2 },
+  { id: 'survival-build', title: 'Survival', kind: 'activity', activity: 'survival-build', module: 2 },
+  { id: 'crew-briefing', title: 'Meet your crew', kind: 'conversation', lines: CREW_BRIEFING, module: 3 },
+  { id: 'crew-selection', title: 'Choose your crew', kind: 'activity', activity: 'crew-selection', module: 3 },
+  { id: 'crew-plan', title: 'Your crew is ready', kind: 'activity', activity: 'crew-plan', module: 3 },
+  { id: 'crew-check', title: 'Crew & supplies', kind: 'activity', activity: 'crew-check', module: 4 },
+  { id: 'mass-check', title: 'MASS CHECK', kind: 'activity', activity: 'mass-check', module: 4 },
+  { id: 'power-check', title: 'POWER CHECK', kind: 'activity', activity: 'power-check', module: 4 },
+  { id: 'budget-check', title: 'BUDGET CHECK', kind: 'activity', activity: 'budget-check', module: 4 },
+  { id: 'systems-check', title: 'Check the return path', kind: 'activity', activity: 'systems-check', module: 4 },
+  { id: 'stress-check', title: 'Moon quiz', kind: 'activity', activity: 'stress-check', module: 4 },
+  { id: 'rocket-pack', title: 'Secure your spacecraft', kind: 'activity', activity: 'rocket-pack', module: 4 },
+  { id: 'rocket-assembly', title: 'Build your rocket', kind: 'activity', activity: 'rocket-assembly', module: 4 },
+  { id: 'launch-ready', title: 'Departure plan ready', kind: 'activity', activity: 'launch-ready', module: 4 },
+  { id: 'liftoff', title: 'Launch your explorer', kind: 'activity', activity: 'liftoff', module: 5 },
+  { id: 'earth-orbit', title: 'Choose your Moon route', kind: 'activity', activity: 'earth-orbit', module: 6 },
+  { id: 'moon-transfer', title: 'Journey to the Moon', kind: 'activity', activity: 'moon-transfer', module: 6 },
+  { id: 'lunar-orbit', title: 'Lunar orbit reached', kind: 'activity', activity: 'lunar-orbit', module: 6 },
+  { id: 'lunar-descent', title: 'Land on the Moon', kind: 'activity', activity: 'lunar-descent', module: 7 },
+  { id: 'lunar-surface', title: 'Deploy your rover', kind: 'activity', activity: 'surface-deploy', module: 8 },
+  { id: 'surface-explore', title: 'Explore your Moon route', kind: 'activity', activity: 'surface-explore', module: 8 },
+  { id: 'surface-ready', title: 'Your surface route is ready', kind: 'activity', activity: 'surface-explore', module: 8 },
+  { id: 'ice-science', title: 'Find the evidence', kind: 'activity', activity: 'ice-science', module: 9 },
+  { id: 'science-ready', title: 'Science delivered', kind: 'activity', activity: 'ice-science', module: 9 },
+  { id: 'surface-recovery', title: 'Secure the surface', kind: 'activity', activity: 'surface-recovery', module: 10 },
+  { id: 'surface-secured', title: 'Surface secured', kind: 'activity', activity:'surface-recovery', module: 10 },
+  {id:'crew-return',title:'Bring our crew home',kind:'activity',activity:'crew-return',module:11},
+  {id:'mission-debrief',title:'Mission complete',kind:'endpoint',module:11}
+];
+
+export function getStoryStep(id: StoryStepId, objective?:string): StoryStep {
+  const step = STORY_FLOW.find(item => item.id === id);
+  if (!step) throw new Error(`Unknown story step: ${id}`);
+  if(objective==='lunar-geology'&&step.kind==='choice'&&step.choiceKey==='site')return {...step,options:[{id:'lunar-highlands',label:'Lunar highlands',description:'Ancient crust · sunlit camp',available:true},{id:'ancient-crater',label:'Ancient impact crater',description:'Mixed rocks · impact clues',available:true}]};
+  if(objective==='lunar-geology'&&step.id==='site-briefing'&&step.kind==='conversation')return {...step,lines:GEOLOGY_SITE_BRIEFING};
+  if(objective==='lunar-geology'&&step.id==='resource-briefing'&&step.kind==='conversation')return {...step,lines:GEOLOGY_RESOURCE_BRIEFING};
+  return step;
+}
+
+export function getDialogueText(line: StoryLine, playerName: string): string {
+  return line.nameSlots === 'greeting' && playerName
+    ? line.text.replace(/^Charlie,/, () => `${playerName},`)
+    : line.text;
+}
+
+/** All displayed Commander replies belong to the companion, not a playable astronaut. */
+export function getSpeakerLabel(line: StoryLine, playerName: string): string {
+  return line.sourceSpeaker === 'Charlie' ? playerName || 'Charlie' : line.sourceSpeaker;
+}

@@ -31,12 +31,12 @@ To guarantee instant scene transitions and zero layout shifts without penalizing
 
 1. **Precached Visual Assets (~2.5 MB total)**:
    - **3D Celestial Flight Textures**: `/story/flight/earth-blue-marble.jpg`
-   - **Character Rig Atlases (WebP)**: `/story/characters-v1/chief-body.webp`, `chief-faces-a.webp`, `chief-faces-b.webp`, `commander-body.webp`, `commander-faces-a.webp`, `commander-faces-b.webp`, `commander-faces-c.webp`, `commander-male-atlas.png`.
+   - **Character Rig Atlases (WebP)**: `/story/characters-v1/chief-body.webp`, `chief-faces-a.webp`, `chief-faces-b.webp`, `commander-body.webp`, `commander-faces-a.webp`, `commander-faces-b.webp`, `commander-faces-c.webp`, `commander-male-atlas.webp`.
    - **Rig Manifest**: `/story/characters-v1/manifest.json`.
-   - **Astronaut Dossiers & Expressions**: `/story/pilot.png`, `/story/sarah-jenkins.png`, `/story/kai-briefing.webp`, `/story/mira-briefing.webp`, and emotion cutouts.
+   - **Astronaut Dossiers & Portraits**: `/story/lunar-cabin-v1.webp`, `/story/crew-portraits/astrobiologist.webp`, `/story/crew-portraits/geologist.webp`, `/story/crew-portraits/robotics-specialist.webp`, `/story/crew-portraits/systems-engineer.webp`.
 
 2. **Decoupled Audio Streaming**:
-   - Audio dialogue files (~600+ MP3 clips) stream through standard browser HTTP cache on demand rather than blocking the loading screen, saving bandwidth while ensuring instant speech synthesis playback.
+   - Audio dialogue files (~700+ MP3 clips) stream through standard browser HTTP cache on demand rather than blocking the loading screen, saving bandwidth while ensuring instant speech synthesis playback.
 
 3. **In-Memory & Cache Storage Dual Warming with 7-Day TTL**:
    - `preloadImage()` warms the browser's image decoder (`img.decode()`), caches the decoded `HTMLImageElement` in memory, and persists the raw asset response in `window.caches` for offline resilience.
@@ -46,7 +46,7 @@ To guarantee instant scene transitions and zero layout shifts without penalizing
 
 ## 3. PWA Configuration & Web App Manifest
 
-Configured in `vite.config.ts`:
+Configured in `apps/web/vite.config.ts`:
 - **Display Mode**: `standalone` (removes browser URL bar, tabs, and navigation controls for genuine game immersion).
 - **Orientation**: `landscape` (locks horizontal game viewport on mobile devices).
 - **Service Worker Strategy**: `generateSW` with `registerType: 'autoUpdate'`.
@@ -57,7 +57,7 @@ Configured in `vite.config.ts`:
 
 ## 4. State Management (`usePwaStore`)
 
-The PWA store (`src/state/pwaStore.ts`) provides centralized reactive state:
+The PWA store (`packages/ui/src/state/pwaStore.ts`, exported via `@exo/ui`) provides centralized reactive state:
 
 - `isInstalled`: Boolean indicating whether the game is currently running in standalone mode (checked via `matchMedia('(display-mode: standalone)')`, iOS `navigator.standalone`, or Android referrer).
 - `canInstall`: Boolean indicating whether installation is possible.
@@ -75,10 +75,10 @@ The PWA store (`src/state/pwaStore.ts`) provides centralized reactive state:
 1. **Mission Home View (`MissionHome`)**:
    - Prominently displays an "Install App" button in `.home-other-actions` next to "Judge demo" and "New mission".
    - Automatically hides when the application is already running in installed standalone mode.
-2. **Mission Control Aerospace Header (`Header.tsx`)**:
+2. **Mission Control Aerospace Header (`apps/web/src/game/story/Header.tsx`)**:
    - Integrated in the flight control accessories bar with a glowing cyan download icon.
    - Auto-hides when installed.
-3. **Aerospace Install Guidance Modal (`InstallAppModal.tsx`)**:
+3. **Aerospace Install Guidance Modal (`packages/ui/src/components/InstallAppModal.tsx`)**:
    - Glassmorphic aerospace styling with deep space neon borders (`#8ce2c2`, `#863bff`).
    - Platform-specific tab switching with exhaustive real-world edge-case coverage:
      - **PC & Mac**:

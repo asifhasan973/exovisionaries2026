@@ -2,7 +2,7 @@
 
 ## 1. Overview & Architectural Purpose
 
-The **Loading Screen Component** ([LoadingScreen.tsx](file:///d:/RUNNING_PROJECTS/_nasaspaceappschallenge-2k26/exovisionaries2026/src/components/common/LoadingScreen.tsx)) serves as an architectural shield and cinematic entry point for **Exovisionaries-2k26**:
+The **Loading Screen Component** ([LoadingScreen.tsx](../packages/ui/src/components/LoadingScreen.tsx)) serves as an architectural shield and cinematic entry point for **Exovisionaries-2k26**:
 1. **Cinematic Progression Flow**: 
    - **Step 1: Intro Splash**: On initial visit of the day/session, a solid pitch-black screen presents `"ExoVisionaries-2k26 Presents"`.
    - **Step 2: Looping NASA Carousel**: The intro splash smoothly cross-fades to reveal an endlessly looping full-screen carousel of authentic NASA space exploration imagery and educational captions.
@@ -16,7 +16,7 @@ The **Loading Screen Component** ([LoadingScreen.tsx](file:///d:/RUNNING_PROJECT
 
 ## 2. Environment Configuration (`.env.example`)
 
-All timing values, minimum durations, and deliberate visual testing delays are retrieved dynamically from Vite environment variables (with fallback defaults) via [loadingConfig.ts](file:///d:/RUNNING_PROJECTS/_nasaspaceappschallenge-2k26/exovisionaries2026/src/config/loadingConfig.ts):
+All timing values, minimum durations, and deliberate visual testing delays are retrieved dynamically from Vite environment variables (with fallback defaults) via [loadingConfig.ts](../packages/ui/src/config/loadingConfig.ts):
 
 | Environment Variable | Default Value | Description |
 |---|---|---|
@@ -32,32 +32,34 @@ To customize these settings locally, copy `.env.example` to `.env` or `.env.loca
 
 ```
                            +---------------------------+
-                           |       src/App.tsx         |
+                           |     apps/web/src/App.tsx  |
                            +-------------+-------------+
                                          |
                                          v
                          +-------------------------------+
-                         | <LoadingScreen /> [Global UI] |
+                         | <LoadingScreen /> [@exo/ui]   |
                          +---------------+---------------+
                                          | Reads state & progress
                                          v
 +-------------------------------+-------------------------------+
-|      loadingStore.ts          |       assetPreloader.ts       |
+| @exo/ui/src/state/            | apps/web/src/services/        |
+| loadingStore.ts               | assetPreloader.ts             |
 | - isLoading (default: true)   | - preloadEntrySubsystems()    |
 | - isPaused                    |   * 40% Dynamic Code Modules  |
 | - progress (0-100 real)       |   * 30% 3D Moon Shaders       |
-| - showIntroSplash             |   * 20% Heavy Character Art   |
+| - showIntroSplash             |   * 20% Deep Space & Timeline |
 | - pendingTasks (Promises)     |   * 10% Audio & State         |
 +-------------------------------+ - preloadMissionSubsystems()  |
                                 |   * 40% 3D Workshop & Flight  |
                                 |   * 30% Rocket PBR Meshes     |
-                                |   * 20% Crew Dossiers         |
+                                |   * 20% Crew Dossiers & Rigs  |
                                 |   * 10% Launch Acoustics      |
                                 +-------------------------------+
                                          |
                                          v
                          +-------------------------------+
-                         |       loadingEngine.ts        |
+                         | @exo/engine/src/              |
+                         | loadingEngine.ts              |
                          | - preloadImage(url)           |
                          | - Browser Cache Storage API   |
                          |   (7-day inactivity purge)    |
@@ -85,14 +87,14 @@ To customize these settings locally, copy `.env.example` to `.env` or `.env.loca
 
 ### 4.3 Real Subsystem Preloading Pipeline
 - **Entry Preloading** (`preloadEntrySubsystems`):
-  - Preloads `HomeViewport.tsx` 3D Moon sphere and shaders, `SelectionScreens.tsx`, `sources.ts`, `parts.ts`, `/story/crew-welcome.png`, `/story/mission-control.png`, and the 5 NASA loading slides.
+  - Preloads `HomeViewport.tsx` 3D Moon sphere and shaders, `SelectionScreens.tsx`, `NasaMissionArchive.tsx` and timeline bubbles, `/story/moon-mission-hero.webp`, and the NASA loading slides (`artemis_launch.jpg`, `orion_earth_view.jpg`, `carina_nebula.webp`, `apollo_bootprint.jpg`, `mars_perseverance.jpg`).
 - **Mission Preloading** (`preloadMissionSubsystems`):
   - Triggered when starting any mission or demo.
-  - Preloads `WorkshopScreen.tsx`, `WorkshopViewport.tsx`, `Assembly.tsx`, `RocketBuilder3D.tsx`, `FlightScreen.tsx`, `FlightScene3D.tsx`, `SystemTests.tsx`, all lunar mission viewports, `/story/pilot.png`, and `/story/sarah-jenkins.png`.
+  - Preloads `WorkshopScreen.tsx`, `WorkshopViewport.tsx`, `FlightScreen.tsx`, `FlightViewport.tsx`, lunar mission viewports (`CrewScreen.tsx`, `RocketAssemblyScreen.tsx`, `JourneyScreen.tsx`, `LandingScreen.tsx`, `SurfaceScreen.tsx`, `ScienceScreen.tsx`, `ReturnScreen.tsx`), celestial flight texture `/story/flight/earth-blue-marble.jpg`, character rig WebP atlases (`chief-body.webp`, `commander-male-atlas.webp`), lunar cabin, and astronaut dossiers (`astrobiologist.webp`, `geologist.webp`, `robotics-specialist.webp`, `systems-engineer.webp`).
   - Always concludes by setting progress to 100% in a safe `finally` block. As soon as all tasks finish, the loader dismisses.
 
 ### 4.4 Universal Lifecycle Freeze & Loading Screen Halting
-- **Unified Engine Suspension**: When `LoadingScreen` is active (`isLoading = true`) or when `OrientationGuard` blocks in portrait mode (`isBlocked = true`), the entire application state halts via the centralized lifecycle store (`src/state/orientationLifecycleStore.ts`):
+- **Unified Engine Suspension**: When `LoadingScreen` is active (`isLoading = true`) or when `OrientationGuard` blocks in portrait mode (`isBlocked = true`), the entire application state halts via the centralized lifecycle store (`packages/ui/src/state/orientationLifecycleStore.ts`):
   - **Simulation Loops Halted**: Descent physics, flight timers, lunar rover telemetry, and automated assembly are paused in-place. If the user reloads in the middle of a mission and restarts, no underlying game ticks or progress advance behind the loading screen.
   - **Audio & Spoken Dialogue**: Web Audio synthesizer contexts are suspended in-place via `SoundEngine.pauseAll()`, and active spoken narration is held silent. Spoken dialogue is prevented from starting until loading completes; upon unfreezing at 100% progress, dialogue replays from the beginning of the line so the player hears the complete context without clipping or browser synthesis freeze.
   - **Orientation Pause on Loader**: While the orientation guard is active, the loading screen's intro splash timer, carousel hold timer, and visual progress interpolation freeze with exact millisecond precision.
