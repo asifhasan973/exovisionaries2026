@@ -30,6 +30,7 @@ export interface StoryShellProps {
   onToggleVoice?: () => void;
   voiceAvailable?: boolean;
   skipTarget?: string;
+  isDebugSession?: boolean;
 }
 
 /** Shared navigation frame for conversations, mission cards and the workshop handoff. */
@@ -44,12 +45,19 @@ export function StoryShell({
   onToggleVoice,
   voiceAvailable = true,
   skipTarget = "story-content",
+  isDebugSession,
 }: StoryShellProps) {
   const isSoundOn = soundActive ?? voiceEnabled;
   const mobileGame = useMobileGame();
   const navigation = useStoryNavigation(),
     shell = useRef<HTMLDivElement>(null);
-  const reviewing = !!navigation?.reviewing && !navigation.card;
+  const isDebug = Boolean(
+    isDebugSession ||
+    (typeof window !== "undefined" &&
+      (window.location.hash.includes("debug") ||
+        window.location.search.includes("debug"))),
+  );
+  const reviewing = !isDebug && !!navigation?.reviewing && !navigation.card;
   useEffect(() => {
     if (!reviewing) return;
     const mains = Array.from(shell.current?.querySelectorAll("main") ?? []),

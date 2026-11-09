@@ -30,6 +30,11 @@ const ConversationPreview = lazy(() =>
     default: m.ConversationPreview,
   })),
 );
+const RoverLabPreview = lazy(() =>
+  import("./game/moon/rover/RoverLabPreview").then((m) => ({
+    default: m.RoverLabPreview,
+  })),
+);
 const ExactStory = lazy(() => import("./game/moon/stages/ExactStory"));
 
 export default function App() {
@@ -45,7 +50,13 @@ export default function App() {
   useEffect(() => {
     if (!isDevelopment) return;
     const handleHashChange = () => {
-      setDebugRoute(parseDebugHash(window.location.hash));
+      const nextRoute = parseDebugHash(window.location.hash);
+      if (nextRoute) {
+        useLoadingStore
+          .getState()
+          .startLoading("mission_start", `Opening ${nextRoute.id}…`);
+      }
+      setDebugRoute(nextRoute);
     };
     window.addEventListener("hashchange", handleHashChange);
     return () => window.removeEventListener("hashchange", handleHashChange);
@@ -64,6 +75,8 @@ export default function App() {
         content = <ConversationPreview />;
       } else if (debugRoute.id === "archive") {
         content = <ExactStory initialArchive={true} />;
+      } else if (debugRoute.id === "rover-lab") {
+        content = <RoverLabPreview />;
       } else {
         content = <ExactStory initialHome={true} />;
       }

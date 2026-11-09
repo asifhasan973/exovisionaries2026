@@ -136,7 +136,8 @@ export function reduceWorkshopMission(
   ) => stageReady(id, preparation, objective);
   const stage = WORKSHOP_STAGES.find((id) => id === step.id);
   if (event.type === "fix-problem") {
-    if (step.module !== 6 && !stage) return session;
+    const isChecks = step.module === 4 || step.module === 6;
+    if (!isChecks && !stage) return session;
     const repair = recommendRepair(session, event.problem);
     if (
       !repair ||
@@ -146,7 +147,7 @@ export function reduceWorkshopMission(
       return session;
     return {
       ...session,
-      repair: { ...repair, fromChecks: step.module === 6 },
+      repair: { ...repair, fromChecks: isChecks },
       progress: {
         ...session.progress,
         stepId: repair.stage,

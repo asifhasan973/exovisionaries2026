@@ -6,7 +6,6 @@ import {
   useRef,
   useState,
 } from "react";
-import type { StoryStepId } from "@/game/moon/core/types";
 import { PlayerCharacterProvider } from "@/game/moon/narrative/hooks/playerCharacterContext";
 import { GameSettingsProvider } from "@/shared/shell";
 import { RestartStoryDialog } from "@/game/moon/crew/SelectionScreens";
@@ -65,12 +64,19 @@ export default function ExactStory({
   initialHome,
   initialArchive,
 }: ExactStoryProps = {}) {
-  const isDebugSession = Boolean(debugStepId || debugDemoChapter);
+  const isDebugSession = Boolean(
+    debugStepId ||
+    debugDemoChapter ||
+    (typeof window !== "undefined" &&
+      (window.location.hash.includes("debug") ||
+        window.location.search.includes("debug"))),
+  );
   const [archiveOpen, setArchiveOpen] = useState(() => Boolean(initialArchive));
   const [session] = useState(readBrowserSelectionSession);
   const [mission, setMission] = useState<WorkshopSession>(() => {
     if (debugStepId) {
-      return createDebugSession(debugStepId as StoryStepId);
+      const debugSession = createDebugSession<WorkshopSession>(debugStepId);
+      if (debugSession) return debugSession;
     }
     return createWorkshopSession(
       session.progress,
@@ -190,7 +196,7 @@ export default function ExactStory({
                 ? null
                 : {
                     progress: nav.chapter,
-                    reviewing: Boolean(mission.review),
+                    reviewing: !isDebugSession && Boolean(mission.review),
                     autoplay: nav.autoplay && !mission.review,
                     card: nav.milestoneCard,
                     back: nav.back,

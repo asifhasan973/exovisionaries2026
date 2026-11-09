@@ -35,6 +35,15 @@ export const DEBUG_PAGES: readonly DebugItem[] = [
     type: "page",
     hash: "#/debug/page/archive",
   },
+  {
+    id: "rover-lab",
+    label: "Rover Cabin & Radar Lab",
+    description:
+      "Standalone rover cockpit, radar navigation, and battery management sandbox",
+    badge: "Sandbox",
+    type: "page",
+    hash: "#/debug/page/rover-lab",
+  },
 ];
 
 /**

@@ -136,8 +136,12 @@ export class SceneBoundary extends Component<
   { failed: boolean }
 > {
   state = { failed: false };
-  static getDerivedStateFromError() {
+  static getDerivedStateFromError(error: unknown) {
+    console.error("[SceneBoundary] Render error caught:", error);
     return { failed: true };
+  }
+  componentDidCatch(error: Error, errorInfo: any) {
+    console.error("[SceneBoundary] Component stack:", error, errorInfo);
   }
   render() {
     return this.state.failed ? this.props.fallback : this.props.children;

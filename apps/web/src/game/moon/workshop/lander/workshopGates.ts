@@ -247,7 +247,7 @@ export function handleWorkshopBack(
     stageReady(id, session.preparation, objective);
   const index = WORKSHOP_STAGES.findIndex((id) => id === progress.stepId);
   const boundary =
-    getStoryStep(progress.stepId).module >= 6 ? WORKSHOP_STAGES.length : index;
+    getStoryStep(progress.stepId).module >= 3 ? WORKSHOP_STAGES.length : index;
   const missing = WORKSHOP_STAGES.find((id, i) => i < boundary && !ready(id));
   if (missing)
     return {
@@ -255,7 +255,7 @@ export function handleWorkshopBack(
       progress: { ...progress, stepId: missing, lineIndex: 0 },
     };
   if (
-    getStoryStep(progress.stepId).module >= 6 &&
+    getStoryStep(progress.stepId).module >= 3 &&
     ![
       "crew-check",
       "systems-check",

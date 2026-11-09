@@ -1,7 +1,8 @@
 import { reduceRover } from "@/game/moon/rover/rover";
 import { STORY_FLOW, getStoryStep } from "./flow";
 import { reduceStoryProgress } from "./progress";
-import type { StoryProgress } from "./types";
+import type { ChoiceId, StoryProgress } from "./types";
+import type { MoonObjective } from "../shared/catalog";
 import type { WorkshopSession } from "@/game/moon/workshop/lander/workshopSession";
 import { createDebugSession, registerSkipResolver } from "@exo/debug";
 
@@ -110,7 +111,11 @@ export function pauseMission(s: WorkshopSession): WorkshopSession {
 
 /** A backwards visit never spends resources, clears receipts or restarts physics. */
 export function navigateBack(s: WorkshopSession): WorkshopSession {
-  const paused = pauseMission(s),
+  const isDebug =
+    typeof window !== "undefined" &&
+    (window.location.hash.includes("debug") ||
+      window.location.search.includes("debug"));
+  const paused = isDebug ? s : pauseMission(s),
     current = s.progress,
     step = getStoryStep(current.stepId, current.selections.objective);
   let progress: StoryProgress;
@@ -142,11 +147,16 @@ export function navigateBack(s: WorkshopSession): WorkshopSession {
     };
   }
   const locked =
-    !!s.review ||
-    s.flight.t > 0 ||
-    !["prepare", "validate"].includes(s.moon.phase);
+    !isDebug &&
+    (!!s.review ||
+      s.flight.t > 0 ||
+      !["prepare", "validate"].includes(s.moon.phase));
   return {
     ...paused,
+    flight:
+      isDebug && s.flight.status === "paused"
+        ? { ...s.flight, status: "ready" }
+        : paused.flight,
     progress: {
       ...progress,
       milestones: progress.milestones
@@ -163,7 +173,7 @@ export function navigateBack(s: WorkshopSession): WorkshopSession {
             ],
           },
         }
-      : {}),
+      : { review: undefined }),
   };
 }
 export function navigateForward(s: WorkshopSession): WorkshopSession {
@@ -237,7 +247,14 @@ export function advanceMissionSkip(source: WorkshopSession): WorkshopSession {
   const targetStep = STORY_FLOW[currentIndex + 1];
   if (!targetStep) return source;
 
-  const seeded = createDebugSession(targetStep.id);
+  const seeded = createDebugSession<WorkshopSession>(targetStep.id, {
+    objective:
+      (source.progress.selections.objective as MoonObjective) || "lunar-ice",
+    gender: source.progress.playerGender,
+    playerName: source.progress.playerName,
+    site: source.progress.selections.site as ChoiceId | undefined,
+  });
+  if (!seeded) return source;
   return {
     ...seeded,
     progress: {

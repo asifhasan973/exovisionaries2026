@@ -3,15 +3,10 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { createCrewedPlatform } from "@/game/moon/crew/crewedMeshes";
 import { disposeGroup } from "@/game/moon/workshop/lander/workshopMeshes";
-import { coastFraction } from "./journey.ts";
+import { coastFraction, getLoiRequiredDv } from "./journey.ts";
 import type { JourneyState } from "./journey.ts";
 import type { PreparationSelection } from "@/game/moon/core/design";
-import {
-  transferSolution,
-  TRANSFER_DATES,
-  orbitPreview,
-} from "./transferModel.ts";
-import solarData from "@/game/moon/shared/solarData.json";
+import { transferSolution, LUNAR_ORBIT_TIERS } from "./transferModel.ts";
 import { useLoadingStore } from "@exo/ui";
 import { isEngineFrozen } from "@exo/ui";
 import { SceneFallback } from "@exo/ui";
@@ -24,10 +19,11 @@ export function JourneyViewport({
   preparation: PreparationSelection;
   gentle: boolean;
 }) {
+  const initialMode = journey.stage === "route" ? "trajectory" : "craft";
   const host = useRef<HTMLDivElement>(null),
     latest = useRef(journey),
-    view = useRef<"chase" | "map" | "solar">("chase");
-  const [mode, setMode] = useState<"chase" | "map" | "solar">("chase"),
+    view = useRef<"craft" | "trajectory">(initialMode);
+  const [mode, setMode] = useState<"craft" | "trajectory">(initialMode),
     [failed, setFailed] = useState(false);
   useEffect(() => {
     latest.current = journey;
@@ -65,17 +61,32 @@ export function JourneyViewport({
         controls.enableDamping = false;
         controls.minDistance = 2;
         controls.maxDistance = 1200;
-        const earthTexture = await new THREE.TextureLoader().loadAsync(
-          `${import.meta.env.BASE_URL}story/flight/earth-blue-marble.jpg`,
-        );
-        earthTexture.colorSpace = THREE.SRGBColorSpace;
+        let earthTexture: THREE.Texture | undefined;
+        try {
+          earthTexture = await new THREE.TextureLoader().loadAsync(
+            `${import.meta.env.BASE_URL}story/flight/earth-blue-marble.jpg`,
+          );
+          earthTexture.colorSpace = THREE.SRGBColorSpace;
+        } catch (e) {
+          console.warn(
+            "Could not load earth texture, falling back to blue marble tone",
+            e,
+          );
+        }
         if (disposed) {
-          earthTexture.dispose();
+          earthTexture?.dispose();
           return;
         }
+        const earthMat = earthTexture
+          ? new THREE.MeshStandardMaterial({ map: earthTexture, roughness: 1 })
+          : new THREE.MeshStandardMaterial({
+              color: 0x274e82,
+              roughness: 0.9,
+              metalness: 0.1,
+            });
         const earth = new THREE.Mesh(
           new THREE.SphereGeometry(6.378137, 64, 48),
-          new THREE.MeshStandardMaterial({ map: earthTexture, roughness: 1 }),
+          earthMat,
         );
         scene.add(earth);
         const moon = new THREE.Mesh(
@@ -158,53 +169,54 @@ export function JourneyViewport({
           }),
         );
         scene.add(line);
-        const futureMoon = new THREE.Mesh(
-          new THREE.SphereGeometry(1.78, 32, 24),
-          new THREE.MeshBasicMaterial({
-            color: 0xffdf89,
-            wireframe: true,
+        const beacon = new THREE.Group();
+        const beaconMat = new THREE.MeshBasicMaterial({
+          color: 0x8ce2c2,
+          side: THREE.DoubleSide,
+          transparent: true,
+          opacity: 0.9,
+          depthWrite: false,
+          blending: THREE.AdditiveBlending,
+        });
+        const outerRing = new THREE.Mesh(
+          new THREE.RingGeometry(5.8, 7.2, 48),
+          beaconMat,
+        );
+        beacon.add(outerRing);
+        const innerRing = new THREE.Mesh(
+          new THREE.RingGeometry(2.8, 3.6, 32),
+          beaconMat,
+        );
+        beacon.add(innerRing);
+        for (let i = 0; i < 4; i++) {
+          const tick = new THREE.Mesh(
+            new THREE.PlaneGeometry(0.5, 2.2),
+            beaconMat,
+          );
+          const ang = (i * Math.PI) / 2;
+          tick.position.set(Math.cos(ang) * 8.2, Math.sin(ang) * 8.2, 0);
+          tick.rotation.z = ang + Math.PI / 2;
+          beacon.add(tick);
+        }
+        beacon.visible = false;
+        scene.add(beacon);
+        const lunarOrbitRing = new THREE.LineLoop(
+          new THREE.BufferGeometry(),
+          new THREE.LineBasicMaterial({
+            color: 0x8ce2c2,
             transparent: true,
-            opacity: 0.25,
+            opacity: 0.85,
           }),
         );
-        scene.add(futureMoon);
-        const solar = new THREE.Group();
-        scene.add(solar);
-        const sun = new THREE.Mesh(
-          new THREE.SphereGeometry(1, 32, 24),
-          new THREE.MeshBasicMaterial({ color: 0xffd47e }),
-        );
-        solar.add(sun);
-        const planets = (solarData as any[]).map((body: any, i: number) => {
-          const p = new THREE.Mesh(
-            new THREE.SphereGeometry(i === 4 ? 0.65 : 0.3, 24, 16),
-            new THREE.MeshBasicMaterial({
-              color: [
-                0xada49b, 0xe8c7a0, 0x76b8ff, 0xe79c78, 0xd2b69c, 0xe1c58f,
-                0x93ddd8, 0x6089df,
-              ][i],
-            }),
-          );
-          solar.add(p);
-          return p;
-        });
-        const prediction = new THREE.Line(
-          new THREE.BufferGeometry(),
-          new THREE.LineBasicMaterial({ color: 0xffd58a }),
-        );
-        scene.add(prediction);
-        let predictionKey = "",
-          orbitClock = 0,
+        lunarOrbitRing.visible = false;
+        scene.add(lunarOrbitRing);
+        let orbitClock = 0,
           lastTime = 0;
-        let orbitPoints: THREE.Vector3[] = [];
         let previous = "",
           previousMode = "",
-          lastPosition = new THREE.Vector3(),
-          dragged = false;
-        const dragging = () => {
-          dragged = true;
-        };
-        controls.addEventListener("start", dragging);
+          previousArrival = false,
+          lastPosition = new THREE.Vector3();
+        controls.addEventListener("start", () => {});
         const resize = () => {
           if (!renderer) return;
           renderer.setSize(
@@ -227,193 +239,389 @@ export function JourneyViewport({
             lastTime = 0;
             return;
           }
-          const now = performance.now();
-          if (lastTime && !latest.current.paused && !gentle)
-            orbitClock += Math.min(0.05, (now - lastTime) / 1000);
-          lastTime = now;
-          const j = latest.current,
-            s = transferSolution(j.date, j.route ?? "balanced"),
-            key = `${j.date}-${j.route}`,
-            v =
-              j.stage === "route" && view.current === "chase"
-                ? "map"
-                : view.current;
-          if (key !== previous) {
-            line.geometry.dispose();
-            line.geometry = new THREE.BufferGeometry().setFromPoints(
-              s
-                ? s.path.map(
-                    (p) =>
-                      new THREE.Vector3(p[0] / 1000, p[2] / 1000, -p[1] / 1000),
-                  )
-                : [],
-            );
-            previous = key;
-            previousMode = "";
-          }
-          const index = s
-            ? Math.min(
+          try {
+            const now = performance.now();
+            if (lastTime && !latest.current.paused && !gentle)
+              orbitClock += Math.min(0.05, (now - lastTime) / 1000);
+            lastTime = now;
+            const j = latest.current,
+              s = transferSolution(j.date, j.route ?? "balanced"),
+              key = `${j.date}-${j.route}-${j.orbitTier ?? "low"}`,
+              v = view.current;
+            const isTrajectory = v === "trajectory";
+            const rawPoint = (p: number[]) => {
+              if (!p || p.length < 3) return new THREE.Vector3(0, 0, 0);
+              return new THREE.Vector3(p[0] / 1000, p[2] / 1000, -p[1] / 1000);
+            };
+            const targetDest =
+              s && s.moonPath && s.moonPath.length > 0
+                ? rawPoint(s.moonPath[s.moonPath.length - 1])
+                : new THREE.Vector3(380, 0, 0);
+            const lunarTier =
+              LUNAR_ORBIT_TIERS[j.orbitTier ?? "low"] ?? LUNAR_ORBIT_TIERS.low;
+            const lunarClearance = lunarTier.clearanceOffset;
+            const targetRadius = 1.7374 + lunarClearance;
+            const approachDist = targetRadius + 6.0;
+            const clearanceRadius = 6.378137 + 1.45;
+            const point = (p: number[], idx?: number) => {
+              const pt = rawPoint(p);
+              const r = pt.length();
+              if (r < clearanceRadius && r > 0.01) {
+                pt.multiplyScalar(clearanceRadius / r);
+              } else if (idx !== undefined && idx < 6 && r < 30) {
+                const t = idx / 6;
+                const base = pt
+                  .clone()
+                  .normalize()
+                  .multiplyScalar(clearanceRadius);
+                pt.lerp(base, (1 - t) * 0.4);
+              }
+              if (targetDest) {
+                const rel = pt.clone().sub(targetDest);
+                const moonDist = rel.length();
+                if (moonDist < 25 && moonDist > 0.01) {
+                  const factor = Math.max(0, Math.min(1, (25 - moonDist) / 20));
+                  const targetD = THREE.MathUtils.lerp(
+                    moonDist,
+                    approachDist,
+                    factor,
+                  );
+                  pt.copy(
+                    targetDest
+                      .clone()
+                      .add(rel.multiplyScalar(targetD / moonDist)),
+                  );
+                }
+              }
+              return pt;
+            };
+
+            const arrival = j.stage.startsWith("loi") || j.stage === "complete";
+            lunarOrbitRing.visible = arrival;
+
+            if (key !== previous) {
+              line.geometry.dispose();
+              line.geometry = new THREE.BufferGeometry().setFromPoints(
+                s ? s.path.map((p, idx) => point(p, idx)) : [],
+              );
+              const ringPts: THREE.Vector3[] = [];
+              const segs = 128;
+              for (let i = 0; i <= segs; i++) {
+                const theta = (i / segs) * Math.PI * 2;
+                ringPts.push(
+                  new THREE.Vector3(
+                    targetDest.x - Math.cos(theta) * targetRadius,
+                    targetDest.y + Math.sin(theta) * 0.35 * targetRadius,
+                    targetDest.z - Math.sin(theta) * targetRadius,
+                  ),
+                );
+              }
+              lunarOrbitRing.geometry.dispose();
+              lunarOrbitRing.geometry =
+                new THREE.BufferGeometry().setFromPoints(ringPts);
+              previous = key;
+              previousMode = "";
+            }
+
+            const isAligned = Math.abs(j.angle ?? 0) <= 8;
+            const isTliBurn = j.stage === "tli-burn" && !!s;
+            const isLoiBurn = j.stage === "loi-burn" && !!s;
+
+            let shipPosition: THREE.Vector3;
+            let delta: THREE.Vector3;
+
+            if (isTliBurn && s) {
+              const reqTli = s?.tliMS || 3149;
+              const burnProgress = isAligned
+                ? Math.min(1, Math.max(0, (j.dv ?? 0) / reqTli))
+                : 0;
+              const tliPointsCount = Math.min(6, s.path.length - 1);
+              const tliStep = burnProgress * tliPointsCount;
+              const pA = Math.floor(tliStep);
+              const pB = Math.min(s.path.length - 1, pA + 1);
+              const f = tliStep - pA;
+              const p1 = point(s.path[pA], pA);
+              const p2 = point(s.path[pB], pB);
+              shipPosition = p1.clone().lerp(p2, f);
+              delta = p2.clone().sub(p1);
+              if (delta.lengthSq() < 1e-4) delta.set(1, 0, 0);
+              delta.normalize();
+            } else if (isLoiBurn && s) {
+              const reqLoi = getLoiRequiredDv(j, s?.loiMS || 890);
+              const burnProgress = isAligned
+                ? Math.min(1, Math.max(0, (j.dv ?? 0) / reqLoi))
+                : 0;
+              const smoothP = THREE.MathUtils.smoothstep(burnProgress, 0, 1);
+              const currentR = THREE.MathUtils.lerp(
+                approachDist,
+                targetRadius,
+                smoothP,
+              );
+              const currentAngle = smoothP * Math.PI * 0.9;
+              shipPosition = new THREE.Vector3(
+                targetDest.x - Math.cos(currentAngle) * currentR,
+                targetDest.y + Math.sin(currentAngle) * 0.35 * currentR,
+                targetDest.z - Math.sin(currentAngle) * currentR,
+              );
+              const dTheta = 0.05;
+              const nextR = THREE.MathUtils.lerp(
+                approachDist,
+                targetRadius,
+                Math.min(1, smoothP + 0.02),
+              );
+              const nextPos = new THREE.Vector3(
+                targetDest.x - Math.cos(currentAngle + dTheta) * nextR,
+                targetDest.y + Math.sin(currentAngle + dTheta) * 0.35 * nextR,
+                targetDest.z - Math.sin(currentAngle + dTheta) * nextR,
+              );
+              delta = nextPos.sub(shipPosition);
+              if (delta.lengthSq() < 1e-4) delta.set(1, 0, 0);
+              delta.normalize();
+            } else if (j.stage === "complete") {
+              const orbitAngle = Math.PI * 0.9 + orbitClock * 0.35;
+              shipPosition = new THREE.Vector3(
+                targetDest.x - Math.cos(orbitAngle) * targetRadius,
+                targetDest.y + Math.sin(orbitAngle) * 0.35 * targetRadius,
+                targetDest.z - Math.sin(orbitAngle) * targetRadius,
+              );
+              const nextPos = new THREE.Vector3(
+                targetDest.x - Math.cos(orbitAngle + 0.05) * targetRadius,
+                targetDest.y +
+                  Math.sin(orbitAngle + 0.05) * 0.35 * targetRadius,
+                targetDest.z - Math.sin(orbitAngle + 0.05) * targetRadius,
+              );
+              delta = nextPos.sub(shipPosition);
+              if (delta.lengthSq() < 1e-4) delta.set(1, 0, 0);
+              delta.normalize();
+            } else if (j.stage === "loi-window" && s) {
+              shipPosition = new THREE.Vector3(
+                targetDest.x - approachDist,
+                targetDest.y,
+                targetDest.z,
+              );
+              delta = new THREE.Vector3(0, 0.35, -1).normalize();
+            } else if (s) {
+              const index = Math.min(
                 s.path.length - 1,
                 Math.round(coastFraction(j) * (s.path.length - 1)),
-              )
-            : 0;
-          const point = (p: number[]) =>
-            new THREE.Vector3(p[0] / 1000, p[2] / 1000, -p[1] / 1000);
-          const shipPosition = s
-              ? point(s.path[index])
-              : new THREE.Vector3(0, 7, 0),
-            moonPosition = s
-              ? point(s.moonPath[index])
-              : new THREE.Vector3(380, 0, 0);
-          ship.position.copy(shipPosition);
-          moon.position.copy(moonPosition);
-          futureMoon.position.copy(
-            s ? point(s.moonPath[s.moonPath.length - 1]) : moonPosition,
-          );
-          const delta =
-            s && index < s.path.length - 1
-              ? point(s.path[index + 1]).sub(shipPosition)
-              : new THREE.Vector3(1, 0, 0);
-          delta.normalize();
-          const arrival = j.stage.startsWith("loi") || j.stage === "complete";
-          if (arrival && s) {
-            delta
-              .copy(shipPosition)
-              .sub(moonPosition)
-              .cross(new THREE.Vector3(0, 1, 0))
-              .normalize()
-              .negate();
-          }
-          const previewKey = `${key}-${Math.round(j.dv ?? 0)}-${Math.round(j.radialDv ?? 0)}`;
-          prediction.visible = arrival && v !== "solar";
-          if (arrival && s && previewKey !== predictionKey) {
-            const n = s.path.length - 1,
-              relative = point(s.path[n]).sub(point(s.moonPath[n]));
-            const radial = relative.clone().normalize();
-            const incoming = point(s.path[n])
-              .sub(point(s.path[n - 1]))
-              .sub(point(s.moonPath[n]).sub(point(s.moonPath[n - 1])));
-            const tangent = incoming
-              .addScaledVector(radial, -incoming.dot(radial))
-              .normalize();
-            const velocity = tangent
-              .multiplyScalar(s.arrivalSpeedKmS - (j.dv ?? 0) / 1000)
-              .addScaledVector(radial, (j.radialDv ?? 0) / 1000);
-            const points = orbitPreview(
-              relative.clone().multiplyScalar(1000).toArray(),
-              velocity.toArray(),
-            );
-            orbitPoints = points.map((p) =>
-              new THREE.Vector3(...(p as [number, number, number]))
-                .multiplyScalar(0.001)
-                .add(moonPosition),
-            );
-            prediction.geometry.dispose();
-            prediction.geometry = new THREE.BufferGeometry().setFromPoints(
-              orbitPoints,
-            );
-            predictionKey = previewKey;
-          }
-          if (j.stage === "complete" && orbitPoints.length) {
-            shipPosition.copy(
-              orbitPoints[Math.floor(orbitClock * 6) % orbitPoints.length],
-            );
-            ship.position.copy(shipPosition);
-          }
-          const direction = delta
-            .clone()
-            .multiplyScalar(arrival ? -1 : 1)
-            .applyAxisAngle(
-              new THREE.Vector3(0, 1, 0),
-              ((j.angle ?? 0) * Math.PI) / 180,
-            );
-          ship.quaternion.setFromUnitVectors(
-            new THREE.Vector3(0, 1, 0),
-            direction,
-          );
-          guide.position.copy(shipPosition);
-          guide.setDirection(delta.clone().multiplyScalar(arrival ? -1 : 1));
-          plume.visible =
-            j.version === 2
-              ? !!j.firing && !j.paused
-              : j.stage.endsWith("burn");
-          plume.scale.y = 0.5 + (j.throttle ?? 0.5);
-          light.position
-            .fromArray(
-              (s?.sunDirection ?? [1, 1, 1]) as [number, number, number],
-            )
-            .multiplyScalar(1000);
-          const isSolar = v === "solar";
-          solar.visible = isSolar;
-          earth.visible =
-            moon.visible =
-            ship.visible =
-            guide.visible =
-              !isSolar;
-          line.visible = futureMoon.visible = v === "map";
-          if (isSolar) {
-            const day = Math.max(0, TRANSFER_DATES.indexOf(j.date ?? ""));
-            (solarData as any[]).forEach((body: any, i: number) => {
-              const p = body.positions[day] ?? body.positions[0],
-                r = Math.hypot(...p),
-                radius = 3 + Math.log10(r / 149597870.7 + 1) * 16;
-              planets[i].position.set(
-                (p[0] / r) * radius,
-                0,
-                (-p[1] / r) * radius,
               );
-            });
-          }
-          earth.scale.setScalar(v === "map" ? 3 : 1);
-          moon.scale.setScalar(v === "map" ? 5 : 1);
-          futureMoon.scale.setScalar(5);
-          if (v !== previousMode) {
-            dragged = false;
-            if (v === "chase") {
-              const outward = shipPosition
-                .clone()
-                .sub(arrival ? moonPosition : new THREE.Vector3())
-                .normalize();
-              camera.position
-                .copy(shipPosition)
-                .addScaledVector(outward, 5)
-                .add(new THREE.Vector3(1, 1, 0));
-              controls!.target.copy(shipPosition);
-            } else if (isSolar) {
-              camera.position.set(0, 34, 14);
-              controls!.target.set(0, 0, 0);
+              shipPosition = point(s.path[index], index);
+              delta =
+                index < s.path.length - 1
+                  ? point(s.path[index + 1], index + 1)
+                      .clone()
+                      .sub(shipPosition)
+                  : new THREE.Vector3(1, 0, 0);
+              if (delta.lengthSq() < 1e-4) delta.set(1, 0, 0);
+              delta.normalize();
             } else {
-              const points = s
-                ? s.path.map(point)
-                : [new THREE.Vector3(), moonPosition];
-              const bounds = new THREE.Box3().setFromPoints(points),
-                sphere = bounds.getBoundingSphere(new THREE.Sphere());
-              const distance =
-                ((sphere.radius / Math.sin(THREE.MathUtils.degToRad(22.5))) *
-                  1.15) /
-                Math.min(1, camera.aspect);
-              camera.position
-                .copy(sphere.center)
-                .add(new THREE.Vector3(0, distance * 0.65, distance * 0.76));
-              controls!.target.copy(sphere.center);
+              shipPosition = new THREE.Vector3(0, clearanceRadius, 0);
+              delta = new THREE.Vector3(1, 0, 0);
             }
-            previousMode = v;
-          } else if (v === "chase") {
-            if (!dragged) {
-              const change = shipPosition.clone().sub(lastPosition);
-              camera.position.add(change);
-              controls!.target.copy(shipPosition);
+
+            ship.position.copy(shipPosition);
+            moon.position.copy(targetDest);
+
+            // In Trajectory view, scale craft and animate locator beacon
+            ship.scale.setScalar(isTrajectory ? 2.4 : 0.22);
+            if (isTrajectory) {
+              beacon.visible = true;
+              beacon.position.copy(shipPosition);
+              beacon.quaternion.copy(camera.quaternion);
+              const pulse = 1 + 0.12 * Math.sin(performance.now() * 0.006);
+              beacon.scale.setScalar(pulse);
+            } else {
+              beacon.visible = false;
             }
+
+            const outward = shipPosition
+              .clone()
+              .sub(arrival ? targetDest : new THREE.Vector3());
+            if (outward.lengthSq() < 1e-4) outward.set(0, 1, 0);
+            outward.normalize();
+
+            // In LOI burn, backward thrust (nozzle at -Y) points OPPOSITE to Moon:
+            // Therefore forward nose (+Y) points toward the Moon:
+            const toMoon = targetDest.clone().sub(shipPosition).normalize();
+            const prograde = isLoiBurn
+              ? toMoon
+              : delta.clone().multiplyScalar(arrival ? -1 : 1);
+            if (prograde.lengthSq() < 1e-4) prograde.set(1, 0, 0);
+            prograde.normalize();
+
+            let right = prograde.clone().cross(outward);
+            if (right.lengthSq() < 1e-4) {
+              right = prograde.clone().cross(new THREE.Vector3(0, 1, 0));
+              if (right.lengthSq() < 1e-4) right = new THREE.Vector3(0, 0, 1);
+            }
+            right.normalize();
+
+            let normalUp = right.clone().cross(prograde);
+            if (normalUp.lengthSq() < 1e-4) normalUp.set(0, 1, 0);
+            normalUp.normalize();
+
+            // Steering (A/D): apply yaw angle around normalUp (local zenith):
+            const steeredDirection = prograde
+              .clone()
+              .applyAxisAngle(normalUp, ((j.angle ?? 0) * Math.PI) / 180)
+              .normalize();
+
+            let steeredRight = steeredDirection.clone().cross(normalUp);
+            if (steeredRight.lengthSq() < 1e-4) steeredRight = right.clone();
+            steeredRight.normalize();
+
+            let steeredUp = steeredRight.clone().cross(steeredDirection);
+            if (steeredUp.lengthSq() < 1e-4) steeredUp = normalUp.clone();
+            steeredUp.normalize();
+
+            // Construct 3D orientation: Forward = steeredDirection (Y+ in mesh), Up = steeredUp (Z+), Right = steeredRight (X+)
+            const rotMatrix = new THREE.Matrix4().makeBasis(
+              steeredRight,
+              steeredDirection,
+              steeredUp,
+            );
+            ship.quaternion.setFromRotationMatrix(rotMatrix);
+
+            guide.position.copy(shipPosition);
+            guide.setDirection(prograde);
+
+            const firing =
+              j.version === 2
+                ? !!j.firing && !j.paused
+                : j.stage.endsWith("burn");
+            plume.visible = firing;
+            if (firing) {
+              const time = performance.now() * 0.02;
+              const throttle = j.throttle ?? 0.5;
+              const pulse = 1 + 0.08 * Math.sin(time * 3);
+              if (isTrajectory) {
+                plume.scale.set(
+                  (1.2 + throttle * 0.6) * pulse,
+                  (2.0 + throttle * 3.5) * (1 + 0.12 * Math.sin(time * 5)),
+                  (1.2 + throttle * 0.6) * pulse,
+                );
+              } else {
+                plume.scale.set(
+                  (0.7 + throttle * 0.3) * pulse,
+                  (0.8 + throttle * 2.2) * (1 + 0.12 * Math.sin(time * 5)),
+                  (0.7 + throttle * 0.3) * pulse,
+                );
+              }
+              (plume.material as THREE.MeshBasicMaterial).opacity =
+                0.8 + 0.2 * Math.sin(time * 4);
+            }
+
+            light.position
+              .fromArray(
+                (s?.sunDirection ?? [1, 1, 1]) as [number, number, number],
+              )
+              .multiplyScalar(1000);
+
+            earth.visible = true;
+            moon.visible = true;
+            ship.visible = true;
+            guide.visible = !isTrajectory;
+            line.visible = true;
+
+            earth.scale.setScalar(isTrajectory ? 1.4 : 1);
+            moon.scale.setScalar(isTrajectory ? 4 : 1);
+
+            if (arrival !== previousArrival) {
+              previousMode = "";
+              previousArrival = arrival;
+            }
+
+            if (v !== previousMode) {
+              if (v === "craft") {
+                if (arrival) {
+                  const camDist = Math.max(targetRadius * 2.8, 14);
+                  camera.position.set(
+                    targetDest.x - camDist * 0.85,
+                    targetDest.y + camDist * 0.45,
+                    targetDest.z + camDist * 0.75,
+                  );
+                  controls!.target.copy(targetDest);
+                } else {
+                  let corridorDir = targetDest.clone().sub(shipPosition);
+                  if (corridorDir.lengthSq() < 1e-4)
+                    corridorDir = new THREE.Vector3(1, 0, 0);
+                  corridorDir.normalize();
+
+                  let corridorRight = corridorDir.clone().cross(normalUp);
+                  if (corridorRight.lengthSq() < 1e-4) {
+                    corridorRight = corridorDir
+                      .clone()
+                      .cross(new THREE.Vector3(0, 1, 0));
+                    if (corridorRight.lengthSq() < 1e-4)
+                      corridorRight = new THREE.Vector3(0, 0, 1);
+                  }
+                  corridorRight.normalize();
+
+                  let corridorUp = corridorRight.clone().cross(corridorDir);
+                  if (corridorUp.lengthSq() < 1e-4)
+                    corridorUp = normalUp.clone();
+                  corridorUp.normalize();
+
+                  const camOffset = corridorDir
+                    .clone()
+                    .multiplyScalar(-5.5)
+                    .add(corridorUp.clone().multiplyScalar(2.0))
+                    .add(corridorRight.clone().multiplyScalar(0.4));
+                  camera.position.copy(shipPosition).add(camOffset);
+                  controls!.target.copy(shipPosition);
+                }
+              } else {
+                const points = s
+                  ? [...s.path.map((p, idx) => point(p, idx)), targetDest]
+                  : [new THREE.Vector3(), targetDest];
+                const bounds = new THREE.Box3().setFromPoints(points),
+                  sphere = bounds.getBoundingSphere(new THREE.Sphere());
+                const aspect = Math.max(0.1, camera.aspect || 1);
+                const distance =
+                  ((sphere.radius / Math.sin(THREE.MathUtils.degToRad(22.5))) *
+                    1.15) /
+                  Math.min(1, aspect);
+                camera.position
+                  .copy(sphere.center)
+                  .add(new THREE.Vector3(0, distance * 0.65, distance * 0.76));
+                controls!.target.copy(sphere.center);
+              }
+              previousMode = v;
+            } else if (v === "craft") {
+              if (arrival) {
+                // In arrival, Moon is centered at targetDest. Keep controls target on targetDest
+                // so the Moon remains 100% stationary and does not drift as the craft moves.
+                controls!.target.copy(targetDest);
+                if (j.firing && !j.paused) {
+                  const shake = 0.015 * (j.throttle ?? 0.5);
+                  camera.position.x += (Math.random() - 0.5) * shake;
+                  camera.position.y += (Math.random() - 0.5) * shake;
+                  camera.position.z += (Math.random() - 0.5) * shake;
+                }
+              } else {
+                const change = shipPosition.clone().sub(lastPosition);
+                camera.position.add(change);
+                controls!.target.copy(shipPosition);
+
+                if (j.firing && !j.paused) {
+                  const shake = 0.015 * (j.throttle ?? 0.5);
+                  camera.position.x += (Math.random() - 0.5) * shake;
+                  camera.position.y += (Math.random() - 0.5) * shake;
+                  camera.position.z += (Math.random() - 0.5) * shake;
+                }
+              }
+            }
+            lastPosition.copy(shipPosition);
+            controls!.update();
+            renderer!.render(scene!, camera);
+          } catch (paintErr) {
+            console.error("JourneyViewport paint error:", paintErr);
           }
-          lastPosition.copy(shipPosition);
-          controls!.update();
-          renderer!.render(scene!, camera);
         };
         frame = requestAnimationFrame(paint);
         cleanup = () => {
           observer.disconnect();
-          controls?.removeEventListener("start", dragging);
-          earthTexture.dispose();
+          earthTexture?.dispose();
         };
       } catch (error) {
         if (!disposed) {
@@ -450,24 +658,21 @@ export function JourneyViewport({
         ) : null}
       </div>
       <div className="journey-camera-controls" aria-label="Flight camera">
-        {(["chase", "map", "solar"] as const).map((v) => (
-          <button key={v} aria-pressed={mode === v} onClick={() => setMode(v)}>
-            {v === "chase"
-              ? "Follow craft"
-              : v === "map"
-                ? "Trajectory"
-                : "Solar system"}
-          </button>
-        ))}
+        <button
+          aria-pressed={mode === "craft"}
+          onClick={() => setMode("craft")}
+        >
+          Craft view
+        </button>
+        <button
+          aria-pressed={mode === "trajectory"}
+          onClick={() => setMode("trajectory")}
+        >
+          Trajectory view
+        </button>
       </div>
-      {mode === "solar" ? (
-        <div className="journey-solar-key">
-          Sun · Mercury · Venus · Earth · Mars · Jupiter · Saturn · Uranus ·
-          Neptune
-          <br />
-          NASA positions · radial distances compressed · body sizes exaggerated
-        </div>
-      ) : null}
     </>
   );
 }
+
+export default JourneyViewport;

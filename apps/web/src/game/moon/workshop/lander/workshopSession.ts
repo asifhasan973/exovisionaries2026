@@ -131,7 +131,11 @@ export function reduceMission(
   event: MissionEvent,
 ): WorkshopSession {
   if (event.type === "back") return navigateBack(session);
-  if (session.review)
+  const isDebug =
+    typeof window !== "undefined" &&
+    (window.location.hash.includes("debug") ||
+      window.location.search.includes("debug"));
+  if (!isDebug && session.review)
     return event.type === "next" || event.type === "skip-briefing"
       ? navigateForward(session)
       : session;
