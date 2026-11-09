@@ -33,3 +33,6 @@ dist-ssr
 
 # Turborepo
 .turbo
+
+# superpowers docs
+docs/superpowers/*

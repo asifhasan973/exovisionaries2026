@@ -10,6 +10,7 @@ import { ENGINEER_REPLIES, pickEngineerReply } from "../voice/voiceClips.ts";
 import type { EngineerReaction } from "../voice/voiceClips.ts";
 import { engineerCue } from "./engineer.ts";
 import "@/shared/shell/playability.css";
+import "./engineerCompanion.css";
 import { LearningText } from "@/game/moon/core/learning/Learning";
 import { useStoryNavigation } from "@/game/moon/core/storyNavigationContext";
 

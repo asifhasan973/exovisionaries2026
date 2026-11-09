@@ -36,6 +36,7 @@ export function useStoryFrames({
     onHome,
     voiceEnabled,
     soundActive,
+    isDebugSession,
     onToggleVoice: toggleAudioMute,
     voiceAvailable: typeof Audio !== "undefined",
     headerExtra: (

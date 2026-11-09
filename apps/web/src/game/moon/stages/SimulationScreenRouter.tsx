@@ -13,11 +13,6 @@ const ReturnScreen = lazy(() =>
     default: m.ReturnScreen,
   })),
 );
-const RoverScreen = lazy(() =>
-  import("@/game/moon/rover/components/RoverScreen").then((m) => ({
-    default: m.RoverScreen,
-  })),
-);
 const LandingScreen = lazy(() =>
   import("@/game/moon/landing/LandingScreen").then((m) => ({
     default: m.LandingScreen,
@@ -43,6 +38,21 @@ const CrewScreen = lazy(() =>
     default: module.CrewScreen,
   })),
 );
+const SurfaceScreen = lazy(() =>
+  import("@/game/moon/surface/SurfaceScreen").then((module) => ({
+    default: module.SurfaceScreen,
+  })),
+);
+const ScienceScreen = lazy(() =>
+  import("@/game/moon/science/ScienceScreen").then((module) => ({
+    default: module.ScienceScreen,
+  })),
+);
+const RecoveryScreen = lazy(() =>
+  import("@/game/moon/return/debrief/RecoveryScreen").then((module) => ({
+    default: module.RecoveryScreen,
+  })),
+);
 
 export interface SimulationScreenRouterProps {
   mission: WorkshopSession;
@@ -63,9 +73,9 @@ export function SimulationScreenRouter({
 }: SimulationScreenRouterProps) {
   const { progress } = mission;
   const stepId = progress.stepId;
-  const moduleNum = mission.progress.stepId ? getStepModule(stepId) : 5;
 
-  if (moduleNum === 8) {
+  // Module 03: Astronaut Crew Selection & Mission Plan
+  if (["crew-selection", "crew-plan"].includes(stepId)) {
     return (
       <Suspense
         fallback={
@@ -85,59 +95,7 @@ export function SimulationScreenRouter({
     );
   }
 
-  if (moduleNum === 14) {
-    return (
-      <Suspense
-        fallback={<div className="crew-loading">Opening crew return…</div>}
-      >
-        <ReturnScreen session={mission} dispatch={dispatch} frame={frame} />
-      </Suspense>
-    );
-  }
-
-  if ([11, 12, 13].includes(moduleNum)) {
-    return (
-      <Suspense
-        fallback={
-          <div className="crew-loading">Opening your rover expedition…</div>
-        }
-      >
-        <RoverScreen session={mission} dispatch={dispatch} frame={frame} />
-      </Suspense>
-    );
-  }
-
-  if (moduleNum === 10) {
-    return (
-      <Suspense
-        fallback={<div className="crew-loading">Opening Moon landing…</div>}
-      >
-        <LandingScreen session={mission} dispatch={dispatch} frame={frame} />
-      </Suspense>
-    );
-  }
-
-  if (moduleNum === 9) {
-    return (
-      <Suspense
-        fallback={<div className="crew-loading">Opening Moon journey…</div>}
-      >
-        <JourneyScreen session={mission} dispatch={dispatch} frame={frame} />
-      </Suspense>
-    );
-  }
-
-  if (moduleNum === 7) {
-    return (
-      <FlightScreen
-        session={mission}
-        dispatch={dispatch}
-        onBack={back}
-        frame={frame}
-      />
-    );
-  }
-
+  // Module 04: Flight Readiness - Rocket Assembly Hangar
   if (stepId === "rocket-assembly") {
     return (
       <Suspense
@@ -153,6 +111,7 @@ export function SimulationScreenRouter({
     );
   }
 
+  // Module 04: Flight Readiness - Human Mission Checks & Rocket Packing
   if (
     [
       "crew-check",
@@ -181,7 +140,8 @@ export function SimulationScreenRouter({
     );
   }
 
-  if (moduleNum === 6) {
+  // Module 04: Flight Readiness - Telemetry Checks (Mass, Power, Budget)
+  if (["mass-check", "power-check", "budget-check"].includes(stepId)) {
     return (
       <ReadinessScreen
         key={progress.stepId}
@@ -193,6 +153,92 @@ export function SimulationScreenRouter({
     );
   }
 
+  // Module 05: Liftoff & Earth Orbit Ascent
+  if (stepId === "liftoff") {
+    return (
+      <FlightScreen
+        session={mission}
+        dispatch={dispatch}
+        onBack={back}
+        frame={frame}
+      />
+    );
+  }
+
+  // Module 06: Orbit & Trans-Lunar Injection
+  if (["earth-orbit", "moon-transfer", "lunar-orbit"].includes(stepId)) {
+    return (
+      <Suspense
+        fallback={<div className="crew-loading">Opening Moon journey…</div>}
+      >
+        <JourneyScreen
+          session={mission}
+          dispatch={dispatch}
+          onBack={back}
+          frame={frame}
+        />
+      </Suspense>
+    );
+  }
+
+  // Module 07: Lunar Descent & Touchdown
+  if (stepId === "lunar-descent") {
+    return (
+      <Suspense
+        fallback={<div className="crew-loading">Opening Moon landing…</div>}
+      >
+        <LandingScreen session={mission} dispatch={dispatch} frame={frame} />
+      </Suspense>
+    );
+  }
+
+  // Module 08: Lunar Surface Deployment & Exploration
+  if (["lunar-surface", "surface-explore", "surface-ready"].includes(stepId)) {
+    return (
+      <Suspense
+        fallback={<div className="crew-loading">Opening Moon expedition…</div>}
+      >
+        <SurfaceScreen session={mission} dispatch={dispatch} frame={frame} />
+      </Suspense>
+    );
+  }
+
+  // Module 09: Ice Drilling & Spectrometry Science
+  if (["ice-science", "science-ready"].includes(stepId)) {
+    return (
+      <Suspense
+        fallback={<div className="crew-loading">Opening science lab…</div>}
+      >
+        <ScienceScreen session={mission} dispatch={dispatch} frame={frame} />
+      </Suspense>
+    );
+  }
+
+  // Module 10: Surface Incident & Recovery
+  if (["surface-recovery", "surface-secured"].includes(stepId)) {
+    return (
+      <Suspense
+        fallback={
+          <div className="crew-loading">Opening recovery checklist…</div>
+        }
+      >
+        <RecoveryScreen session={mission} dispatch={dispatch} frame={frame} />
+      </Suspense>
+    );
+  }
+
+  // Module 11: Crew Return & Mission Debrief
+  if (["crew-return", "mission-debrief"].includes(stepId)) {
+    return (
+      <Suspense
+        fallback={<div className="crew-loading">Opening crew return…</div>}
+      >
+        <ReturnScreen session={mission} dispatch={dispatch} frame={frame} />
+      </Suspense>
+    );
+  }
+
+  // Module 02: Spacecraft & Rover Workshop (Fallback)
   return (
     <WorkshopScreen
       key={progress.stepId}
@@ -208,39 +254,4 @@ export function SimulationScreenRouter({
       }}
     />
   );
-}
-
-function getStepModule(stepId: string): number {
-  if (["crew-selection", "crew-plan", "crew-briefing"].includes(stepId))
-    return 8;
-  if (["crew-return", "mission-debrief"].includes(stepId)) return 14;
-  if (
-    [
-      "surface-deploy",
-      "rover-traverse",
-      "lunar-surface",
-      "science-drill",
-      "incident-recovery",
-    ].includes(stepId)
-  )
-    return 11;
-  if (["lunar-descent", "landing-site"].includes(stepId)) return 10;
-  if (["earth-orbit", "moon-transfer", "lunar-orbit"].includes(stepId))
-    return 9;
-  if (["liftoff", "ascent-stage"].includes(stepId)) return 7;
-  if (
-    [
-      "crew-check",
-      "mass-check",
-      "power-check",
-      "budget-check",
-      "systems-check",
-      "stress-check",
-      "rocket-pack",
-      "rocket-assembly",
-      "launch-ready",
-    ].includes(stepId)
-  )
-    return 6;
-  return 5;
 }

@@ -1219,49 +1219,6 @@
   .conversation-game.conversation-game .crew-top .workshop-heading p {
     display: none;
   }
-  .conversation-game.conversation-game .crew-top .workshop-engineer {
-    display: flex !important;
-    align-items: center;
-    height: clamp(30px, 5vh, 36px) !important;
-    min-height: clamp(30px, 5vh, 36px) !important;
-    max-height: clamp(30px, 5vh, 36px) !important;
-    padding: 2px 8px 2px 4px !important;
-    border-radius: 9px !important;
-    gap: 6px;
-    max-width: clamp(220px, 46vw, 440px);
-    flex: 1;
-    margin-left: auto;
-  }
-  .conversation-game.conversation-game .crew-top .engineer-character {
-    width: 26px !important;
-    height: 26px !important;
-    min-width: 26px !important;
-  }
-  .conversation-game.conversation-game
-    .crew-top
-    .engineer-character
-    .conversation-actor {
-    width: 38px !important;
-    height: 68px !important;
-    margin-left: -19px;
-    transform: translateY(-3px) !important;
-  }
-  .conversation-game.conversation-game .crew-top .engineer-bubble > span {
-    display: none !important;
-  }
-  .conversation-game.conversation-game .crew-top .engineer-bubble p {
-    font-size: 11px !important;
-    line-height: 1.18 !important;
-  }
-  .conversation-game.conversation-game .crew-top .conversation-icon {
-    width: 22px !important;
-    height: 22px !important;
-    min-width: 22px !important;
-  }
-  .conversation-game.conversation-game .crew-top .conversation-icon svg {
-    width: 12px;
-    height: 12px;
-  }
 }
 @media (max-height: 400px) {
   .moon-crew-pick {

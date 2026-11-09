@@ -31,7 +31,8 @@ export interface DebugCategory {
 }
 
 let registeredCategories: DebugCategory[] = [];
-let sessionSeeder: ((stepId: string) => any) | null = null;
+let sessionSeeder: ((stepId: string, options?: unknown) => unknown) | null =
+  null;
 
 export function registerDebugCategories(categories: DebugCategory[]): void {
   registeredCategories = categories;
@@ -41,13 +42,18 @@ export function getDebugCategories(): DebugCategory[] {
   return registeredCategories;
 }
 
-export function setDebugSessionSeeder(seeder: (stepId: string) => any): void {
-  sessionSeeder = seeder;
+export function setDebugSessionSeeder<T = unknown, O = unknown>(
+  seeder: (stepId: string, options?: O) => T,
+): void {
+  sessionSeeder = seeder as (stepId: string, options?: unknown) => unknown;
 }
 
-export function createDebugSession(stepId: string): any {
+export function createDebugSession<T = unknown, O = unknown>(
+  stepId: string,
+  options?: O,
+): T | null {
   if (sessionSeeder) {
-    return sessionSeeder(stepId);
+    return sessionSeeder(stepId, options) as T;
   }
   return null;
 }

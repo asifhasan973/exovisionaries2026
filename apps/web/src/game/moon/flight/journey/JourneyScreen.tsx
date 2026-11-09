@@ -1,4 +1,9 @@
-import { TRANSFER_DATES, captureOrbit } from "./transferModel.ts";
+import {
+  TRANSFER_DATES,
+  captureOrbit,
+  formatDepartureDate,
+  LUNAR_ORBIT_TIERS,
+} from "./transferModel.ts";
 import {
   isEngineFrozen,
   useOrientationLifecycleStore,
@@ -6,7 +11,7 @@ import {
   SceneFallback,
   GameInfo,
 } from "@exo/ui";
-import { lazy, Suspense, useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Check,
   Info,
@@ -32,20 +37,20 @@ import {
   burnSafe,
   coastFraction,
   TRANSFER_MODEL,
-  lunarOrbitSpeedKmS,
+  getLoiRequiredDv,
 } from "./journey.ts";
 import { JOURNEY_LINES } from "./journeyCopy.ts";
 import "./journey.css";
-const JourneyViewport = lazy(() =>
-  import("./JourneyViewport.tsx").then((m) => ({ default: m.JourneyViewport })),
-);
+import { JourneyViewport } from "./JourneyViewport";
 export function JourneyScreen({
   session,
   dispatch,
+  onBack,
   frame,
 }: {
   session: WorkshopSession;
   dispatch(event: MissionEvent): void;
+  onBack?: () => void;
   frame: SelectionFrame;
 }) {
   const { moon, progress, preparation } = session,
@@ -58,12 +63,25 @@ export function JourneyScreen({
     burning = j.stage.endsWith("burn"),
     complete = j.stage === "complete";
   const route = j.route ? routeReport(moon, j.route) : null;
+  const activeTier =
+    LUNAR_ORBIT_TIERS[j.orbitTier ?? "low"] ?? LUNAR_ORBIT_TIERS.low;
   const frozen = useOrientationLifecycleStore((state) => state.isFrozen);
   const pilot = j.version === 2,
     pilotBurn = pilot && burning;
+  const isDebugMode = Boolean(
+    frame.isDebugSession ||
+    (typeof window !== "undefined" &&
+      (window.location.hash.includes("debug") ||
+        window.location.search.includes("debug"))),
+  );
+  const latest = useRef(j);
+  const held = useRef(new Set<string>());
+  useEffect(() => {
+    latest.current = j;
+  }, [j]);
   const required = route
     ? j.stage.startsWith("loi")
-      ? route.loiMS
+      ? getLoiRequiredDv(j, route.loiMS)
       : route.tliMS
     : 0;
   const orbit = route?.solution
@@ -93,7 +111,9 @@ export function JourneyScreen({
                 ? "loi"
                 : "tli";
   const advice = pilotBurn
-    ? "Align with the marker. Hold Space to fire. Cut the engine at the target delta-v."
+    ? j.stage === "loi-burn"
+      ? "Rotate craft with A/D so backward thrust points opposite the Moon. Hold Space to brake into lunar orbit."
+      : "Align with the marker. Hold Space to fire. Cut the engine at the target delta-v."
     : JOURNEY_LINES[adviceId as keyof typeof JOURNEY_LINES];
   const best = pilot
     ? TRANSFER_DATES.flatMap((date) =>
@@ -121,10 +141,43 @@ export function JourneyScreen({
     let last = performance.now();
     const timer = setInterval(() => {
       const now = performance.now();
-      if (!document.hidden)
-        dispatch({ type: "journey-tick", seconds: (now - last) / 1000 });
+      const dt = (now - last) / 1000;
       last = now;
-    }, 100);
+      if (document.hidden || isEngineFrozen()) return;
+
+      const current = latest.current;
+      if (!current.paused && pilotBurn) {
+        let newAngle = current.angle ?? 0;
+        let newThrottle = current.throttle ?? 0.5;
+        let changed = false;
+
+        if (held.current.has("left")) {
+          newAngle = Math.max(-180, newAngle - 75 * dt);
+          changed = true;
+        }
+        if (held.current.has("right")) {
+          newAngle = Math.min(180, newAngle + 75 * dt);
+          changed = true;
+        }
+        if (held.current.has("up")) {
+          newThrottle = Math.min(1, newThrottle + 0.6 * dt);
+          changed = true;
+        }
+        if (held.current.has("down")) {
+          newThrottle = Math.max(0, newThrottle - 0.6 * dt);
+          changed = true;
+        }
+        if (changed) {
+          dispatch({
+            type: "journey-pilot",
+            angle: Math.round(newAngle),
+            throttle: Math.round(newThrottle * 100) / 100,
+          });
+        }
+      }
+
+      dispatch({ type: "journey-tick", seconds: dt });
+    }, 50);
     return () => clearInterval(timer);
   }, [
     selection,
@@ -134,6 +187,7 @@ export function JourneyScreen({
     j.mode,
     windowStage,
     pilot,
+    pilotBurn,
     dispatch,
   ]);
   useEffect(() => {
@@ -167,7 +221,7 @@ export function JourneyScreen({
   useEffect(() => {
     if (!pilotBurn) return;
     const down = (e: KeyboardEvent) => {
-      if (isEngineFrozen() || e.repeat) return;
+      if (isEngineFrozen()) return;
       const target = e.target as HTMLElement;
       if (
         target.closest('input,select,textarea,[role="dialog"]') ||
@@ -176,44 +230,128 @@ export function JourneyScreen({
         return;
       if (e.code === "Space" && target.closest("button")) return;
       if (
-        ["KeyA", "KeyD", "KeyW", "KeyS", "Space", "Enter", "KeyP"].includes(
-          e.code,
-        )
-      )
+        [
+          "KeyA",
+          "KeyD",
+          "KeyW",
+          "KeyS",
+          "ArrowLeft",
+          "ArrowRight",
+          "ArrowUp",
+          "ArrowDown",
+          "Space",
+          "Enter",
+          "KeyP",
+        ].includes(e.code)
+      ) {
         e.preventDefault();
-      else return;
-      if (e.code === "KeyP") {
-        dispatch({ type: j.paused ? "journey-resume" : "journey-pause" });
+      } else {
         return;
       }
-      if (j.paused) return;
-      if (e.code === "Space") dispatch({ type: "journey-pilot", firing: true });
-      if (e.code === "Enter") dispatch({ type: "journey-finish-burn" });
-      if (e.code === "KeyA" || e.code === "KeyD")
+      if (e.code === "KeyP") {
+        held.current.clear();
         dispatch({
-          type: "journey-pilot",
-          angle: (j.angle ?? 0) + (e.code === "KeyA" ? -5 : 5),
+          type: latest.current.paused ? "journey-resume" : "journey-pause",
         });
-      if (e.code === "KeyW" || e.code === "KeyS")
-        dispatch({
-          type: "journey-pilot",
-          throttle: (j.throttle ?? 0.5) + (e.code === "KeyW" ? 0.1 : -0.1),
-        });
+        return;
+      }
+      if (latest.current.paused) return;
+
+      if (e.code === "Enter") {
+        held.current.clear();
+        dispatch({ type: "journey-finish-burn" });
+        return;
+      }
+
+      const keyAction =
+        e.code === "KeyA" || e.code === "ArrowLeft"
+          ? "left"
+          : e.code === "KeyD" || e.code === "ArrowRight"
+            ? "right"
+            : e.code === "KeyW" || e.code === "ArrowUp"
+              ? "up"
+              : e.code === "KeyS" || e.code === "ArrowDown"
+                ? "down"
+                : e.code === "Space"
+                  ? "fire"
+                  : null;
+
+      if (!keyAction) return;
+
+      const wasAlreadyHeld = held.current.has(keyAction);
+      held.current.add(keyAction);
+
+      // Instant single-tap response on first keydown
+      if (!wasAlreadyHeld) {
+        const cur = latest.current;
+        if (keyAction === "left") {
+          dispatch({
+            type: "journey-pilot",
+            angle: Math.max(-180, (cur.angle ?? 0) - 2),
+          });
+        } else if (keyAction === "right") {
+          dispatch({
+            type: "journey-pilot",
+            angle: Math.min(180, (cur.angle ?? 0) + 2),
+          });
+        } else if (keyAction === "up") {
+          dispatch({
+            type: "journey-pilot",
+            throttle: Math.min(1, (cur.throttle ?? 0.5) + 0.05),
+          });
+        } else if (keyAction === "down") {
+          dispatch({
+            type: "journey-pilot",
+            throttle: Math.max(0, (cur.throttle ?? 0.5) - 0.05),
+          });
+        } else if (keyAction === "fire") {
+          dispatch({ type: "journey-pilot", firing: true });
+        }
+      }
     };
+
     const up = (e: KeyboardEvent) => {
-      if (e.code === "Space")
-        dispatch({ type: "journey-pilot", firing: false });
+      const keyAction =
+        e.code === "KeyA" || e.code === "ArrowLeft"
+          ? "left"
+          : e.code === "KeyD" || e.code === "ArrowRight"
+            ? "right"
+            : e.code === "KeyW" || e.code === "ArrowUp"
+              ? "up"
+              : e.code === "KeyS" || e.code === "ArrowDown"
+                ? "down"
+                : e.code === "Space"
+                  ? "fire"
+                  : null;
+
+      if (keyAction) {
+        held.current.delete(keyAction);
+        if (keyAction === "fire") {
+          dispatch({ type: "journey-pilot", firing: false });
+        }
+      }
     };
-    const stop = () => dispatch({ type: "journey-pilot", firing: false });
+
+    const stop = () => {
+      held.current.clear();
+      if (latest.current.firing) {
+        dispatch({ type: "journey-pilot", firing: false });
+      }
+    };
+
+    const heldSet = held.current;
     window.addEventListener("keydown", down);
     window.addEventListener("keyup", up);
     window.addEventListener("blur", stop);
+    window.addEventListener("game-orientation-pause", stop);
     return () => {
+      heldSet.clear();
       window.removeEventListener("keydown", down);
       window.removeEventListener("keyup", up);
       window.removeEventListener("blur", stop);
+      window.removeEventListener("game-orientation-pause", stop);
     };
-  }, [pilotBurn, j.paused, j.angle, j.throttle, dispatch]);
+  }, [pilotBurn, dispatch]);
   const act = (event: MissionEvent) => {
     sound.setMuted(!effects);
     sound.playRadioBeep();
@@ -244,7 +382,9 @@ export function JourneyScreen({
               ? "Take engine control"
               : "Fire engine"
             : pilotBurn
-              ? "Check trajectory"
+              ? j.stage === "loi-burn" && (j.dv ?? 0) >= required * 0.94
+                ? "Enter lunar orbit →"
+                : "Check trajectory"
               : burning
                 ? "Engine firing…"
                 : "Coasting…";
@@ -256,6 +396,10 @@ export function JourneyScreen({
       controls={
         <StoryControls
           onBack={() => {
+            if (isDebugMode) {
+              if (onBack) onBack();
+              return;
+            }
             act({ type: "journey-pause" });
             setPanel("back");
           }}
@@ -333,14 +477,16 @@ export function JourneyScreen({
                       <option value="">Legacy game profiles</option>
                     ) : null}
                     {TRANSFER_DATES.map((date) => (
-                      <option key={date}>{date}</option>
+                      <option key={date} value={date}>
+                        {formatDepartureDate(date)}
+                      </option>
                     ))}
                   </select>
                 </label>
                 <p className="journey-date-note">
                   Aim where the Moon will be.{" "}
                   {best
-                    ? `Lowest burn fuel in this dataset: ${best.date}, ${best.report.days} days.`
+                    ? `Lowest burn fuel in this dataset: ${formatDepartureDate(best.date)}, ${best.report.days} days.`
                     : "Compare time, fuel and crew supplies."}
                 </p>
                 <div className="journey-mode">
@@ -415,8 +561,19 @@ export function JourneyScreen({
                   A/D align · W/S throttle · hold Space to fire · Enter checks
                   trajectory
                 </p>
-                <label>
-                  Alignment: {j.angle ?? 0}°
+                <label className="journey-align-field">
+                  <span className="journey-align-label">
+                    <span>Alignment: {j.angle ?? 0}°</span>
+                    <span
+                      className={`journey-align-badge ${Math.abs(j.angle ?? 0) <= 8 ? "is-aligned" : "is-misaligned"}`}
+                    >
+                      {Math.abs(j.angle ?? 0) <= 8
+                        ? "ALIGNED ✓"
+                        : j.stage === "loi-burn"
+                          ? "ROTATE THRUST OPPOSITE MOON (±8°)"
+                          : "ALIGN TO 0° (±8°)"}
+                    </span>
+                  </span>
                   <input
                     type="range"
                     min="-180"
@@ -485,6 +642,59 @@ export function JourneyScreen({
                     ? "Speed up toward the Moon"
                     : "Slow down for lunar orbit"}
                 </h2>
+                {j.stage === "loi-window" ? (
+                  <div className="journey-orbit-selection">
+                    <p>
+                      Select target orbit altitude before initiating arrival
+                      burn:
+                    </p>
+                    <div
+                      className="journey-orbit-tiers"
+                      role="radiogroup"
+                      aria-label="Target lunar orbit level"
+                    >
+                      {Object.values(LUNAR_ORBIT_TIERS).map((tier) => {
+                        const isSelected = (j.orbitTier ?? "low") === tier.id;
+                        return (
+                          <button
+                            key={tier.id}
+                            type="button"
+                            role="radio"
+                            aria-checked={isSelected}
+                            className="journey-tier-card"
+                            onClick={() =>
+                              act({
+                                type: "journey-select-orbit",
+                                tier: tier.id,
+                              })
+                            }
+                          >
+                            <div className="journey-tier-head">
+                              <strong>{tier.name}</strong>
+                              <span className="journey-tier-tag">
+                                {tier.altitudeKm} km
+                              </span>
+                            </div>
+                            <div className="journey-tier-metrics">
+                              <span>LOI: {tier.loiDvMS} m/s</span>
+                              <span>
+                                Descent:{" "}
+                                {tier.descentDvImpactMS < 0
+                                  ? `${tier.descentDvImpactMS} m/s`
+                                  : tier.descentDvImpactMS > 0
+                                    ? `+${tier.descentDvImpactMS} m/s`
+                                    : "Balanced"}
+                              </span>
+                            </div>
+                            <div className="journey-tier-note">
+                              {tier.tradeoffNote}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ) : null}
                 {!pilot ? (
                   <div className="journey-directions">
                     {(["prograde", "retrograde"] as const).map((direction) => (
@@ -538,10 +748,11 @@ export function JourneyScreen({
             ) : complete ? (
               <div className="journey-arrived">
                 <Check size={45} />
-                <h2>Three crew. Safe in orbit.</h2>
+                <h2>Three crew. Safe in {activeTier.name}.</h2>
                 <p>
-                  {j.assisted ? "Assisted journey" : "Challenge journey"} ·
-                  next: landing.
+                  Captured at {activeTier.altitudeKm} km altitude (
+                  {activeTier.scanResolution}). Ready for lunar descent and
+                  surface operations.
                 </p>
               </div>
             ) : (
@@ -662,31 +873,25 @@ export function JourneyScreen({
                 />
               }
             >
-              <Suspense
-                fallback={
-                  <div className="journey-fallback">
-                    Opening the Moon journey…
-                  </div>
-                }
-              >
-                <JourneyViewport
-                  journey={j}
-                  preparation={preparation}
-                  gentle={gentle}
-                />
-              </Suspense>
+              <JourneyViewport
+                journey={j}
+                preparation={preparation}
+                gentle={gentle}
+              />
             </SceneBoundary>
             <div className="journey-scene-heading">
               <span>
                 {complete
-                  ? "LUNAR ORBIT · 100 KM"
-                  : selection
-                    ? "EARTH PARKING ORBIT · 200 KM"
-                    : "EARTH → MOON"}
+                  ? `LUNAR ORBIT · ${activeTier.altitudeKm} KM`
+                  : j.stage.startsWith("loi")
+                    ? `LUNAR APPROACH · ${activeTier.altitudeKm} KM TARGET`
+                    : selection
+                      ? "EARTH PARKING ORBIT · 200 KM"
+                      : "EARTH → MOON"}
               </span>
               <strong>
-                {complete
-                  ? `≈${lunarOrbitSpeedKmS.toFixed(2)} km/s orbital speed`
+                {complete || j.stage.startsWith("loi")
+                  ? `≈${activeTier.speedKmS.toFixed(2)} km/s orbital speed`
                   : selection
                     ? "≈7.79 km/s orbital speed"
                     : "Three crew · capsule + lunar lander"}

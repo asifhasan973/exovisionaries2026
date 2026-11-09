@@ -1,7 +1,8 @@
 import {
   transferSolution,
   TRANSFER_DATES,
-  captureOrbit,
+  LUNAR_ORBIT_TIERS,
+  type LunarOrbitTierId,
 } from "./transferModel.ts";
 import type { MoonSession, MissionResources } from "@/game/moon/shared/session";
 import { PLATFORM_MODEL, platformReport } from "@/game/moon/shared/platform";
@@ -48,6 +49,7 @@ export interface JourneyState {
   commands?: JourneyEvent[];
   burnSeconds?: number;
   date?: string;
+  orbitTier?: LunarOrbitTierId;
   angle?: number;
   throttle?: number;
   firing?: boolean;
@@ -69,10 +71,11 @@ export interface JourneyState {
   assisted: boolean;
 }
 export const emptyJourney = (): JourneyState => ({
-  version: 1,
+  version: 2,
   signature: null,
   route: null,
   stage: "route",
+  orbitTier: "low",
   elapsed: 0,
   mode: "guided",
   speed: 1,
@@ -241,6 +244,7 @@ export function journeyResources(
 }
 export type JourneyEvent =
   | { type: "journey-confirm" }
+  | { type: "journey-select-orbit"; tier: LunarOrbitTierId }
   | { type: "journey-date"; date: string }
   | {
       type: "journey-pilot";
@@ -260,6 +264,16 @@ export type JourneyEvent =
   | { type: "journey-retry" }
   | { type: "journey-skip" }
   | { type: "journey-hint" };
+export function randomInitialAngle(): number {
+  const sign = Math.random() < 0.5 ? -1 : 1;
+  return sign * Math.floor(35 + Math.random() * 40);
+}
+
+export function getLoiRequiredDv(j: JourneyState, baseLoiMS: number): number {
+  const tier = LUNAR_ORBIT_TIERS[j.orbitTier ?? "low"];
+  return tier ? tier.loiDvMS : baseLoiMS;
+}
+
 function reduceJourneyCore(
   j: JourneyState,
   event: JourneyEvent,
@@ -271,6 +285,12 @@ function reduceJourneyCore(
       routeReport({ ...moon, journey: j }, j.route).feasible
       ? { ...j, stage: "tli-window", elapsed: 0, paused: false }
       : j;
+  if (event.type === "journey-select-orbit")
+    return {
+      ...j,
+      orbitTier: event.tier,
+      feedback: null,
+    };
   if (event.type === "journey-date")
     return j.stage === "route" && TRANSFER_DATES.includes(event.date)
       ? {
@@ -303,16 +323,10 @@ function reduceJourneyCore(
     const report = j.route ? routeReport(moon, j.route) : null;
     if (!report || j.paused || !j.stage.endsWith("burn")) return j;
     const arrival = j.stage === "loi-burn",
-      required = arrival ? report.loiMS : report.tliMS;
-    const orbit = report.solution
-      ? captureOrbit(
-          report.solution.arrivalSpeedKmS,
-          j.dv ?? 0,
-          j.radialDv ?? 0,
-        )
-      : null;
+      required = arrival ? getLoiRequiredDv(j, report.loiMS) : report.tliMS;
     const ok = arrival
-      ? !!orbit?.bound && orbit.periapsisKm >= 50 && orbit.apoapsisKm <= 1000
+      ? Math.abs((j.dv ?? 0) - required) <= Math.max(60, required * 0.1) ||
+        (j.dv ?? 0) >= required * 0.94
       : Math.hypot((j.dv ?? 0) - required, j.radialDv ?? 0) <= required * 0.015;
     if (!ok)
       return {
@@ -359,6 +373,7 @@ function reduceJourneyCore(
       firing: false,
       dv: 0,
       radialDv: 0,
+      angle: randomInitialAngle(),
       elapsed: 0,
       burnSeconds: Math.max(0, (j.burnSeconds ?? 0) - j.elapsed),
       ...(j.stage === "loi-burn" ? { loiUsed: 0 } : { tliUsed: 0 }),
@@ -394,10 +409,10 @@ function reduceJourneyCore(
                 ),
                 loiUsed: fuelForBurn(
                   moon.human.approved?.accounting.grossSpacecraftKg ?? 0,
-                  route.loiMS,
+                  getLoiRequiredDv(j, route.loiMS),
                   PLATFORM_MODEL.serviceIspSeconds,
                 ),
-                dv: route.loiMS,
+                dv: getLoiRequiredDv(j, route.loiMS),
                 radialDv: 0,
               }
             : {}),
@@ -415,7 +430,7 @@ function reduceJourneyCore(
       return {
         ...j,
         stage: j.stage === "tli-window" ? "tli-burn" : "loi-burn",
-        angle: 0,
+        angle: randomInitialAngle(),
         dv: 0,
         radialDv: 0,
         firing: false,
@@ -453,7 +468,6 @@ function reduceJourneyCore(
     if (!j.firing || !route) return j;
     const arrival = j.stage === "loi-burn",
       account = moon.human.approved?.accounting;
-    if (!account) return j;
     const isp = arrival
       ? PLATFORM_MODEL.serviceIspSeconds
       : TRANSFER_MODEL.upperIspSeconds;
@@ -461,22 +475,24 @@ function reduceJourneyCore(
     const prior = arrival
       ? 0
       : TRANSFER_MODEL.upperDryKg + TRANSFER_MODEL.upperFuelKg;
-    const mass = account.grossSpacecraftKg + prior - used;
+    const grossKg = account?.grossSpacecraftKg ?? 45000;
+    const mass = grossKg + prior - used;
     // Authored engine thrust and simulation time compression; fuel remains kg.
     const seconds = Math.min(event.seconds, 0.25) * 20;
     const fuelLimit = arrival
-      ? account.service.propellantKg - route.returnReserveKg
+      ? (account?.service.propellantKg ?? 4500) - route.returnReserveKg
       : TRANSFER_MODEL.upperFuelKg;
     const flow =
       ((arrival ? 90000 : 1000000) * (j.throttle ?? 0.5)) / (g0 * isp);
     const fuel = Math.max(0, Math.min(flow * seconds, fuelLimit - used));
     const delta = g0 * isp * Math.log(mass / (mass - fuel)),
       a = ((j.angle ?? 0) * Math.PI) / 180;
+    const isAligned = Math.abs(j.angle ?? 0) <= 8;
     return {
       ...j,
       elapsed: j.elapsed + seconds,
       burnSeconds: (j.burnSeconds ?? 0) + seconds,
-      dv: (j.dv ?? 0) + delta * Math.cos(a),
+      dv: (j.dv ?? 0) + (isAligned ? delta * Math.cos(a) : 0),
       radialDv: (j.radialDv ?? 0) + delta * Math.sin(a),
       ...(arrival ? { loiUsed: used + fuel } : { tliUsed: used + fuel }),
       firing: fuel > 0,

@@ -92,8 +92,12 @@
   margin: 10px 0;
 }
 .workshop-engineer.is-celebrating {
-  border-color: #d9bb6377;
-  background: linear-gradient(120deg, #6b552b33, #311740);
+  border-color: rgba(93, 242, 178, 0.6);
+  background: linear-gradient(
+    135deg,
+    rgba(22, 28, 48, 0.92) 0%,
+    rgba(18, 14, 36, 0.96) 100%
+  );
 }
 .workshop-engineer .conversation-icon {
   width: 36px;
