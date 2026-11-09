@@ -1,11 +1,14 @@
-import { useState, useCallback, useEffect } from 'react';
-import type { WorkshopSession, MissionEvent } from '@/game/moon/workshop/lander/workshopSession';
-import { createWorkshopSession } from '@/game/moon/workshop/lander/workshopSession';
-import { createStoryProgress } from '@/game/moon/core/progress';
-import { pauseMission } from '@/game/moon/core/missionNavigation';
-import { executeSkip } from '@exo/debug';
-import { milestoneProgress } from '@/game/moon/core/missionMilestones';
-import { useLoadingStore, isEngineFrozen } from '@exo/ui';
+import { useState, useCallback, useEffect } from "react";
+import type {
+  WorkshopSession,
+  MissionEvent,
+} from "@/game/moon/workshop/lander/workshopSession";
+import { createWorkshopSession } from "@/game/moon/workshop/lander/workshopSession";
+import { createStoryProgress } from "@/game/moon/core/progress";
+import { pauseMission } from "@/game/moon/core/missionNavigation";
+import { executeSkip } from "@exo/debug";
+import { milestoneProgress } from "@/game/moon/core/missionMilestones";
+import { useLoadingStore, isEngineFrozen } from "@exo/ui";
 
 export interface UseStoryNavigationStateOptions {
   mission: WorkshopSession;
@@ -37,24 +40,28 @@ export function useStoryNavigationState({
   });
   const [autoBuilding, setAutoBuilding] = useState(false);
   const [autoplay, setAutoplay] = useState(true);
-  const [overviewOpen, setOverviewOpen] = useState<'map' | 'start' | null>(null);
+  const [overviewOpen, setOverviewOpen] = useState<"map" | "start" | null>(
+    null,
+  );
   const [restart, setRestart] = useState(false);
   const [skipBusy, setSkipBusy] = useState(false);
   const [skipError, setSkipError] = useState<string | null>(null);
 
   const enterMission = useCallback(() => {
-    useLoadingStore.getState().startLoading('mission_start');
+    useLoadingStore.getState().startLoading("mission_start");
     setAutoplay(true);
     setHome(false);
-    if (progress.stepId !== 'player-name') {
-      setOverviewOpen('map');
+    if (progress.stepId !== "player-name") {
+      setOverviewOpen("map");
     } else {
       setOverviewOpen(null);
     }
   }, [progress.stepId]);
 
   const reset = useCallback(() => {
-    useLoadingStore.getState().startLoading('mission_start', 'Preparing fresh mission…');
+    useLoadingStore
+      .getState()
+      .startLoading("mission_start", "Preparing fresh mission…");
     setAutoBuilding(false);
     setAutoplay(true);
     setMission(createWorkshopSession(createStoryProgress()));
@@ -66,7 +73,7 @@ export function useStoryNavigationState({
   const goHome = useCallback(() => {
     setAutoBuilding(false);
     setOverviewOpen(null);
-    setMission(current => {
+    setMission((current) => {
       const paused = pauseMission(current);
       if (!paused.review) return paused;
       const { review, ...live } = paused;
@@ -84,36 +91,38 @@ export function useStoryNavigationState({
     setAutoplay(false);
     if (overviewOpen) {
       setOverviewOpen(null);
-      if (progress.stepId === 'appointment') {
-        dispatch({ type: 'back' });
+      if (progress.stepId === "appointment") {
+        dispatch({ type: "back" });
       }
       return;
     }
-    if (progress.stepId === 'player-name') setHome(true);
-    else dispatch({ type: 'back' });
+    if (progress.stepId === "player-name") setHome(true);
+    else dispatch({ type: "back" });
   }, [dispatch, overviewOpen, progress.stepId]);
 
   const chapter = milestoneProgress(mission);
   const pending = mission.review ? undefined : progress.milestones?.pending;
-  const introduction = !progress.milestones?.introduced && progress.stepId === 'appointment';
-  const milestoneCard = !home && (Boolean(overviewOpen) || Boolean(pending) || introduction);
+  const introduction =
+    !progress.milestones?.introduced && progress.stepId === "appointment";
+  const milestoneCard =
+    !home && (Boolean(overviewOpen) || Boolean(pending) || introduction);
 
   const skipPage = useCallback(async () => {
     if (skipBusy || isEngineFrozen()) return;
     if (milestoneCard) {
       if (pending) {
-        dispatch({ type: 'milestone-continue' });
-        setOverviewOpen('map');
+        dispatch({ type: "milestone-continue" });
+        setOverviewOpen("map");
       } else {
         setOverviewOpen(null);
-        dispatch({ type: 'milestone-start' });
+        dispatch({ type: "milestone-start" });
       }
       setAutoplay(true);
       return;
     }
     if (mission.review) {
       setAutoplay(true);
-      dispatch({ type: 'next' });
+      dispatch({ type: "next" });
       return;
     }
     setAutoBuilding(false);
@@ -121,14 +130,16 @@ export function useStoryNavigationState({
     setSkipError(null);
     const paused = pauseMission(mission);
     setMission(paused);
-    void useLoadingStore.getState().startLoading('mission_start', 'Advancing to next stage…');
+    void useLoadingStore
+      .getState()
+      .startLoading("mission_start", "Advancing to next stage…");
     try {
       const advanced = executeSkip(paused);
       setMission(advanced);
       setAutoplay(true);
       setOverviewOpen(null);
     } catch {
-      setSkipError('Skip unavailable. Try Next or return home.');
+      setSkipError("Skip unavailable. Try Next or return home.");
     } finally {
       setSkipBusy(false);
     }
@@ -136,8 +147,8 @@ export function useStoryNavigationState({
 
   useEffect(() => {
     const stop = () => setAutoBuilding(false);
-    window.addEventListener('game-help-open', stop);
-    return () => window.removeEventListener('game-help-open', stop);
+    window.addEventListener("game-help-open", stop);
+    return () => window.removeEventListener("game-help-open", stop);
   }, []);
 
   return {
@@ -164,4 +175,3 @@ export function useStoryNavigationState({
     milestoneCard,
   };
 }
-

@@ -52,7 +52,10 @@
   position: absolute;
   inset: 0;
   opacity: 0.12;
-  background-image: radial-gradient(rgba(255, 255, 255, 0.25) 1px, transparent 1px);
+  background-image: radial-gradient(
+    rgba(255, 255, 255, 0.25) 1px,
+    transparent 1px
+  );
   background-size: 36px 36px;
 }
 
@@ -174,7 +177,9 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  transition: transform 0.55s cubic-bezier(0.25, 0.45, 0.3, 1), opacity 0.45s ease;
+  transition:
+    transform 0.55s cubic-bezier(0.25, 0.45, 0.3, 1),
+    opacity 0.45s ease;
   will-change: transform, opacity;
 }
 
@@ -399,7 +404,10 @@
   flex-shrink: 0 !important;
   box-sizing: border-box !important;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
-  transition: transform 0.2s cubic-bezier(0.25, 0.45, 0.3, 1), border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s cubic-bezier(0.25, 0.45, 0.3, 1),
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
   padding: 0;
 }
 
@@ -452,7 +460,11 @@
 
 /* 3rd More Indicator Bubble */
 .bubble-more {
-  background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95));
+  background: linear-gradient(
+    135deg,
+    rgba(30, 41, 59, 0.95),
+    rgba(15, 23, 42, 0.95)
+  );
   border: 2px dashed rgba(237, 141, 239, 0.6) !important;
   display: flex !important;
   flex-direction: column !important;
@@ -633,7 +645,9 @@
 .timeline-year-btn.is-active-center {
   background: rgba(140, 226, 194, 0.15);
   border-color: #8ce2c2;
-  box-shadow: 0 0 16px rgba(140, 226, 194, 0.45), inset 0 0 8px rgba(140, 226, 194, 0.2);
+  box-shadow:
+    0 0 16px rgba(140, 226, 194, 0.45),
+    inset 0 0 8px rgba(140, 226, 194, 0.2);
 }
 
 .timeline-year-btn.is-active-center .year-digits {
@@ -711,7 +725,9 @@
 .timeline-synced-center-pointer.is-magnet-docked .pointer-frame-bracket {
   border-style: solid;
   border-color: #8ce2c2;
-  box-shadow: 0 0 22px rgba(140, 226, 194, 0.55), inset 0 0 10px rgba(140, 226, 194, 0.25);
+  box-shadow:
+    0 0 22px rgba(140, 226, 194, 0.55),
+    inset 0 0 10px rgba(140, 226, 194, 0.25);
   transform: translateX(-50%) scale(1.04);
 }
 
@@ -810,7 +826,6 @@
 }
 
 @keyframes hud-beacon {
-
   0%,
   100% {
     box-shadow: 0 0 8px rgba(140, 226, 194, 0.25);
@@ -853,7 +868,9 @@
   display: flex;
   flex-direction: column;
   z-index: 25;
-  transition: transform 0.55s cubic-bezier(0.25, 0.45, 0.3, 1), opacity 0.45s ease;
+  transition:
+    transform 0.55s cubic-bezier(0.25, 0.45, 0.3, 1),
+    opacity 0.45s ease;
   will-change: transform, opacity;
 }
 
@@ -1012,7 +1029,7 @@
 
 /* Illuminated branch connecting spine dot to mission card */
 .event-spine-node::after {
-  content: '';
+  content: "";
   position: absolute;
   left: 50%;
   top: 50%;
@@ -1053,7 +1070,9 @@
 
 .event-card-inner:hover {
   border-color: rgba(140, 226, 194, 0.4);
-  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(140, 226, 194, 0.15);
+  box-shadow:
+    0 14px 40px rgba(0, 0, 0, 0.6),
+    0 0 20px rgba(140, 226, 194, 0.15);
   transform: translateY(-2px);
 }
 
@@ -1142,7 +1161,11 @@
 .thumbnail-lens-flare {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(140, 226, 194, 0.15), transparent 60%);
+  background: linear-gradient(
+    135deg,
+    rgba(140, 226, 194, 0.15),
+    transparent 60%
+  );
   pointer-events: none;
 }
 
@@ -1302,7 +1325,9 @@
   cursor: pointer;
   text-decoration: underline;
   text-underline-offset: 2px;
-  transition: color 0.15s ease, opacity 0.15s ease;
+  transition:
+    color 0.15s ease,
+    opacity 0.15s ease;
 }
 
 .see-more-toggle-btn:hover {
@@ -1325,9 +1350,15 @@
   gap: clamp(8px, 1vw, 12px);
   padding: clamp(6px, 1.1vh, 10px) clamp(10px, 1.3vw, 18px);
   border-radius: clamp(10px, 1vw, 14px);
-  background: linear-gradient(135deg, rgba(14, 21, 46, 0.85), rgba(7, 11, 26, 0.95));
+  background: linear-gradient(
+    135deg,
+    rgba(14, 21, 46, 0.85),
+    rgba(7, 11, 26, 0.95)
+  );
   border: 1px solid rgba(140, 226, 194, 0.35);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(140, 226, 194, 0.2);
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(140, 226, 194, 0.2);
   color: #ffffff;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.25, 0.45, 0.3, 1);
@@ -1337,7 +1368,9 @@
 .home-archive-button:hover {
   transform: translateY(-2px) scale(1.02);
   border-color: rgba(140, 226, 194, 0.7);
-  box-shadow: 0 8px 30px rgba(140, 226, 194, 0.2), inset 0 1px 0 rgba(140, 226, 194, 0.4);
+  box-shadow:
+    0 8px 30px rgba(140, 226, 194, 0.2),
+    inset 0 1px 0 rgba(140, 226, 194, 0.4);
 }
 
 .home-archive-button:active {

@@ -17,7 +17,10 @@ const memoryCache = new Map<string, NasaLiveMediaItem[]>();
  * Queries NASA's public Image and Video Library API for historical mission media.
  * Does not require an API key and supports CORS for browser applications.
  */
-export async function fetchNasaYearUpdates(year: number, query = 'mission'): Promise<NasaLiveMediaItem[]> {
+export async function fetchNasaYearUpdates(
+  year: number,
+  query = "mission",
+): Promise<NasaLiveMediaItem[]> {
   const cacheKey = `${year}_${query}`;
   if (memoryCache.has(cacheKey)) {
     return memoryCache.get(cacheKey)!;
@@ -50,7 +53,7 @@ export async function fetchNasaYearUpdates(year: number, query = 'mission'): Pro
     let items = json?.collection?.items || [];
 
     // If specific mission title query returned no items, try a broader NASA mission search for that year
-    if (items.length === 0 && query !== 'mission' && query !== 'NASA') {
+    if (items.length === 0 && query !== "mission" && query !== "NASA") {
       try {
         const fallbackUrl = `https://images-api.nasa.gov/search?q=NASA&media_type=image&year_start=${year}&year_end=${year}`;
         const fallbackResp = await fetch(fallbackUrl);
@@ -61,34 +64,45 @@ export async function fetchNasaYearUpdates(year: number, query = 'mission'): Pro
       } catch {}
     }
 
-    const mapped: NasaLiveMediaItem[] = items.slice(0, 6).map((item: {
-      data?: Array<{
-        nasa_id?: string;
-        title?: string;
-        description?: string;
-        date_created?: string;
-        center?: string;
-        keywords?: string[];
-      }>;
-      links?: Array<{ href?: string; rel?: string }>;
-    }) => {
-      const data = item.data?.[0] || {};
-      const rawLink = item.links?.find(l => l.rel === 'preview')?.href || item.links?.[0]?.href;
-      const imageLink = rawLink ? rawLink.replace(/^http:\/\//, 'https://') : undefined;
-      return {
-        nasaId: data.nasa_id || `nasa-${Math.random()}`,
-        title: data.title || 'NASA Mission Record',
-        description: data.description || '',
-        dateCreated: data.date_created ? data.date_created.substring(0, 10) : String(year),
-        center: data.center || 'NASA',
-        imageUrl: imageLink,
-        keywords: data.keywords || []
-      };
-    });
+    const mapped: NasaLiveMediaItem[] = items.slice(0, 6).map(
+      (item: {
+        data?: Array<{
+          nasa_id?: string;
+          title?: string;
+          description?: string;
+          date_created?: string;
+          center?: string;
+          keywords?: string[];
+        }>;
+        links?: Array<{ href?: string; rel?: string }>;
+      }) => {
+        const data = item.data?.[0] || {};
+        const rawLink =
+          item.links?.find((l) => l.rel === "preview")?.href ||
+          item.links?.[0]?.href;
+        const imageLink = rawLink
+          ? rawLink.replace(/^http:\/\//, "https://")
+          : undefined;
+        return {
+          nasaId: data.nasa_id || `nasa-${Math.random()}`,
+          title: data.title || "NASA Mission Record",
+          description: data.description || "",
+          dateCreated: data.date_created
+            ? data.date_created.substring(0, 10)
+            : String(year),
+          center: data.center || "NASA",
+          imageUrl: imageLink,
+          keywords: data.keywords || [],
+        };
+      },
+    );
 
     memoryCache.set(cacheKey, mapped);
     try {
-      window.localStorage.setItem(`nasa_archive_${cacheKey}`, JSON.stringify(mapped));
+      window.localStorage.setItem(
+        `nasa_archive_${cacheKey}`,
+        JSON.stringify(mapped),
+      );
     } catch {}
 
     return mapped;

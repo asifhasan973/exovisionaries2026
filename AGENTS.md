@@ -51,11 +51,11 @@ This document defines standard conventions, architectural standards, and develop
 
 ---
 
-## 5. File Size Ceiling & Directory Density Guard
+## 5. Codebase Prettification, File Ceiling & Directory Density Guard
 
-- **Strict 250-Line Non-CSS Guard**: Any TypeScript or TSX file exceeding 250 lines must be proactively modularized into focused sub-components, custom hooks, or utility helpers.
-- **Directory Density Limit**: Directories must contain at most 12 files. Group larger sets into domain subdirectories with a unifying `index.ts` barrel export.
-- **CSS Stylesheet Preservation**: Do NOT split internal lines of CSS stylesheets. Keep CSS files intact, cohesive, and format/prettify cleanly.
+- **Mandatory Prettier Formation**: All files across the repository (`.css`, `.ts`, `.tsx`, `.json`, `.md`, `.html`, `.yaml`) must strictly maintain standard Prettier formatting (`pnpm run format` / `pnpm run format:check`). On any future modification, agents must never compress, minify, or inline multi-statement blocks; preserve clean indentation, multiline declarations, and format before finalizing.
+- **Strict Component Modularization & File Ceiling**: Proactively decompose growing files into focused sub-components, custom hooks, or utility helpers. Keep directories at <= 12 files with unifying `index.ts` barrel exports.
+- **CSS Stylesheet Preservation**: Keep CSS files intact, cohesive, and format/prettify cleanly.
 - **Facades & Exports**: Preserve backwards-compatible re-export facades at legacy paths during migrations. Prefer explicit named exports over default exports.
 
 ---
@@ -80,10 +80,10 @@ This document defines standard conventions, architectural standards, and develop
 
 - **Centralized Lifecycle (Zero Prop-Drilling)**: Suspend/resume states strictly through `useOrientationLifecycleStore` and `game-orientation-pause` / `game-orientation-resume` events.
 - **Universal State Freeze**: When `isBlocked = true` or `isLoading = true`:
-  - *Simulation*: Progression, flight ascent, descent physics, rover telemetry, and assembly halt at exact frame/sub-second.
-  - *Audio/Speech*: Web Audio suspends via `SoundEngine.pauseAll()`; speech narration pauses and replays line cleanly on resume.
-  - *Timers & CSS*: Progress bar and slide intervals freeze; CSS animations pause via `.orientation-guard-wrapper.is-blocked * { animation-play-state: paused !important; }`.
-  - *Preloading Exemption*: Asynchronous asset preloading continues unhindered in the background. Manually paused subsystems remain paused on resume.
+  - _Simulation_: Progression, flight ascent, descent physics, rover telemetry, and assembly halt at exact frame/sub-second.
+  - _Audio/Speech_: Web Audio suspends via `SoundEngine.pauseAll()`; speech narration pauses and replays line cleanly on resume.
+  - _Timers & CSS_: Progress bar and slide intervals freeze; CSS animations pause via `.orientation-guard-wrapper.is-blocked * { animation-play-state: paused !important; }`.
+  - _Preloading Exemption_: Asynchronous asset preloading continues unhindered in the background. Manually paused subsystems remain paused on resume.
 
 ---
 
@@ -91,10 +91,10 @@ This document defines standard conventions, architectural standards, and develop
 
 - **Enforced Landscape Viewport**: Optimized strictly for horizontal viewports across all devices. Zero vertical page scrolling (`overflow: hidden`).
 - **Responsive Viewport Tiers**:
-  - *Tier 1: Compact Mobile Landscape* (H <= 450px, W >= 600px): Side-by-side splits (`grid-template-columns: minmax(0,1fr) minmax(0,1.1fr)`), `clamp()` typography, compact buttons (42-48px).
-  - *Tier 2: Tablet Landscape* (H 451-720px, W 800-1280px): Balanced spacing, >= 48px touch targets, character/3D stages with dialog cards.
-  - *Tier 3: Desktop Standard* (H 721-1080px, W 1280-1920px): Full aerospace HUD, glow borders, and telemetry status bars.
-  - *Tier 4: Ultra-Wide/4K* (W > 1920px): Max-width container (`max-width: 1680px`) centered with cosmic ambient gradients.
+  - _Tier 1: Compact Mobile Landscape_ (H <= 450px, W >= 600px): Side-by-side splits (`grid-template-columns: minmax(0,1fr) minmax(0,1.1fr)`), `clamp()` typography, compact buttons (42-48px).
+  - _Tier 2: Tablet Landscape_ (H 451-720px, W 800-1280px): Balanced spacing, >= 48px touch targets, character/3D stages with dialog cards.
+  - _Tier 3: Desktop Standard_ (H 721-1080px, W 1280-1920px): Full aerospace HUD, glow borders, and telemetry status bars.
+  - _Tier 4: Ultra-Wide/4K_ (W > 1920px): Max-width container (`max-width: 1680px`) centered with cosmic ambient gradients.
 - **Zero Layout Shifts**: Canvases and containers must preserve strict aspect ratio boxes during load and resize events.
 
 ---
@@ -147,6 +147,7 @@ This document defines standard conventions, architectural standards, and develop
   1. `pnpm run lint`: Zero warnings and zero errors across workspace packages via `oxlint`.
   2. `pnpm --filter <pkg> exec tsc --noEmit`: Strict TypeScript type checking without emitting artifacts.
   3. `pnpm run build`: Full Turborepo build pipeline and Vite production bundling.
+  4. `pnpm run format:check`: All modified files strictly conform to Prettier code style without formatting drifts.
 - **Zero Degradation Invariant**: Refactorings and features must preserve 100% backwards compatibility and existing gameplay mechanics.
 
 ---

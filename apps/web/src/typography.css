@@ -70,24 +70,24 @@
 
 /* Welcome and story pages */
 .game .welcome-copy .eyebrow,
-.game .welcome-copy>p,
-.game .mission-brief>p,
-.game .story-dialog>p,
-.game .setting-row>span,
+.game .welcome-copy > p,
+.game .mission-brief > p,
+.game .story-dialog > p,
+.game .setting-row > span,
 .game .orbit-copy p,
-.game .flight-copy>p,
-.game .flight-control-panel>p {
+.game .flight-copy > p,
+.game .flight-control-panel > p {
   font-size: var(--font-body);
 }
 
 .game .hero-byline,
 .game .photo-caption span,
-.game .hero-moon>span,
+.game .hero-moon > span,
 .game .mission-sticker b,
 .game .route-intro,
 .game .adventure-route small,
 .game .destination-caption small,
-.game .visual-mission>span,
+.game .visual-mission > span,
 .game .other-missions button,
 .game .site-pin small,
 .game .site-pin b,
@@ -138,8 +138,8 @@
   font-size: var(--font-small);
 }
 
-.game .workshop-progress button>span,
-.game .parts-shelf .workshop-progress button>span {
+.game .workshop-progress button > span,
+.game .parts-shelf .workshop-progress button > span {
   font-size: var(--font-micro);
 }
 
@@ -150,22 +150,22 @@
   font-size: 24px;
 }
 
-.game .shelf-heading>span,
-.game .crew-pick .shelf-heading>span,
-.game .parts-shelf>.mini,
+.game .shelf-heading > span,
+.game .crew-pick .shelf-heading > span,
+.game .parts-shelf > .mini,
 .game .shelf-controls,
-.game .packing-title>.label-tag {
+.game .packing-title > .label-tag {
   font-size: var(--font-label);
 }
 
 .game .part-card strong,
-.game .packing-slot>strong,
+.game .packing-slot > strong,
 .game .locked-part-card strong {
   font-size: var(--font-card-title);
 }
 
 .game .part-card small,
-.game .packing-slot>small,
+.game .packing-slot > small,
 .game .locked-part-card small,
 .game .locked-label {
   font-size: var(--font-micro);
@@ -217,13 +217,13 @@
   font-size: 12px;
 }
 
-.game .mission-meters>p {
+.game .mission-meters > p {
   font-size: var(--font-micro);
 }
 
 /* Crew, duration and launch-readiness pages */
 .game .duration-heading small,
-.game .duration-heading>b,
+.game .duration-heading > b,
 .game .duration-scale,
 .game .duration-scale small,
 .game .ready-crew-member small,
@@ -235,15 +235,15 @@
   font-size: 25px;
 }
 
-.game .duration-planner>p,
-.game .crew-seat>small,
+.game .duration-planner > p,
+.game .crew-seat > small,
 .game .candidate small,
-.game .readiness-card>span,
-.game .ready-list>.mini {
+.game .readiness-card > span,
+.game .ready-list > .mini {
   font-size: var(--font-small);
 }
 
-.game .crew-seat>strong {
+.game .crew-seat > strong {
   font-size: 22px;
 }
 
@@ -253,23 +253,23 @@
   font-size: var(--font-card-title);
 }
 
-.game .ready-crew-panel>p {
+.game .ready-crew-panel > p {
   font-size: var(--font-body);
 }
 
 /* Launch and orbit */
 .game .preflight-switches button,
-.game .preflight-switches button>span,
+.game .preflight-switches button > span,
 .game .preflight-switches small,
-.game .flight-stage-track>span,
+.game .flight-stage-track > span,
 .game .flight-copy .flight-caption,
 .game .flight-live,
 .game .flight-skip,
 .game .sun-reference strong,
 .game .sun-reference small,
-.game .earned-badges>span,
+.game .earned-badges > span,
 .game .light-text,
-.game .orbit-stamp>span {
+.game .orbit-stamp > span {
   font-size: var(--font-small);
 }
 
@@ -282,18 +282,18 @@
 }
 
 /* Field notes and dialogs */
-.game .notes-heading>span {
+.game .notes-heading > span {
   font-size: 21px;
 }
 
-.game .notebook-cover>h2,
-.game .part-details>h2,
+.game .notebook-cover > h2,
+.game .part-details > h2,
 .game .dialog-heading h2 {
   font-size: 28px;
 }
 
-.game .notebook-cover>p,
-.game .field-notes>.muted,
+.game .notebook-cover > p,
+.game .field-notes > .muted,
 .game .kid-lesson,
 .game .part-details dl,
 .game .field-notes details,
@@ -301,12 +301,12 @@
 .game .field-notes details p,
 .game .field-notes details a,
 .game .setting-row small,
-.game .setting-row>b {
+.game .setting-row > b {
   font-size: var(--font-small);
 }
 
 .game .part-details dt,
-.game .part-details>.eyebrow {
+.game .part-details > .eyebrow {
   font-size: var(--font-label);
 }
 
@@ -358,12 +358,12 @@
     font-size: 30px;
   }
 
-  .game .crew-seat>strong {
+  .game .crew-seat > strong {
     font-size: 17px;
   }
 
   .game .part-card strong,
-  .game .packing-slot>strong {
+  .game .packing-slot > strong {
     font-size: 13px;
   }
 }

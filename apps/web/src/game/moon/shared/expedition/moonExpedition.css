@@ -1,6 +1,266 @@
-.moon-stage .moon-action{position:absolute;right:18px;bottom:72px;width:min(350px,39%);max-height:calc(100% - 160px);overflow-y:auto;display:flex;flex-direction:column;gap:11px;padding:18px;background:#101b29ed;border:1px solid #acc5d24d;border-radius:18px;backdrop-filter:blur(12px);color:#e7f1f6;scrollbar-width:thin;scrollbar-color:#8abfad #182433}
-.moon-action h2{display:flex;align-items:center;gap:8px;font-size:clamp(18px,1.9vw,25px);line-height:1.2;margin:0;color:#f3f7fa}.moon-action p{margin:0;font-size:14px;line-height:1.5;color:#c8d5df}.moon-action small{font-size:11px;line-height:1.4;color:#a5c5c1}.moon-eyebrow{font-size:9px;letter-spacing:1.5px;font-weight:800;color:#a0dfc5}.moon-action progress{width:100%;height:8px;accent-color:#a3e9cb}.moon-itinerary{display:flex;gap:7px}.moon-itinerary span{flex:1;padding:7px 4px;text-align:center;border:1px solid #a1d3c333;border-radius:8px;color:#c5e6d9;background:#20383c;font-size:11px}.moon-secondary{min-height:42px;border:1px solid #adc9db55;background:#192c3a;color:#d8e9f4;padding:9px 12px;border-radius:10px;font-size:12px;cursor:pointer}.moon-secondary:hover{background:#2a4552}.moon-secondary:active{transform:scale(.98)}
-.moon-evidence{display:grid;gap:6px}.moon-evidence article{padding:9px 11px;background:#23343c;border:1px solid #b8ccd222;border-radius:10px;display:grid;gap:4px}.moon-evidence article>span{font-size:10px;letter-spacing:.5px;color:#acd0c4}.moon-evidence strong{font-size:14px;line-height:1.3;color:#ffdfa0}.moon-evidence small{font-size:10px}.moon-findings{display:grid;grid-template-columns:1fr 1fr;gap:6px}.moon-findings button{padding:10px;min-height:44px;background:#243e48;color:#eef7fa;border:1px solid #94c6c780;border-radius:10px;font-size:12px;cursor:pointer}.moon-findings button:hover{background:#365a62}.moon-success{color:#b0f0cf!important}.moon-feedback{padding:9px;border:1px solid #deb78688;background:#4a3436;border-radius:10px;color:#ffe3b5!important}
-.moon-stage .moon-incident{border:0;border-radius:0;padding:0;background:none;gap:10px}.moon-stage .incident-choices{gap:7px}.moon-stage .incident-choices button{min-height:44px;background:#263e47;border-color:#a4c7d066}.moon-stage .incident-choices button[data-incident-recommended=true]{background:#285345;border-color:#9bddbd}.moon-stage .expedition-objective{max-width:min(360px,46%)}.moon-task-count{display:flex;gap:6px}.moon-task-count span{height:5px;flex:1;border-radius:3px;background:#354954}.moon-task-count .is-done{background:#a0e2c0}.moon-task-count .is-current{background:#ffdf9f}.moon-action .moon-finished{color:#b0edca}.moon-stage .expedition-battery small{font-size:10px}.moon-action button:focus-visible{outline:3px solid #ffdf9e;outline-offset:2px}
-@media(max-height:720px){.moon-stage .moon-action{padding:12px;gap:8px;width:min(330px,39%);max-height:calc(100% - 138px)}.moon-action h2{font-size:19px}.moon-action p{font-size:12px}.moon-evidence article{padding:7px 9px}.moon-evidence strong{font-size:12px}.moon-findings button{min-height:42px;padding:8px}.moon-stage .expedition-objective h2{font-size:16px}}
-@media(max-height:450px){.moon-stage .moon-action{right:10px;bottom:51px;width:270px;max-width:41%;max-height:calc(100% - 100px);padding:10px;gap:7px}.moon-action h2{font-size:16px}.moon-action p{font-size:11px;line-height:1.35}.moon-eyebrow{font-size:8px}.moon-stage .expedition-objective{max-width:45%}.moon-stage .expedition-objective h2{font-size:13px}.moon-stage .expedition-objective ol{gap:8px;font-size:9px}.moon-stage .expedition-battery{width:150px}.moon-action .moon-evidence article{padding:5px 7px;gap:2px}.moon-evidence article>span,.moon-evidence small{font-size:9px}.moon-action .moon-evidence strong{font-size:11px}.moon-findings button{min-height:40px;font-size:11px;padding:6px}.moon-itinerary span{padding:4px;font-size:10px}.moon-stage .incident-choices button{min-height:40px;font-size:11px}}
+.moon-stage .moon-action {
+  position: absolute;
+  right: 18px;
+  bottom: 72px;
+  width: min(350px, 39%);
+  max-height: calc(100% - 160px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  padding: 18px;
+  background: #101b29ed;
+  border: 1px solid #acc5d24d;
+  border-radius: 18px;
+  backdrop-filter: blur(12px);
+  color: #e7f1f6;
+  scrollbar-width: thin;
+  scrollbar-color: #8abfad #182433;
+}
+.moon-action h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: clamp(18px, 1.9vw, 25px);
+  line-height: 1.2;
+  margin: 0;
+  color: #f3f7fa;
+}
+.moon-action p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #c8d5df;
+}
+.moon-action small {
+  font-size: 11px;
+  line-height: 1.4;
+  color: #a5c5c1;
+}
+.moon-eyebrow {
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  font-weight: 800;
+  color: #a0dfc5;
+}
+.moon-action progress {
+  width: 100%;
+  height: 8px;
+  accent-color: #a3e9cb;
+}
+.moon-itinerary {
+  display: flex;
+  gap: 7px;
+}
+.moon-itinerary span {
+  flex: 1;
+  padding: 7px 4px;
+  text-align: center;
+  border: 1px solid #a1d3c333;
+  border-radius: 8px;
+  color: #c5e6d9;
+  background: #20383c;
+  font-size: 11px;
+}
+.moon-secondary {
+  min-height: 42px;
+  border: 1px solid #adc9db55;
+  background: #192c3a;
+  color: #d8e9f4;
+  padding: 9px 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.moon-secondary:hover {
+  background: #2a4552;
+}
+.moon-secondary:active {
+  transform: scale(0.98);
+}
+.moon-evidence {
+  display: grid;
+  gap: 6px;
+}
+.moon-evidence article {
+  padding: 9px 11px;
+  background: #23343c;
+  border: 1px solid #b8ccd222;
+  border-radius: 10px;
+  display: grid;
+  gap: 4px;
+}
+.moon-evidence article > span {
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  color: #acd0c4;
+}
+.moon-evidence strong {
+  font-size: 14px;
+  line-height: 1.3;
+  color: #ffdfa0;
+}
+.moon-evidence small {
+  font-size: 10px;
+}
+.moon-findings {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.moon-findings button {
+  padding: 10px;
+  min-height: 44px;
+  background: #243e48;
+  color: #eef7fa;
+  border: 1px solid #94c6c780;
+  border-radius: 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.moon-findings button:hover {
+  background: #365a62;
+}
+.moon-success {
+  color: #b0f0cf !important;
+}
+.moon-feedback {
+  padding: 9px;
+  border: 1px solid #deb78688;
+  background: #4a3436;
+  border-radius: 10px;
+  color: #ffe3b5 !important;
+}
+.moon-stage .moon-incident {
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  background: none;
+  gap: 10px;
+}
+.moon-stage .incident-choices {
+  gap: 7px;
+}
+.moon-stage .incident-choices button {
+  min-height: 44px;
+  background: #263e47;
+  border-color: #a4c7d066;
+}
+.moon-stage .incident-choices button[data-incident-recommended="true"] {
+  background: #285345;
+  border-color: #9bddbd;
+}
+.moon-stage .expedition-objective {
+  max-width: min(360px, 46%);
+}
+.moon-task-count {
+  display: flex;
+  gap: 6px;
+}
+.moon-task-count span {
+  height: 5px;
+  flex: 1;
+  border-radius: 3px;
+  background: #354954;
+}
+.moon-task-count .is-done {
+  background: #a0e2c0;
+}
+.moon-task-count .is-current {
+  background: #ffdf9f;
+}
+.moon-action .moon-finished {
+  color: #b0edca;
+}
+.moon-stage .expedition-battery small {
+  font-size: 10px;
+}
+.moon-action button:focus-visible {
+  outline: 3px solid #ffdf9e;
+  outline-offset: 2px;
+}
+@media (max-height: 720px) {
+  .moon-stage .moon-action {
+    padding: 12px;
+    gap: 8px;
+    width: min(330px, 39%);
+    max-height: calc(100% - 138px);
+  }
+  .moon-action h2 {
+    font-size: 19px;
+  }
+  .moon-action p {
+    font-size: 12px;
+  }
+  .moon-evidence article {
+    padding: 7px 9px;
+  }
+  .moon-evidence strong {
+    font-size: 12px;
+  }
+  .moon-findings button {
+    min-height: 42px;
+    padding: 8px;
+  }
+  .moon-stage .expedition-objective h2 {
+    font-size: 16px;
+  }
+}
+@media (max-height: 450px) {
+  .moon-stage .moon-action {
+    right: 10px;
+    bottom: 51px;
+    width: 270px;
+    max-width: 41%;
+    max-height: calc(100% - 100px);
+    padding: 10px;
+    gap: 7px;
+  }
+  .moon-action h2 {
+    font-size: 16px;
+  }
+  .moon-action p {
+    font-size: 11px;
+    line-height: 1.35;
+  }
+  .moon-eyebrow {
+    font-size: 8px;
+  }
+  .moon-stage .expedition-objective {
+    max-width: 45%;
+  }
+  .moon-stage .expedition-objective h2 {
+    font-size: 13px;
+  }
+  .moon-stage .expedition-objective ol {
+    gap: 8px;
+    font-size: 9px;
+  }
+  .moon-stage .expedition-battery {
+    width: 150px;
+  }
+  .moon-action .moon-evidence article {
+    padding: 5px 7px;
+    gap: 2px;
+  }
+  .moon-evidence article > span,
+  .moon-evidence small {
+    font-size: 9px;
+  }
+  .moon-action .moon-evidence strong {
+    font-size: 11px;
+  }
+  .moon-findings button {
+    min-height: 40px;
+    font-size: 11px;
+    padding: 6px;
+  }
+  .moon-itinerary span {
+    padding: 4px;
+    font-size: 10px;
+  }
+  .moon-stage .incident-choices button {
+    min-height: 40px;
+    font-size: 11px;
+  }
+}

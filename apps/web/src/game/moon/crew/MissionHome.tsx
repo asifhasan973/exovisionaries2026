@@ -1,12 +1,20 @@
-import { useState } from 'react';
-import { ArrowRight, Play, RotateCcw, Sparkles, Compass, Download, Award } from 'lucide-react';
-import { sound } from '@exo/audio';
-import { usePwaStore } from '@exo/ui';
-import { StoryShell } from '@/shared/shell';
-import type { StoryProgress } from '@/game/moon/core/types';
-import { useMobileGame } from '@/shared/shell';
-import type { SelectionFrame } from './selectionConfig';
-import { JudgeInstructionsDialog } from './JudgeInstructionsDialog';
+import { useState } from "react";
+import {
+  ArrowRight,
+  Play,
+  RotateCcw,
+  Sparkles,
+  Compass,
+  Download,
+  Award,
+} from "lucide-react";
+import { sound } from "@exo/audio";
+import { usePwaStore } from "@exo/ui";
+import { StoryShell } from "@/shared/shell";
+import type { StoryProgress } from "@/game/moon/core/types";
+import { useMobileGame } from "@/shared/shell";
+import type { SelectionFrame } from "./selectionConfig";
+import { JudgeInstructionsDialog } from "./JudgeInstructionsDialog";
 
 export function MissionHome({
   progress,
@@ -29,9 +37,18 @@ export function MissionHome({
 
   return (
     <StoryShell {...frame} controls={null}>
-      <main className="mission-home" id="story-content" tabIndex={-1} aria-labelledby="mission-home-title">
+      <main
+        className="mission-home"
+        id="story-content"
+        tabIndex={-1}
+        aria-labelledby="mission-home-title"
+      >
         <div className="home-hero-backdrop" aria-hidden="true">
-          <img src="/story/moon-mission-hero.webp" alt="" className="home-hero-full-img" />
+          <img
+            src="/story/moon-mission-hero.webp"
+            alt=""
+            className="home-hero-full-img"
+          />
         </div>
         <section className="home-copy">
           <span className="home-mission-tag">
@@ -56,7 +73,7 @@ export function MissionHome({
               }}
             >
               <Play size={14} fill="currentColor" />
-              <span>{hasProgress ? 'Resume' : 'Play now'}</span>
+              <span>{hasProgress ? "Resume" : "Play now"}</span>
               <ArrowRight size={14} />
             </button>
             {hasProgress ? (
@@ -149,4 +166,3 @@ export function MissionHome({
     </StoryShell>
   );
 }
-

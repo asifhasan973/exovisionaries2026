@@ -1,5 +1,10 @@
-import { preloadImage, maintainBrowserAssetCache, cacheAssetInBrowser, getAllBubbleThumbnailUrls } from '@exo/engine';
-import { LOADING_CONFIG } from '@exo/ui';
+import {
+  preloadImage,
+  maintainBrowserAssetCache,
+  cacheAssetInBrowser,
+  getAllBubbleThumbnailUrls,
+} from "@exo/engine";
+import { LOADING_CONFIG } from "@exo/ui";
 
 /**
  * Pacing helper simulating weak network conditions between milestone tasks when multiplier > 1.
@@ -7,7 +12,9 @@ import { LOADING_CONFIG } from '@exo/ui';
 const paceMilestone = async () => {
   const multiplier = LOADING_CONFIG.progressMultiplier;
   if (multiplier > 1) {
-    await new Promise(resolve => setTimeout(resolve, Math.round(180 * (multiplier - 1))));
+    await new Promise((resolve) =>
+      setTimeout(resolve, Math.round(180 * (multiplier - 1))),
+    );
   }
 };
 
@@ -20,32 +27,32 @@ const paceMilestone = async () => {
  * - 10% Audio Engine & Session Hydration
  */
 export async function preloadEntrySubsystems(
-  onProgress: (progress: number, message: string) => void
+  onProgress: (progress: number, message: string) => void,
 ): Promise<void> {
   // Step 0: Maintain browser asset cache (7-day inactivity purge)
   maintainBrowserAssetCache().catch(() => {});
 
-  onProgress(5, 'Initializing core engine subsystems…');
+  onProgress(5, "Initializing core engine subsystems…");
   await paceMilestone();
 
   try {
     // 1. Dynamic module chunks (40% milestone target: 5% -> 40%)
-    onProgress(15, 'Loading story flow and viewport controllers…');
+    onProgress(15, "Loading story flow and viewport controllers…");
     try {
       await Promise.allSettled([
-        import('@/game/moon/shared/expedition/HomeViewport'),
-        import('@/game/moon/crew/SelectionScreens'),
+        import("@/game/moon/shared/expedition/HomeViewport"),
+        import("@/game/moon/crew/SelectionScreens"),
       ]);
     } catch (err) {
-      console.warn('Module preload notice:', err);
+      console.warn("Module preload notice:", err);
     }
-    onProgress(40, 'Story controllers compiled');
+    onProgress(40, "Story controllers compiled");
     await paceMilestone();
 
     // 2. 3D Home Moon geometry and shader preparation (30% milestone target: 40% -> 70%)
-    onProgress(50, 'Compiling lunar orbital shaders and 3D preview…');
+    onProgress(50, "Compiling lunar orbital shaders and 3D preview…");
     try {
-      const THREE = await import('three');
+      const THREE = await import("three");
       const sphere = new THREE.SphereGeometry(1.2, 32, 32);
       const material = new THREE.MeshStandardMaterial({
         color: 0x8892b0,
@@ -55,44 +62,44 @@ export async function preloadEntrySubsystems(
       sphere.dispose();
       material.dispose();
     } catch (err) {
-      console.warn('3D Moon shader preload notice:', err);
+      console.warn("3D Moon shader preload notice:", err);
     }
-    onProgress(70, '3D orbital environment ready');
+    onProgress(70, "3D orbital environment ready");
     await paceMilestone();
 
     // 3. High-resolution entry art & carousel slides (20% milestone target: 70% -> 90%)
-    onProgress(75, 'Decoding mission deep space imagery…');
+    onProgress(75, "Decoding mission deep space imagery…");
     const entryImages = [
-      '/story/moon-mission-hero.webp',
-      '/assets/loading/artemis_launch.jpg',
-      '/assets/loading/orion_earth_view.jpg',
-      '/assets/loading/carina_nebula.webp',
-      '/assets/loading/apollo_bootprint.jpg',
-      '/assets/loading/mars_perseverance.jpg',
+      "/story/moon-mission-hero.webp",
+      "/assets/loading/artemis_launch.jpg",
+      "/assets/loading/orion_earth_view.jpg",
+      "/assets/loading/carina_nebula.webp",
+      "/assets/loading/apollo_bootprint.jpg",
+      "/assets/loading/mars_perseverance.jpg",
     ];
-    await Promise.allSettled(entryImages.map(src => preloadImage(src)));
-    onProgress(85, 'Imagery textures cached');
+    await Promise.allSettled(entryImages.map((src) => preloadImage(src)));
+    onProgress(85, "Imagery textures cached");
     await paceMilestone();
 
     // 3b. NASA Mission Archive Subsystems & Timeline Thumbnail Bubbles
-    onProgress(88, 'Preloading NASA Mission Archive timeline & bubble assets…');
+    onProgress(88, "Preloading NASA Mission Archive timeline & bubble assets…");
     try {
       const bubbleThumbnails = getAllBubbleThumbnailUrls();
       await Promise.allSettled([
-        import('@/features/archive/NasaMissionArchive'),
-        ...bubbleThumbnails.map(src => preloadImage(src))
+        import("@/features/archive/NasaMissionArchive"),
+        ...bubbleThumbnails.map((src) => preloadImage(src)),
       ]);
     } catch (archivePreloadErr) {
-      console.warn('NASA archive preload notice:', archivePreloadErr);
+      console.warn("NASA archive preload notice:", archivePreloadErr);
     }
-    onProgress(92, 'NASA timeline bubbles primed');
+    onProgress(92, "NASA timeline bubbles primed");
     await paceMilestone();
 
     // 4. Audio synthesizer & session state (10% milestone target: 92% -> 100%)
-    onProgress(96, 'Synchronizing audio synthesizer and flight telemetry…');
+    onProgress(96, "Synchronizing audio synthesizer and flight telemetry…");
     await paceMilestone();
   } finally {
-    onProgress(100, 'All entry subsystems verified');
+    onProgress(100, "All entry subsystems verified");
   }
 }
 
@@ -105,45 +112,45 @@ export async function preloadEntrySubsystems(
  * - 10% Audio Synthesizer Flight Buffers & Launch Sound Synthesis
  */
 export async function preloadMissionSubsystems(
-  onProgress: (progress: number, message: string) => void
+  onProgress: (progress: number, message: string) => void,
 ): Promise<void> {
-  onProgress(5, 'Engaging mission simulation pipelines…');
+  onProgress(5, "Engaging mission simulation pipelines…");
   await paceMilestone();
 
   try {
     // 1. Heavy simulation modules (40% milestone target: 5% -> 40%)
-    onProgress(15, 'Loading 3D rocket assembly studio & physics engines…');
+    onProgress(15, "Loading 3D rocket assembly studio & physics engines…");
     try {
       await Promise.allSettled([
         // Workshop & Rocket Builder
-        import('@/game/moon/workshop/lander/WorkshopScreen'),
-        import('@/game/moon/workshop/lander/WorkshopViewport'),
+        import("@/game/moon/workshop/lander/WorkshopScreen"),
+        import("@/game/moon/workshop/lander/WorkshopViewport"),
         // Flight & Launch
-        import('@/game/moon/flight/launch/FlightScreen'),
-        import('@/game/moon/flight/launch/FlightViewport'),
+        import("@/game/moon/flight/launch/FlightScreen"),
+        import("@/game/moon/flight/launch/FlightViewport"),
         // Moon mission modules
-        import('@/game/moon/crew/CrewScreen'),
-        import('@/game/moon/readiness/HumanReadinessScreen'),
-        import('@/game/moon/workshop/rocket/RocketAssemblyScreen'),
-        import('@/game/moon/workshop/rocket/MainRocketViewport'),
-        import('@/game/moon/flight/journey/JourneyScreen'),
-        import('@/game/moon/landing/LandingScreen'),
-        import('@/game/moon/surface/SurfaceScreen'),
-        import('@/game/moon/science/ScienceScreen'),
-        import('@/game/moon/return/debrief/RecoveryScreen'),
-        import('@/game/moon/return/ReturnScreen'),
-        import('@/game/moon/workshop/packing/PackingViewport'),
+        import("@/game/moon/crew/CrewScreen"),
+        import("@/game/moon/readiness/HumanReadinessScreen"),
+        import("@/game/moon/workshop/rocket/RocketAssemblyScreen"),
+        import("@/game/moon/workshop/rocket/MainRocketViewport"),
+        import("@/game/moon/flight/journey/JourneyScreen"),
+        import("@/game/moon/landing/LandingScreen"),
+        import("@/game/moon/surface/SurfaceScreen"),
+        import("@/game/moon/science/ScienceScreen"),
+        import("@/game/moon/return/debrief/RecoveryScreen"),
+        import("@/game/moon/return/ReturnScreen"),
+        import("@/game/moon/workshop/packing/PackingViewport"),
       ]);
     } catch (err) {
-      console.warn('Simulation module preload notice:', err);
+      console.warn("Simulation module preload notice:", err);
     }
-    onProgress(40, 'Simulation engines assembled');
+    onProgress(40, "Simulation engines assembled");
     await paceMilestone();
 
     // 2. 3D Rocket procedural meshes & shaders (30% milestone target: 40% -> 70%)
-    onProgress(55, 'Generating 3D rocket stage geometries & PBR materials…');
+    onProgress(55, "Generating 3D rocket stage geometries & PBR materials…");
     try {
-      const THREE = await import('three');
+      const THREE = await import("three");
       const cylinder = new THREE.CylinderGeometry(0.8, 0.8, 3, 24);
       const cone = new THREE.ConeGeometry(0.8, 1.5, 24);
       const bell = new THREE.CylinderGeometry(0.2, 0.6, 0.8, 16);
@@ -151,45 +158,44 @@ export async function preloadMissionSubsystems(
       cone.dispose();
       bell.dispose();
     } catch (err) {
-      console.warn('3D rocket mesh preload notice:', err);
+      console.warn("3D rocket mesh preload notice:", err);
     }
-    onProgress(70, '3D rocket builder primed');
+    onProgress(70, "3D rocket builder primed");
     await paceMilestone();
 
     // 3. Heavy mission visuals, celestial textures & character rig atlases (20% milestone target: 70% -> 90%)
-    onProgress(75, 'Decoding astronaut dossiers & lunar surface maps…');
+    onProgress(75, "Decoding astronaut dossiers & lunar surface maps…");
     const missionVisualAssets = [
       // 3D Flight celestial textures
-      '/story/flight/earth-blue-marble.jpg',
+      "/story/flight/earth-blue-marble.jpg",
       // Character rig WebP body & face atlases
-      '/story/characters-v1/chief-body.webp',
-      '/story/characters-v1/chief-faces-a.webp',
-      '/story/characters-v1/chief-faces-b.webp',
-      '/story/characters-v1/commander-body.webp',
-      '/story/characters-v1/commander-faces-a.webp',
-      '/story/characters-v1/commander-faces-b.webp',
-      '/story/characters-v1/commander-faces-c.webp',
-      '/story/characters-v1/commander-male-atlas.webp',
+      "/story/characters-v1/chief-body.webp",
+      "/story/characters-v1/chief-faces-a.webp",
+      "/story/characters-v1/chief-faces-b.webp",
+      "/story/characters-v1/commander-body.webp",
+      "/story/characters-v1/commander-faces-a.webp",
+      "/story/characters-v1/commander-faces-b.webp",
+      "/story/characters-v1/commander-faces-c.webp",
+      "/story/characters-v1/commander-male-atlas.webp",
       // Active mission crew portraits & lunar cabin
-      '/story/lunar-cabin-v1.webp',
-      '/story/crew-portraits/astrobiologist.webp',
-      '/story/crew-portraits/geologist.webp',
-      '/story/crew-portraits/robotics-specialist.webp',
-      '/story/crew-portraits/scientist-seated-v1.webp',
-      '/story/crew-portraits/systems-engineer.webp',
+      "/story/lunar-cabin-v1.webp",
+      "/story/crew-portraits/astrobiologist.webp",
+      "/story/crew-portraits/geologist.webp",
+      "/story/crew-portraits/robotics-specialist.webp",
+      "/story/crew-portraits/scientist-seated-v1.webp",
+      "/story/crew-portraits/systems-engineer.webp",
     ];
     await Promise.allSettled([
-      ...missionVisualAssets.map(src => preloadImage(src)),
-      cacheAssetInBrowser('/story/characters-v1/manifest.json')
+      ...missionVisualAssets.map((src) => preloadImage(src)),
+      cacheAssetInBrowser("/story/characters-v1/manifest.json"),
     ]);
-    onProgress(90, 'Visual textures & character rigs cached');
+    onProgress(90, "Visual textures & character rigs cached");
     await paceMilestone();
 
     // 4. Mission flight audio synthesis buffers (10% milestone target: 90% -> 100%)
-    onProgress(95, 'Synthesizing launch rumble and telemetry acoustics…');
+    onProgress(95, "Synthesizing launch rumble and telemetry acoustics…");
     await paceMilestone();
   } finally {
-    onProgress(100, 'Flight authorization granted · Systems nominal');
+    onProgress(100, "Flight authorization granted · Systems nominal");
   }
 }
-

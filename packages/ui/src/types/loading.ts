@@ -7,7 +7,7 @@ export interface LoadingSlide {
   tag?: string;
 }
 
-export type LoadingContext = 'landing' | 'mission_start' | 'custom';
+export type LoadingContext = "landing" | "mission_start" | "custom";
 
 export interface LoadingState {
   isLoading: boolean;
@@ -19,7 +19,10 @@ export interface LoadingState {
   statusMessage: string;
   slides: LoadingSlide[];
   pendingTasks: Promise<unknown>[];
-  startLoading: (context?: LoadingContext, initialMessage?: string) => Promise<void>;
+  startLoading: (
+    context?: LoadingContext,
+    initialMessage?: string,
+  ) => Promise<void>;
   updateProgress: (progress: number, message?: string) => void;
   nextSlide: () => void;
   setPaused: (paused: boolean) => void;

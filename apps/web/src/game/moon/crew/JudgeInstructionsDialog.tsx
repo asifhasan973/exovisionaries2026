@@ -1,7 +1,7 @@
-import { useEffect, useRef } from 'react';
-import { createPortal } from 'react-dom';
-import { Award, X, Compass, CheckCircle2, FastForward } from 'lucide-react';
-import { sound } from '@exo/audio';
+import { useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
+import { Award, X, Compass, CheckCircle2, FastForward } from "lucide-react";
+import { sound } from "@exo/audio";
 
 export function JudgeInstructionsDialog({
   open = true,
@@ -20,7 +20,7 @@ export function JudgeInstructionsDialog({
       try {
         dialog.showModal();
       } catch {
-        dialog.setAttribute('open', '');
+        dialog.setAttribute("open", "");
       }
     } else if (!open && dialog.open) {
       dialog.close();
@@ -42,11 +42,11 @@ export function JudgeInstructionsDialog({
       ref={ref}
       className="judge-instructions-dialog"
       aria-labelledby="judge-instructions-title"
-      onCancel={event => {
+      onCancel={(event) => {
         event.preventDefault();
         onClose();
       }}
-      onClick={event => {
+      onClick={(event) => {
         if (event.target === event.currentTarget) {
           const rect = event.currentTarget.getBoundingClientRect();
           if (
@@ -80,7 +80,8 @@ export function JudgeInstructionsDialog({
 
       <h2 id="judge-instructions-title">Zero To Beyond · Evaluator Guide</h2>
       <p className="judge-instructions-intro">
-        Design and command an authentic lunar expedition from mission objectives to splashdown debrief.
+        Design and command an authentic lunar expedition from mission objectives
+        to splashdown debrief.
       </p>
 
       <div className="judge-instructions-sections">
@@ -91,9 +92,11 @@ export function JudgeInstructionsDialog({
           <div className="judge-instructions-card-body">
             <h3>Mission Architecture & Systems</h3>
             <p>
-              Choose between <strong>Lunar South Pole Ice Explorer</strong> (Permanently Shadowed Region ice coring)
-              or <strong>Lunar Geology Explorer</strong> (crust spectrometry). Hardware realistically constrains mass,
-              power Wh, delta-v margins, and crew return viability.
+              Choose between <strong>Lunar South Pole Ice Explorer</strong>{" "}
+              (Permanently Shadowed Region ice coring) or{" "}
+              <strong>Lunar Geology Explorer</strong> (crust spectrometry).
+              Hardware realistically constrains mass, power Wh, delta-v margins,
+              and crew return viability.
             </p>
           </div>
         </article>
@@ -105,9 +108,10 @@ export function JudgeInstructionsDialog({
           <div className="judge-instructions-card-body">
             <h3>Rapid Evaluation via Stage Skip</h3>
             <p>
-              Use the bottom-bar <strong>Skip</strong> button on any stage to instantly advance through dialogues,
-              hardware bay, and pre-flight telemetry checks. The unified seeder populates valid flight manifests so you
-              can inspect any phase seamlessly.
+              Use the bottom-bar <strong>Skip</strong> button on any stage to
+              instantly advance through dialogues, hardware bay, and pre-flight
+              telemetry checks. The unified seeder populates valid flight
+              manifests so you can inspect any phase seamlessly.
             </p>
           </div>
         </article>
@@ -119,8 +123,10 @@ export function JudgeInstructionsDialog({
           <div className="judge-instructions-card-body">
             <h3>Complete Mission Lifecycle</h3>
             <p>
-              Experience the full simulation: spacecraft & rover assembly, astronaut crew selection, multi-stage
-              liftoff, trans-lunar injection, powered descent & touchdown, surface rover exploration, and Earth re-entry.
+              Experience the full simulation: spacecraft & rover assembly,
+              astronaut crew selection, multi-stage liftoff, trans-lunar
+              injection, powered descent & touchdown, surface rover exploration,
+              and Earth re-entry.
             </p>
           </div>
         </article>
@@ -143,4 +149,3 @@ export function JudgeInstructionsDialog({
     document.body,
   );
 }
-

@@ -1,28 +1,33 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { motion } from 'framer-motion';
-import { useLoadingStore } from '../../state/loadingStore';
-import { preloadImage } from '@exo/engine';
-import { LOADING_CONFIG } from '../../config/loadingConfig';
-import { LoadingIntroSplash } from './LoadingIntroSplash';
-import { LoadingCarouselStage } from './LoadingCarouselStage';
-import './loadingScreen.css';
+import React, { useEffect, useState, useRef } from "react";
+import { motion } from "framer-motion";
+import { useLoadingStore } from "../../state/loadingStore";
+import { preloadImage } from "@exo/engine";
+import { LOADING_CONFIG } from "../../config/loadingConfig";
+import { LoadingIntroSplash } from "./LoadingIntroSplash";
+import { LoadingCarouselStage } from "./LoadingCarouselStage";
+import "./loadingScreen.css";
 
 export const LoadingScreen: React.FC = () => {
-  const isLoading = useLoadingStore(s => s.isLoading);
-  const isPaused = useLoadingStore(s => s.isPaused);
-  const backendProgress = useLoadingStore(s => s.progress);
-  const slides = useLoadingStore(s => s.slides);
-  const statusMessage = useLoadingStore(s => s.statusMessage);
-  const activeContext = useLoadingStore(s => s.activeContext);
-  const showIntroSplashStore = useLoadingStore(s => s.showIntroSplash);
-  const completeLoading = useLoadingStore(s => s.completeLoading);
-  const setIntroSplashShown = useLoadingStore(s => s.setIntroSplashShown);
+  const isLoading = useLoadingStore((s) => s.isLoading);
+  const isPaused = useLoadingStore((s) => s.isPaused);
+  const backendProgress = useLoadingStore((s) => s.progress);
+  const slides = useLoadingStore((s) => s.slides);
+  const statusMessage = useLoadingStore((s) => s.statusMessage);
+  const activeContext = useLoadingStore((s) => s.activeContext);
+  const showIntroSplashStore = useLoadingStore((s) => s.showIntroSplash);
+  const completeLoading = useLoadingStore((s) => s.completeLoading);
+  const setIntroSplashShown = useLoadingStore((s) => s.setIntroSplashShown);
 
   const [showSplash, setShowSplash] = useState(showIntroSplashStore);
   const [splashFinished, setSplashFinished] = useState(!showIntroSplashStore);
   const [activeSlide, setActiveSlide] = useState(0);
   const [displayedProgress, setDisplayedProgress] = useState(0);
-  const isScreenExiting = Boolean(isLoading && splashFinished && displayedProgress >= 100 && backendProgress >= 100);
+  const isScreenExiting = Boolean(
+    isLoading &&
+    splashFinished &&
+    displayedProgress >= 100 &&
+    backendProgress >= 100,
+  );
 
   const isPausedRef = useRef(isPaused);
   useEffect(() => {
@@ -66,7 +71,10 @@ export const LoadingScreen: React.FC = () => {
       clearTimeout(timer);
       if (splashLastStartRef.current !== null) {
         const elapsed = performance.now() - splashLastStartRef.current;
-        splashRemainingMs.current = Math.max(50, splashRemainingMs.current - elapsed);
+        splashRemainingMs.current = Math.max(
+          50,
+          splashRemainingMs.current - elapsed,
+        );
         splashLastStartRef.current = null;
       }
     };
@@ -81,11 +89,14 @@ export const LoadingScreen: React.FC = () => {
 
     const interval = setInterval(() => {
       if (isCancelled || isPausedRef.current) return;
-      setDisplayedProgress(prev => {
+      setDisplayedProgress((prev) => {
         const target = useLoadingStore.getState().progress;
         if (prev < target) {
           const rawStep = Math.ceil((target - prev) * 0.15);
-          const step = Math.max(1, Math.floor(rawStep / Math.sqrt(multiplier)) || 1);
+          const step = Math.max(
+            1,
+            Math.floor(rawStep / Math.sqrt(multiplier)) || 1,
+          );
           return Math.min(target, prev + step);
         }
         return prev;
@@ -112,7 +123,7 @@ export const LoadingScreen: React.FC = () => {
 
     slideLastStartRef.current = performance.now();
     const timer = setTimeout(() => {
-      setActiveSlide(prev => {
+      setActiveSlide((prev) => {
         const next = (prev + 1) % slides.length;
         const future = slides[(next + 1) % slides.length];
         if (future) preloadImage(future.image).catch(() => {});
@@ -125,7 +136,10 @@ export const LoadingScreen: React.FC = () => {
       clearTimeout(timer);
       if (slideLastStartRef.current !== null) {
         const elapsed = performance.now() - slideLastStartRef.current;
-        slideRemainingMs.current = Math.max(100, slideRemainingMs.current - elapsed);
+        slideRemainingMs.current = Math.max(
+          100,
+          slideRemainingMs.current - elapsed,
+        );
         slideLastStartRef.current = null;
       }
     };
@@ -141,7 +155,7 @@ export const LoadingScreen: React.FC = () => {
       className="loading-screen-root"
       initial={{ opacity: 1 }}
       animate={{ opacity: isScreenExiting ? 0 : 1 }}
-      transition={{ duration: 0.5, ease: 'easeOut' }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
       onAnimationComplete={() => {
         if (isScreenExiting && !isPausedRef.current) {
           completeLoading();
@@ -166,4 +180,3 @@ export const LoadingScreen: React.FC = () => {
     </motion.div>
   );
 };
-

@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft,
   ExternalLink,
@@ -11,13 +11,16 @@ import {
   CheckCircle2,
   Loader2,
   Globe,
-  Radio
-} from 'lucide-react';
-import { NASA_MISSION_EVENTS, NASA_BUBBLE_PLACEHOLDER } from '@exo/engine';
-import { fetchNasaYearUpdates, type NasaLiveMediaItem } from '@/shared/services/nasaApiService';
-import { sound } from '@exo/audio';
-import { formatOrdinalDate } from './archiveFormatters';
-import { LiveMediaSection } from './LiveMediaSection';
+  Radio,
+} from "lucide-react";
+import { NASA_MISSION_EVENTS, NASA_BUBBLE_PLACEHOLDER } from "@exo/engine";
+import {
+  fetchNasaYearUpdates,
+  type NasaLiveMediaItem,
+} from "@/shared/services/nasaApiService";
+import { sound } from "@exo/audio";
+import { formatOrdinalDate } from "./archiveFormatters";
+import { LiveMediaSection } from "./LiveMediaSection";
 
 interface MissionEventTreeProps {
   year: number | null;
@@ -32,13 +35,15 @@ export const MissionEventTree: React.FC<MissionEventTreeProps> = ({
   year,
   selectedEventId,
   onClose,
-  isVisible
+  isVisible,
 }) => {
   const events = year ? NASA_MISSION_EVENTS.filter((e) => e.year === year) : [];
-  const queryTerm = events.length > 0 ? events[0].title.split(' ')[0] : 'NASA';
+  const queryTerm = events.length > 0 ? events[0].title.split(" ")[0] : "NASA";
   const [liveMedia, setLiveMedia] = useState<NasaLiveMediaItem[]>([]);
   const [loadedYear, setLoadedYear] = useState<number | null>(null);
-  const [expandedEvents, setExpandedEvents] = useState<Record<string, boolean>>({});
+  const [expandedEvents, setExpandedEvents] = useState<Record<string, boolean>>(
+    {},
+  );
   const isLoadingLive = year !== null && loadedYear !== year;
 
   useEffect(() => {
@@ -68,14 +73,16 @@ export const MissionEventTree: React.FC<MissionEventTreeProps> = ({
     sound.playClick(650);
     setExpandedEvents((prev) => ({
       ...prev,
-      [id]: !prev[id]
+      [id]: !prev[id],
     }));
   };
 
   if (!year) return null;
 
   return (
-    <div className={`nasa-event-tree-panel ${isVisible ? 'is-slid-in' : 'is-slid-down'}`}>
+    <div
+      className={`nasa-event-tree-panel ${isVisible ? "is-slid-in" : "is-slid-down"}`}
+    >
       <div className="tree-panel-header">
         <button
           type="button"
@@ -86,7 +93,10 @@ export const MissionEventTree: React.FC<MissionEventTreeProps> = ({
           className="tree-back-button group"
           title="Return to Horizontal Timeline"
         >
-          <ArrowLeft size={16} className="transform group-hover:-translate-x-1 transition-transform" />
+          <ArrowLeft
+            size={16}
+            className="transform group-hover:-translate-x-1 transition-transform"
+          />
           <span>Back to Year Timeline</span>
         </button>
 
@@ -96,13 +106,16 @@ export const MissionEventTree: React.FC<MissionEventTreeProps> = ({
             <span>YEAR {year} MANIFEST</span>
           </span>
           <h2 className="tree-heading">
-            {events.length > 0 ? events[0].title.split('—')[0].trim() : `NASA Events in ${year}`}
+            {events.length > 0
+              ? events[0].title.split("—")[0].trim()
+              : `NASA Events in ${year}`}
           </h2>
         </div>
 
         <div className="tree-header-meta">
           <span className="tree-count-pill font-mono">
-            {events.length} {events.length === 1 ? 'MISSION RECORD' : 'MISSION RECORDS'}
+            {events.length}{" "}
+            {events.length === 1 ? "MISSION RECORD" : "MISSION RECORDS"}
           </span>
         </div>
       </div>
@@ -111,7 +124,10 @@ export const MissionEventTree: React.FC<MissionEventTreeProps> = ({
         {isLoadingLive && (
           <div className="tree-live-sync-indicator" role="status">
             <Loader2 size={16} className="animate-spin text-cyan-400" />
-            <span>Synchronizing live imagery with NASA Image & Video Library archives…</span>
+            <span>
+              Synchronizing live imagery with NASA Image & Video Library
+              archives…
+            </span>
           </div>
         )}
 
@@ -125,21 +141,22 @@ export const MissionEventTree: React.FC<MissionEventTreeProps> = ({
                   const isHighlight = selectedEventId === event.id;
                   const isExpanded = Boolean(expandedEvents[event.id]);
                   const isLong = event.description.length > EVENT_DESC_LIMIT;
-                  const descText = isLong && !isExpanded
-                    ? `${event.description.slice(0, EVENT_DESC_LIMIT)}…`
-                    : event.description;
+                  const descText =
+                    isLong && !isExpanded
+                      ? `${event.description.slice(0, EVENT_DESC_LIMIT)}…`
+                      : event.description;
 
                   return (
                     <motion.article
                       key={event.id}
-                      className={`tree-event-card ${isHighlight ? 'is-highlighted' : ''}`}
+                      className={`tree-event-card ${isHighlight ? "is-highlighted" : ""}`}
                       initial={{ opacity: 0, x: -35 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -20 }}
                       transition={{
                         duration: 0.45,
                         delay: idx * 0.12,
-                        ease: [0.25, 0.45, 0.3, 1]
+                        ease: [0.25, 0.45, 0.3, 1],
                       }}
                     >
                       <div className="event-spine-node">
@@ -150,11 +167,21 @@ export const MissionEventTree: React.FC<MissionEventTreeProps> = ({
                       <div className="event-card-inner">
                         <div className="event-card-top">
                           <span className="event-category-badge">
-                            {event.category === 'Crewed' && <Rocket size={12} />}
-                            {event.category === 'Planetary' && <Globe size={12} />}
-                            {event.category === 'Astrophysics' && <Sparkles size={12} />}
-                            {event.category === 'Solar & Space' && <Radio size={12} />}
-                            {event.category === 'Infrastructure' && <Compass size={12} />}
+                            {event.category === "Crewed" && (
+                              <Rocket size={12} />
+                            )}
+                            {event.category === "Planetary" && (
+                              <Globe size={12} />
+                            )}
+                            {event.category === "Astrophysics" && (
+                              <Sparkles size={12} />
+                            )}
+                            {event.category === "Solar & Space" && (
+                              <Radio size={12} />
+                            )}
+                            {event.category === "Infrastructure" && (
+                              <Compass size={12} />
+                            )}
                             <span>{event.category.toUpperCase()}</span>
                           </span>
 
@@ -196,21 +223,25 @@ export const MissionEventTree: React.FC<MissionEventTreeProps> = ({
                                   onClick={() => toggleEventExpand(event.id)}
                                   aria-expanded={isExpanded}
                                 >
-                                  {isExpanded ? 'See less' : 'See more'}
+                                  {isExpanded ? "See less" : "See more"}
                                 </button>
                               )}
                             </p>
 
-                            {event.highlights && event.highlights.length > 0 && (
-                              <div className="event-highlights-list">
-                                {event.highlights.map((hl, hIdx) => (
-                                  <div key={hIdx} className="highlight-item">
-                                    <CheckCircle2 size={13} className="text-emerald-400 flex-shrink-0" />
-                                    <span>{hl}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
+                            {event.highlights &&
+                              event.highlights.length > 0 && (
+                                <div className="event-highlights-list">
+                                  {event.highlights.map((hl, hIdx) => (
+                                    <div key={hIdx} className="highlight-item">
+                                      <CheckCircle2
+                                        size={13}
+                                        className="text-emerald-400 flex-shrink-0"
+                                      />
+                                      <span>{hl}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
 
                             <div className="event-actions-bar">
                               <a
@@ -243,7 +274,9 @@ export const MissionEventTree: React.FC<MissionEventTreeProps> = ({
               No Primary Milestones Cataloged for {year}
             </h3>
             <p className="text-xs text-slate-400 max-w-md text-center">
-              NASA operational milestones in this year focused on ongoing orbital missions, planetary cruise phases, or ground aerospace research.
+              NASA operational milestones in this year focused on ongoing
+              orbital missions, planetary cruise phases, or ground aerospace
+              research.
             </p>
           </div>
         )}

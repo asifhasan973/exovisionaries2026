@@ -42,6 +42,7 @@ graph TD
 ```
 
 ### `@exo/engine` (`packages/engine`)
+
 - **Role**: Pure mathematical modeling, orbital mechanics, rocket mass and power budget accounting, and asset preloader task management.
 - **Submodules**:
   - `physics/`: Multi-stage delta-v calculations, ascent velocity curves, atmospheric drag models, and payload capacity equations.
@@ -49,6 +50,7 @@ graph TD
 - **Constraints**: 100% platform-independent; zero DOM dependencies.
 
 ### `@exo/data` (`packages/data`)
+
 - **Role**: Structured aerospace hardware datasets, NASA historical flight records, astronaut dossiers, and mission manifests.
 - **Submodules**:
   - `archive/`: Chronologically partitioned NASA records (`earlyDecades.ts`, `apolloEra.ts`, `shuttleEra.ts`, `modernEra.ts`, `artemisEra.ts`, `events.ts`, `timelineUtils.ts`).
@@ -57,6 +59,7 @@ graph TD
 - **Constraints**: Pure data definitions and immutable reference arrays.
 
 ### `@exo/audio` (`packages/audio`)
+
 - **Role**: Procedural Web Audio API sound synthesis and synchronized state controls.
 - **Modules**:
   - `soundEngine.ts`: Unified audio controller facade exposing tactile sound effects.
@@ -65,6 +68,7 @@ graph TD
 - **Constraints**: Immediate suspension compliance on mobile orientation blocks.
 
 ### `@exo/ui` (`packages/ui`)
+
 - **Role**: Reusable aerospace HUD primitives, orientation enforcement, loading sequences, and vector hardware symbology.
 - **Components**:
   - `OrientationGuard`: Mandatory horizontal viewport guard and universal state freeze orchestrator.
@@ -77,6 +81,7 @@ graph TD
   - `CartoonIcons` & `RealisticPartIcons`: Vector spacecraft and scientific instrument symbology (`icons/parts/`).
 
 ### `@exo/tsconfig` (`packages/tsconfig`)
+
 - **Role**: Shared compiler configurations ensuring consistent TypeScript behavior across the workspace:
   - `base.json`: Modern ESNext compiler options with strict type checking.
   - `react-library.json`: Library preset with JSX transform for shared UI packages.
@@ -112,7 +117,9 @@ apps/web/src/
 ```
 
 ### Feature Slice Layout
+
 Each feature slice in `apps/web/src/features/<feature>/` adheres to an autonomous internal structure:
+
 - `components/`: UI cards, interactive dialogs, and visual control HUDs.
 - `viewports/`: Three.js canvas scenes and 3D mesh rendering mounts.
 - `state/`: Specialized Zustand stores or action reducers scoped to the feature.
@@ -168,6 +175,7 @@ apps/web/public/
 ```
 
 ### Asset Performance Standards
+
 - **Modern Formats**: WebP for all photographic, character, and celestial illustrations; compressed MP3/OGG for audio narration.
 - **Type-Safe Registry**: Every static asset URL must be registered in a type-safe catalog (`assetRegistry.ts` or `voiceClips.ts`), accompanied by automated build-time existence checks.
 

@@ -1,13 +1,20 @@
-import type { WorkshopSession, MissionEvent } from '@/game/moon/workshop/lander/workshopSession';
-import type { SelectionFrame } from '@/game/moon/crew/SelectionScreens';
-import type { PlayerGender } from '@/game/moon/core/types';
-import { getStoryStep } from '@/game/moon/core/flow';
-import { reduceMission } from '@/game/moon/workshop/lander/workshopSession';
-import { ChoiceScreen, MissionHome, NameScreen } from '@/game/moon/crew/SelectionScreens';
-import { ConversationScene } from '@/game/moon/narrative/components/ConversationScene';
-import type { MilestoneId } from '@/game/moon/core/missionMilestones';
-import { MilestonePage } from './milestones';
-import { SimulationScreenRouter } from './SimulationScreenRouter';
+import type {
+  WorkshopSession,
+  MissionEvent,
+} from "@/game/moon/workshop/lander/workshopSession";
+import type { SelectionFrame } from "@/game/moon/crew/SelectionScreens";
+import type { PlayerGender } from "@/game/moon/core/types";
+import { getStoryStep } from "@/game/moon/core/flow";
+import { reduceMission } from "@/game/moon/workshop/lander/workshopSession";
+import {
+  ChoiceScreen,
+  MissionHome,
+  NameScreen,
+} from "@/game/moon/crew/SelectionScreens";
+import { ConversationScene } from "@/game/moon/narrative/components/ConversationScene";
+import type { MilestoneId } from "@/game/moon/core/missionMilestones";
+import { MilestonePage } from "./milestones";
+import { SimulationScreenRouter } from "./SimulationScreenRouter";
 
 export interface StoryScreenRouterProps {
   home: boolean;
@@ -15,14 +22,14 @@ export interface StoryScreenRouterProps {
   frame: SelectionFrame;
   homeFrame: SelectionFrame;
   milestoneCard: boolean;
-  overviewOpen: 'map' | 'start' | null;
+  overviewOpen: "map" | "start" | null;
   pending?: MilestoneId;
   chapterIndex: number;
   autoplay: boolean;
   autoBuilding: boolean;
   storageAvailable: boolean;
   setHome: (home: boolean) => void;
-  setOverviewOpen: (open: 'map' | 'start' | null) => void;
+  setOverviewOpen: (open: "map" | "start" | null) => void;
   setAutoplay: (autoplay: boolean) => void;
   setAutoBuilding: (building: boolean) => void;
   setMission: React.Dispatch<React.SetStateAction<WorkshopSession>>;
@@ -73,11 +80,13 @@ export function StoryScreenRouter({
   }
 
   if (milestoneCard) {
-    const allComplete = progress.stepId === 'mission-debrief' || Boolean(progress.milestones?.celebrated.includes('home'));
+    const allComplete =
+      progress.stepId === "mission-debrief" ||
+      Boolean(progress.milestones?.celebrated.includes("home"));
     return (
       <MilestonePage
         frame={frame}
-        mode={overviewOpen === 'map' ? 'map' : pending ? 'complete' : 'intro'}
+        mode={overviewOpen === "map" ? "map" : pending ? "complete" : "intro"}
         current={chapterIndex}
         completed={pending}
         destination={progress.selections.destination}
@@ -86,18 +95,18 @@ export function StoryScreenRouter({
         onNext={() => {
           setAutoplay(true);
           if (pending) {
-            dispatch({ type: 'milestone-continue' });
-            setOverviewOpen('map');
+            dispatch({ type: "milestone-continue" });
+            setOverviewOpen("map");
           } else {
             setOverviewOpen(null);
-            dispatch({ type: 'milestone-start' });
+            dispatch({ type: "milestone-start" });
           }
         }}
       />
     );
   }
 
-  if (step.kind === 'conversation') {
+  if (step.kind === "conversation") {
     return (
       <ConversationScene
         key={`${step.id}:${progress.lineIndex}`}
@@ -111,7 +120,7 @@ export function StoryScreenRouter({
         headerExtra={frame.headerExtra}
         onNext={() => {
           setAutoplay(true);
-          dispatch({ type: 'next' });
+          dispatch({ type: "next" });
         }}
         onBack={back}
         onHome={homeFrame.onHome}
@@ -119,7 +128,7 @@ export function StoryScreenRouter({
     );
   }
 
-  if (step.kind === 'name') {
+  if (step.kind === "name") {
     return (
       <NameScreen
         key={step.id}
@@ -129,15 +138,15 @@ export function StoryScreenRouter({
         onBack={back}
         onSubmit={(name: string, gender: PlayerGender) => {
           setAutoplay(true);
-          dispatch({ type: 'set-name', name, gender });
-          dispatch({ type: 'next' });
-          setOverviewOpen('start');
+          dispatch({ type: "set-name", name, gender });
+          dispatch({ type: "next" });
+          setOverviewOpen("start");
         }}
       />
     );
   }
 
-  if (step.kind === 'choice') {
+  if (step.kind === "choice") {
     return (
       <ChoiceScreen
         key={step.id}
@@ -146,14 +155,14 @@ export function StoryScreenRouter({
         frame={frame}
         onNext={() => {
           setAutoplay(true);
-          dispatch({ type: 'next' });
+          dispatch({ type: "next" });
         }}
         onBack={back}
-        onSelect={choiceId => {
+        onSelect={(choiceId) => {
           setAutoplay(true);
-          setMission(current => {
+          setMission((current) => {
             if (current.progress.stepId !== step.id) return current;
-            return reduceMission(current, { type: 'select', choiceId });
+            return reduceMission(current, { type: "select", choiceId });
           });
         }}
       />

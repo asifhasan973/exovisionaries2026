@@ -1,14 +1,14 @@
-import { useEffect, useState } from 'react';
-import type { ReactNode } from 'react';
-import { Settings, Volume2, Sparkles, RotateCcw } from 'lucide-react';
-import { GameInfo } from '@exo/ui';
-import { useAudioStore } from '@exo/audio';
-import { SettingsContext } from './gameSettingsContext';
+import { useEffect, useState } from "react";
+import type { ReactNode } from "react";
+import { Settings, Volume2, Sparkles, RotateCcw } from "lucide-react";
+import { GameInfo } from "@exo/ui";
+import { useAudioStore } from "@exo/audio";
+import { SettingsContext } from "./gameSettingsContext";
 
 function saved(key: string, fallback: boolean) {
   try {
     const value = localStorage.getItem(`ztb-${key}`);
-    return value === null ? fallback : value === 'true';
+    return value === null ? fallback : value === "true";
   } catch {
     return fallback;
   }
@@ -25,20 +25,25 @@ export function GameSettingsProvider({
   onToggleVoice?(): void;
   onRestart(): void;
 }) {
-  const isMuted = useAudioStore(s => s.isMuted);
-  const voicesEnabled = useAudioStore(s => s.voicesEnabled);
-  const effectsEnabled = useAudioStore(s => s.effectsEnabled);
-  const setVoicesEnabled = useAudioStore(s => s.setVoicesEnabled);
-  const setEffects = useAudioStore(s => s.setEffectsEnabled);
+  const isMuted = useAudioStore((s) => s.isMuted);
+  const voicesEnabled = useAudioStore((s) => s.voicesEnabled);
+  const effectsEnabled = useAudioStore((s) => s.effectsEnabled);
+  const setVoicesEnabled = useAudioStore((s) => s.setVoicesEnabled);
+  const setEffects = useAudioStore((s) => s.setEffectsEnabled);
 
   const voiceActive = !isMuted && voicesEnabled;
   const effects = !isMuted && effectsEnabled;
-  const [gentle, setGentle] = useState(() => saved('gentle', window.matchMedia('(prefers-reduced-motion: reduce)').matches));
+  const [gentle, setGentle] = useState(() =>
+    saved(
+      "gentle",
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+    ),
+  );
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
     try {
-      localStorage.setItem('ztb-gentle', String(gentle));
+      localStorage.setItem("ztb-gentle", String(gentle));
     } catch {
       /* Settings still work without storage. */
     }
@@ -53,8 +58,8 @@ export function GameSettingsProvider({
 
   useEffect(() => {
     const show = () => setOpen(true);
-    window.addEventListener('open-game-settings', show);
-    return () => window.removeEventListener('open-game-settings', show);
+    window.addEventListener("open-game-settings", show);
+    return () => window.removeEventListener("open-game-settings", show);
   }, []);
 
   return (
@@ -72,7 +77,7 @@ export function GameSettingsProvider({
                 <input
                   type="checkbox"
                   checked={voiceActive}
-                  onChange={e => setVoicesEnabled(e.target.checked)}
+                  onChange={(e) => setVoicesEnabled(e.target.checked)}
                 />
               </label>
               <label>
@@ -81,13 +86,17 @@ export function GameSettingsProvider({
                 <input
                   type="checkbox"
                   checked={effects}
-                  onChange={e => setEffects(e.target.checked)}
+                  onChange={(e) => setEffects(e.target.checked)}
                 />
               </label>
               <label>
                 <Sparkles />
                 Gentle motion
-                <input type="checkbox" checked={gentle} onChange={e => setGentle(e.target.checked)} />
+                <input
+                  type="checkbox"
+                  checked={gentle}
+                  onChange={(e) => setGentle(e.target.checked)}
+                />
               </label>
               <button
                 className="game-info-trigger settings-restart"
@@ -115,7 +124,7 @@ export function SettingsButton({ onOpen }: { onOpen?: () => void } = {}) {
       title="Game settings"
       onClick={() => {
         onOpen?.();
-        window.dispatchEvent(new Event('open-game-settings'));
+        window.dispatchEvent(new Event("open-game-settings"));
       }}
     >
       <Settings size={20} />
@@ -123,4 +132,3 @@ export function SettingsButton({ onOpen }: { onOpen?: () => void } = {}) {
     </button>
   );
 }
-

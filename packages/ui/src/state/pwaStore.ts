@@ -1,15 +1,15 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 
 export interface BeforeInstallPromptEvent extends Event {
   readonly platforms: string[];
   readonly userChoice: Promise<{
-    outcome: 'accepted' | 'dismissed';
+    outcome: "accepted" | "dismissed";
     platform: string;
   }>;
   prompt(): Promise<void>;
 }
 
-export type PwaPlatform = 'ios' | 'android' | 'desktop';
+export type PwaPlatform = "ios" | "android" | "desktop";
 
 export interface PwaState {
   deferredPrompt: BeforeInstallPromptEvent | null;
@@ -25,28 +25,33 @@ export interface PwaState {
 }
 
 function detectPlatform(): PwaPlatform {
-  if (typeof window === 'undefined') return 'desktop';
+  if (typeof window === "undefined") return "desktop";
   const ua = window.navigator.userAgent;
   // iOS / iPadOS detection
-  const isIOS = /iPad|iPhone|iPod/.test(ua) || (window.navigator.platform === 'MacIntel' && window.navigator.maxTouchPoints > 1);
-  if (isIOS) return 'ios';
+  const isIOS =
+    /iPad|iPhone|iPod/.test(ua) ||
+    (window.navigator.platform === "MacIntel" &&
+      window.navigator.maxTouchPoints > 1);
+  if (isIOS) return "ios";
   // Android detection
-  if (/Android/i.test(ua)) return 'android';
-  return 'desktop';
+  if (/Android/i.test(ua)) return "android";
+  return "desktop";
 }
 
 function checkIsInstalled(): boolean {
-  if (typeof window === 'undefined') return false;
-  const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-  const isIOSStandalone = (window.navigator as unknown as { standalone?: boolean }).standalone === true;
-  const isAndroidApp = document.referrer?.startsWith('android-app://') || false;
+  if (typeof window === "undefined") return false;
+  const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
+  const isIOSStandalone =
+    (window.navigator as unknown as { standalone?: boolean }).standalone ===
+    true;
+  const isAndroidApp = document.referrer?.startsWith("android-app://") || false;
   return isStandalone || isIOSStandalone || isAndroidApp;
 }
 
 export const usePwaStore = create<PwaState>((set, get) => ({
   deferredPrompt: null,
-  isInstalled: typeof window !== 'undefined' ? checkIsInstalled() : false,
-  canInstall: typeof window !== 'undefined' ? !checkIsInstalled() : true,
+  isInstalled: typeof window !== "undefined" ? checkIsInstalled() : false,
+  canInstall: typeof window !== "undefined" ? !checkIsInstalled() : true,
   isModalOpen: false,
   platform: detectPlatform(),
 
@@ -55,7 +60,12 @@ export const usePwaStore = create<PwaState>((set, get) => ({
   },
 
   setInstalled: (installed) => {
-    set({ isInstalled: installed, canInstall: !installed, deferredPrompt: null, isModalOpen: false });
+    set({
+      isInstalled: installed,
+      canInstall: !installed,
+      deferredPrompt: null,
+      isModalOpen: false,
+    });
   },
 
   openInstallModal: () => {
@@ -76,7 +86,7 @@ export const usePwaStore = create<PwaState>((set, get) => ({
       try {
         await deferredPrompt.prompt();
         const choice = await deferredPrompt.userChoice;
-        if (choice.outcome === 'accepted') {
+        if (choice.outcome === "accepted") {
           set({
             isInstalled: true,
             canInstall: false,
@@ -85,7 +95,7 @@ export const usePwaStore = create<PwaState>((set, get) => ({
           });
         }
       } catch (err) {
-        console.warn('PWA install prompt error:', err);
+        console.warn("PWA install prompt error:", err);
         set({ isModalOpen: true });
       }
     } else {
@@ -96,19 +106,19 @@ export const usePwaStore = create<PwaState>((set, get) => ({
 }));
 
 // Initialize event listeners once at runtime
-if (typeof window !== 'undefined') {
-  window.addEventListener('beforeinstallprompt', (e) => {
+if (typeof window !== "undefined") {
+  window.addEventListener("beforeinstallprompt", (e) => {
     e.preventDefault();
     usePwaStore.getState().setDeferredPrompt(e as BeforeInstallPromptEvent);
   });
 
-  window.addEventListener('appinstalled', () => {
+  window.addEventListener("appinstalled", () => {
     usePwaStore.getState().setInstalled(true);
   });
 
   try {
-    const mediaQuery = window.matchMedia('(display-mode: standalone)');
-    mediaQuery.addEventListener('change', (e) => {
+    const mediaQuery = window.matchMedia("(display-mode: standalone)");
+    mediaQuery.addEventListener("change", (e) => {
       if (e.matches) {
         usePwaStore.getState().setInstalled(true);
       }

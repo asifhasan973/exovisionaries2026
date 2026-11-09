@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react';
-import { isEngineFrozen } from '../../state/orientationLifecycleStore';
+import { useEffect, useRef } from "react";
+import { isEngineFrozen } from "../../state/orientationLifecycleStore";
 import {
   initStars,
   renderNebula,
@@ -10,7 +10,7 @@ import {
   type Star,
   type ShootingStar,
   type CursorMote,
-} from './cosmicRenderer';
+} from "./cosmicRenderer";
 
 export interface CosmicBackgroundProps {
   gentle?: boolean;
@@ -21,14 +21,17 @@ export interface CosmicBackgroundProps {
  * Interactive Cosmic Particle Canvas
  * Fully integrates with universal state freeze protocol
  */
-export function CosmicBackground({ gentle = false, className = 'mission-home-cosmic-bg' }: CosmicBackgroundProps) {
+export function CosmicBackground({
+  gentle = false,
+  className = "mission-home-cosmic-bg",
+}: CosmicBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d', { alpha: true });
+    const ctx = canvas.getContext("2d", { alpha: true });
     if (!ctx) return;
 
     let animFrame = 0;
@@ -67,8 +70,14 @@ export function CosmicBackground({ gentle = false, className = 'mission-home-cos
     handleResize();
 
     const handlePointerMove = (e: MouseEvent | TouchEvent) => {
-      const clientX = 'touches' in e && e.touches.length > 0 ? e.touches[0].clientX : (e as MouseEvent).clientX;
-      const clientY = 'touches' in e && e.touches.length > 0 ? e.touches[0].clientY : (e as MouseEvent).clientY;
+      const clientX =
+        "touches" in e && e.touches.length > 0
+          ? e.touches[0].clientX
+          : (e as MouseEvent).clientX;
+      const clientY =
+        "touches" in e && e.touches.length > 0
+          ? e.touches[0].clientY
+          : (e as MouseEvent).clientY;
 
       targetPointerX = (clientX / Math.max(width, 1) - 0.5) * 2;
       targetPointerY = (clientY / Math.max(height, 1) - 0.5) * 2;
@@ -88,8 +97,8 @@ export function CosmicBackground({ gentle = false, className = 'mission-home-cos
       }
     };
 
-    window.addEventListener('mousemove', handlePointerMove, { passive: true });
-    window.addEventListener('touchmove', handlePointerMove, { passive: true });
+    window.addEventListener("mousemove", handlePointerMove, { passive: true });
+    window.addEventListener("touchmove", handlePointerMove, { passive: true });
 
     let lastShootingStarTime = performance.now();
     let nextShootingStarDelay = 3500 + Math.random() * 4500;
@@ -126,8 +135,23 @@ export function CosmicBackground({ gentle = false, className = 'mission-home-cos
       ctx.clearRect(0, 0, width, height);
 
       nebulaTime += gentle ? 0.001 : 0.003;
-      renderNebula(ctx, width, height, nebulaTime, currentPointerX, currentPointerY);
-      renderStars(ctx, stars, width, height, currentPointerX, currentPointerY, gentle);
+      renderNebula(
+        ctx,
+        width,
+        height,
+        nebulaTime,
+        currentPointerX,
+        currentPointerY,
+      );
+      renderStars(
+        ctx,
+        stars,
+        width,
+        height,
+        currentPointerX,
+        currentPointerY,
+        gentle,
+      );
 
       if (now - lastShootingStarTime > nextShootingStarDelay && !gentle) {
         spawnShootingStar();
@@ -153,9 +177,9 @@ export function CosmicBackground({ gentle = false, className = 'mission-home-cos
       cancelAnimationFrame(animFrame);
     };
 
-    window.addEventListener('game-orientation-pause', stopLoop);
-    window.addEventListener('game-orientation-resume', startLoop);
-    document.addEventListener('visibilitychange', () => {
+    window.addEventListener("game-orientation-pause", stopLoop);
+    window.addEventListener("game-orientation-resume", startLoop);
+    document.addEventListener("visibilitychange", () => {
       if (document.hidden) stopLoop();
       else startLoop();
     });
@@ -166,13 +190,12 @@ export function CosmicBackground({ gentle = false, className = 'mission-home-cos
       isDisposed = true;
       cancelAnimationFrame(animFrame);
       resizeObserver.disconnect();
-      window.removeEventListener('mousemove', handlePointerMove);
-      window.removeEventListener('touchmove', handlePointerMove);
-      window.removeEventListener('game-orientation-pause', stopLoop);
-      window.removeEventListener('game-orientation-resume', startLoop);
+      window.removeEventListener("mousemove", handlePointerMove);
+      window.removeEventListener("touchmove", handlePointerMove);
+      window.removeEventListener("game-orientation-pause", stopLoop);
+      window.removeEventListener("game-orientation-resume", startLoop);
     };
   }, [gentle]);
 
   return <canvas ref={canvasRef} className={className} aria-hidden="true" />;
 }
-

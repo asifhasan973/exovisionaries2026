@@ -34,11 +34,11 @@ export interface CursorMote {
 }
 
 export const STAR_COLORS = [
-  '#ffffff',
-  '#8ce2c2',
-  '#ffdf89',
-  '#dba3ef',
-  '#99c6ff',
+  "#ffffff",
+  "#8ce2c2",
+  "#ffdf89",
+  "#dba3ef",
+  "#99c6ff",
 ];
 
 export function initStars(w: number, h: number): Star[] {
@@ -78,9 +78,9 @@ export function renderNebula(
     height * 0.4 + shiftY,
     width * 0.45,
   );
-  grad1.addColorStop(0, 'rgba(140, 226, 194, 0.08)');
-  grad1.addColorStop(0.6, 'rgba(88, 140, 190, 0.03)');
-  grad1.addColorStop(1, 'rgba(0, 0, 0, 0)');
+  grad1.addColorStop(0, "rgba(140, 226, 194, 0.08)");
+  grad1.addColorStop(0.6, "rgba(88, 140, 190, 0.03)");
+  grad1.addColorStop(1, "rgba(0, 0, 0, 0)");
   ctx.fillStyle = grad1;
   ctx.fillRect(0, 0, width, height);
 
@@ -92,9 +92,9 @@ export function renderNebula(
     height * 0.55 + shiftY * 0.8,
     width * 0.5,
   );
-  grad2.addColorStop(0, 'rgba(219, 163, 239, 0.07)');
-  grad2.addColorStop(0.55, 'rgba(90, 53, 118, 0.04)');
-  grad2.addColorStop(1, 'rgba(0, 0, 0, 0)');
+  grad2.addColorStop(0, "rgba(219, 163, 239, 0.07)");
+  grad2.addColorStop(0.55, "rgba(90, 53, 118, 0.04)");
+  grad2.addColorStop(1, "rgba(0, 0, 0, 0)");
   ctx.fillStyle = grad2;
   ctx.fillRect(0, 0, width, height);
 }
@@ -174,21 +174,21 @@ export function updateAndRenderShootingStars(
     const tailY = s.y - (s.vy / 16) * s.length;
 
     const starGrad = ctx.createLinearGradient(s.x, s.y, tailX, tailY);
-    starGrad.addColorStop(0, '#ffffff');
-    starGrad.addColorStop(0.2, '#8ce2c2');
-    starGrad.addColorStop(0.7, 'rgba(219, 163, 239, 0.4)');
-    starGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    starGrad.addColorStop(0, "#ffffff");
+    starGrad.addColorStop(0.2, "#8ce2c2");
+    starGrad.addColorStop(0.7, "rgba(219, 163, 239, 0.4)");
+    starGrad.addColorStop(1, "rgba(255, 255, 255, 0)");
 
     ctx.strokeStyle = starGrad;
     ctx.lineWidth = 2.2;
-    ctx.lineCap = 'round';
+    ctx.lineCap = "round";
 
     ctx.beginPath();
     ctx.moveTo(s.x, s.y);
     ctx.lineTo(tailX, tailY);
     ctx.stroke();
 
-    ctx.fillStyle = '#ffffff';
+    ctx.fillStyle = "#ffffff";
     ctx.beginPath();
     ctx.arc(s.x, s.y, 2.5, 0, Math.PI * 2);
     ctx.fill();
@@ -223,4 +223,3 @@ export function updateAndRenderMotes(
     ctx.restore();
   }
 }
-

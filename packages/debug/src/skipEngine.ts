@@ -22,4 +22,3 @@ export function executeSkip<T>(source: T): T {
 export function hasSkipResolver(): boolean {
   return activeSkipResolver !== null;
 }
-

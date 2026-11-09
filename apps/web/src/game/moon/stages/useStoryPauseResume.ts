@@ -1,10 +1,10 @@
-import { useCallback, useRef } from 'react';
-import type { MutableRefObject } from 'react';
-import { isEngineFrozen } from '@exo/ui';
-import { roverActive } from '@/game/moon/rover/rover';
-import { trialActive } from '@/game/moon/hazards/trial';
-import type { MissionEvent } from '@/game/moon/workshop/lander/workshopSession';
-import type { StoryPersistenceState } from './useStoryPersistence.ts';
+import { useCallback, useRef } from "react";
+import type { MutableRefObject } from "react";
+import { isEngineFrozen } from "@exo/ui";
+import { roverActive } from "@/game/moon/rover/rover";
+import { trialActive } from "@/game/moon/hazards/trial";
+import type { MissionEvent } from "@/game/moon/workshop/lander/workshopSession";
+import type { StoryPersistenceState } from "./useStoryPersistence.ts";
 
 export function useStoryPauseResume(
   dispatch: (event: MissionEvent) => void,
@@ -24,21 +24,30 @@ export function useStoryPauseResume(
   const pauseGame = useCallback(() => {
     const current = latestRef.current;
     const shouldPause = {
-      flight: current.flight.status === 'running',
-      trial: trialActive(current.readiness.trial) && !current.readiness.trial.paused,
-      returning: current.progress.stepId === 'crew-return' && !current.moon.returnFlight.paused,
+      flight: current.flight.status === "running",
+      trial:
+        trialActive(current.readiness.trial) && !current.readiness.trial.paused,
+      returning:
+        current.progress.stepId === "crew-return" &&
+        !current.moon.returnFlight.paused,
       science:
-        ['ice-science', 'surface-recovery'].includes(current.progress.stepId) &&
+        ["ice-science", "surface-recovery"].includes(current.progress.stepId) &&
         !current.moon.science.paused,
       surface:
-        ['lunar-surface', 'surface-explore'].includes(current.progress.stepId) &&
-        !current.moon.surface.paused,
-      rover: !!current.moon.rover && roverActive(current.moon.rover) && !current.moon.rover.paused,
-      landing: current.progress.stepId === 'lunar-descent' && !current.moon.landing.paused,
+        ["lunar-surface", "surface-explore"].includes(
+          current.progress.stepId,
+        ) && !current.moon.surface.paused,
+      rover:
+        !!current.moon.rover &&
+        roverActive(current.moon.rover) &&
+        !current.moon.rover.paused,
+      landing:
+        current.progress.stepId === "lunar-descent" &&
+        !current.moon.landing.paused,
       journey:
-        ['moon-transfer'].includes(current.progress.stepId) &&
+        ["moon-transfer"].includes(current.progress.stepId) &&
         !current.moon.journey.paused &&
-        current.moon.journey.stage !== 'complete',
+        current.moon.journey.stage !== "complete",
     };
 
     if (shouldPause.rover) pausedFromMenu.current.rover = true;
@@ -50,28 +59,28 @@ export function useStoryPauseResume(
     if (shouldPause.landing) pausedFromMenu.current.landing = true;
     if (shouldPause.journey) pausedFromMenu.current.journey = true;
 
-    if (shouldPause.rover) dispatch({ type: 'rover-pause' });
-    if (shouldPause.flight) dispatch({ type: 'flight-pause' });
-    if (shouldPause.trial) dispatch({ type: 'trial-pause' });
-    if (shouldPause.returning) dispatch({ type: 'return-pause' });
-    if (shouldPause.science) dispatch({ type: 'science-pause' });
-    if (shouldPause.surface) dispatch({ type: 'surface-pause' });
-    if (shouldPause.landing) dispatch({ type: 'landing-pause' });
-    if (shouldPause.journey) dispatch({ type: 'journey-pause' });
+    if (shouldPause.rover) dispatch({ type: "rover-pause" });
+    if (shouldPause.flight) dispatch({ type: "flight-pause" });
+    if (shouldPause.trial) dispatch({ type: "trial-pause" });
+    if (shouldPause.returning) dispatch({ type: "return-pause" });
+    if (shouldPause.science) dispatch({ type: "science-pause" });
+    if (shouldPause.surface) dispatch({ type: "surface-pause" });
+    if (shouldPause.landing) dispatch({ type: "landing-pause" });
+    if (shouldPause.journey) dispatch({ type: "journey-pause" });
 
-    window.dispatchEvent(new Event('game-help-open'));
+    window.dispatchEvent(new Event("game-help-open"));
   }, [dispatch, latestRef]);
 
   const resumeGame = useCallback(() => {
     if (isEngineFrozen()) return;
-    if (pausedFromMenu.current.rover) dispatch({ type: 'rover-resume' });
-    if (pausedFromMenu.current.flight) dispatch({ type: 'flight-resume' });
-    if (pausedFromMenu.current.returning) dispatch({ type: 'return-resume' });
-    if (pausedFromMenu.current.science) dispatch({ type: 'science-resume' });
-    if (pausedFromMenu.current.surface) dispatch({ type: 'surface-resume' });
-    if (pausedFromMenu.current.landing) dispatch({ type: 'landing-resume' });
-    if (pausedFromMenu.current.journey) dispatch({ type: 'journey-resume' });
-    if (pausedFromMenu.current.trial) dispatch({ type: 'trial-resume' });
+    if (pausedFromMenu.current.rover) dispatch({ type: "rover-resume" });
+    if (pausedFromMenu.current.flight) dispatch({ type: "flight-resume" });
+    if (pausedFromMenu.current.returning) dispatch({ type: "return-resume" });
+    if (pausedFromMenu.current.science) dispatch({ type: "science-resume" });
+    if (pausedFromMenu.current.surface) dispatch({ type: "surface-resume" });
+    if (pausedFromMenu.current.landing) dispatch({ type: "landing-resume" });
+    if (pausedFromMenu.current.journey) dispatch({ type: "journey-resume" });
+    if (pausedFromMenu.current.trial) dispatch({ type: "trial-resume" });
     pausedFromMenu.current = {
       flight: false,
       trial: false,
@@ -86,4 +95,3 @@ export function useStoryPauseResume(
 
   return { pauseGame, resumeGame };
 }
-

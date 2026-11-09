@@ -1,6 +1,6 @@
-import React from 'react';
-import type { SelectionFrame } from '@/game/moon/crew/SelectionScreens';
-import { StoryHeaderExtra } from './StoryHeaderExtra';
+import React from "react";
+import type { SelectionFrame } from "@/game/moon/crew/SelectionScreens";
+import { StoryHeaderExtra } from "./StoryHeaderExtra";
 
 export interface UseStoryFramesOptions {
   onHome: () => void;
@@ -28,13 +28,16 @@ export function useStoryFrames({
   storageAvailable,
   isSaving,
   skipError,
-}: UseStoryFramesOptions): { frame: SelectionFrame; homeFrame: SelectionFrame } {
+}: UseStoryFramesOptions): {
+  frame: SelectionFrame;
+  homeFrame: SelectionFrame;
+} {
   const frame: SelectionFrame = {
     onHome,
     voiceEnabled,
     soundActive,
     onToggleVoice: toggleAudioMute,
-    voiceAvailable: typeof Audio !== 'undefined',
+    voiceAvailable: typeof Audio !== "undefined",
     headerExtra: (
       <StoryHeaderExtra
         isDebugSession={isDebugSession}
@@ -67,4 +70,3 @@ export function useStoryFrames({
 
   return { frame, homeFrame };
 }
-

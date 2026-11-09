@@ -1,4 +1,3 @@
-export * from './checkPathData';
-export * from './checkCopy';
-export * from './CheckPath';
-
+export * from "./checkPathData";
+export * from "./checkCopy";
+export * from "./CheckPath";

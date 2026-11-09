@@ -6,12 +6,16 @@
   "scripts": {
     "build": "turbo run build",
     "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{css,ts,tsx,json,html,md,yaml,yml}\" --ignore-path .gitignore",
+    "format:check": "prettier --check \"**/*.{css,ts,tsx,json,html,md,yaml,yml}\" --ignore-path .gitignore",
+    "format:css": "prettier --write \"apps/**/*.css\" \"packages/**/*.css\"",
     "dev": "turbo run dev",
     "preview": "turbo run preview",
     "test": "turbo run lint"
   },
   "devDependencies": {
     "oxlint": "^1.88.0",
+    "prettier": "^3.9.10",
     "sharp": "^0.35.5",
     "turbo": "^2.4.4"
   }

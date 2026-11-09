@@ -16,7 +16,7 @@ Whenever a user accesses the application in portrait orientation or resizes thei
    - High-contrast cosmic theme with radial lighting and twinkling starfields matching the project's visual identity.
    - Animated visual device rotation guide showing a smartphone pivoting from portrait to landscape alongside radar pulse waves and orbit rings.
    - Status beacon displaying active flight status: `Portrait Mode Detected • Game Paused`.
-   - Clear instructional copy: *"Commander, the spacecraft flight deck and navigation systems require Landscape Orientation. Please turn your device sideways to continue your mission."*
+   - Clear instructional copy: _"Commander, the spacecraft flight deck and navigation systems require Landscape Orientation. Please turn your device sideways to continue your mission."_
 4. **Fullscreen & Orientation Lock Assist**:
    - The primary action button, **Enter Landscape Fullscreen**, attempts programmatic switch to fullscreen (`requestFullscreen`) and requests `screen.orientation.lock('landscape')`.
    - On browsers where programmatic orientation lock is restricted by platform policy (such as iOS Safari or non-standalone web apps), an inline guidance tip gently reminds the player to unlock device auto-rotate.

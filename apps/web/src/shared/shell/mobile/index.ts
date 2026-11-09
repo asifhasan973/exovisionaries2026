@@ -1,3 +1,2 @@
-export * from './mobileGameContext';
-export * from './MobileGame';
-
+export * from "./mobileGameContext";
+export * from "./MobileGame";

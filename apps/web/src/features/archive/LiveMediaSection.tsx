@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { Sparkles } from 'lucide-react';
-import { NASA_BUBBLE_PLACEHOLDER } from '@exo/engine';
-import type { NasaLiveMediaItem } from '@/shared/services/nasaApiService';
-import { sound } from '@exo/audio';
-import { formatOrdinalDate } from './archiveFormatters';
+import React, { useState } from "react";
+import { Sparkles } from "lucide-react";
+import { NASA_BUBBLE_PLACEHOLDER } from "@exo/engine";
+import type { NasaLiveMediaItem } from "@/shared/services/nasaApiService";
+import { sound } from "@exo/audio";
+import { formatOrdinalDate } from "./archiveFormatters";
 
 interface LiveMediaSectionProps {
   liveMedia: NasaLiveMediaItem[];
@@ -12,14 +12,19 @@ interface LiveMediaSectionProps {
 
 const TRUNCATE_LIMIT = 110;
 
-export const LiveMediaSection: React.FC<LiveMediaSectionProps> = ({ liveMedia, year }) => {
-  const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>({});
+export const LiveMediaSection: React.FC<LiveMediaSectionProps> = ({
+  liveMedia,
+  year,
+}) => {
+  const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>(
+    {},
+  );
 
   const toggleExpand = (id: string) => {
     sound.playClick(650);
     setExpandedCards((prev) => ({
       ...prev,
-      [id]: !prev[id]
+      [id]: !prev[id],
     }));
   };
 
@@ -36,9 +41,10 @@ export const LiveMediaSection: React.FC<LiveMediaSectionProps> = ({ liveMedia, y
         {liveMedia.map((item) => {
           const isExpanded = Boolean(expandedCards[item.nasaId]);
           const isLong = item.description.length > TRUNCATE_LIMIT;
-          const displayText = isLong && !isExpanded
-            ? `${item.description.slice(0, TRUNCATE_LIMIT)}…`
-            : item.description;
+          const displayText =
+            isLong && !isExpanded
+              ? `${item.description.slice(0, TRUNCATE_LIMIT)}…`
+              : item.description;
 
           return (
             <div key={item.nasaId} className="live-media-card">
@@ -54,7 +60,9 @@ export const LiveMediaSection: React.FC<LiveMediaSectionProps> = ({ liveMedia, y
                 />
               )}
               <div className="live-media-caption">
-                <span className="live-media-date">{formatOrdinalDate(item.dateCreated)}</span>
+                <span className="live-media-date">
+                  {formatOrdinalDate(item.dateCreated)}
+                </span>
                 <strong className="live-media-title">{item.title}</strong>
                 <p className="live-media-desc">
                   <span>{displayText}</span>
@@ -65,7 +73,7 @@ export const LiveMediaSection: React.FC<LiveMediaSectionProps> = ({ liveMedia, y
                       onClick={() => toggleExpand(item.nasaId)}
                       aria-expanded={isExpanded}
                     >
-                      {isExpanded ? 'See less' : 'See more'}
+                      {isExpanded ? "See less" : "See more"}
                     </button>
                   )}
                 </p>
@@ -77,4 +85,3 @@ export const LiveMediaSection: React.FC<LiveMediaSectionProps> = ({ liveMedia, y
     </div>
   );
 };
-

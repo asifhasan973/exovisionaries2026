@@ -1,5 +1,5 @@
-import type { MouseEvent } from 'react';
-import { sound } from '@exo/audio';
+import type { MouseEvent } from "react";
+import { sound } from "@exo/audio";
 
 export interface ProgressRingProps {
   percent: number;
@@ -18,10 +18,12 @@ export function ProgressRing({
   label,
   title,
   onClick,
-  className = 'mission-progress-ring',
+  className = "mission-progress-ring",
 }: ProgressRingProps) {
-  const ariaLabel = label ?? `Milestone ${current} of ${total}, ${percent}% complete.`;
-  const ringTitle = title ?? `Milestone ${current}/${total} · ${percent}% (Open mission map)`;
+  const ariaLabel =
+    label ?? `Milestone ${current} of ${total}, ${percent}% complete.`;
+  const ringTitle =
+    title ?? `Milestone ${current}/${total} · ${percent}% (Open mission map)`;
 
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
     sound.playClick(720);
@@ -52,7 +54,9 @@ export function ProgressRing({
       </div>
       <div className="ring-content">
         <strong>{percent}%</strong>
-        <small>{current}/{total}</small>
+        <small>
+          {current}/{total}
+        </small>
       </div>
     </button>
   );

@@ -1,5 +1,4 @@
-export * from './WorkshopPartCard';
-export * from './WorkshopInventoryDrawer';
-export * from './WorkshopMeters';
-export * from './WorkshopPartDialogs';
-
+export * from "./WorkshopPartCard";
+export * from "./WorkshopInventoryDrawer";
+export * from "./WorkshopMeters";
+export * from "./WorkshopPartDialogs";

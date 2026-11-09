@@ -1,5 +1,5 @@
-import { createContext, useContext } from 'react';
-import type { milestoneProgress } from './missionMilestones';
+import { createContext, useContext } from "react";
+import type { milestoneProgress } from "./missionMilestones";
 export interface StoryNavigation {
   progress: ReturnType<typeof milestoneProgress>;
   reviewing: boolean;
@@ -10,9 +10,11 @@ export interface StoryNavigation {
   back(): void;
   forward(): void;
   overview(): void;
-  overviewOpen?: 'map' | 'start' | 'complete' | null;
+  overviewOpen?: "map" | "start" | "complete" | null;
   storageAvailable?: boolean;
   isSaving?: boolean;
 }
-export const StoryNavigationContext=createContext<StoryNavigation|null>(null);
-export const useStoryNavigation=()=>useContext(StoryNavigationContext);
+export const StoryNavigationContext = createContext<StoryNavigation | null>(
+  null,
+);
+export const useStoryNavigation = () => useContext(StoryNavigationContext);

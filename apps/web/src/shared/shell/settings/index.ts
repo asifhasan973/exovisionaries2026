@@ -1,3 +1,2 @@
-export * from './gameSettingsContext';
-export * from './GameSettings';
-
+export * from "./gameSettingsContext";
+export * from "./GameSettings";

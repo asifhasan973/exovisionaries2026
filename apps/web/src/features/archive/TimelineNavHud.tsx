@@ -1,5 +1,5 @@
-import React from 'react';
-import { ChevronLeft, ChevronRight, Compass, RotateCcw } from 'lucide-react';
+import React from "react";
+import { ChevronLeft, ChevronRight, Compass, RotateCcw } from "lucide-react";
 
 export interface TimelineHeaderHudProps {
   activeCenterYear: number;
@@ -86,4 +86,3 @@ export const TimelineFooterHud: React.FC<TimelineFooterHudProps> = ({
     </div>
   );
 };
-

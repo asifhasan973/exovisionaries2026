@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import { sound } from '@exo/audio';
+import { useEffect, useRef, useState } from "react";
+import { sound } from "@exo/audio";
 
 export interface WorkshopDragState {
   id: string;
@@ -35,11 +35,14 @@ export function useWorkshopDrag({
       drag.current = null;
       setDragging(null);
     };
-    window.addEventListener('blur', cancel);
-    return () => window.removeEventListener('blur', cancel);
+    window.addEventListener("blur", cancel);
+    return () => window.removeEventListener("blur", cancel);
   }, []);
 
-  const onPointerDown = (event: React.PointerEvent<HTMLButtonElement>, id: string) => {
+  const onPointerDown = (
+    event: React.PointerEvent<HTMLButtonElement>,
+    id: string,
+  ) => {
     if (event.button !== 0 || !event.isPrimary) return;
     suppressClick.current = false;
 
@@ -77,7 +80,11 @@ export function useWorkshopDrag({
         active.isDragging = true;
         suppressClick.current = true;
         if (navigator.vibrate) {
-          try { navigator.vibrate(30); } catch { /* ignore */ }
+          try {
+            navigator.vibrate(30);
+          } catch {
+            /* ignore */
+          }
         }
         sound.setMuted(!effects);
         sound.playSnap();
@@ -111,10 +118,15 @@ export function useWorkshopDrag({
       }
     }
 
-    if (active.targetElement && active.targetElement.hasPointerCapture(event.pointerId)) {
+    if (
+      active.targetElement &&
+      active.targetElement.hasPointerCapture(event.pointerId)
+    ) {
       try {
         active.targetElement.releasePointerCapture(event.pointerId);
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
     }
     drag.current = null;
     setDragging(null);
