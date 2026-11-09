@@ -1,13 +1,23 @@
-import { ArrowLeft, ArrowRight, Rocket, SkipForward, Volume2, VolumeX } from 'lucide-react';
-import { useEffect, useRef } from 'react';
-import type { ReactNode } from 'react';
-import './viewport.css';
-import { SettingsButton } from './settings';
-import { HintButton, LearningControls } from '@/game/moon/core/learning/Learning';
-import { useMobileGame } from './mobile';
-import { SourcesButton } from '@/game/moon/core/learning/MissionSources';
-import { useStoryNavigation } from '@/game/moon/core/storyNavigationContext';
-import { MilestoneRing } from '@/game/moon/stages/milestones/MilestoneRing';
+import {
+  ArrowLeft,
+  ArrowRight,
+  Rocket,
+  SkipForward,
+  Volume2,
+  VolumeX,
+} from "lucide-react";
+import { useEffect, useRef } from "react";
+import type { ReactNode } from "react";
+import "./viewport.css";
+import { SettingsButton } from "./settings";
+import {
+  HintButton,
+  LearningControls,
+} from "@/game/moon/core/learning/Learning";
+import { useMobileGame } from "./mobile";
+import { SourcesButton } from "@/game/moon/core/learning/MissionSources";
+import { useStoryNavigation } from "@/game/moon/core/storyNavigationContext";
+import { MilestoneRing } from "@/game/moon/stages/milestones/MilestoneRing";
 
 export interface StoryShellProps {
   children: ReactNode;
@@ -23,36 +33,99 @@ export interface StoryShellProps {
 }
 
 /** Shared navigation frame for conversations, mission cards and the workshop handoff. */
-export function StoryShell({ children, controls, headerExtra, onHome, exitURL = import.meta.env.BASE_URL,
-  voiceEnabled = true, soundActive, onToggleVoice, voiceAvailable = true, skipTarget = 'story-content' }: StoryShellProps) {
+export function StoryShell({
+  children,
+  controls,
+  headerExtra,
+  onHome,
+  exitURL = import.meta.env.BASE_URL,
+  voiceEnabled = true,
+  soundActive,
+  onToggleVoice,
+  voiceAvailable = true,
+  skipTarget = "story-content",
+}: StoryShellProps) {
   const isSoundOn = soundActive ?? voiceEnabled;
   const mobileGame = useMobileGame();
-  const navigation=useStoryNavigation(),shell=useRef<HTMLDivElement>(null);
-  const reviewing=!!navigation?.reviewing&&!navigation.card;
-  useEffect(()=>{
-    if(!reviewing)return;
-    const mains=Array.from(shell.current?.querySelectorAll('main')??[]),previous=mains.map(main=>main.inert);
-    mains.forEach(main=>{main.inert=true;});return()=>mains.forEach((main,i)=>{main.inert=previous[i];});
-  },[reviewing,children]);
-  const footer=reviewing?<StoryControls onBack={navigation!.back} onNext={navigation!.forward} nextLabel="Next" hintDisabled/>:controls??(navigation?.skip?<footer className="conversation-controls"><span/><div className="conversation-progress"><JudgeSkip/></div><span/></footer>:null);
+  const navigation = useStoryNavigation(),
+    shell = useRef<HTMLDivElement>(null);
+  const reviewing = !!navigation?.reviewing && !navigation.card;
+  useEffect(() => {
+    if (!reviewing) return;
+    const mains = Array.from(shell.current?.querySelectorAll("main") ?? []),
+      previous = mains.map((main) => main.inert);
+    mains.forEach((main) => {
+      main.inert = true;
+    });
+    return () =>
+      mains.forEach((main, i) => {
+        main.inert = previous[i];
+      });
+  }, [reviewing, children]);
+  const footer = reviewing ? (
+    <StoryControls
+      onBack={navigation!.back}
+      onNext={navigation!.forward}
+      nextLabel="Next"
+      hintDisabled
+    />
+  ) : (
+    (controls ??
+    (navigation?.skip ? (
+      <footer className="conversation-controls">
+        <span />
+        <span />
+        <div className="next-control">
+          <JudgeSkip />
+        </div>
+      </footer>
+    ) : null))
+  );
   useEffect(() => {
     const advance = (event: KeyboardEvent) => {
-      if (event.key !== 'Enter' || event.defaultPrevented || event.repeat || event.isComposing || event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) return;
-      if (document.querySelector('dialog[open]')) return;
+      if (
+        event.key !== "Enter" ||
+        event.defaultPrevented ||
+        event.repeat ||
+        event.isComposing ||
+        event.ctrlKey ||
+        event.metaKey ||
+        event.altKey ||
+        event.shiftKey
+      )
+        return;
+      if (document.querySelector("dialog[open]")) return;
       const target = event.target as HTMLElement;
       // Native form submission and focused controls keep their keyboard behavior.
-      if (target.closest('input, textarea, select, button, a, [contenteditable="true"]')) return;
-      const action = document.querySelector<HTMLButtonElement>('.conversation-game [data-primary-action]:not(:disabled):not([inert] *)');
-      if (action) { event.preventDefault(); action.click(); }
+      if (
+        target.closest(
+          'input, textarea, select, button, a, [contenteditable="true"]',
+        )
+      )
+        return;
+      const action = document.querySelector<HTMLButtonElement>(
+        ".conversation-game [data-primary-action]:not(:disabled):not([inert] *)",
+      );
+      if (action) {
+        event.preventDefault();
+        action.click();
+      }
     };
-    window.addEventListener('keydown', advance);
-    return () => window.removeEventListener('keydown', advance);
+    window.addEventListener("keydown", advance);
+    return () => window.removeEventListener("keydown", advance);
   }, []);
-  const brand = <><span><Rocket size={25} /></span>Zero To Beyond</>;
+  const brand = (
+    <>
+      <span>
+        <Rocket size={25} />
+      </span>
+      Zero To Beyond
+    </>
+  );
   return (
     <div
       ref={shell}
-      className={`conversation-game ${footer ? '' : 'without-footer'} ${mobileGame.active ? 'is-mobile-game' : ''} ${reviewing ? 'is-review' : ''}`}
+      className={`conversation-game ${footer ? "" : "without-footer"} ${mobileGame.active ? "is-mobile-game" : ""} ${reviewing ? "is-review" : ""}`}
     >
       <a className="conversation-skip" href={`#${skipTarget}`}>
         Skip to mission
@@ -60,7 +133,11 @@ export function StoryShell({ children, controls, headerExtra, onHome, exitURL = 
       {!mobileGame.active || controls === null ? (
         <header className="conversation-header">
           {onHome ? (
-            <button className="conversation-brand" onClick={onHome} aria-label="Zero To Beyond home">
+            <button
+              className="conversation-brand"
+              onClick={onHome}
+              aria-label="Zero To Beyond home"
+            >
               {brand}
             </button>
           ) : (
@@ -79,11 +156,27 @@ export function StoryShell({ children, controls, headerExtra, onHome, exitURL = 
                 className="conversation-icon labeled-control"
                 onClick={onToggleVoice}
                 disabled={!voiceAvailable}
-                aria-label={!voiceAvailable ? 'Sound unavailable' : isSoundOn ? 'Mute sound' : 'Enable sound'}
+                aria-label={
+                  !voiceAvailable
+                    ? "Sound unavailable"
+                    : isSoundOn
+                      ? "Mute sound"
+                      : "Enable sound"
+                }
                 aria-pressed={isSoundOn && voiceAvailable}
-                title={!voiceAvailable ? 'Sound unavailable' : isSoundOn ? 'Mute sound' : 'Enable sound'}
+                title={
+                  !voiceAvailable
+                    ? "Sound unavailable"
+                    : isSoundOn
+                      ? "Mute sound"
+                      : "Enable sound"
+                }
               >
-                {isSoundOn && voiceAvailable ? <Volume2 size={21} /> : <VolumeX size={21} />}
+                {isSoundOn && voiceAvailable ? (
+                  <Volume2 size={21} />
+                ) : (
+                  <VolumeX size={21} />
+                )}
                 <span>Sound</span>
               </button>
             ) : null}
@@ -91,7 +184,11 @@ export function StoryShell({ children, controls, headerExtra, onHome, exitURL = 
         </header>
       ) : null}
       {children}
-      {reviewing ? <span className="story-review-note" role="status">Review · mission paused</span> : null}
+      {reviewing ? (
+        <span className="story-review-note" role="status">
+          Review · mission paused
+        </span>
+      ) : null}
       {footer}
     </div>
   );
@@ -118,7 +215,7 @@ export interface StoryControlsProps {
 export function StoryControls({
   onBack,
   onNext,
-  nextLabel = 'Next',
+  nextLabel = "Next",
   nextDisabled = false,
   nextForm,
   progress,
@@ -130,14 +227,16 @@ export function StoryControls({
   hintHidden = false,
   skipHidden = false,
   keepProgress = false,
-  skipWithHint = false,
+  skipWithHint: _skipWithHint = false,
 }: StoryControlsProps) {
   const navigation = useStoryNavigation();
   const showSkip = !skipHidden && !!navigation?.skip;
   const showDialog = !dialogHidden && Boolean(dialog);
 
   return (
-    <footer className={`conversation-controls ${showDialog ? 'has-bottom-dialog' : ''}`}>
+    <footer
+      className={`conversation-controls ${showDialog ? "has-bottom-dialog" : ""}`}
+    >
       <div className="conversation-left-group">
         {backHidden ? (
           <span className="conversation-back-spacer" aria-hidden="true" />
@@ -152,20 +251,14 @@ export function StoryControls({
           </button>
         )}
         {showDialog && (
-          <div className="conversation-bottom-dialog">
-            {dialog}
-          </div>
+          <div className="conversation-bottom-dialog">{dialog}</div>
         )}
       </div>
       <div className="conversation-progress">
-        {showSkip && !skipWithHint ? (
-          <JudgeSkip />
-        ) : !navigation || keepProgress ? (
-          progress
-        ) : null}
+        {!navigation || keepProgress ? progress : null}
       </div>
       <div className="next-control">
-        {showSkip && skipWithHint ? <JudgeSkip /> : null}
+        {showSkip ? <JudgeSkip /> : null}
         {!hintHidden && !navigation?.card ? (
           <HintButton disabled={hintDisabled} />
         ) : null}
@@ -173,10 +266,10 @@ export function StoryControls({
           {nextHint}
         </span>
         <button
-          aria-describedby={nextHint ? 'next-action-hint' : undefined}
+          aria-describedby={nextHint ? "next-action-hint" : undefined}
           data-primary-action
           className="conversation-next"
-          type={nextForm ? 'submit' : 'button'}
+          type={nextForm ? "submit" : "button"}
           form={nextForm}
           disabled={nextDisabled}
           onClick={onNext}
@@ -189,8 +282,19 @@ export function StoryControls({
   );
 }
 
-export function StorySkip(){
-  const navigation=useStoryNavigation();
-  return navigation?.skip?<button type="button" className="conversation-judge-skip" onClick={navigation.skip} disabled={navigation.skipping} title="Skip this page and advance to the next mission stage."><SkipForward size={17}/>{navigation.skipping?'Advancing…':'Skip'}</button>:null;
+export function StorySkip() {
+  const navigation = useStoryNavigation();
+  return navigation?.skip ? (
+    <button
+      type="button"
+      className="conversation-judge-skip"
+      onClick={navigation.skip}
+      disabled={navigation.skipping}
+      title="Skip this page and advance to the next mission stage."
+    >
+      <SkipForward size={17} />
+      {navigation.skipping ? "Advancing…" : "Skip"}
+    </button>
+  ) : null;
 }
 export const JudgeSkip = StorySkip;

@@ -4,11 +4,11 @@
  * VITE_APP_ENV=production can also disable it locally.
  */
 export const isDevelopment: boolean =
-  typeof import.meta !== 'undefined' &&
+  typeof import.meta !== "undefined" &&
   Boolean(import.meta.env?.DEV) &&
-  import.meta.env?.VITE_APP_ENV !== 'production';
+  import.meta.env?.VITE_APP_ENV !== "production";
 
-export type DebugTargetType = 'page' | 'step';
+export type DebugTargetType = "page" | "step";
 
 export interface DebugRoute {
   type: DebugTargetType;
@@ -61,22 +61,21 @@ export function createDebugSession(stepId: string): any {
  */
 export function parseDebugHash(hash: string): DebugRoute | null {
   if (!isDevelopment) return null;
-  const clean = hash.replace(/^#\/?/, '').trim();
-  if (!clean.startsWith('debug')) return null;
+  const clean = hash.replace(/^#\/?/, "").trim();
+  if (!clean.startsWith("debug")) return null;
 
-  const parts = clean.split('/').filter(Boolean);
+  const parts = clean.split("/").filter(Boolean);
   if (parts.length < 2) return null;
 
   if (parts.length >= 3) {
     const type = parts[1];
     const id = parts[2];
-    if (type === 'page' || type === 'step') {
+    if (type === "page" || type === "step") {
       return { type, id };
     }
     return null;
   }
 
   // Shorthand #/debug/:id -> default to 'step'
-  return { type: 'step', id: parts[1] };
+  return { type: "step", id: parts[1] };
 }
-

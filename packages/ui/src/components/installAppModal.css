@@ -17,8 +17,12 @@
 }
 
 @keyframes pwaFadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .pwa-modal-container {
@@ -26,9 +30,16 @@
   width: 100%;
   max-width: 680px;
   max-height: min(90vh, 520px);
-  background: linear-gradient(135deg, rgba(16, 11, 38, 0.94) 0%, rgba(3, 7, 18, 0.96) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(16, 11, 38, 0.94) 0%,
+    rgba(3, 7, 18, 0.96) 100%
+  );
   border: 1px solid rgba(140, 226, 194, 0.25);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 30px rgba(140, 226, 194, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.7),
+    0 0 30px rgba(140, 226, 194, 0.12),
+    inset 0 1px 1px rgba(255, 255, 255, 0.15);
   border-radius: 20px;
   overflow: hidden;
   display: flex;
@@ -77,7 +88,7 @@
 }
 
 .pwa-modal-title {
-  font-family: 'Outfit', sans-serif;
+  font-family: "Outfit", sans-serif;
   font-weight: 700;
   font-size: 16px;
   color: #f8fafc;
@@ -133,7 +144,7 @@
   gap: 8px;
   padding: 8px 14px;
   border-radius: 10px;
-  font-family: 'Outfit', sans-serif;
+  font-family: "Outfit", sans-serif;
   font-size: 13px;
   font-weight: 600;
   color: #94a3b8;
@@ -190,14 +201,18 @@
   gap: 12px;
   padding: 12px 16px;
   border-radius: 12px;
-  background: linear-gradient(135deg, rgba(2, 132, 199, 0.18) 0%, rgba(134, 59, 255, 0.18) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(2, 132, 199, 0.18) 0%,
+    rgba(134, 59, 255, 0.18) 100%
+  );
   border: 1px solid rgba(56, 189, 248, 0.4);
   box-shadow: 0 0 20px rgba(56, 189, 248, 0.15);
 }
 
 .pwa-direct-copy h4 {
   margin: 0;
-  font-family: 'Outfit', sans-serif;
+  font-family: "Outfit", sans-serif;
   font-size: 13px;
   font-weight: 700;
   color: #38bdf8;
@@ -226,7 +241,7 @@
 
 .pwa-method-divider::before,
 .pwa-method-divider::after {
-  content: '';
+  content: "";
   flex: 1;
   height: 1px;
   background: rgba(255, 255, 255, 0.08);
@@ -318,7 +333,7 @@
 }
 
 .pwa-perk-title {
-  font-family: 'Outfit', sans-serif;
+  font-family: "Outfit", sans-serif;
   font-size: 12px;
   font-weight: 700;
   color: #ffdf89;
@@ -353,7 +368,7 @@
   background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
   border: 1px solid #38bdf8;
   color: #ffffff;
-  font-family: 'Outfit', sans-serif;
+  font-family: "Outfit", sans-serif;
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
@@ -373,7 +388,7 @@
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.15);
   color: #e2e8f0;
-  font-family: 'Outfit', sans-serif;
+  font-family: "Outfit", sans-serif;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;

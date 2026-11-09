@@ -1,1 +1,1 @@
-export * from '@exo/data';
+export * from "@exo/data";

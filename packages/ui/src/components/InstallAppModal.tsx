@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Monitor,
   Smartphone,
@@ -6,18 +6,25 @@ import {
   Download,
   X,
   CheckCircle2,
-} from 'lucide-react';
-import { usePwaStore } from '../state/pwaStore';
-import type { PwaPlatform } from '../state/pwaStore';
-import { sound } from '@exo/audio';
-import { DesktopInstructions } from './install-modal/DesktopInstructions';
-import { AndroidInstructions } from './install-modal/AndroidInstructions';
-import { IosInstructions } from './install-modal/IosInstructions';
-import { PwaPerksBox } from './install-modal/PwaPerksBox';
-import './installAppModal.css';
+} from "lucide-react";
+import { usePwaStore } from "../state/pwaStore";
+import type { PwaPlatform } from "../state/pwaStore";
+import { sound } from "@exo/audio";
+import { DesktopInstructions } from "./install-modal/DesktopInstructions";
+import { AndroidInstructions } from "./install-modal/AndroidInstructions";
+import { IosInstructions } from "./install-modal/IosInstructions";
+import { PwaPerksBox } from "./install-modal/PwaPerksBox";
+import "./installAppModal.css";
 
 export const InstallAppModal: React.FC = () => {
-  const { isModalOpen, closeInstallModal, promptInstall, deferredPrompt, platform, isInstalled } = usePwaStore();
+  const {
+    isModalOpen,
+    closeInstallModal,
+    promptInstall,
+    deferredPrompt,
+    platform,
+    isInstalled,
+  } = usePwaStore();
   const [selectedTab, setSelectedTab] = useState<PwaPlatform | null>(null);
   const activeTab = selectedTab ?? platform;
   const setActiveTab = setSelectedTab;
@@ -26,14 +33,14 @@ export const InstallAppModal: React.FC = () => {
     if (!isModalOpen) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         sound.playClick();
         closeInstallModal();
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isModalOpen, closeInstallModal]);
 
   if (!isModalOpen || isInstalled) return null;
@@ -94,9 +101,9 @@ export const InstallAppModal: React.FC = () => {
           <button
             type="button"
             role="tab"
-            aria-selected={activeTab === 'desktop'}
-            className={`pwa-tab-btn ${activeTab === 'desktop' ? 'is-active' : ''}`}
-            onClick={() => handleTabChange('desktop')}
+            aria-selected={activeTab === "desktop"}
+            className={`pwa-tab-btn ${activeTab === "desktop" ? "is-active" : ""}`}
+            onClick={() => handleTabChange("desktop")}
           >
             <Monitor size={15} />
             <span>PC & Mac</span>
@@ -104,9 +111,9 @@ export const InstallAppModal: React.FC = () => {
           <button
             type="button"
             role="tab"
-            aria-selected={activeTab === 'android'}
-            className={`pwa-tab-btn ${activeTab === 'android' ? 'is-active' : ''}`}
-            onClick={() => handleTabChange('android')}
+            aria-selected={activeTab === "android"}
+            className={`pwa-tab-btn ${activeTab === "android" ? "is-active" : ""}`}
+            onClick={() => handleTabChange("android")}
           >
             <Smartphone size={15} />
             <span>Android</span>
@@ -114,9 +121,9 @@ export const InstallAppModal: React.FC = () => {
           <button
             type="button"
             role="tab"
-            aria-selected={activeTab === 'ios'}
-            className={`pwa-tab-btn ${activeTab === 'ios' ? 'is-active' : ''}`}
-            onClick={() => handleTabChange('ios')}
+            aria-selected={activeTab === "ios"}
+            className={`pwa-tab-btn ${activeTab === "ios" ? "is-active" : ""}`}
+            onClick={() => handleTabChange("ios")}
           >
             <Apple size={15} />
             <span>iPhone / iPad</span>
@@ -125,21 +132,21 @@ export const InstallAppModal: React.FC = () => {
 
         {/* Modal Content */}
         <div className="pwa-modal-body">
-          {activeTab === 'desktop' && (
+          {activeTab === "desktop" && (
             <DesktopInstructions
               deferredPrompt={deferredPrompt}
               onDirectInstall={handleDirectInstall}
             />
           )}
 
-          {activeTab === 'android' && (
+          {activeTab === "android" && (
             <AndroidInstructions
               deferredPrompt={deferredPrompt}
               onDirectInstall={handleDirectInstall}
             />
           )}
 
-          {activeTab === 'ios' && <IosInstructions />}
+          {activeTab === "ios" && <IosInstructions />}
 
           <PwaPerksBox />
         </div>

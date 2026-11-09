@@ -1,36 +1,45 @@
-import type { StoryCharacterId } from '@/game/moon/core/types';
-import { useAudioStore } from '@exo/audio';
-import { recordedVoiceURL } from './voiceClips.ts';
-import { selectCharacterVoice } from './voiceSelection.ts';
-export { selectCharacterVoice } from './voiceSelection.ts';
+import type { StoryCharacterId } from "@/game/moon/core/types";
+import { useAudioStore } from "@exo/audio";
+import { recordedVoiceURL } from "./voiceClips.ts";
+import { selectCharacterVoice } from "./voiceSelection.ts";
+export { selectCharacterVoice } from "./voiceSelection.ts";
 
-export type NarrationStatus = 'idle' | 'starting' | 'speaking' | 'unavailable' | 'error';
+export type NarrationStatus =
+  "idle" | "starting" | "speaking" | "unavailable" | "error";
 export const NARRATION_SPEED = 1.5;
-export interface NarrationSnapshot { status: NarrationStatus; character: StoryCharacterId | null }
+export interface NarrationSnapshot {
+  status: NarrationStatus;
+  character: StoryCharacterId | null;
+}
 export interface NarrationEnvironment {
-  synthesis?: Pick<SpeechSynthesis, 'speak' | 'cancel' | 'getVoices'>;
+  synthesis?: Pick<SpeechSynthesis, "speak" | "cancel" | "getVoices">;
   createUtterance?(text: string): SpeechSynthesisUtterance;
   setTimer(callback: () => void, ms: number): ReturnType<typeof setTimeout>;
   clearTimer(timer: ReturnType<typeof setTimeout>): void;
   createRecording?(url: string): HTMLAudioElement;
 }
 export function browserNarrationEnvironment(): NarrationEnvironment | null {
-  if (typeof window === 'undefined' || typeof Audio === 'undefined') return null;
+  if (typeof window === "undefined" || typeof Audio === "undefined")
+    return null;
   return {
     synthesis: window.speechSynthesis,
-    createUtterance: window.SpeechSynthesisUtterance ? text => new SpeechSynthesisUtterance(text) : undefined,
+    createUtterance: window.SpeechSynthesisUtterance
+      ? (text) => new SpeechSynthesisUtterance(text)
+      : undefined,
     setTimer: (callback, ms) => setTimeout(callback, ms),
-    clearTimer: timer => clearTimeout(timer),
-    createRecording: url => new Audio(url),
+    clearTimer: (timer) => clearTimeout(timer),
+    createRecording: (url) => new Audio(url),
   };
 }
 
-import { isEngineFrozen } from '@exo/ui';
+import { isEngineFrozen } from "@exo/ui";
 
 // One radio channel across scenes, companions and the glossary. A new message
 // interrupts the old owner; it never queues behind an obsolete instruction.
 let activeNarrator: NarrationController | null = null;
-const setActiveNarrator = (narrator: NarrationController | null) => { activeNarrator = narrator; };
+const setActiveNarrator = (narrator: NarrationController | null) => {
+  activeNarrator = narrator;
+};
 
 /** Owns one utterance. Late callbacks from cancelled lines cannot animate the next line. */
 export class NarrationController {
@@ -50,26 +59,44 @@ export class NarrationController {
     text: string;
     character: StoryCharacterId;
     clipId?: string;
-    gender: 'male' | 'female';
+    gender: "male" | "female";
   } | null = null;
 
   constructor(environment: NarrationEnvironment | null) {
     this.environment = environment;
-    this.snapshot = { status: environment ? 'idle' : 'unavailable', character: null };
+    this.snapshot = {
+      status: environment ? "idle" : "unavailable",
+      character: null,
+    };
   }
   getSnapshot = () => this.snapshot;
-  subscribe = (listener: () => void) => { this.listeners.add(listener); return () => { this.listeners.delete(listener); }; };
+  subscribe = (listener: () => void) => {
+    this.listeners.add(listener);
+    return () => {
+      this.listeners.delete(listener);
+    };
+  };
   /** Sampled by canvas, without causing React renders for every audio frame. */
   getSpeechTime = () => {
-    if (this.snapshot.status !== 'speaking' && !this.isPaused) return 0;
+    if (this.snapshot.status !== "speaking" && !this.isPaused) return 0;
     if (this.recording) return this.recording.currentTime * 1000;
-    const now = this.isPaused && this.pausedAt !== null ? this.pausedAt : performance.now();
-    return Math.max(0, now - this.speechStartedAt - this.totalPausedTime) * NARRATION_SPEED;
+    const now =
+      this.isPaused && this.pausedAt !== null
+        ? this.pausedAt
+        : performance.now();
+    return (
+      Math.max(0, now - this.speechStartedAt - this.totalPausedTime) *
+      NARRATION_SPEED
+    );
   };
 
   pause = (byEngine = false) => {
     if (this.isPaused) return;
-    if (this.snapshot.status !== 'speaking' && this.snapshot.status !== 'starting') return;
+    if (
+      this.snapshot.status !== "speaking" &&
+      this.snapshot.status !== "starting"
+    )
+      return;
     const params = this.lastSpokenParams;
     if (!params) return;
     // Cancel old callbacks/watchdogs before replaying this line after suspension.
@@ -79,11 +106,11 @@ export class NarrationController {
     this.isPaused = true;
     this.pausedByEngine = byEngine;
     this.pausedAt = performance.now();
-    this.update('starting', params.character);
+    this.update("starting", params.character);
   };
 
   resume = (byEngine = false) => {
-    if (!this.isPaused || byEngine && !this.pausedByEngine) return;
+    if (!this.isPaused || (byEngine && !this.pausedByEngine)) return;
     this.isPaused = false;
     this.pausedByEngine = false;
     this.pausedAt = null;
@@ -96,9 +123,12 @@ export class NarrationController {
     }
   };
 
-  private update(status: NarrationStatus, character: StoryCharacterId | null = null) {
+  private update(
+    status: NarrationStatus,
+    character: StoryCharacterId | null = null,
+  ) {
     this.snapshot = { status, character };
-    this.listeners.forEach(listener => listener());
+    this.listeners.forEach((listener) => listener());
   }
   private clearTimer() {
     if (this.timer !== undefined) this.environment?.clearTimer(this.timer);
@@ -116,13 +146,25 @@ export class NarrationController {
     const owned = this.utterance;
     this.utterance = null;
     if (this.recording) {
-      this.recording.onplaying = this.recording.onended = this.recording.onerror = this.recording.onwaiting = this.recording.onstalled = this.recording.onpause = null;
-      this.recording.pause(); this.recording = null;
+      this.recording.onplaying =
+        this.recording.onended =
+        this.recording.onerror =
+        this.recording.onwaiting =
+        this.recording.onstalled =
+        this.recording.onpause =
+          null;
+      this.recording.pause();
+      this.recording = null;
     }
     if (owned) this.environment?.synthesis?.cancel();
-    this.update(this.environment ? 'idle' : 'unavailable');
+    this.update(this.environment ? "idle" : "unavailable");
   };
-  speak(text: string, character: StoryCharacterId, clipId?: string, gender: 'male' | 'female' = 'female') {
+  speak(
+    text: string,
+    character: StoryCharacterId,
+    clipId?: string,
+    gender: "male" | "female" = "female",
+  ) {
     this.stop();
     const audio = useAudioStore.getState();
     if (audio.isMuted || !audio.voicesEnabled) return;
@@ -137,94 +179,154 @@ export class NarrationController {
     if (isEngineFrozen()) {
       this.isPaused = true;
       this.pausedByEngine = true;
-      this.update('starting', character);
+      this.update("starting", character);
       return;
     }
 
     this.isPaused = false;
     const generation = this.generation;
     const valid = () => generation === this.generation;
-    const finish = (status: 'idle' | 'error') => {
+    const finish = (status: "idle" | "error") => {
       if (!valid()) return;
       this.generation++;
       if (activeNarrator === this) activeNarrator = null;
       this.clearTimer();
       this.utterance = null;
       if (this.recording) {
-        this.recording.onplaying = this.recording.onended = this.recording.onerror = this.recording.onwaiting = this.recording.onstalled = this.recording.onpause = null;
-        this.recording.pause(); this.recording = null;
+        this.recording.onplaying =
+          this.recording.onended =
+          this.recording.onerror =
+          this.recording.onwaiting =
+          this.recording.onstalled =
+          this.recording.onpause =
+            null;
+        this.recording.pause();
+        this.recording = null;
       }
       this.lastSpokenParams = null;
       this.isPaused = false;
       this.update(status);
     };
-    const speech = (voiceWait = 0) => { try {
-      if (!valid()) return;
-      if (!environment.synthesis || !environment.createUtterance) { finish('error'); return; }
-      // Chromium loads system voices asynchronously. Do not accidentally speak Chief
-      // with the female default before the male voice inventory arrives.
-      if (environment.createRecording && !environment.synthesis.getVoices().length && voiceWait < 15) {
-        this.update('starting'); this.clearTimer();
-        this.timer = environment.setTimer(() => speech(voiceWait + 1), 100);
-        return;
-      }
-      const utterance = environment.createUtterance(text);
-      this.utterance = utterance;
-      utterance.lang = 'en-US';
-      utterance.rate = NARRATION_SPEED;
-      utterance.pitch = 1;
-      const voices = environment.synthesis.getVoices().filter(voice => /^en[-_]/i.test(voice.lang));
-      const voice = selectCharacterVoice(voices, character, gender);
-      if (voice) utterance.voice = voice;
-      utterance.onstart = () => {
+    const speech = (voiceWait = 0) => {
+      try {
         if (!valid()) return;
-        this.clearTimer();
-        this.speechStartedAt = performance.now();
-        this.update('speaking', character);
-        // Safety net for speech services which disappear or never send an end event.
+        if (!environment.synthesis || !environment.createUtterance) {
+          finish("error");
+          return;
+        }
+        // Chromium loads system voices asynchronously. Do not accidentally speak Chief
+        // with the female default before the male voice inventory arrives.
+        if (
+          environment.createRecording &&
+          !environment.synthesis.getVoices().length &&
+          voiceWait < 15
+        ) {
+          this.update("starting");
+          this.clearTimer();
+          this.timer = environment.setTimer(() => speech(voiceWait + 1), 100);
+          return;
+        }
+        const utterance = environment.createUtterance(text);
+        this.utterance = utterance;
+        utterance.lang = "en-US";
+        utterance.rate = NARRATION_SPEED;
+        utterance.pitch = 1;
+        const voices = environment.synthesis
+          .getVoices()
+          .filter((voice) => /^en[-_]/i.test(voice.lang));
+        const voice = selectCharacterVoice(voices, character, gender);
+        if (voice) utterance.voice = voice;
+        utterance.onstart = () => {
+          if (!valid()) return;
+          this.clearTimer();
+          this.speechStartedAt = performance.now();
+          this.update("speaking", character);
+          // Safety net for speech services which disappear or never send an end event.
+          this.timer = environment.setTimer(
+            () => {
+              if (!valid()) return;
+              this.stop();
+              this.update("error");
+            },
+            Math.max(15000, text.length * 180 + 10000),
+          );
+        };
+        utterance.onend = () => finish("idle");
+        utterance.onerror = () => finish("error");
+        utterance.onpause = () => {
+          if (valid()) this.update("starting");
+        };
+        utterance.onresume = () => {
+          if (valid()) this.update("speaking", character);
+        };
+        this.update("starting");
         this.timer = environment.setTimer(() => {
           if (!valid()) return;
-          this.stop(); this.update('error');
-        }, Math.max(15000, text.length * 180 + 10000));
-      };
-      utterance.onend = () => finish('idle');
-      utterance.onerror = () => finish('error');
-      utterance.onpause = () => { if (valid()) this.update('starting'); };
-      utterance.onresume = () => { if (valid()) this.update('speaking', character); };
-      this.update('starting');
-      this.timer = environment.setTimer(() => {
-        if (!valid()) return;
-        this.stop(); this.update('error');
-      }, 10000);
-      environment.synthesis.speak(utterance);
-    } catch {
-      this.stop(); this.update('error');
-    } };
-    const recordingURL = environment.createRecording ? recordedVoiceURL(clipId, text, character, gender) : null;
-    if (!recordingURL) { speech(); return; }
+          this.stop();
+          this.update("error");
+        }, 10000);
+        environment.synthesis.speak(utterance);
+      } catch {
+        this.stop();
+        this.update("error");
+      }
+    };
+    const recordingURL = environment.createRecording
+      ? recordedVoiceURL(clipId, text, character, gender)
+      : null;
+    if (!recordingURL) {
+      speech();
+      return;
+    }
     try {
       const audio = environment.createRecording!(recordingURL);
       audio.playbackRate = NARRATION_SPEED;
       audio.preservesPitch = true;
       this.recording = audio;
       const current = () => valid() && this.recording === audio;
-      this.update('starting');
+      this.update("starting");
       audio.onplaying = () => {
         if (!current()) return;
-        this.clearTimer(); this.update('speaking', character);
-        this.timer = environment.setTimer(() => { if (current()) finish('error'); }, Math.max(15000, text.length * 180 + 10000));
+        this.clearTimer();
+        this.update("speaking", character);
+        this.timer = environment.setTimer(
+          () => {
+            if (current()) finish("error");
+          },
+          Math.max(15000, text.length * 180 + 10000),
+        );
       };
-      audio.onended = () => { if (current()) finish('idle'); };
+      audio.onended = () => {
+        if (current()) finish("idle");
+      };
       // Buffering and pause are not speech: keep the actor's mouth closed until
       // the browser confirms that audio is actually playing again.
-      audio.onwaiting = audio.onstalled = audio.onpause = () => { if (current()) this.update('starting'); };
+      audio.onwaiting =
+        audio.onstalled =
+        audio.onpause =
+          () => {
+            if (current()) this.update("starting");
+          };
       audio.onerror = () => {
         if (!current()) return;
-        this.clearTimer(); audio.pause(); this.recording = null; speech();
+        this.clearTimer();
+        audio.pause();
+        this.recording = null;
+        speech();
       };
-      this.timer = environment.setTimer(() => { if (current()) { audio.pause(); this.recording = null; speech(); } }, 10000);
-      void audio.play().catch(() => { if (current()) finish('error'); });
-    } catch { speech(); }
+      this.timer = environment.setTimer(() => {
+        if (current()) {
+          audio.pause();
+          this.recording = null;
+          speech();
+        }
+      }, 10000);
+      void audio.play().catch(() => {
+        if (current()) finish("error");
+      });
+    } catch {
+      speech();
+    }
   }
 }
 
@@ -236,14 +338,13 @@ export function resumeActiveNarration() {
   activeNarrator?.resume(true);
 }
 
-if (typeof window !== 'undefined') {
-  window.addEventListener('game-orientation-pause', pauseActiveNarration);
-  window.addEventListener('game-orientation-resume', resumeActiveNarration);
+if (typeof window !== "undefined") {
+  window.addEventListener("game-orientation-pause", pauseActiveNarration);
+  window.addEventListener("game-orientation-resume", resumeActiveNarration);
   const syncVoiceMute = () => {
     const audio = useAudioStore.getState();
     if (audio.isMuted || !audio.voicesEnabled) activeNarrator?.stop();
   };
-  window.addEventListener('game-audio-mute-change', syncVoiceMute);
-  window.addEventListener('game-audio-voices-change', syncVoiceMute);
+  window.addEventListener("game-audio-mute-change", syncVoiceMute);
+  window.addEventListener("game-audio-voices-change", syncVoiceMute);
 }
-

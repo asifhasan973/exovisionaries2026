@@ -1,12 +1,12 @@
-import { useCallback, useEffect } from 'react';
-import { useAudioStore } from '@exo/audio';
+import { useCallback, useEffect } from "react";
+import { useAudioStore } from "@exo/audio";
 
 export function useStoryAudioControls(initialVoiceEnabled?: boolean) {
-  const isMuted = useAudioStore(s => s.isMuted);
-  const voicesEnabled = useAudioStore(s => s.voicesEnabled);
-  const effectsEnabled = useAudioStore(s => s.effectsEnabled);
-  const toggleMute = useAudioStore(s => s.toggleMute);
-  const setVoicesEnabled = useAudioStore(s => s.setVoicesEnabled);
+  const isMuted = useAudioStore((s) => s.isMuted);
+  const voicesEnabled = useAudioStore((s) => s.voicesEnabled);
+  const effectsEnabled = useAudioStore((s) => s.effectsEnabled);
+  const toggleMute = useAudioStore((s) => s.toggleMute);
+  const setVoicesEnabled = useAudioStore((s) => s.setVoicesEnabled);
   const voiceEnabled = !isMuted && voicesEnabled;
   const soundActive = !isMuted && (voicesEnabled || effectsEnabled);
 
@@ -29,4 +29,3 @@ export function useStoryAudioControls(initialVoiceEnabled?: boolean) {
     toggleAudioMute,
   };
 }
-

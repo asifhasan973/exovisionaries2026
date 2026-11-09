@@ -1,16 +1,18 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import type { ReactNode } from 'react';
-import { Expand, Home, Pause, Play, Volume2, VolumeX } from 'lucide-react';
-import { MobileGameContext, MOBILE_GAME_QUERY } from './mobileGameContext';
-import { GameInfo } from '@exo/ui';
-import { useAudioStore } from '@exo/audio';
-import { SettingsButton } from '../settings/GameSettings';
-import { LearningControls } from '@/game/moon/core/learning/Learning';
-import { StorySaveBadge } from '../StorySaveBadge';
-import { MilestoneRing } from '@/game/moon/stages/milestones/MilestoneRing';
-import './mobileGame.css';
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { ReactNode } from "react";
+import { Expand, Home, Pause, Play, Volume2, VolumeX } from "lucide-react";
+import { MobileGameContext, MOBILE_GAME_QUERY } from "./mobileGameContext";
+import { GameInfo } from "@exo/ui";
+import { useAudioStore } from "@exo/audio";
+import { SettingsButton } from "../settings/GameSettings";
+import { LearningControls } from "@/game/moon/core/learning/Learning";
+import { StorySaveBadge } from "../StorySaveBadge";
+import { MilestoneRing } from "@/game/moon/stages/milestones/MilestoneRing";
+import "./mobileGame.css";
 
-type LockableOrientation = ScreenOrientation & { lock?: (orientation: 'landscape') => Promise<void> };
+type LockableOrientation = ScreenOrientation & {
+  lock?: (orientation: "landscape") => Promise<void>;
+};
 
 /** Fullscreen is an enhancement. Unsupported or rejected browser APIs never block play. */
 export function MobileGameProvider({
@@ -30,50 +32,63 @@ export function MobileGameProvider({
   onPause?(): void;
   onResume?(): void;
 }) {
-  const isMuted = useAudioStore(s => s.isMuted);
-  const voicesEnabled = useAudioStore(s => s.voicesEnabled);
-  const effectsEnabled = useAudioStore(s => s.effectsEnabled);
-  const toggleMute = useAudioStore(s => s.toggleMute);
+  const isMuted = useAudioStore((s) => s.isMuted);
+  const voicesEnabled = useAudioStore((s) => s.voicesEnabled);
+  const effectsEnabled = useAudioStore((s) => s.effectsEnabled);
+  const toggleMute = useAudioStore((s) => s.toggleMute);
 
   const soundActive = !isMuted && (voicesEnabled || effectsEnabled);
-  const isSoundOn = propVoiceEnabled !== undefined ? propVoiceEnabled : soundActive;
+  const isSoundOn =
+    propVoiceEnabled !== undefined ? propVoiceEnabled : soundActive;
   const handleToggleSound = propOnToggleVoice ?? toggleMute;
 
-  const [mobile, setMobile] = useState(() => matchMedia(MOBILE_GAME_QUERY).matches);
+  const [mobile, setMobile] = useState(
+    () => matchMedia(MOBILE_GAME_QUERY).matches,
+  );
   const [menu, setMenu] = useState(false);
   const [fullscreen, setFullscreen] = useState(!!document.fullscreenElement);
-  const [screenMessage, setScreenMessage] = useState('');
-  const wanted = useRef(false), ownedFullscreen = useRef(false), ownedLock = useRef(false);
+  const [screenMessage, setScreenMessage] = useState("");
+  const wanted = useRef(false),
+    ownedFullscreen = useRef(false),
+    ownedLock = useRef(false);
 
   const release = useCallback(() => {
     wanted.current = false;
-    if (ownedLock.current) { screen.orientation?.unlock?.(); ownedLock.current = false; }
-    if (ownedFullscreen.current && document.fullscreenElement) void document.exitFullscreen?.().catch(() => {});
+    if (ownedLock.current) {
+      screen.orientation?.unlock?.();
+      ownedLock.current = false;
+    }
+    if (ownedFullscreen.current && document.fullscreenElement)
+      void document.exitFullscreen?.().catch(() => {});
     ownedFullscreen.current = false;
   }, []);
 
   const requestScreen = useCallback(() => {
     if (!matchMedia(MOBILE_GAME_QUERY).matches) return;
     wanted.current = true;
-    setScreenMessage('');
+    setScreenMessage("");
     const lock = async () => {
       if (!wanted.current) return;
       try {
-        const orientation = screen.orientation as LockableOrientation | undefined;
-        await orientation?.lock?.('landscape');
+        const orientation = screen.orientation as
+          LockableOrientation | undefined;
+        await orientation?.lock?.("landscape");
         ownedLock.current = true;
       } catch {
         // Many mobile browsers reject lock without fullscreen first.
       }
     };
     if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen?.().then(() => {
-        ownedFullscreen.current = true;
-        setFullscreen(true);
-        void lock();
-      }).catch(() => {
-        setScreenMessage('Turn your phone sideways for full screen.');
-      });
+      document.documentElement
+        .requestFullscreen?.()
+        .then(() => {
+          ownedFullscreen.current = true;
+          setFullscreen(true);
+          void lock();
+        })
+        .catch(() => {
+          setScreenMessage("Turn your phone sideways for full screen.");
+        });
     } else {
       void lock();
     }
@@ -90,14 +105,14 @@ export function MobileGameProvider({
       setMobile(isMobile);
       if (!isMobile) release();
     };
-    query.addEventListener('change', update);
-    return () => query.removeEventListener('change', update);
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
   }, [release]);
 
   useEffect(() => {
     const onFullscreen = () => setFullscreen(!!document.fullscreenElement);
-    document.addEventListener('fullscreenchange', onFullscreen);
-    return () => document.removeEventListener('fullscreenchange', onFullscreen);
+    document.addEventListener("fullscreenchange", onFullscreen);
+    return () => document.removeEventListener("fullscreenchange", onFullscreen);
   }, []);
 
   useEffect(() => {
@@ -121,7 +136,9 @@ export function MobileGameProvider({
   const mode = mobile && active;
 
   return (
-    <MobileGameContext.Provider value={{ mobile, active: mode, start, openMenu }}>
+    <MobileGameContext.Provider
+      value={{ mobile, active: mode, start, openMenu }}
+    >
       {children}
       {mode ? (
         <aside className="mobile-game-tools" aria-label="Quick game controls">
@@ -129,8 +146,8 @@ export function MobileGameProvider({
           <MilestoneRing />
           <button
             type="button"
-            aria-label={isSoundOn ? 'Mute sound' : 'Enable sound'}
-            title={isSoundOn ? 'Mute sound' : 'Enable sound'}
+            aria-label={isSoundOn ? "Mute sound" : "Enable sound"}
+            title={isSoundOn ? "Mute sound" : "Enable sound"}
             aria-pressed={isSoundOn}
             onClick={handleToggleSound}
           >
@@ -159,8 +176,8 @@ export function MobileGameProvider({
               <div className="mobile-menu-grid">
                 <button
                   type="button"
-                  aria-label={isSoundOn ? 'Mute sound' : 'Enable sound'}
-                  title={isSoundOn ? 'Mute sound' : 'Enable sound'}
+                  aria-label={isSoundOn ? "Mute sound" : "Enable sound"}
+                  title={isSoundOn ? "Mute sound" : "Enable sound"}
                   aria-pressed={isSoundOn}
                   onClick={() => {
                     setMenu(false);
@@ -168,11 +185,11 @@ export function MobileGameProvider({
                   }}
                 >
                   {isSoundOn ? <VolumeX size={18} /> : <Volume2 size={18} />}
-                  {isSoundOn ? 'Mute sound' : 'Sound on'}
+                  {isSoundOn ? "Mute sound" : "Sound on"}
                 </button>
                 <button onClick={toggleFullscreen}>
                   <Expand size={18} />
-                  {fullscreen ? 'Normal screen' : 'Full screen'}
+                  {fullscreen ? "Normal screen" : "Full screen"}
                 </button>
                 <SettingsButton
                   onOpen={() => {
@@ -203,4 +220,3 @@ export function MobileGameProvider({
     </MobileGameContext.Provider>
   );
 }
-

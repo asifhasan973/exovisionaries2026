@@ -1,5 +1,5 @@
-import { Check, Loader2 } from 'lucide-react';
-import { useStoryNavigation } from '@/game/moon/core/storyNavigationContext';
+import { Check, Loader2 } from "lucide-react";
+import { useStoryNavigation } from "@/game/moon/core/storyNavigationContext";
 
 export interface StorySaveBadgeProps {
   storageAvailable?: boolean;
@@ -12,7 +12,7 @@ export function StorySaveBadge({
   storageAvailable: propStorage,
   isSaving: propSaving,
   isDebugSession = false,
-  className = '',
+  className = "",
 }: StorySaveBadgeProps) {
   const navigation = useStoryNavigation();
   const storageAvailable = propStorage ?? navigation?.storageAvailable ?? true;
@@ -46,17 +46,20 @@ export function StorySaveBadge({
 
   return (
     <span
-      className={`selection-save-status ${storageAvailable ? 'is-saved' : 'is-unsaved'} ${className}`}
+      className={`selection-save-status ${storageAvailable ? "is-saved" : "is-unsaved"} ${className}`}
       role="status"
       title={
         storageAvailable
-          ? 'Progress saved on this device'
-          : 'Saving unavailable. Keep this tab open.'
+          ? "Progress saved on this device"
+          : "Saving unavailable. Keep this tab open."
       }
     >
-      {storageAvailable ? <Check size={12} className="save-check" /> : <i aria-hidden="true" />}
-      <span>{storageAvailable ? 'Saved' : 'Not saved'}</span>
+      {storageAvailable ? (
+        <Check size={12} className="save-check" />
+      ) : (
+        <i aria-hidden="true" />
+      )}
+      <span>{storageAvailable ? "Saved" : "Not saved"}</span>
     </span>
   );
 }
-

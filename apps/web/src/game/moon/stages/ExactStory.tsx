@@ -1,33 +1,52 @@
-import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
-import type { StoryStepId } from '@/game/moon/core/types';
-import { PlayerCharacterProvider } from '@/game/moon/narrative/hooks/playerCharacterContext';
-import { GameSettingsProvider } from '@/shared/shell';
-import { RestartStoryDialog } from '@/game/moon/crew/SelectionScreens';
-import { getStoryStep } from '@/game/moon/core/flow';
-import { readBrowserSelectionSession } from '@/game/moon/crew/selectionSession';
-import { createWorkshopSession, reduceMission } from '@/game/moon/workshop/lander/workshopSession';
-import { MissionBoundary } from '@/shared/shell/MissionBoundary';
-import type { MissionEvent, WorkshopSession } from '@/game/moon/workshop/lander/workshopSession';
-import '@/game/moon/narrative/components/conversation.css';
-import '@/game/moon/crew/selection.css';
-import '@/shared/shell/playability.css';
-import { LearningProvider } from '@/game/moon/core/learning/Learning';
-import { GestureGuide } from '@/shared/shell/GestureGuide';
-import { MobileGameProvider } from '@/shared/shell';
-import { isEngineFrozen } from '@exo/ui';
-import { createDebugSession } from '@exo/debug';
-import { trackMilestoneTransition } from '@/game/moon/core/missionMilestones';
-import { pauseMission, savedMissionProgress } from '@/game/moon/core/missionNavigation';
-import { StoryNavigationContext } from '@/game/moon/core/storyNavigationContext';
-import { useStoryPersistence, type StoryPersistenceState } from './useStoryPersistence';
-import { useStoryPauseResume } from './useStoryPauseResume';
-import { StoryScreenRouter } from './StoryScreenRouter';
-import { useStoryNavigationState } from './useStoryNavigationState';
-import { useStoryFrames } from './useStoryFrames';
-import { useStoryAudioControls } from './useStoryAudioControls';
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import type { StoryStepId } from "@/game/moon/core/types";
+import { PlayerCharacterProvider } from "@/game/moon/narrative/hooks/playerCharacterContext";
+import { GameSettingsProvider } from "@/shared/shell";
+import { RestartStoryDialog } from "@/game/moon/crew/SelectionScreens";
+import { getStoryStep } from "@/game/moon/core/flow";
+import { readBrowserSelectionSession } from "@/game/moon/crew/selectionSession";
+import {
+  createWorkshopSession,
+  reduceMission,
+} from "@/game/moon/workshop/lander/workshopSession";
+import { MissionBoundary } from "@/shared/shell/MissionBoundary";
+import type {
+  MissionEvent,
+  WorkshopSession,
+} from "@/game/moon/workshop/lander/workshopSession";
+import "@/game/moon/narrative/components/conversation.css";
+import "@/game/moon/crew/selection.css";
+import "@/shared/shell/playability.css";
+import { LearningProvider } from "@/game/moon/core/learning/Learning";
+import { GestureGuide } from "@/shared/shell/GestureGuide";
+import { MobileGameProvider } from "@/shared/shell";
+import { isEngineFrozen } from "@exo/ui";
+import { createDebugSession } from "@exo/debug";
+import { trackMilestoneTransition } from "@/game/moon/core/missionMilestones";
+import {
+  pauseMission,
+  savedMissionProgress,
+} from "@/game/moon/core/missionNavigation";
+import { StoryNavigationContext } from "@/game/moon/core/storyNavigationContext";
+import {
+  useStoryPersistence,
+  type StoryPersistenceState,
+} from "./useStoryPersistence";
+import { useStoryPauseResume } from "./useStoryPauseResume";
+import { StoryScreenRouter } from "./StoryScreenRouter";
+import { useStoryNavigationState } from "./useStoryNavigationState";
+import { useStoryFrames } from "./useStoryFrames";
+import { useStoryAudioControls } from "./useStoryAudioControls";
 
 const NasaMissionArchive = lazy(() =>
-  import('@/features/archive/NasaMissionArchive').then(module => ({
+  import("@/features/archive/NasaMissionArchive").then((module) => ({
     default: module.NasaMissionArchive,
   })),
 );
@@ -67,12 +86,14 @@ export default function ExactStory({
   const { voiceEnabled, voicesEnabled, soundActive, toggleAudioMute } =
     useStoryAudioControls(session.voiceEnabled);
 
-  const [storageAvailable, setStorageAvailable] = useState(session.storageAvailable);
+  const [storageAvailable, setStorageAvailable] = useState(
+    session.storageAvailable,
+  );
   const [isSaving, setIsSaving] = useState(false);
 
   const dispatch = useCallback((event: MissionEvent) => {
-    setMission(current =>
-      isEngineFrozen() && !event.type.endsWith('-pause')
+    setMission((current) =>
+      isEngineFrozen() && !event.type.endsWith("-pause")
         ? current
         : trackMilestoneTransition(current, reduceMission(current, event)),
     );
@@ -111,11 +132,19 @@ export default function ExactStory({
     };
   }, [mission, progress, voicesEnabled, preparation, readiness, flight, moon]);
 
-  useStoryPersistence(mission, latest, isDebugSession, voiceEnabled, voicesEnabled, setStorageAvailable, setIsSaving);
+  useStoryPersistence(
+    mission,
+    latest,
+    isDebugSession,
+    voiceEnabled,
+    voicesEnabled,
+    setStorageAvailable,
+    setIsSaving,
+  );
   useStoryPauseResume(dispatch, latest);
 
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    window.scrollTo({ top: 0, behavior: "instant" });
   }, [progress.stepId, nav.home]);
 
   const step = getStoryStep(progress.stepId, progress.selections.objective);
@@ -135,7 +164,13 @@ export default function ExactStory({
 
   if (archiveOpen) {
     return (
-      <Suspense fallback={<div className="fixed inset-0 w-screen h-screen bg-[#030712] flex items-center justify-center text-cyan-400 font-mono text-sm z-50">Opening NASA Mission Archive…</div>}>
+      <Suspense
+        fallback={
+          <div className="fixed inset-0 w-screen h-screen bg-[#030712] flex items-center justify-center text-cyan-400 font-mono text-sm z-50">
+            Opening NASA Mission Archive…
+          </div>
+        }
+      >
         <NasaMissionArchive onBack={() => setArchiveOpen(false)} />
       </Suspense>
     );
@@ -143,7 +178,11 @@ export default function ExactStory({
 
   return (
     <PlayerCharacterProvider value={progress.playerGender}>
-      <GameSettingsProvider voiceEnabled={voiceEnabled} onToggleVoice={toggleAudioMute} onRestart={nav.requestRestart}>
+      <GameSettingsProvider
+        voiceEnabled={voiceEnabled}
+        onToggleVoice={toggleAudioMute}
+        onRestart={nav.requestRestart}
+      >
         <LearningProvider>
           <StoryNavigationContext.Provider
             value={
@@ -155,14 +194,17 @@ export default function ExactStory({
                     autoplay: nav.autoplay && !mission.review,
                     card: nav.milestoneCard,
                     back: nav.back,
-                    skip: step.kind === 'endpoint' && !nav.milestoneCard ? undefined : nav.skipPage,
+                    skip:
+                      step.kind === "endpoint" && !nav.milestoneCard
+                        ? undefined
+                        : nav.skipPage,
                     skipping: nav.skipBusy,
-                    forward: () => dispatch({ type: 'next' }),
+                    forward: () => dispatch({ type: "next" }),
                     overview: () => {
                       nav.setAutoBuilding(false);
                       nav.setAutoplay(false);
-                      setMission(current => pauseMission(current));
-                      nav.setOverviewOpen('map');
+                      setMission((current) => pauseMission(current));
+                      nav.setOverviewOpen("map");
                     },
                     overviewOpen: nav.overviewOpen,
                     storageAvailable,
@@ -170,14 +212,20 @@ export default function ExactStory({
                   }
             }
           >
-            <GestureGuide step={nav.home ? 'player-name' : mission.progress.stepId} hidden={nav.overviewOpen !== null} repair={mission.repair} />
+            <GestureGuide
+              step={nav.home ? "player-name" : mission.progress.stepId}
+              hidden={nav.overviewOpen !== null}
+              repair={mission.repair}
+            />
             <MobileGameProvider
               active={!nav.home}
               voiceEnabled={voiceEnabled}
               onToggleVoice={toggleAudioMute}
               onHome={nav.goHome}
             >
-              <div className={`story-viewport-root ${nav.milestoneCard ? 'is-milestone-overview' : ''}`}>
+              <div
+                className={`story-viewport-root ${nav.milestoneCard ? "is-milestone-overview" : ""}`}
+              >
                 <MissionBoundary frame={frame} onReload={nav.reset}>
                   <StoryScreenRouter
                     home={nav.home}
@@ -204,11 +252,17 @@ export default function ExactStory({
                   />
                 </MissionBoundary>
               </div>
-              {nav.restart ? <RestartStoryDialog open={nav.restart} onConfirm={nav.reset} onClose={() => nav.setRestart(false)} /> : null}
+              {nav.restart ? (
+                <RestartStoryDialog
+                  open={nav.restart}
+                  onConfirm={nav.reset}
+                  onClose={() => nav.setRestart(false)}
+                />
+              ) : null}
             </MobileGameProvider>
           </StoryNavigationContext.Provider>
         </LearningProvider>
       </GameSettingsProvider>
     </PlayerCharacterProvider>
-    );
-  }
+  );
+}

@@ -1,32 +1,47 @@
-import { lazy, Suspense } from 'react';
-import type { WorkshopSession, MissionEvent } from '@/game/moon/workshop/lander/workshopSession';
-import type { SelectionFrame } from '@/game/moon/crew/SelectionScreens';
-import { FlightScreen } from '@/game/moon/flight/launch/FlightScreen';
-import { ReadinessScreen } from '@/game/moon/readiness/ReadinessScreen';
-import { WorkshopScreen } from '@/game/moon/workshop/lander/WorkshopScreen';
+import { lazy, Suspense } from "react";
+import type {
+  WorkshopSession,
+  MissionEvent,
+} from "@/game/moon/workshop/lander/workshopSession";
+import type { SelectionFrame } from "@/game/moon/crew/SelectionScreens";
+import { FlightScreen } from "@/game/moon/flight/launch/FlightScreen";
+import { ReadinessScreen } from "@/game/moon/readiness/ReadinessScreen";
+import { WorkshopScreen } from "@/game/moon/workshop/lander/WorkshopScreen";
 
 const ReturnScreen = lazy(() =>
-  import('@/game/moon/return/ReturnScreen').then(m => ({ default: m.ReturnScreen })),
+  import("@/game/moon/return/ReturnScreen").then((m) => ({
+    default: m.ReturnScreen,
+  })),
 );
 const RoverScreen = lazy(() =>
-  import('@/game/moon/rover/components/RoverScreen').then(m => ({ default: m.RoverScreen })),
+  import("@/game/moon/rover/components/RoverScreen").then((m) => ({
+    default: m.RoverScreen,
+  })),
 );
 const LandingScreen = lazy(() =>
-  import('@/game/moon/landing/LandingScreen').then(m => ({ default: m.LandingScreen })),
+  import("@/game/moon/landing/LandingScreen").then((m) => ({
+    default: m.LandingScreen,
+  })),
 );
 const JourneyScreen = lazy(() =>
-  import('@/game/moon/flight/journey/JourneyScreen').then(m => ({ default: m.JourneyScreen })),
+  import("@/game/moon/flight/journey/JourneyScreen").then((m) => ({
+    default: m.JourneyScreen,
+  })),
 );
 const RocketAssemblyScreen = lazy(() =>
-  import('@/game/moon/workshop/rocket/RocketAssemblyScreen').then(m => ({ default: m.RocketAssemblyScreen })),
+  import("@/game/moon/workshop/rocket/RocketAssemblyScreen").then((m) => ({
+    default: m.RocketAssemblyScreen,
+  })),
 );
 const HumanReadinessScreen = lazy(() =>
-  import('@/game/moon/readiness/HumanReadinessScreen').then(module => ({
+  import("@/game/moon/readiness/HumanReadinessScreen").then((module) => ({
     default: module.HumanReadinessScreen,
   })),
 );
 const CrewScreen = lazy(() =>
-  import('@/game/moon/crew/CrewScreen').then(module => ({ default: module.CrewScreen })),
+  import("@/game/moon/crew/CrewScreen").then((module) => ({
+    default: module.CrewScreen,
+  })),
 );
 
 export interface SimulationScreenRouterProps {
@@ -52,15 +67,29 @@ export function SimulationScreenRouter({
 
   if (moduleNum === 8) {
     return (
-      <Suspense fallback={<div className="crew-loading" role="status">Opening crew selection…</div>}>
-        <CrewScreen key={progress.stepId} session={mission} dispatch={dispatch} onBack={back} frame={frame} />
+      <Suspense
+        fallback={
+          <div className="crew-loading" role="status">
+            Opening crew selection…
+          </div>
+        }
+      >
+        <CrewScreen
+          key={progress.stepId}
+          session={mission}
+          dispatch={dispatch}
+          onBack={back}
+          frame={frame}
+        />
       </Suspense>
     );
   }
 
   if (moduleNum === 14) {
     return (
-      <Suspense fallback={<div className="crew-loading">Opening crew return…</div>}>
+      <Suspense
+        fallback={<div className="crew-loading">Opening crew return…</div>}
+      >
         <ReturnScreen session={mission} dispatch={dispatch} frame={frame} />
       </Suspense>
     );
@@ -68,7 +97,11 @@ export function SimulationScreenRouter({
 
   if ([11, 12, 13].includes(moduleNum)) {
     return (
-      <Suspense fallback={<div className="crew-loading">Opening your rover expedition…</div>}>
+      <Suspense
+        fallback={
+          <div className="crew-loading">Opening your rover expedition…</div>
+        }
+      >
         <RoverScreen session={mission} dispatch={dispatch} frame={frame} />
       </Suspense>
     );
@@ -76,7 +109,9 @@ export function SimulationScreenRouter({
 
   if (moduleNum === 10) {
     return (
-      <Suspense fallback={<div className="crew-loading">Opening Moon landing…</div>}>
+      <Suspense
+        fallback={<div className="crew-loading">Opening Moon landing…</div>}
+      >
         <LandingScreen session={mission} dispatch={dispatch} frame={frame} />
       </Suspense>
     );
@@ -84,34 +119,78 @@ export function SimulationScreenRouter({
 
   if (moduleNum === 9) {
     return (
-      <Suspense fallback={<div className="crew-loading">Opening Moon journey…</div>}>
+      <Suspense
+        fallback={<div className="crew-loading">Opening Moon journey…</div>}
+      >
         <JourneyScreen session={mission} dispatch={dispatch} frame={frame} />
       </Suspense>
     );
   }
 
   if (moduleNum === 7) {
-    return <FlightScreen session={mission} dispatch={dispatch} onBack={back} frame={frame} />;
+    return (
+      <FlightScreen
+        session={mission}
+        dispatch={dispatch}
+        onBack={back}
+        frame={frame}
+      />
+    );
   }
 
-  if (stepId === 'rocket-assembly') {
+  if (stepId === "rocket-assembly") {
     return (
-      <Suspense fallback={<div className="crew-loading">Opening rocket hangar…</div>}>
-        <RocketAssemblyScreen session={mission} dispatch={dispatch} onBack={back} frame={frame} />
+      <Suspense
+        fallback={<div className="crew-loading">Opening rocket hangar…</div>}
+      >
+        <RocketAssemblyScreen
+          session={mission}
+          dispatch={dispatch}
+          onBack={back}
+          frame={frame}
+        />
       </Suspense>
     );
   }
 
-  if (['crew-check', 'systems-check', 'stress-check', 'rocket-pack', 'launch-ready'].includes(stepId)) {
+  if (
+    [
+      "crew-check",
+      "systems-check",
+      "stress-check",
+      "rocket-pack",
+      "launch-ready",
+    ].includes(stepId)
+  ) {
     return (
-      <Suspense fallback={<div className="crew-loading" role="status">Opening mission checks…</div>}>
-        <HumanReadinessScreen key={stepId} session={mission} dispatch={dispatch} onBack={back} frame={frame} />
+      <Suspense
+        fallback={
+          <div className="crew-loading" role="status">
+            Opening mission checks…
+          </div>
+        }
+      >
+        <HumanReadinessScreen
+          key={stepId}
+          session={mission}
+          dispatch={dispatch}
+          onBack={back}
+          frame={frame}
+        />
       </Suspense>
     );
   }
 
   if (moduleNum === 6) {
-    return <ReadinessScreen key={progress.stepId} session={mission} dispatch={dispatch} onBack={back} frame={frame} />;
+    return (
+      <ReadinessScreen
+        key={progress.stepId}
+        session={mission}
+        dispatch={dispatch}
+        onBack={back}
+        frame={frame}
+      />
+    );
   }
 
   return (
@@ -124,7 +203,7 @@ export function SimulationScreenRouter({
       autoBuilding={autoBuilding}
       onStopAutoBuild={() => setAutoBuilding(false)}
       onAutoBuild={() => {
-        dispatch({ type: 'begin-auto-build' });
+        dispatch({ type: "begin-auto-build" });
         setAutoBuilding(true);
       }}
     />
@@ -132,13 +211,36 @@ export function SimulationScreenRouter({
 }
 
 function getStepModule(stepId: string): number {
-  if (['crew-selection', 'crew-plan', 'crew-briefing'].includes(stepId)) return 8;
-  if (['crew-return', 'mission-debrief'].includes(stepId)) return 14;
-  if (['surface-deploy', 'rover-traverse', 'lunar-surface', 'science-drill', 'incident-recovery'].includes(stepId)) return 11;
-  if (['lunar-descent', 'landing-site'].includes(stepId)) return 10;
-  if (['earth-orbit', 'moon-transfer', 'lunar-orbit'].includes(stepId)) return 9;
-  if (['liftoff', 'ascent-stage'].includes(stepId)) return 7;
-  if (['crew-check', 'mass-check', 'power-check', 'budget-check', 'systems-check', 'stress-check', 'rocket-pack', 'rocket-assembly', 'launch-ready'].includes(stepId)) return 6;
+  if (["crew-selection", "crew-plan", "crew-briefing"].includes(stepId))
+    return 8;
+  if (["crew-return", "mission-debrief"].includes(stepId)) return 14;
+  if (
+    [
+      "surface-deploy",
+      "rover-traverse",
+      "lunar-surface",
+      "science-drill",
+      "incident-recovery",
+    ].includes(stepId)
+  )
+    return 11;
+  if (["lunar-descent", "landing-site"].includes(stepId)) return 10;
+  if (["earth-orbit", "moon-transfer", "lunar-orbit"].includes(stepId))
+    return 9;
+  if (["liftoff", "ascent-stage"].includes(stepId)) return 7;
+  if (
+    [
+      "crew-check",
+      "mass-check",
+      "power-check",
+      "budget-check",
+      "systems-check",
+      "stress-check",
+      "rocket-pack",
+      "rocket-assembly",
+      "launch-ready",
+    ].includes(stepId)
+  )
+    return 6;
   return 5;
 }
-

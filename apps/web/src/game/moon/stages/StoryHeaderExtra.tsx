@@ -1,5 +1,5 @@
-import React from 'react';
-import { StorySaveBadge } from '@/shared/shell/StorySaveBadge';
+import React from "react";
+import { StorySaveBadge } from "@/shared/shell/StorySaveBadge";
 
 export interface StoryHeaderExtraProps {
   isDebugSession: boolean;
@@ -28,8 +28,11 @@ export function StoryHeaderExtra({
           isSaving={isSaving}
         />
       ) : null}
-      {skipError ? <span role="alert" className="story-skip-error">{skipError}</span> : null}
+      {skipError ? (
+        <span role="alert" className="story-skip-error">
+          {skipError}
+        </span>
+      ) : null}
     </>
   );
 }
-

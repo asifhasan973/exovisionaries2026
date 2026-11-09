@@ -1,18 +1,20 @@
-import type { WorkshopSession } from '@/game/moon/workshop/lander/workshopSession';
+import type { WorkshopSession } from "@/game/moon/workshop/lander/workshopSession";
 
 /** Provenance affects labels, never evidence points or gate authorization. */
 export function missionAssistance(s: WorkshopSession) {
   const m = s.moon;
-  return [...new Set([
-    ...(s.progress.assistance ?? []),
-    ...(s.flight.mode === 'guided' ? ['guided-launch'] : []),
-    ...(s.flight.skipped ? ['launch-skip'] : []),
-    ...(m.human.stress.assisted ? ['readiness-hint'] : []),
-    ...(m.journey.assisted ? ['journey-assistance'] : []),
-    ...(m.landing.assisted ? ['landing-assistance'] : []),
-    ...(m.rover?.assisted ? ['rover-checkpoint-assistance'] : []),
-    ...(m.surface.assisted ? ['surface-assistance'] : []),
-    ...(m.science.assisted ? ['science-assistance'] : []),
-    ...(m.returnFlight.assisted ? ['return-assistance'] : []),
-  ])];
+  return [
+    ...new Set([
+      ...(s.progress.assistance ?? []),
+      ...(s.flight.mode === "guided" ? ["guided-launch"] : []),
+      ...(s.flight.skipped ? ["launch-skip"] : []),
+      ...(m.human.stress.assisted ? ["readiness-hint"] : []),
+      ...(m.journey.assisted ? ["journey-assistance"] : []),
+      ...(m.landing.assisted ? ["landing-assistance"] : []),
+      ...(m.rover?.assisted ? ["rover-checkpoint-assistance"] : []),
+      ...(m.surface.assisted ? ["surface-assistance"] : []),
+      ...(m.science.assisted ? ["science-assistance"] : []),
+      ...(m.returnFlight.assisted ? ["return-assistance"] : []),
+    ]),
+  ];
 }

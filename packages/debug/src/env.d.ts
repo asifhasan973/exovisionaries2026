@@ -1,4 +1,4 @@
-declare module '*.css';
+declare module "*.css";
 
 interface ImportMeta {
   readonly env: {
@@ -7,4 +7,3 @@ interface ImportMeta {
     readonly [key: string]: any;
   };
 }
-

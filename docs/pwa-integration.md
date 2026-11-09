@@ -27,6 +27,7 @@ The application features a production-ready Progressive Web App (PWA) powered by
 ## 2. Visual Asset Preloading & Browser Caching
 
 ### Architectural Strategy
+
 To guarantee instant scene transitions and zero layout shifts without penalizing users on cellular or metered connections, visual mission assets are preloaded and cached in the browser's Cache Storage API (`exovisionaries-assets-v1`):
 
 1. **Precached Visual Assets (~2.5 MB total)**:
@@ -47,6 +48,7 @@ To guarantee instant scene transitions and zero layout shifts without penalizing
 ## 3. PWA Configuration & Web App Manifest
 
 Configured in `apps/web/vite.config.ts`:
+
 - **Display Mode**: `standalone` (removes browser URL bar, tabs, and navigation controls for genuine game immersion).
 - **Orientation**: `landscape` (locks horizontal game viewport on mobile devices).
 - **Service Worker Strategy**: `generateSW` with `registerType: 'autoUpdate'`.
@@ -82,17 +84,16 @@ The PWA store (`packages/ui/src/state/pwaStore.ts`, exported via `@exo/ui`) prov
    - Glassmorphic aerospace styling with deep space neon borders (`#8ce2c2`, `#863bff`).
    - Platform-specific tab switching with exhaustive real-world edge-case coverage:
      - **PC & Mac**:
-       - *Fullscreen Tip*: Advises pressing `F11` or `Esc` to reveal browser address bar.
-       - *Method 1 (Address Bar)*: Click the Install icon in the browser URL bar.
-       - *Method 2 (3-Dots Menu)*: Chrome/Brave: Three dots (`⋮`) -> "Save and share" -> "Install Zero To Beyond..." / Edge: Three dots (`…`) -> "Apps" -> "Install Zero To Beyond".
-       - *Direct One-Click Card*: Triggers native browser install prompt when available.
+       - _Fullscreen Tip_: Advises pressing `F11` or `Esc` to reveal browser address bar.
+       - _Method 1 (Address Bar)_: Click the Install icon in the browser URL bar.
+       - _Method 2 (3-Dots Menu)_: Chrome/Brave: Three dots (`⋮`) -> "Save and share" -> "Install Zero To Beyond..." / Edge: Three dots (`…`) -> "Apps" -> "Install Zero To Beyond".
+       - _Direct One-Click Card_: Triggers native browser install prompt when available.
      - **Android**:
-       - *Important First Step*: Instructs user to swipe down from the top edge of their screen to exit fullscreen and reveal the Chrome toolbar.
-       - *Menu Steps*: Three dots (`⋮`) -> "Install app" or "Add to Home screen" (Samsung Internet: `≡` -> Add page to -> Home screen).
-       - *Direct One-Click Card*: Triggers native Android install dialog.
+       - _Important First Step_: Instructs user to swipe down from the top edge of their screen to exit fullscreen and reveal the Chrome toolbar.
+       - _Menu Steps_: Three dots (`⋮`) -> "Install app" or "Add to Home screen" (Samsung Internet: `≡` -> Add page to -> Home screen).
+       - _Direct One-Click Card_: Triggers native Android install dialog.
      - **iPhone / iPad (iOS Safari)**:
-       - *Prerequisite*: Explains Safari requirement and how to break out of in-app social browsers.
-       - *Toolbar Reveal*: Tap screen edge to reveal bottom toolbar.
-       - *Walkthrough*: Tap Share (`⎋`), scroll down to "Add to Home Screen" (`[+]`), tap "Add".
+       - _Prerequisite_: Explains Safari requirement and how to break out of in-app social browsers.
+       - _Toolbar Reveal_: Tap screen edge to reveal bottom toolbar.
+       - _Walkthrough_: Tap Share (`⎋`), scroll down to "Add to Home Screen" (`[+]`), tap "Add".
    - Highlights key PWA advantages: **Zero UI Clutter**, **Visuals Cached**, and **Instant Launch**.
-

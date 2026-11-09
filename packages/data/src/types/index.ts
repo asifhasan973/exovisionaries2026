@@ -1,55 +1,57 @@
 // Mission Forge - Core Types
 
 export type MissionPhase =
-  | 'welcome'
-  | 'destination'
-  | 'mission'
-  | 'site'
-  | 'assembly'
-  | 'testing'
-  | 'crew'
-  | 'readiness'
-  | 'launchpad'
-  | 'ascent'
-  | 'orbit';
+  | "welcome"
+  | "destination"
+  | "mission"
+  | "site"
+  | "assembly"
+  | "testing"
+  | "crew"
+  | "readiness"
+  | "launchpad"
+  | "ascent"
+  | "orbit";
 
-export type DestinationId = 'moon' | 'mars';
+export type DestinationId = "moon" | "mars";
 
-export type MissionId = 'lunar-ice-explorer' | 'lunar-geology' | 'lunar-volcanic';
+export type MissionId =
+  "lunar-ice-explorer" | "lunar-geology" | "lunar-volcanic";
 
-export type SiteId = 'ridge' | 'crater-rim' | 'shadowed-crater';
+export type SiteId = "ridge" | "crater-rim" | "shadowed-crater";
 
 export type PartCategory =
-  | 'launchVehicle'
-  | 'crewSpacecraft'
-  | 'crewSupport'
-  | 'avionics'
-  | 'science'
-  | 'upgrades';
+  | "launchVehicle"
+  | "crewSpacecraft"
+  | "crewSupport"
+  | "avionics"
+  | "science"
+  | "upgrades";
 
-export type AssemblyViewMode = 'sciencePayload' | 'crewSpacecraft' | 'fullStack';
+export type AssemblyViewMode =
+  "sciencePayload" | "crewSpacecraft" | "fullStack";
 
 export type SlotInterface =
-  | 'booster-stage-1'
-  | 'interstage-1'
-  | 'booster-stage-2'
-  | 'interstage-2'
-  | 'booster-stage-3'
-  | 'instrument-unit'
-  | 'lunar-payload-bay'
-  | 'service-module'
-  | 'crew-capsule'
-  | 'launch-escape-system'
-  | 'eclss-bay'
-  | 'avionics-bay'
-  | 'power-bay'
-  | 'comms-mast'
-  | 'science-slot-1'
-  | 'science-slot-2'
-  | 'science-slot-3'
-  | 'science-slot-4'
-  | 'upgrade-slot-1'
-  | 'upgrade-slot-2';
+  | "booster-stage-1"
+  | "interstage-1"
+  | "booster-stage-2"
+  | "interstage-2"
+  | "booster-stage-3"
+  | "instrument-unit"
+  | "lunar-payload-bay"
+  | "service-module"
+  | "crew-capsule"
+  | "launch-escape-system"
+  | "eclss-bay"
+  | "avionics-bay"
+  | "power-bay"
+  | "comms-mast"
+  | "science-slot-1"
+  | "science-slot-2"
+  | "science-slot-3"
+  | "science-slot-4"
+  | "upgrade-slot-1"
+  | "upgrade-slot-2";
 
 export interface SlotDefinition {
   id: SlotInterface;
@@ -64,8 +66,9 @@ export interface SlotDefinition {
   isInternal?: boolean;
 }
 
-export type PriceStatus = 'published' | 'historical' | 'educationalEstimate' | 'includedInPackage';
-export type SpecStatus = 'sourced' | 'assumed';
+export type PriceStatus =
+  "published" | "historical" | "educationalEstimate" | "includedInPackage";
+export type SpecStatus = "sourced" | "assumed";
 
 export interface PartDefinition {
   id: string;
@@ -88,7 +91,7 @@ export interface PartDefinition {
   dimensions?: [number, number, number];
 }
 
-export type CrewRole = 'commander' | 'scientist' | 'engineer';
+export type CrewRole = "commander" | "scientist" | "engineer";
 
 export interface AstronautCandidate {
   id: string;
@@ -110,7 +113,7 @@ export interface AstronautCandidate {
 
 export interface ReadinessIssue {
   id: string;
-  type: 'blocker' | 'note';
+  type: "blocker" | "note";
   title: string;
   description: string;
   actionText?: string;
@@ -148,4 +151,3 @@ export interface AscentTelemetry {
   isStagingEvent?: boolean;
   stagingMessage?: string;
 }
-

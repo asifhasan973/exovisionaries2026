@@ -1,6 +1,6 @@
-import { useEffect, useRef } from 'react';
-import { createPortal } from 'react-dom';
-import { sound } from '@exo/audio';
+import { useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
+import { sound } from "@exo/audio";
 
 export function RestartStoryDialog({
   open = true,
@@ -21,7 +21,7 @@ export function RestartStoryDialog({
       try {
         dialog.showModal();
       } catch {
-        dialog.setAttribute('open', '');
+        dialog.setAttribute("open", "");
       }
     } else if (!open && dialog.open) {
       dialog.close();
@@ -43,11 +43,11 @@ export function RestartStoryDialog({
       ref={ref}
       className="selection-reset-dialog"
       aria-labelledby="restart-story-title"
-      onCancel={event => {
+      onCancel={(event) => {
         event.preventDefault();
         onClose();
       }}
-      onClick={event => {
+      onClick={(event) => {
         if (event.target === event.currentTarget) {
           const rect = event.currentTarget.getBoundingClientRect();
           if (

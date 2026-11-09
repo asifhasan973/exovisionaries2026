@@ -1,5 +1,5 @@
-import React from 'react';
-import { Zap, ShieldCheck, Rocket } from 'lucide-react';
+import React from "react";
+import { Zap, ShieldCheck, Rocket } from "lucide-react";
 
 export const PwaPerksBox: React.FC = () => {
   return (
@@ -36,4 +36,3 @@ export const PwaPerksBox: React.FC = () => {
     </div>
   );
 };
-

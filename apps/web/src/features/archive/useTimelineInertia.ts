@@ -1,11 +1,14 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect } from "react";
 
 export interface UseTimelineInertiaOptions {
   containerRef: React.RefObject<HTMLDivElement | null>;
   snapToNearestYear: (targetYearIdx?: number, playAudio?: boolean) => void;
 }
 
-export function useTimelineInertia({ containerRef, snapToNearestYear }: UseTimelineInertiaOptions) {
+export function useTimelineInertia({
+  containerRef,
+  snapToNearestYear,
+}: UseTimelineInertiaOptions) {
   const [isDraggingState, setIsDraggingState] = useState<boolean>(false);
   const isDragging = useRef<boolean>(false);
   const hasMovedDrag = useRef<boolean>(false);
@@ -102,14 +105,14 @@ export function useTimelineInertia({ containerRef, snapToNearestYear }: UseTimel
       }
     };
 
-    window.addEventListener('pointermove', onGlobalPointerMove);
-    window.addEventListener('pointerup', onGlobalPointerUp);
-    window.addEventListener('pointercancel', onGlobalPointerUp);
+    window.addEventListener("pointermove", onGlobalPointerMove);
+    window.addEventListener("pointerup", onGlobalPointerUp);
+    window.addEventListener("pointercancel", onGlobalPointerUp);
 
     return () => {
-      window.removeEventListener('pointermove', onGlobalPointerMove);
-      window.removeEventListener('pointerup', onGlobalPointerUp);
-      window.removeEventListener('pointercancel', onGlobalPointerUp);
+      window.removeEventListener("pointermove", onGlobalPointerMove);
+      window.removeEventListener("pointerup", onGlobalPointerUp);
+      window.removeEventListener("pointercancel", onGlobalPointerUp);
     };
   }, [containerRef, snapToNearestYear]);
 
@@ -124,7 +127,6 @@ export function useTimelineInertia({ containerRef, snapToNearestYear }: UseTimel
     hasMovedDrag,
     handlePointerDown,
     handleWheel,
-    stopInertia
+    stopInertia,
   };
 }
-

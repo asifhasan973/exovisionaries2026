@@ -18,7 +18,7 @@ import {
   synthesizeSnap,
   synthesizeStagingThud,
   synthesizeTimelineSlideTick,
-} from './synthEffects';
+} from "./synthEffects";
 
 class SoundEngine {
   private ctx: AudioContext | null = null;
@@ -47,7 +47,7 @@ class SoundEngine {
   }
 
   /** Separate motor feedback for the practice game; never shares flight audio nodes. */
-  public startRoverSound(kind: 'drive' | 'drill') {
+  public startRoverSound(kind: "drive" | "drill") {
     this.stopRoverSound();
     if (this.isMuted) return;
     this.initContext();
@@ -76,7 +76,7 @@ class SoundEngine {
   public pauseAll() {
     this.wasSuspendedByOrientation = true;
     this.wasSuspendedByOrientationState = true;
-    if (this.ctx && this.ctx.state === 'running') {
+    if (this.ctx && this.ctx.state === "running") {
       this.ctx.suspend().catch(() => {});
     }
   }
@@ -84,27 +84,32 @@ class SoundEngine {
   public resumeAll() {
     this.wasSuspendedByOrientation = false;
     this.wasSuspendedByOrientationState = false;
-    if (this.ctx && this.ctx.state === 'suspended' && !this.isMuted) {
+    if (this.ctx && this.ctx.state === "suspended" && !this.isMuted) {
       this.ctx.resume().catch(() => {});
     }
   }
 
   public isSuspended(): boolean {
-    return this.wasSuspendedByOrientation || this.wasSuspendedByOrientationState;
+    return (
+      this.wasSuspendedByOrientation || this.wasSuspendedByOrientationState
+    );
   }
 
   private initContext() {
     if (!this.ctx) {
-      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      const AudioCtx =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext })
+          .webkitAudioContext;
       if (AudioCtx) {
         this.ctx = new AudioCtx();
       }
     }
     if (this.ctx && this.wasSuspendedByOrientation) {
-      if (this.ctx.state === 'running') void this.ctx.suspend().catch(() => {});
+      if (this.ctx.state === "running") void this.ctx.suspend().catch(() => {});
       return;
     }
-    if (this.ctx && this.ctx.state === 'suspended') {
+    if (this.ctx && this.ctx.state === "suspended") {
       this.ctx.resume().catch(() => {});
     }
   }
@@ -134,10 +139,12 @@ class SoundEngine {
   }
 
   public playRocketFit(part: string) {
-    if (part === 'engines' || part === 'core' || part === 'upper') this.playStagingThud();
-    else if (part.startsWith('cover')) this.playHatchSeal();
-    else if (['rover', 'lander', 'capsule'].includes(part)) this.playMagneticSnap();
-    else if (part === 'tower') this.playRadioBeep();
+    if (part === "engines" || part === "core" || part === "upper")
+      this.playStagingThud();
+    else if (part.startsWith("cover")) this.playHatchSeal();
+    else if (["rover", "lander", "capsule"].includes(part))
+      this.playMagneticSnap();
+    else if (part === "tower") this.playRadioBeep();
     else this.playSnap();
   }
 
@@ -182,7 +189,7 @@ class SoundEngine {
   }
 
   /** Fabric deployment and water feedback for the Earth drop rehearsal. */
-  public playReturnTestEffect(kind: 'canopy' | 'splash') {
+  public playReturnTestEffect(kind: "canopy" | "splash") {
     if (this.isMuted || this.wasSuspendedByOrientation) return;
     this.initContext();
     if (!this.ctx) return;
@@ -249,11 +256,22 @@ class SoundEngine {
     }
 
     try {
-      const targetGain = Math.max(0, Math.min(0.32, intensity * (1 - vacuumRatio * 0.55)));
+      const targetGain = Math.max(
+        0,
+        Math.min(0.32, intensity * (1 - vacuumRatio * 0.55)),
+      );
       const targetFreq = 180 + (1 - vacuumRatio) * 380;
 
-      this.rocketNodes.gain.gain.setTargetAtTime(targetGain, this.ctx.currentTime, 0.1);
-      this.rocketNodes.filter.frequency.setTargetAtTime(targetFreq, this.ctx.currentTime, 0.1);
+      this.rocketNodes.gain.gain.setTargetAtTime(
+        targetGain,
+        this.ctx.currentTime,
+        0.1,
+      );
+      this.rocketNodes.filter.frequency.setTargetAtTime(
+        targetFreq,
+        this.ctx.currentTime,
+        0.1,
+      );
     } catch {}
   }
 
@@ -262,7 +280,11 @@ class SoundEngine {
     const nodes = this.rocketNodes;
     this.rocketNodes = null;
     if (!nodes) return;
-    if (this.ctx) nodes.gain.gain.linearRampToValueAtTime(0.0001, this.ctx.currentTime + 0.2);
+    if (this.ctx)
+      nodes.gain.gain.linearRampToValueAtTime(
+        0.0001,
+        this.ctx.currentTime + 0.2,
+      );
     setTimeout(() => {
       try {
         nodes.noise.stop();

@@ -1,7 +1,7 @@
-import { useStoryNavigation } from '@/game/moon/core/storyNavigationContext';
-import { MILESTONES } from '@/game/moon/core/missionMilestones';
-import { ProgressRing } from '@exo/ui';
-import '@/shared/shell/missionExperience.css';
+import { useStoryNavigation } from "@/game/moon/core/storyNavigationContext";
+import { MILESTONES } from "@/game/moon/core/missionMilestones";
+import { ProgressRing } from "@exo/ui";
+import "@/shared/shell/missionExperience.css";
 
 export function MilestoneRing() {
   const navigation = useStoryNavigation();
@@ -19,4 +19,3 @@ export function MilestoneRing() {
     />
   );
 }
-

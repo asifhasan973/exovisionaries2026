@@ -1,2 +1,6 @@
-export { PlayerCharacterProvider, usePlayerCharacter, usePlayerGender, PlayerCharacterContext } from '../hooks/playerCharacterContext';
-
+export {
+  PlayerCharacterProvider,
+  usePlayerCharacter,
+  usePlayerGender,
+  PlayerCharacterContext,
+} from "../hooks/playerCharacterContext";

@@ -1,8 +1,8 @@
 /**
  * Cache storage identifier and 7-day TTL expiration thresholds
  */
-const ASSET_CACHE_NAME = 'exovisionaries-assets-v1';
-const CACHE_CREATED_AT_KEY = 'exovisionaries_cache_created_at_v1';
+const ASSET_CACHE_NAME = "exovisionaries-assets-v1";
+const CACHE_CREATED_AT_KEY = "exovisionaries_cache_created_at_v1";
 const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
 
 /** In-memory cache holding preloaded HTMLImageElements to guarantee instant slide switching */
@@ -13,7 +13,7 @@ const memoryImageCache = new Map<string, HTMLImageElement>();
  * automatically purging and renewing cached assets after 7 days (universal 7-day TTL without inactivity reset).
  */
 export async function maintainBrowserAssetCache(): Promise<void> {
-  if (typeof window === 'undefined' || !('caches' in window)) return;
+  if (typeof window === "undefined" || !("caches" in window)) return;
 
   try {
     const now = Date.now();
@@ -39,13 +39,13 @@ export async function maintainBrowserAssetCache(): Promise<void> {
  * Fetches an asset and caches it into the Browser Cache Storage API.
  */
 export async function cacheAssetInBrowser(url: string): Promise<void> {
-  if (typeof window === 'undefined' || !('caches' in window)) return;
+  if (typeof window === "undefined" || !("caches" in window)) return;
 
   try {
     const cache = await window.caches.open(ASSET_CACHE_NAME);
     const existing = await cache.match(url);
     if (!existing) {
-      const response = await fetch(url, { mode: 'cors' });
+      const response = await fetch(url, { mode: "cors" });
       if (response.ok) {
         await cache.put(url, response.clone());
       }
@@ -65,11 +65,11 @@ export function preloadImage(src: string): Promise<HTMLImageElement> {
   }
 
   // Pre-cache in browser Cache API in the background
-  cacheAssetInBrowser(src).catch(() => { });
+  cacheAssetInBrowser(src).catch(() => {});
 
   return new Promise((resolve) => {
     const img = new Image();
-    img.crossOrigin = 'anonymous';
+    img.crossOrigin = "anonymous";
 
     let settled = false;
     const finalize = () => {
@@ -77,8 +77,11 @@ export function preloadImage(src: string): Promise<HTMLImageElement> {
       settled = true;
       memoryImageCache.set(src, img);
       // If decode is supported, warmup texture decoding
-      if (typeof img.decode === 'function') {
-        img.decode().catch(() => { }).finally(() => resolve(img));
+      if (typeof img.decode === "function") {
+        img
+          .decode()
+          .catch(() => {})
+          .finally(() => resolve(img));
       } else {
         resolve(img);
       }
@@ -107,18 +110,20 @@ export function isImageCached(src: string): boolean {
  * should be shown based on session state with daily calendar fallback.
  */
 export function shouldShowIntroSplash(): boolean {
-  if (typeof window === 'undefined') return false;
+  if (typeof window === "undefined") return false;
 
   try {
     // 1. Session check
-    const sessionSeen = window.sessionStorage.getItem('exovisionaries_splash_session');
-    if (sessionSeen === 'true') {
+    const sessionSeen = window.sessionStorage.getItem(
+      "exovisionaries_splash_session",
+    );
+    if (sessionSeen === "true") {
       return false;
     }
 
     // 2. Calendar day check
     const today = new Date().toISOString().slice(0, 10);
-    const lastDate = window.localStorage.getItem('exovisionaries_splash_date');
+    const lastDate = window.localStorage.getItem("exovisionaries_splash_date");
     if (lastDate === today) {
       return false;
     }
@@ -133,12 +138,12 @@ export function shouldShowIntroSplash(): boolean {
  * Generic registration marking the intro splash as presented for session and daily fallback.
  */
 export function markIntroSplashSeen(): void {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
 
   try {
     const today = new Date().toISOString().slice(0, 10);
-    window.sessionStorage.setItem('exovisionaries_splash_session', 'true');
-    window.localStorage.setItem('exovisionaries_splash_date', today);
+    window.sessionStorage.setItem("exovisionaries_splash_session", "true");
+    window.localStorage.setItem("exovisionaries_splash_date", today);
   } catch {
     // Ignore restricted quota
   }
@@ -148,9 +153,9 @@ export function markIntroSplashSeen(): void {
  * Reset intro splash state for testing or restart
  */
 export function resetIntroSplash(): void {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
   try {
-    window.sessionStorage.removeItem('exovisionaries_splash_session');
-    window.localStorage.removeItem('exovisionaries_splash_date');
-  } catch { }
+    window.sessionStorage.removeItem("exovisionaries_splash_session");
+    window.localStorage.removeItem("exovisionaries_splash_date");
+  } catch {}
 }

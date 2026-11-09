@@ -4,7 +4,11 @@
    ============================================================================== */
 
 .debug-toolbar-container {
-  font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  font-family:
+    "Space Grotesk",
+    system-ui,
+    -apple-system,
+    sans-serif;
   pointer-events: auto;
   user-select: none;
 }
@@ -28,15 +32,23 @@
   text-transform: uppercase;
   cursor: grab;
   touch-action: none;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), 0 0 12px rgba(140, 226, 194, 0.25);
-  transition: transform 0.18s cubic-bezier(0.25, 0.45, 0.3, 1), box-shadow 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.4),
+    0 0 12px rgba(140, 226, 194, 0.25);
+  transition:
+    transform 0.18s cubic-bezier(0.25, 0.45, 0.3, 1),
+    box-shadow 0.18s ease,
+    background 0.18s ease,
+    border-color 0.18s ease;
   z-index: 99999;
 }
 
 .debug-launcher-btn:hover {
   background: rgba(20, 28, 58, 0.98);
   border-color: #8ce2c2;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5), 0 0 18px rgba(140, 226, 194, 0.45);
+  box-shadow:
+    0 6px 24px rgba(0, 0, 0, 0.5),
+    0 0 18px rgba(140, 226, 194, 0.45);
 }
 
 .debug-launcher-btn.is-dragging {
@@ -44,7 +56,9 @@
   transform: scale(1.06);
   background: rgba(26, 36, 75, 0.98);
   border-color: #5df2b2;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7), 0 0 24px rgba(93, 242, 178, 0.5);
+  box-shadow:
+    0 12px 32px rgba(0, 0, 0, 0.7),
+    0 0 24px rgba(93, 242, 178, 0.5);
   transition: none !important;
 }
 
@@ -114,8 +128,16 @@
 }
 
 @keyframes debugRadarPulse {
-  0%, 100% { transform: scale(1); opacity: 0.9; }
-  50% { transform: scale(1.15); opacity: 1; filter: drop-shadow(0 0 6px #ffdf89); }
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 1;
+    filter: drop-shadow(0 0 6px #ffdf89);
+  }
 }
 
 .debug-launcher-hotkey {
@@ -152,8 +174,12 @@
 }
 
 @keyframes debugFadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* Modal Drawer Centered in Landscape Viewport */
@@ -169,7 +195,9 @@
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(140, 226, 194, 0.35);
   border-radius: 16px;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.75), 0 0 24px rgba(140, 226, 194, 0.2);
+  box-shadow:
+    0 16px 48px rgba(0, 0, 0, 0.75),
+    0 0 24px rgba(140, 226, 194, 0.2);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -178,8 +206,14 @@
 }
 
 @keyframes debugCenterZoom {
-  from { transform: translate(-50%, -46%) scale(0.96); opacity: 0; }
-  to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  from {
+    transform: translate(-50%, -46%) scale(0.96);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
 }
 
 /* Drawer Header */

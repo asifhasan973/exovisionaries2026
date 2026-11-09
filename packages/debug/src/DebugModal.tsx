@@ -1,12 +1,12 @@
-import React from 'react';
-import { Search, X, RotateCcw, Terminal, Move } from 'lucide-react';
-import type { DebugCategory, DebugItem, DebugRoute } from './debugConfig';
+import React from "react";
+import { Search, X, RotateCcw, Terminal, Move } from "lucide-react";
+import type { DebugCategory, DebugItem, DebugRoute } from "./debugConfig";
 
 export interface DebugModalProps {
   search: string;
   setSearch(val: string): void;
-  filterType: 'all' | 'page' | 'step';
-  setFilterType(val: 'all' | 'page' | 'step'): void;
+  filterType: "all" | "page" | "step";
+  setFilterType(val: "all" | "page" | "step"): void;
   searchInputRef: React.RefObject<HTMLInputElement | null>;
   filteredCategories: DebugCategory[];
   activeRoute: DebugRoute | null;
@@ -55,7 +55,7 @@ export function DebugModal({
               onClick={onResetPill}
               title="Reset floating debug pill to top center"
             >
-              <Move size={11} style={{ display: 'inline', marginRight: 4 }} />
+              <Move size={11} style={{ display: "inline", marginRight: 4 }} />
               Reset Pill
             </button>
             {currentHash && (
@@ -64,7 +64,10 @@ export function DebugModal({
                 onClick={onClearDebugRoute}
                 title="Clear debug hash and return to normal user progress"
               >
-                <RotateCcw size={11} style={{ display: 'inline', marginRight: 4 }} />
+                <RotateCcw
+                  size={11}
+                  style={{ display: "inline", marginRight: 4 }}
+                />
                 Exit Debug
               </button>
             )}
@@ -88,25 +91,25 @@ export function DebugModal({
               className="debug-search-input"
               placeholder="Filter pages, steps, activities (e.g. 'lander', 'liftoff', 'science')…"
               value={search}
-              onChange={e => setSearch(e.target.value)}
+              onChange={(e) => setSearch(e.target.value)}
             />
           </div>
           <div className="debug-filter-pills">
             <button
-              className={`debug-filter-pill ${filterType === 'all' ? 'is-active' : ''}`}
-              onClick={() => setFilterType('all')}
+              className={`debug-filter-pill ${filterType === "all" ? "is-active" : ""}`}
+              onClick={() => setFilterType("all")}
             >
               All Endpoints
             </button>
             <button
-              className={`debug-filter-pill ${filterType === 'page' ? 'is-active' : ''}`}
-              onClick={() => setFilterType('page')}
+              className={`debug-filter-pill ${filterType === "page" ? "is-active" : ""}`}
+              onClick={() => setFilterType("page")}
             >
               Pages
             </button>
             <button
-              className={`debug-filter-pill ${filterType === 'step' ? 'is-active' : ''}`}
-              onClick={() => setFilterType('step')}
+              className={`debug-filter-pill ${filterType === "step" ? "is-active" : ""}`}
+              onClick={() => setFilterType("step")}
             >
               Story Steps
             </button>
@@ -120,31 +123,38 @@ export function DebugModal({
               No matching debug endpoints found for "{search}".
             </div>
           ) : (
-            filteredCategories.map(cat => (
+            filteredCategories.map((cat) => (
               <div key={cat.title} className="debug-category-section">
                 <div className="debug-category-header">
                   <span>{cat.title}</span>
-                  <span className="debug-category-count">{cat.items.length} targets</span>
+                  <span className="debug-category-count">
+                    {cat.items.length} targets
+                  </span>
                 </div>
                 <div className="debug-items-grid">
-                  {cat.items.map(item => {
+                  {cat.items.map((item) => {
                     const isActive =
-                      activeRoute?.id === item.id && activeRoute?.type === item.type;
+                      activeRoute?.id === item.id &&
+                      activeRoute?.type === item.type;
                     return (
                       <div
                         key={item.hash}
-                        className={`debug-item-card ${isActive ? 'is-active' : ''}`}
+                        className={`debug-item-card ${isActive ? "is-active" : ""}`}
                         onClick={() => onNavigate(item)}
                         title={`Navigate to ${item.label} (${item.hash})`}
                       >
                         <div className="debug-item-info">
                           <span className="debug-item-label">{item.label}</span>
                           {item.description && (
-                            <span className="debug-item-desc">{item.description}</span>
+                            <span className="debug-item-desc">
+                              {item.description}
+                            </span>
                           )}
                           <span className="debug-item-hash">{item.hash}</span>
                         </div>
-                        {item.badge && <span className="debug-item-badge">{item.badge}</span>}
+                        {item.badge && (
+                          <span className="debug-item-badge">{item.badge}</span>
+                        )}
                       </div>
                     );
                   })}
@@ -157,4 +167,3 @@ export function DebugModal({
     </>
   );
 }
-

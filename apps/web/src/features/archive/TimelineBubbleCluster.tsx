@@ -1,6 +1,6 @@
-import React from 'react';
-import type { TimelineBubble } from '@exo/engine';
-import { NASA_BUBBLE_PLACEHOLDER } from '@exo/engine';
+import React from "react";
+import type { TimelineBubble } from "@exo/engine";
+import { NASA_BUBBLE_PLACEHOLDER } from "@exo/engine";
 
 export interface TimelineBubbleClusterProps {
   bubbles: TimelineBubble[];
@@ -17,7 +17,7 @@ export const TimelineBubbleCluster: React.FC<TimelineBubbleClusterProps> = ({
   isAbove,
   onBubbleClick,
   brokenImgMap,
-  onImageError
+  onImageError,
 }) => {
   const renderBubble = (bubble: TimelineBubble) => {
     if (bubble.isMore) {
@@ -39,7 +39,10 @@ export const TimelineBubbleCluster: React.FC<TimelineBubbleClusterProps> = ({
     }
 
     const isBroken = brokenImgMap[bubble.id];
-    const imageSrc = !isBroken && bubble.thumbnail ? bubble.thumbnail : NASA_BUBBLE_PLACEHOLDER;
+    const imageSrc =
+      !isBroken && bubble.thumbnail
+        ? bubble.thumbnail
+        : NASA_BUBBLE_PLACEHOLDER;
 
     return (
       <button
@@ -67,9 +70,7 @@ export const TimelineBubbleCluster: React.FC<TimelineBubbleClusterProps> = ({
 
   if (bubbles.length === 1) {
     return (
-      <div className="bubble-cluster-single">
-        {renderBubble(bubbles[0])}
-      </div>
+      <div className="bubble-cluster-single">{renderBubble(bubbles[0])}</div>
     );
   }
 
@@ -84,7 +85,9 @@ export const TimelineBubbleCluster: React.FC<TimelineBubbleClusterProps> = ({
 
   if (bubbles.length >= 3) {
     return (
-      <div className={`bubble-cluster-triangle ${isAbove ? 'triangle-above' : 'triangle-below'}`}>
+      <div
+        className={`bubble-cluster-triangle ${isAbove ? "triangle-above" : "triangle-below"}`}
+      >
         {isAbove ? (
           <>
             <div className="triangle-row triangle-apex-row triangle-row-top">

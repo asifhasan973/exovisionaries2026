@@ -1,1 +1,1 @@
-export { CosmicBackground, type CosmicBackgroundProps } from './cosmic';
+export { CosmicBackground, type CosmicBackgroundProps } from "./cosmic";

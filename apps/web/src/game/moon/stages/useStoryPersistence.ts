@@ -1,16 +1,16 @@
-import { useEffect, useRef } from 'react';
-import type { MutableRefObject } from 'react';
-import type { WorkshopSession } from '@/game/moon/workshop/lander/workshopSession';
-import { writeBrowserSelectionSession } from '@/game/moon/crew/selectionSession';
+import { useEffect, useRef } from "react";
+import type { MutableRefObject } from "react";
+import type { WorkshopSession } from "@/game/moon/workshop/lander/workshopSession";
+import { writeBrowserSelectionSession } from "@/game/moon/crew/selectionSession";
 
 export interface StoryPersistenceState {
-  progress: WorkshopSession['progress'];
+  progress: WorkshopSession["progress"];
   voiceEnabled: boolean;
-  preparation: WorkshopSession['preparation'];
-  readiness: WorkshopSession['readiness'];
-  flight: WorkshopSession['flight'];
-  moon: WorkshopSession['moon'];
-  repair: WorkshopSession['repair'];
+  preparation: WorkshopSession["preparation"];
+  readiness: WorkshopSession["readiness"];
+  flight: WorkshopSession["flight"];
+  moon: WorkshopSession["moon"];
+  repair: WorkshopSession["repair"];
 }
 
 export function useStoryPersistence(
@@ -40,8 +40,8 @@ export function useStoryPersistence(
     incident.roverParked,
     incident.dataArchived,
     incident.crewChecked,
-    incident.log.map((r: any) => `${r.id}:${r.status}:${r.action}`).join(','),
-  ].join('|');
+    incident.log.map((r: any) => `${r.id}:${r.status}:${r.action}`).join(","),
+  ].join("|");
   const returnCheckpoint = [
     moon.returnFlight.stage,
     Math.floor(moon.returnFlight.frame / 5),
@@ -52,18 +52,20 @@ export function useStoryPersistence(
     moon.returnFlight.alignment,
     moon.returnFlight.closingMS,
     moon.returnFlight.assisted,
-  ].join('|');
+  ].join("|");
   const scienceCheckpoint = Math.floor(moon.science.frame / 5);
   const roverCheckpoint = moon.rover
     ? `${moon.rover.phase}|${moon.rover.line}|${moon.rover.commands.length}|${Math.floor(moon.rover.frames / 20)}|${moon.rover.paused}|${moon.rover.attempts}`
-    : '';
-  const surfaceCheckpoint = Math.floor((moon.surface.phaseFrame + moon.surface.legFrame) / 5);
+    : "";
+  const surfaceCheckpoint = Math.floor(
+    (moon.surface.phaseFrame + moon.surface.legFrame) / 5,
+  );
   const landingInputCheckpoint =
-    moon.landing.mode === 'medium'
+    moon.landing.mode === "medium"
       ? `${moon.landing.direction}|${moon.landing.brake}`
-      : moon.landing.mode === 'challenge'
-      ? `${moon.landing.throttle}|${moon.landing.steer}`
-      : '';
+      : moon.landing.mode === "challenge"
+        ? `${moon.landing.throttle}|${moon.landing.steer}`
+        : "";
   const landingCheckpoint = Math.floor(moon.landing.steps / 30);
   const journeyCheckpoint = Math.floor(moon.journey.elapsed * 2);
   const trialCheckpoint = Math.floor(readiness.trial.progress * 10);
@@ -193,8 +195,7 @@ export function useStoryPersistence(
         current.repair,
       );
     };
-    window.addEventListener('pagehide', save);
-    return () => window.removeEventListener('pagehide', save);
+    window.addEventListener("pagehide", save);
+    return () => window.removeEventListener("pagehide", save);
   }, [isDebugSession, latestRef]);
 }
-

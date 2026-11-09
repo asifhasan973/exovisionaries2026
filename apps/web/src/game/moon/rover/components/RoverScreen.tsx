@@ -1,104 +1,988 @@
-import { partById } from '@/game/moon/core/preparation';
-import { roverPower, roverCapability } from '../roverEquipment';
-import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowLeft, Check, Info, Map, Pause, Play, RotateCcw, X } from 'lucide-react';
-import type { WorkshopSession, MissionEvent } from '@/game/moon/workshop/lander/workshopSession';
-import type { SelectionFrame } from '@/game/moon/crew/SelectionScreens';
-import { StoryShell, StoryControls, useGameSettings } from '@/shared/shell';
-import { useStoryNavigation } from '@/game/moon/core/storyNavigationContext';
-import { SceneBoundary, SceneFallback, GameInfo } from '@exo/ui';
-import { sound } from '@exo/audio';
-import { isEngineFrozen } from '@exo/ui';
-import { freshRover, nearbyRoverSite, roverLight, roverRocks, roverHoles, roverAim, roverInteraction, ROVER_CAMPS, ROVER_SITES, roverGoal, roverSites, roverActive } from '../rover';
-import type { RoverSiteId } from '../rover';
-import { RoverMap, RoverRadar } from './RoverMap.tsx';
-import { RoverCabin } from './RoverCabin.tsx';
-import { RoverRadio } from './RoverRadio.tsx';
-import './rover.css';
-const RoverViewport = lazy(() => import('./RoverViewport.tsx').then(module => ({ default: module.RoverViewport })));
-export function RoverScreen({ session, dispatch, frame }: { session: WorkshopSession; dispatch(event: MissionEvent): void; frame: SelectionFrame }) {
-  const r = useMemo(() => session.moon.rover ?? freshRover(session.moon), [session.moon]);
-  const navigation = useStoryNavigation(), reviewing = !!navigation?.reviewing, { effects, gentle } = useGameSettings();
-  const [map, setMap] = useState(false), [help, setHelp] = useState(false), [target, setTarget] = useState<RoverSiteId>('A');
-  const mapDialog = useRef<HTMLDivElement>(null), mapClose = useRef<HTMLButtonElement>(null), mapOpen = useRef<HTMLButtonElement>(null), held = useRef(new Set<string>()), latest = useRef(r), menuWasPaused = useRef(false);
-  useEffect(() => { latest.current = r; }, [r]);
-  useEffect(() => { if (!map) return; mapClose.current?.focus(); const contain=(event:FocusEvent)=>{if(event.target instanceof Node&&!mapDialog.current?.contains(event.target))mapClose.current?.focus();}; const trap=(event:KeyboardEvent)=>{if(event.key==='Tab'){const items=Array.from(mapDialog.current?.querySelectorAll<HTMLElement>('button:not(:disabled),[tabindex="0"]')??[]),first=items[0],last=items.at(-1);if(event.shiftKey&&document.activeElement===first){event.preventDefault();last?.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus();}}}; document.addEventListener('focusin',contain);document.addEventListener('keydown',trap,true);return()=>{document.removeEventListener('focusin',contain);document.removeEventListener('keydown',trap,true);}; }, [map]);
-  useEffect(() => { const upgrade=()=>{if(latest.current.version<3&&!['ready','complete'].includes(latest.current.phase)&&!reviewing)dispatch({type:'rover-tour'});};upgrade();window.addEventListener('game-orientation-resume',upgrade);return()=>window.removeEventListener('game-orientation-resume',upgrade); }, [session.moon.rover?.version, reviewing, dispatch]);
-  const cabin = ['intro', 'cabin'].includes(r.phase), active = roverActive(r);
-  const site = nearbyRoverSite(r), selected = ROVER_SITES.find((site: any) => site.id === target&&!r.drilled.includes(site.id))??ROVER_SITES.filter((site: any)=>!r.drilled.includes(site.id)).sort((a: any, b: any)=>Math.hypot(a.x-r.x,a.z-r.z)-Math.hypot(b.x-r.x,b.z-r.z))[0]??ROVER_SITES[0];
-  const goal=roverGoal(r),goalSite=r.version>=3&&goal.kind==='sample'?goal.id as RoverSiteId:undefined;
-  const radioId=r.version<3?null:r.phase==='delivery-result'?r.deposited.length>=2?'second':'first':r.phase==='charging'?'charge':r.phase==='exploring'&&r.chargeDone&&!r.hardSeen?'charged':null;
-  const percent = Math.max(0, Math.min(100, r.capacityWh ? r.batteryWh / r.capacityWh * 100 : 0)), interaction = roverInteraction(r);
-  const camp = ROVER_CAMPS.find((camp: any) => Math.hypot(camp.x - r.x, camp.z - r.z) < 3.5);
-  const threat = [...roverRocks(r).map((item: any) => ({ ...item, hole: false })), ...roverHoles(r).map((item: any) => ({ ...item, hole: true }))].filter((item: any) => Math.hypot(item.x - r.x, item.z - r.z) - item.radius < 8).sort((a: any, b: any) => Math.hypot(a.x - r.x, a.z - r.z) - a.radius - (Math.hypot(b.x - r.x, b.z - r.z) - b.radius))[0];
-  const send = useCallback(() => { if (isEngineFrozen()) return; const keys = held.current; dispatch({ type: 'rover-control', throttle: Number(keys.has('forward')) - Number(keys.has('reverse')), steer: Number(keys.has('right')) - Number(keys.has('left')), drill: false }); }, [dispatch]);
-  const release = useCallback(() => { held.current.clear(); send(); }, [send]);
-  const act = useCallback((event: MissionEvent) => { if (reviewing || isEngineFrozen()) return; sound.setMuted(!effects); sound.playClick(); dispatch(event); }, [dispatch, effects, reviewing]);
-  const openMenu = useCallback((kind: 'map' | 'help') => { release(); menuWasPaused.current = latest.current.paused; dispatch({ type: 'rover-pause' }); if (kind === 'map') setMap(true); else setHelp(true); }, [release, dispatch]);
-  const closeMenu = useCallback(() => { setMap(false); setHelp(false); requestAnimationFrame(()=>mapOpen.current?.focus()); if (!menuWasPaused.current && !reviewing) dispatch({ type: 'rover-resume' }); }, [dispatch, reviewing]);
+import { partById } from "@/game/moon/core/preparation";
+import { roverPower, roverCapability } from "../roverEquipment";
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import {
+  ArrowLeft,
+  Check,
+  Info,
+  Map,
+  Pause,
+  Play,
+  RotateCcw,
+  X,
+} from "lucide-react";
+import type {
+  WorkshopSession,
+  MissionEvent,
+} from "@/game/moon/workshop/lander/workshopSession";
+import type { SelectionFrame } from "@/game/moon/crew/SelectionScreens";
+import { StoryShell, StoryControls, useGameSettings } from "@/shared/shell";
+import { useStoryNavigation } from "@/game/moon/core/storyNavigationContext";
+import { SceneBoundary, SceneFallback, GameInfo } from "@exo/ui";
+import { sound } from "@exo/audio";
+import { isEngineFrozen } from "@exo/ui";
+import {
+  freshRover,
+  nearbyRoverSite,
+  roverLight,
+  roverRocks,
+  roverHoles,
+  roverAim,
+  roverInteraction,
+  ROVER_CAMPS,
+  ROVER_SITES,
+  roverGoal,
+  roverSites,
+  roverActive,
+} from "../rover";
+import type { RoverSiteId } from "../rover";
+import { RoverMap, RoverRadar } from "./RoverMap.tsx";
+import { RoverCabin } from "./RoverCabin.tsx";
+import { RoverRadio } from "./RoverRadio.tsx";
+import "./rover.css";
+const RoverViewport = lazy(() =>
+  import("./RoverViewport.tsx").then((module) => ({
+    default: module.RoverViewport,
+  })),
+);
+export function RoverScreen({
+  session,
+  dispatch,
+  frame,
+}: {
+  session: WorkshopSession;
+  dispatch(event: MissionEvent): void;
+  frame: SelectionFrame;
+}) {
+  const r = useMemo(
+    () => session.moon.rover ?? freshRover(session.moon),
+    [session.moon],
+  );
+  const navigation = useStoryNavigation(),
+    reviewing = !!navigation?.reviewing,
+    { effects, gentle } = useGameSettings();
+  const [map, setMap] = useState(false),
+    [help, setHelp] = useState(false),
+    [target, setTarget] = useState<RoverSiteId>("A");
+  const mapDialog = useRef<HTMLDivElement>(null),
+    mapClose = useRef<HTMLButtonElement>(null),
+    mapOpen = useRef<HTMLButtonElement>(null),
+    held = useRef(new Set<string>()),
+    latest = useRef(r),
+    menuWasPaused = useRef(false);
+  useEffect(() => {
+    latest.current = r;
+  }, [r]);
+  useEffect(() => {
+    if (!map) return;
+    mapClose.current?.focus();
+    const contain = (event: FocusEvent) => {
+      if (
+        event.target instanceof Node &&
+        !mapDialog.current?.contains(event.target)
+      )
+        mapClose.current?.focus();
+    };
+    const trap = (event: KeyboardEvent) => {
+      if (event.key === "Tab") {
+        const items = Array.from(
+            mapDialog.current?.querySelectorAll<HTMLElement>(
+              'button:not(:disabled),[tabindex="0"]',
+            ) ?? [],
+          ),
+          first = items[0],
+          last = items.at(-1);
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last?.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first?.focus();
+        }
+      }
+    };
+    document.addEventListener("focusin", contain);
+    document.addEventListener("keydown", trap, true);
+    return () => {
+      document.removeEventListener("focusin", contain);
+      document.removeEventListener("keydown", trap, true);
+    };
+  }, [map]);
+  useEffect(() => {
+    const upgrade = () => {
+      if (
+        latest.current.version < 3 &&
+        !["ready", "complete"].includes(latest.current.phase) &&
+        !reviewing
+      )
+        dispatch({ type: "rover-tour" });
+    };
+    upgrade();
+    window.addEventListener("game-orientation-resume", upgrade);
+    return () => window.removeEventListener("game-orientation-resume", upgrade);
+  }, [session.moon.rover?.version, reviewing, dispatch]);
+  const cabin = ["intro", "cabin"].includes(r.phase),
+    active = roverActive(r);
+  const site = nearbyRoverSite(r),
+    selected =
+      ROVER_SITES.find(
+        (site: any) => site.id === target && !r.drilled.includes(site.id),
+      ) ??
+      ROVER_SITES.filter((site: any) => !r.drilled.includes(site.id)).sort(
+        (a: any, b: any) =>
+          Math.hypot(a.x - r.x, a.z - r.z) - Math.hypot(b.x - r.x, b.z - r.z),
+      )[0] ??
+      ROVER_SITES[0];
+  const goal = roverGoal(r),
+    goalSite =
+      r.version >= 3 && goal.kind === "sample"
+        ? (goal.id as RoverSiteId)
+        : undefined;
+  const radioId =
+    r.version < 3
+      ? null
+      : r.phase === "delivery-result"
+        ? r.deposited.length >= 2
+          ? "second"
+          : "first"
+        : r.phase === "charging"
+          ? "charge"
+          : r.phase === "exploring" && r.chargeDone && !r.hardSeen
+            ? "charged"
+            : null;
+  const percent = Math.max(
+      0,
+      Math.min(100, r.capacityWh ? (r.batteryWh / r.capacityWh) * 100 : 0),
+    ),
+    interaction = roverInteraction(r);
+  const camp = ROVER_CAMPS.find(
+    (camp: any) => Math.hypot(camp.x - r.x, camp.z - r.z) < 3.5,
+  );
+  const threat = [
+    ...roverRocks(r).map((item: any) => ({ ...item, hole: false })),
+    ...roverHoles(r).map((item: any) => ({ ...item, hole: true })),
+  ]
+    .filter(
+      (item: any) => Math.hypot(item.x - r.x, item.z - r.z) - item.radius < 8,
+    )
+    .sort(
+      (a: any, b: any) =>
+        Math.hypot(a.x - r.x, a.z - r.z) -
+        a.radius -
+        (Math.hypot(b.x - r.x, b.z - r.z) - b.radius),
+    )[0];
+  const send = useCallback(() => {
+    if (isEngineFrozen()) return;
+    const keys = held.current;
+    dispatch({
+      type: "rover-control",
+      throttle: Number(keys.has("forward")) - Number(keys.has("reverse")),
+      steer: Number(keys.has("right")) - Number(keys.has("left")),
+      drill: false,
+    });
+  }, [dispatch]);
+  const release = useCallback(() => {
+    held.current.clear();
+    send();
+  }, [send]);
+  const act = useCallback(
+    (event: MissionEvent) => {
+      if (reviewing || isEngineFrozen()) return;
+      sound.setMuted(!effects);
+      sound.playClick();
+      dispatch(event);
+    },
+    [dispatch, effects, reviewing],
+  );
+  const openMenu = useCallback(
+    (kind: "map" | "help") => {
+      release();
+      menuWasPaused.current = latest.current.paused;
+      dispatch({ type: "rover-pause" });
+      if (kind === "map") setMap(true);
+      else setHelp(true);
+    },
+    [release, dispatch],
+  );
+  const closeMenu = useCallback(() => {
+    setMap(false);
+    setHelp(false);
+    requestAnimationFrame(() => mapOpen.current?.focus());
+    if (!menuWasPaused.current && !reviewing)
+      dispatch({ type: "rover-resume" });
+  }, [dispatch, reviewing]);
   useEffect(() => {
     if (!active || r.paused || map || help || reviewing) return;
-    let last = performance.now(); const timer = setInterval(() => { const now = performance.now(); if (!isEngineFrozen() && !document.hidden) dispatch({ type: 'rover-tick', seconds: (now - last) / 1000 }); last = now; }, 50);
+    let last = performance.now();
+    const timer = setInterval(() => {
+      const now = performance.now();
+      if (!isEngineFrozen() && !document.hidden)
+        dispatch({ type: "rover-tick", seconds: (now - last) / 1000 });
+      last = now;
+    }, 50);
     return () => clearInterval(timer);
   }, [active, r.paused, map, help, reviewing, dispatch]);
   useEffect(() => {
     const keys = held.current;
-    const freeze = () => { keys.clear(); dispatch({ type: 'rover-input-pause' }); };
-    const pause = () => { keys.clear(); dispatch({ type: 'rover-pause' }); }, hide = () => { if (document.hidden) pause(); };
-    const inputs: Record<string, string> = { w: 'forward', arrowup: 'forward', s: 'reverse', arrowdown: 'reverse', a: 'left', arrowleft: 'left', d: 'right', arrowright: 'right' };
+    const freeze = () => {
+      keys.clear();
+      dispatch({ type: "rover-input-pause" });
+    };
+    const pause = () => {
+        keys.clear();
+        dispatch({ type: "rover-pause" });
+      },
+      hide = () => {
+        if (document.hidden) pause();
+      };
+    const inputs: Record<string, string> = {
+      w: "forward",
+      arrowup: "forward",
+      s: "reverse",
+      arrowdown: "reverse",
+      a: "left",
+      arrowleft: "left",
+      d: "right",
+      arrowright: "right",
+    };
     const down = (event: KeyboardEvent) => {
       const key = event.key.toLowerCase();
-      if (map && ['escape', 'm'].includes(key)) { event.preventDefault(); closeMenu(); return; }
-      if (map || help || reviewing || isEngineFrozen() || event.defaultPrevented || document.querySelector('dialog[open]') || (event.target instanceof HTMLElement && event.target.closest('input,textarea,select,[contenteditable=true]'))) return;
-      if (key === 'm' && !event.repeat) { event.preventDefault(); openMenu('map'); return; }
-      if (['p', 'escape'].includes(key) && !event.repeat) { event.preventDefault(); keys.clear(); dispatch({ type: latest.current.paused ? 'rover-resume' : 'rover-pause' }); return; }
-      if ((key === 'e' || key === ' ' && latest.current.phase === 'drilling') && !event.repeat) { const action = roverInteraction(latest.current); if (action) { event.preventDefault(); keys.clear(); act(action.event); } return; }
-      const input = inputs[key]; if (!input || event.repeat || latest.current.paused || latest.current.phase !== 'exploring') return;
-      event.preventDefault(); keys.add(input); send();
+      if (map && ["escape", "m"].includes(key)) {
+        event.preventDefault();
+        closeMenu();
+        return;
+      }
+      if (
+        map ||
+        help ||
+        reviewing ||
+        isEngineFrozen() ||
+        event.defaultPrevented ||
+        document.querySelector("dialog[open]") ||
+        (event.target instanceof HTMLElement &&
+          event.target.closest("input,textarea,select,[contenteditable=true]"))
+      )
+        return;
+      if (key === "m" && !event.repeat) {
+        event.preventDefault();
+        openMenu("map");
+        return;
+      }
+      if (["p", "escape"].includes(key) && !event.repeat) {
+        event.preventDefault();
+        keys.clear();
+        dispatch({
+          type: latest.current.paused ? "rover-resume" : "rover-pause",
+        });
+        return;
+      }
+      if (
+        (key === "e" || (key === " " && latest.current.phase === "drilling")) &&
+        !event.repeat
+      ) {
+        const action = roverInteraction(latest.current);
+        if (action) {
+          event.preventDefault();
+          keys.clear();
+          act(action.event);
+        }
+        return;
+      }
+      const input = inputs[key];
+      if (
+        !input ||
+        event.repeat ||
+        latest.current.paused ||
+        latest.current.phase !== "exploring"
+      )
+        return;
+      event.preventDefault();
+      keys.add(input);
+      send();
     };
-    const up = (event: KeyboardEvent) => { if(event.key.toLowerCase()==='e')dispatch({type:'rover-charge',held:false}); const input = inputs[event.key.toLowerCase()]; if (input) { keys.delete(input); send(); } };
-    const hint = () => { pause(); menuWasPaused.current = true; setHelp(true); };
-    window.addEventListener('keydown', down); window.addEventListener('keyup', up); window.addEventListener('blur', pause); window.addEventListener('game-help-open', pause); window.addEventListener('game-orientation-pause', freeze); window.addEventListener('replay-game-help', hint); document.addEventListener('visibilitychange', hide);
-    return () => { keys.clear(); window.removeEventListener('keydown', down); window.removeEventListener('keyup', up); window.removeEventListener('blur', pause); window.removeEventListener('game-help-open', pause); window.removeEventListener('game-orientation-pause', freeze); window.removeEventListener('replay-game-help', hint); document.removeEventListener('visibilitychange', hide); };
+    const up = (event: KeyboardEvent) => {
+      if (event.key.toLowerCase() === "e")
+        dispatch({ type: "rover-charge", held: false });
+      const input = inputs[event.key.toLowerCase()];
+      if (input) {
+        keys.delete(input);
+        send();
+      }
+    };
+    const hint = () => {
+      pause();
+      menuWasPaused.current = true;
+      setHelp(true);
+    };
+    window.addEventListener("keydown", down);
+    window.addEventListener("keyup", up);
+    window.addEventListener("blur", pause);
+    window.addEventListener("game-help-open", pause);
+    window.addEventListener("game-orientation-pause", freeze);
+    window.addEventListener("replay-game-help", hint);
+    document.addEventListener("visibilitychange", hide);
+    return () => {
+      keys.clear();
+      window.removeEventListener("keydown", down);
+      window.removeEventListener("keyup", up);
+      window.removeEventListener("blur", pause);
+      window.removeEventListener("game-help-open", pause);
+      window.removeEventListener("game-orientation-pause", freeze);
+      window.removeEventListener("replay-game-help", hint);
+      document.removeEventListener("visibilitychange", hide);
+    };
   }, [dispatch, send, act, map, help, reviewing, openMenu, closeMenu]);
-  useEffect(() => { if (r.phase !== 'exploring') held.current.clear(); }, [r.phase]);
+  useEffect(() => {
+    if (r.phase !== "exploring") held.current.clear();
+  }, [r.phase]);
   const running = !r.paused && !reviewing && !map && !help;
-  const audioMode = running && r.phase === 'exploring' && Math.abs(r.speed) > .2 ? 'drive' : running && r.phase === 'collecting' ? 'drill' : null;
-  useEffect(() => { sound.setMuted(!effects); if (audioMode) sound.startRoverSound(audioMode); else sound.stopRoverSound(); return () => sound.stopRoverSound(); }, [effects, audioMode]);
+  const audioMode =
+    running && r.phase === "exploring" && Math.abs(r.speed) > 0.2
+      ? "drive"
+      : running && r.phase === "collecting"
+        ? "drill"
+        : null;
+  useEffect(() => {
+    sound.setMuted(!effects);
+    if (audioMode) sound.startRoverSound(audioMode);
+    else sound.stopRoverSound();
+    return () => sound.stopRoverSound();
+  }, [effects, audioMode]);
   const threatId = threat?.id;
-  useEffect(() => { if (running && threatId) { sound.setMuted(!effects); sound.playRadioBeep(); } }, [threatId, running, effects]);
-  useEffect(() => { if (['sample-result','delivery-result','delivering','stowing'].includes(r.phase) && !reviewing) { sound.setMuted(!effects); if(['delivering','stowing'].includes(r.phase))sound.playHatchSeal();else if (r.sampleResult === 'success'||r.phase==='delivery-result') sound.playSnap(); else sound.playRadioBeep(); } }, [r.phase, r.sampleResult, reviewing, effects]);
-  const next = () => { if (reviewing) dispatch({ type: 'next' }); else if (cabin) act({ type: 'rover-talk' }); else if (interaction) act(interaction.event); };
-  const back = () => { release(); dispatch({ type: 'rover-pause' }); dispatch({ type: 'back' }); };
-  return <StoryShell {...frame} controls={cabin ? <StoryControls onBack={back} onNext={next} nextLabel={r.line === 0 ? 'Next' : r.talk === 'intro' ? 'Take the wheel' : r.talk === 'launch' ? 'Board the cabin' : 'Drive out again'} hintDisabled/> : null}>
-    <main className={`workshop-main free-rover-main rover-laptop ${cabin ? 'is-cabin' : 'is-driving'}`} id="story-content" tabIndex={-1} aria-labelledby="free-rover-title">
-      <h1 id="free-rover-title" className={cabin ? 'rover-cabin-title' : 'rover-sr-only'}>{cabin ? 'Moon crew · sample run' : 'Moon rover driving mission'}</h1>
-      {cabin ? <div className="rover-cabin-wrap">{!session.moon.rover && session.moon.surface.deployed ? <p className="rover-migration-note">New expedition · starts at your landing checkpoint</p> : null}<RoverCabin rover={r} moon={session.moon} preparation={session.preparation} voiceEnabled={frame.voiceEnabled ?? true}/></div> : <section className="free-rover-world" data-phase={r.phase} aria-label="Free driving on the Moon">
-        <SceneBoundary fallback={<SceneFallback scene="surface" label="Moon driving" detail="Use the map and driving controls"/>}><Suspense fallback={<div className="rover-visual-fallback">Preparing the driving course…</div>}><RoverViewport rover={r} preparation={session.preparation} gentle={gentle}/></Suspense></SceneBoundary>
-        <div className="rover-run"><span>MOON SAMPLE RUN</span><small>Keyboard + mouse required</small><strong>{r.deposited.length} / 2 <small>DELIVERED</small><b>·</b>{r.cargo.length}<small>ABOARD</small></strong><p>{r.version>=3?goal.label:r.cargo.length+r.deposited.length>=2?'Bring the cargo back to base.':`${selected.id} · ${selected.name}`}</p><small className="rover-target-distance">{r.version>=3?`${goal.name} — ${Math.round(Math.hypot(goal.x-r.x,goal.z-r.z))} m`:''}</small></div>
-        <div className="rover-toolbar"><button aria-label="Back to mission review" onClick={back}><ArrowLeft size={17}/></button><button aria-label="Driving help" onClick={() => openMenu('help')}><Info size={17}/></button><button aria-label={r.paused ? 'Resume' : 'Pause'} onClick={() => { release(); act({ type: r.paused ? 'rover-resume' : 'rover-pause' }); }}>{r.paused ? <Play size={17}/> : <Pause size={17}/>}</button></div>
-        <button ref={mapOpen} className="rover-map-button" aria-label="Open map" onClick={() => openMenu('map')}><RoverMap rover={r} selected={r.version>=3?goalSite:selected.id}/><span><Map size={12}/> M · FULL MAP</span></button>
-        {threat && r.phase === 'exploring' ? <div className="rover-danger"><RoverRadar rover={r}/><div><strong>{threat.hole ? 'CRATER EDGE' : 'ROCK AHEAD'}</strong><small>Brake or steer around</small></div></div> : null}
-        <div className="rover-instruments"><div className="rover-speed"><strong>{Math.round(Math.abs(r.speed) * 3.6)}</strong><span>KM/H<small>{r.speed < -.1 ? 'REVERSE' : Math.abs(r.speed) > .1 ? 'DRIVE' : 'PARKED'}</small></span></div><div className={`rover-charge ${percent < 25 ? 'is-low' : ''}`}><span>BATTERY <b>{Math.round(percent)}%</b></span><div><i style={{ width: `${percent}%` }}/></div><small>{r.version>=3&&camp&&Math.abs(r.speed)<.1?camp.id==='east'?'Solar station · hold E':'Sunny checkpoint':camp && Math.abs(r.speed) < .1 ? r.campTime>=1?'☀ Charging · checkpoint saved':'☀ Charging · stop to save' : roverLight(r.x, r.z) ? 'Sunlit terrain' : 'Shadow · no solar generation'}</small></div>{r.version===4?<small className="rover-energy-reading">{r.batteryWh.toFixed(1)} / {r.capacityWh} Wh · Solar {Math.round(roverPower(session.moon,'standby',roverLight(r.x,r.z)).solarW)} W</small>:null}</div>
-        {percent < 25 && r.phase === 'exploring' ? <div className="rover-power-warning" role="status">LOW BATTERY · Find a sunny charging camp on the map.</div> : null}
-        {r.frames < 600 && r.phase === 'exploring' ? <div className="rover-key-help">W / S <span>accelerate & brake</span> A / D <span>steer</span> Keyboard + mouse required <span>·</span> Mouse drag <span>look</span> C <span>center camera</span></div> : null}
-        {interaction?.event.type!=='rover-charge'&&interaction && r.phase === 'exploring' && !r.paused && !reviewing ? <button className="rover-interact" onClick={next}><kbd>E</kbd><span>{interaction.label}</span></button> : site && r.phase === 'exploring' && Math.abs(r.speed) > .3 && !r.drilled.includes(site.id)&&(r.version<3||goalSite===site.id) ? <div className="rover-parking-hint">Brake and stop inside the sample circle</div> : null}
-        {(r.phase==='charging'||interaction?.event.type==='rover-charge')&&!r.paused&&!reviewing?<div className="rover-charging-card"><span>SOLAR RIDGE · PHYSICAL LINK</span><strong>{r.phase==='charging'?'Charging… keep holding':'Hold E to recharge'}</strong><progress aria-label="Rover charging progress" max={100} value={percent}/><button className="rover-charge-hold" onPointerDown={event=>{event.preventDefault();event.currentTarget.setPointerCapture(event.pointerId);act({type:'rover-charge',held:true});}} onPointerUp={()=>dispatch({type:'rover-charge',held:false})} onPointerCancel={()=>dispatch({type:'rover-charge',held:false})} onLostPointerCapture={()=>dispatch({type:'rover-charge',held:false})} onKeyDown={event=>{if([' ','Enter'].includes(event.key)){event.preventDefault();if(!event.repeat)act({type:'rover-charge',held:true});}}} onKeyUp={event=>{if([' ','Enter'].includes(event.key)){event.preventDefault();dispatch({type:'rover-charge',held:false});}}} onBlur={()=>dispatch({type:'rover-charge',held:false})}>Hold to charge · {Math.round(percent)}%</button><small>Release to stop. W / S to drive after charging.</small></div>:null}
-        {r.phase==='delivering'?<div className="rover-extraction"><span>SAMPLE TRANSFER · KEEP PARKED</span><strong>{r.phaseTime<.95?'Opening the sample hatch…':r.phaseTime<1.5?'Picking up the sealed tube…':r.phaseTime<3.1?'Moving sample into storage…':'Securing the storage rack…'}</strong><progress aria-label="Sample delivery progress" max={3.8} value={r.phaseTime}/></div>:null}
-        {r.phase==='delivery-result'?<div className="rover-sample-result" role="status"><div className="rover-sample-icon"><Check size={30}/></div><span>SAMPLE STORED INSIDE THE LANDER</span><h2>{r.deposited.length} / 2 delivered</h2><p>{r.deposited.length>=2?'Both tubes secured. Park the rover inside the cargo bay.':'First sample safe. Next stop: Solar Ridge for a recharge.'}</p><button onClick={()=>act({type:'rover-continue'})}>E · Continue</button></div>:null}
-        {radioId&&running?<RoverRadio id={radioId} enabled={frame.voiceEnabled??true}/>:null}
-        {r.phase === 'drilling' ? <div className="rover-aim-card"><span>QUICK SAMPLE CHECK · SITE {r.drillSite}</span><h2>Line up the collector</h2><p>Press <kbd>E</kbd> when the marker reaches the green zone.</p><div className="rover-timing" role="meter" aria-label="Collector alignment" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(roverAim(r) * 100)}><i/><b style={{ left: `${roverAim(r) * 100}%` }}/></div><button onClick={() => act({ type: 'rover-aim' })}>E · Lock alignment</button>{r.aimMisses ? <small>Try again. No sample lost. Instruments still use power.</small> : null}<button className="rover-text-button" onClick={() => act({ type: 'rover-cancel' })}>Cancel and drive away</button></div> : null}
-        {r.phase === 'collecting' ? <div className="rover-extraction"><span>COLLECTING AT {r.drillSite}</span><strong>{roverSites(r).find((site: any) => site.id === r.drillSite)?.hard && r.drillProgress > 1.7 ? 'Hard layer. Collector is resisting…' : r.drillProgress < 1 ? 'Lowering the tool…' : r.drillProgress < 2 ? 'Extracting a small core…' : r.version===4?'Sealing sample · running instrument analysis…':'Sealing the sample tube…'}</strong><progress aria-label="Collecting sample" max={r.version===4?2.6+roverCapability(session.moon).depth/40:2.6} value={r.drillProgress}/></div> : null}
-        {r.phase === 'sample-result' ? <div className={`rover-sample-result ${r.sampleResult === 'hard' ? 'is-hard' : ''}`} role="status"><div className="rover-sample-icon">{r.sampleResult === 'hard' ? '×' : <Check size={30}/>}</div><span>{r.sampleResult === 'hard' ? 'HARD SOIL · NO SAMPLE' : `SAMPLE ${r.drillSite} SECURED`}</span><h2>{r.sampleResult === 'hard' ? 'Try a different site' : '+1 sample in your cargo box'}</h2><p>{r.sampleResult === 'hard' ? 'The ground is too hard for this tool. Your other samples are safe.' : r.version>=3?'Sample sealed aboard. Bring it back to the base for delivery.':`${r.cargo.length} aboard · ${r.deposited.length} delivered. Find one more, then return to base.`}</p>{r.version===4&&r.sampleResult==='success'?<div className="rover-evidence-readings"><strong>Instrument readings · awaiting delivery</strong><ul>{session.moon.science.records.filter((record: any)=>!record.transmitted&&record.kind!=='subsurface').map((record: any)=><li key={record.id}><b>{partById(record.instrumentId)?.name??record.instrumentId}</b><span>{record.signal}</span></li>)}</ul>{!session.moon.science.records.some((record: any)=>!record.transmitted&&record.kind!=='subsurface')?<p>Sample collected. No analytical readings available.</p>:null}</div>:null}<button onClick={() => act({ type: 'rover-continue' })}>{r.sampleResult==='hard'&&r.version>=3?'E · Open crew comms':'E · Back to driving'}</button></div> : null}
-        {r.paused && !map && !help ? <div className="rover-pause-card"><h2>Paused</h2><button onClick={() => act({ type: 'rover-resume' })}>Resume driving</button><small>P / Esc</small></div> : null}
-        {['deploying', 'boarding', 'ready','stowing'].includes(r.phase) ? <div className="rover-state-card"><strong>{r.phase==='stowing'?r.phaseTime<1?'Opening cargo bay…':r.phaseTime<2.3?'Lining up the rover…':r.phaseTime<4.8?'Driving up the ramp…':'Closing the cargo bay…':r.phase === 'deploying' ? 'Remote rover link established…' : r.phase === 'boarding' ? 'Samples secured. Ascent cabin readying…' : 'Ready for lunar ascent'}</strong>{r.phase !== 'ready' ? <progress max={r.phase==='stowing'?6:r.phase === 'deploying' ? 3 : 4} value={r.phaseTime}/> : <button onClick={() => act({ type: 'rover-launch' })}>E · Launch ascent cabin</button>}</div> : null}
-        {r.phase === 'failed' ? <div className="rover-failed"><RotateCcw size={34}/><h2>{r.failedReason === 'hole' ? 'Rover stuck in a crater' : r.failedReason === 'supplies' ? 'Mission reserve reached' : 'Rover out of power'}</h2><p>Retry at {ROVER_CAMPS[r.checkpoint.camp].name}. Your checkpointed samples stay safe.</p><button onClick={() => act({ type: 'rover-retry' })}>E · Retry checkpoint</button></div> : null}
-        {map ? <div ref={mapDialog} className="rover-map-overlay" role="dialog" aria-modal="true" aria-label="Expedition map"><div className="rover-map-header"><div><h2>{r.version>=3?'Current mission target':'Choose your next stop'}</h2><p>{r.version>=3?goal.label:'Routes are suggestions. You drive freely.'}</p></div><button ref={mapClose} aria-label="Close map" onClick={closeMenu}><X/></button></div><div className="rover-map-full"><RoverMap rover={r} selected={r.version>=3?goalSite:selected.id} choose={r.version>=3?undefined:id => { setTarget(id); closeMenu(); }}/></div><div className="rover-map-legend"><span>● Sample sites</span><span>☀ Charging camps</span><span>○ Craters</span><span>• Rocks</span></div></div> : null}
-      </section>}
-    </main>
-    {help ? <GameInfo title="Laptop driving controls" onClose={closeMenu} pages={[
-      <div key="controls"><p>Keyboard and mouse required for driving. Touch-only driving is not supported.</p><p>W / ↑ accelerates. S / ↓ brakes, then reverses. A / D steer while moving. Release the accelerator to slow down. Steering while reversing works like a car.</p><p>Drag with the left or right mouse button to look around. C centers the chase camera. Mouse wheel adjusts distance. M opens the map. P or Esc pauses.</p><p>Drive to the marked target, stop inside its circle and press E. Hit the green timing zone, watch the collection, then acknowledge the result. Deliver the first sample, hold E at Solar Ridge to recharge, then explore the shadow target. A hard layer reveals a nearby replacement site. Deliver the second sample and park the rover in the cargo bay to unlock ascent. Collection does not prove that the soil contains ice.</p></div>,
-      <div key="course"><p>Narrow rocky passages, ridge climbs and crater bends are the driving challenge. Paths are landmarks; you can leave them. Radar warns about nearby rocks and crater edges.</p><p>Power use follows your installed equipment. Sunlight feeds your solar panels. Stop in sunlight to save; hold E at Solar Ridge to fast-forward solar charging. A failed run retries there with checkpointed cargo; later unsaved samples must be collected again.</p><p>Camera motion, terrain, grip and energy rates are authored arcade rules.</p></div>,
-    ]}/> : null}
-  </StoryShell>;
+  useEffect(() => {
+    if (running && threatId) {
+      sound.setMuted(!effects);
+      sound.playRadioBeep();
+    }
+  }, [threatId, running, effects]);
+  useEffect(() => {
+    if (
+      ["sample-result", "delivery-result", "delivering", "stowing"].includes(
+        r.phase,
+      ) &&
+      !reviewing
+    ) {
+      sound.setMuted(!effects);
+      if (["delivering", "stowing"].includes(r.phase)) sound.playHatchSeal();
+      else if (r.sampleResult === "success" || r.phase === "delivery-result")
+        sound.playSnap();
+      else sound.playRadioBeep();
+    }
+  }, [r.phase, r.sampleResult, reviewing, effects]);
+  const next = () => {
+    if (reviewing) dispatch({ type: "next" });
+    else if (cabin) act({ type: "rover-talk" });
+    else if (interaction) act(interaction.event);
+  };
+  const back = () => {
+    release();
+    dispatch({ type: "rover-pause" });
+    dispatch({ type: "back" });
+  };
+  return (
+    <StoryShell
+      {...frame}
+      controls={
+        cabin ? (
+          <StoryControls
+            onBack={back}
+            onNext={next}
+            nextLabel={
+              r.line === 0
+                ? "Next"
+                : r.talk === "intro"
+                  ? "Take the wheel"
+                  : r.talk === "launch"
+                    ? "Board the cabin"
+                    : "Drive out again"
+            }
+            hintDisabled
+          />
+        ) : null
+      }
+    >
+      <main
+        className={`workshop-main free-rover-main rover-laptop ${cabin ? "is-cabin" : "is-driving"}`}
+        id="story-content"
+        tabIndex={-1}
+        aria-labelledby="free-rover-title"
+      >
+        <h1
+          id="free-rover-title"
+          className={cabin ? "rover-cabin-title" : "rover-sr-only"}
+        >
+          {cabin ? "Moon crew · sample run" : "Moon rover driving mission"}
+        </h1>
+        {cabin ? (
+          <div className="rover-cabin-wrap">
+            {!session.moon.rover && session.moon.surface.deployed ? (
+              <p className="rover-migration-note">
+                New expedition · starts at your landing checkpoint
+              </p>
+            ) : null}
+            <RoverCabin
+              rover={r}
+              moon={session.moon}
+              preparation={session.preparation}
+              voiceEnabled={frame.voiceEnabled ?? true}
+            />
+          </div>
+        ) : (
+          <section
+            className="free-rover-world"
+            data-phase={r.phase}
+            aria-label="Free driving on the Moon"
+          >
+            <SceneBoundary
+              fallback={
+                <SceneFallback
+                  scene="surface"
+                  label="Moon driving"
+                  detail="Use the map and driving controls"
+                />
+              }
+            >
+              <Suspense
+                fallback={
+                  <div className="rover-visual-fallback">
+                    Preparing the driving course…
+                  </div>
+                }
+              >
+                <RoverViewport
+                  rover={r}
+                  preparation={session.preparation}
+                  gentle={gentle}
+                />
+              </Suspense>
+            </SceneBoundary>
+            <div className="rover-run">
+              <span>MOON SAMPLE RUN</span>
+              <small>Keyboard + mouse required</small>
+              <strong>
+                {r.deposited.length} / 2 <small>DELIVERED</small>
+                <b>·</b>
+                {r.cargo.length}
+                <small>ABOARD</small>
+              </strong>
+              <p>
+                {r.version >= 3
+                  ? goal.label
+                  : r.cargo.length + r.deposited.length >= 2
+                    ? "Bring the cargo back to base."
+                    : `${selected.id} · ${selected.name}`}
+              </p>
+              <small className="rover-target-distance">
+                {r.version >= 3
+                  ? `${goal.name} — ${Math.round(Math.hypot(goal.x - r.x, goal.z - r.z))} m`
+                  : ""}
+              </small>
+            </div>
+            <div className="rover-toolbar">
+              <button aria-label="Back to mission review" onClick={back}>
+                <ArrowLeft size={17} />
+              </button>
+              <button
+                aria-label="Driving help"
+                onClick={() => openMenu("help")}
+              >
+                <Info size={17} />
+              </button>
+              <button
+                aria-label={r.paused ? "Resume" : "Pause"}
+                onClick={() => {
+                  release();
+                  act({ type: r.paused ? "rover-resume" : "rover-pause" });
+                }}
+              >
+                {r.paused ? <Play size={17} /> : <Pause size={17} />}
+              </button>
+            </div>
+            <button
+              ref={mapOpen}
+              className="rover-map-button"
+              aria-label="Open map"
+              onClick={() => openMenu("map")}
+            >
+              <RoverMap
+                rover={r}
+                selected={r.version >= 3 ? goalSite : selected.id}
+              />
+              <span>
+                <Map size={12} /> M · FULL MAP
+              </span>
+            </button>
+            {threat && r.phase === "exploring" ? (
+              <div className="rover-danger">
+                <RoverRadar rover={r} />
+                <div>
+                  <strong>{threat.hole ? "CRATER EDGE" : "ROCK AHEAD"}</strong>
+                  <small>Brake or steer around</small>
+                </div>
+              </div>
+            ) : null}
+            <div className="rover-instruments">
+              <div className="rover-speed">
+                <strong>{Math.round(Math.abs(r.speed) * 3.6)}</strong>
+                <span>
+                  KM/H
+                  <small>
+                    {r.speed < -0.1
+                      ? "REVERSE"
+                      : Math.abs(r.speed) > 0.1
+                        ? "DRIVE"
+                        : "PARKED"}
+                  </small>
+                </span>
+              </div>
+              <div className={`rover-charge ${percent < 25 ? "is-low" : ""}`}>
+                <span>
+                  BATTERY <b>{Math.round(percent)}%</b>
+                </span>
+                <div>
+                  <i style={{ width: `${percent}%` }} />
+                </div>
+                <small>
+                  {r.version >= 3 && camp && Math.abs(r.speed) < 0.1
+                    ? camp.id === "east"
+                      ? "Solar station · hold E"
+                      : "Sunny checkpoint"
+                    : camp && Math.abs(r.speed) < 0.1
+                      ? r.campTime >= 1
+                        ? "☀ Charging · checkpoint saved"
+                        : "☀ Charging · stop to save"
+                      : roverLight(r.x, r.z)
+                        ? "Sunlit terrain"
+                        : "Shadow · no solar generation"}
+                </small>
+              </div>
+              {r.version === 4 ? (
+                <small className="rover-energy-reading">
+                  {r.batteryWh.toFixed(1)} / {r.capacityWh} Wh · Solar{" "}
+                  {Math.round(
+                    roverPower(session.moon, "standby", roverLight(r.x, r.z))
+                      .solarW,
+                  )}{" "}
+                  W
+                </small>
+              ) : null}
+            </div>
+            {percent < 25 && r.phase === "exploring" ? (
+              <div className="rover-power-warning" role="status">
+                LOW BATTERY · Find a sunny charging camp on the map.
+              </div>
+            ) : null}
+            {r.frames < 600 && r.phase === "exploring" ? (
+              <div className="rover-key-help">
+                W / S <span>accelerate & brake</span> A / D <span>steer</span>{" "}
+                Keyboard + mouse required <span>·</span> Mouse drag{" "}
+                <span>look</span> C <span>center camera</span>
+              </div>
+            ) : null}
+            {interaction?.event.type !== "rover-charge" &&
+            interaction &&
+            r.phase === "exploring" &&
+            !r.paused &&
+            !reviewing ? (
+              <button className="rover-interact" onClick={next}>
+                <kbd>E</kbd>
+                <span>{interaction.label}</span>
+              </button>
+            ) : site &&
+              r.phase === "exploring" &&
+              Math.abs(r.speed) > 0.3 &&
+              !r.drilled.includes(site.id) &&
+              (r.version < 3 || goalSite === site.id) ? (
+              <div className="rover-parking-hint">
+                Brake and stop inside the sample circle
+              </div>
+            ) : null}
+            {(r.phase === "charging" ||
+              interaction?.event.type === "rover-charge") &&
+            !r.paused &&
+            !reviewing ? (
+              <div className="rover-charging-card">
+                <span>SOLAR RIDGE · PHYSICAL LINK</span>
+                <strong>
+                  {r.phase === "charging"
+                    ? "Charging… keep holding"
+                    : "Hold E to recharge"}
+                </strong>
+                <progress
+                  aria-label="Rover charging progress"
+                  max={100}
+                  value={percent}
+                />
+                <button
+                  className="rover-charge-hold"
+                  onPointerDown={(event) => {
+                    event.preventDefault();
+                    event.currentTarget.setPointerCapture(event.pointerId);
+                    act({ type: "rover-charge", held: true });
+                  }}
+                  onPointerUp={() =>
+                    dispatch({ type: "rover-charge", held: false })
+                  }
+                  onPointerCancel={() =>
+                    dispatch({ type: "rover-charge", held: false })
+                  }
+                  onLostPointerCapture={() =>
+                    dispatch({ type: "rover-charge", held: false })
+                  }
+                  onKeyDown={(event) => {
+                    if ([" ", "Enter"].includes(event.key)) {
+                      event.preventDefault();
+                      if (!event.repeat)
+                        act({ type: "rover-charge", held: true });
+                    }
+                  }}
+                  onKeyUp={(event) => {
+                    if ([" ", "Enter"].includes(event.key)) {
+                      event.preventDefault();
+                      dispatch({ type: "rover-charge", held: false });
+                    }
+                  }}
+                  onBlur={() => dispatch({ type: "rover-charge", held: false })}
+                >
+                  Hold to charge · {Math.round(percent)}%
+                </button>
+                <small>Release to stop. W / S to drive after charging.</small>
+              </div>
+            ) : null}
+            {r.phase === "delivering" ? (
+              <div className="rover-extraction">
+                <span>SAMPLE TRANSFER · KEEP PARKED</span>
+                <strong>
+                  {r.phaseTime < 0.95
+                    ? "Opening the sample hatch…"
+                    : r.phaseTime < 1.5
+                      ? "Picking up the sealed tube…"
+                      : r.phaseTime < 3.1
+                        ? "Moving sample into storage…"
+                        : "Securing the storage rack…"}
+                </strong>
+                <progress
+                  aria-label="Sample delivery progress"
+                  max={3.8}
+                  value={r.phaseTime}
+                />
+              </div>
+            ) : null}
+            {r.phase === "delivery-result" ? (
+              <div className="rover-sample-result" role="status">
+                <div className="rover-sample-icon">
+                  <Check size={30} />
+                </div>
+                <span>SAMPLE STORED INSIDE THE LANDER</span>
+                <h2>{r.deposited.length} / 2 delivered</h2>
+                <p>
+                  {r.deposited.length >= 2
+                    ? "Both tubes secured. Park the rover inside the cargo bay."
+                    : "First sample safe. Next stop: Solar Ridge for a recharge."}
+                </p>
+                <button onClick={() => act({ type: "rover-continue" })}>
+                  E · Continue
+                </button>
+              </div>
+            ) : null}
+            {radioId && running ? (
+              <RoverRadio id={radioId} enabled={frame.voiceEnabled ?? true} />
+            ) : null}
+            {r.phase === "drilling" ? (
+              <div className="rover-aim-card">
+                <span>QUICK SAMPLE CHECK · SITE {r.drillSite}</span>
+                <h2>Line up the collector</h2>
+                <p>
+                  Press <kbd>E</kbd> when the marker reaches the green zone.
+                </p>
+                <div
+                  className="rover-timing"
+                  role="meter"
+                  aria-label="Collector alignment"
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-valuenow={Math.round(roverAim(r) * 100)}
+                >
+                  <i />
+                  <b style={{ left: `${roverAim(r) * 100}%` }} />
+                </div>
+                <button onClick={() => act({ type: "rover-aim" })}>
+                  E · Lock alignment
+                </button>
+                {r.aimMisses ? (
+                  <small>
+                    Try again. No sample lost. Instruments still use power.
+                  </small>
+                ) : null}
+                <button
+                  className="rover-text-button"
+                  onClick={() => act({ type: "rover-cancel" })}
+                >
+                  Cancel and drive away
+                </button>
+              </div>
+            ) : null}
+            {r.phase === "collecting" ? (
+              <div className="rover-extraction">
+                <span>COLLECTING AT {r.drillSite}</span>
+                <strong>
+                  {roverSites(r).find((site: any) => site.id === r.drillSite)
+                    ?.hard && r.drillProgress > 1.7
+                    ? "Hard layer. Collector is resisting…"
+                    : r.drillProgress < 1
+                      ? "Lowering the tool…"
+                      : r.drillProgress < 2
+                        ? "Extracting a small core…"
+                        : r.version === 4
+                          ? "Sealing sample · running instrument analysis…"
+                          : "Sealing the sample tube…"}
+                </strong>
+                <progress
+                  aria-label="Collecting sample"
+                  max={
+                    r.version === 4
+                      ? 2.6 + roverCapability(session.moon).depth / 40
+                      : 2.6
+                  }
+                  value={r.drillProgress}
+                />
+              </div>
+            ) : null}
+            {r.phase === "sample-result" ? (
+              <div
+                className={`rover-sample-result ${r.sampleResult === "hard" ? "is-hard" : ""}`}
+                role="status"
+              >
+                <div className="rover-sample-icon">
+                  {r.sampleResult === "hard" ? "×" : <Check size={30} />}
+                </div>
+                <span>
+                  {r.sampleResult === "hard"
+                    ? "HARD SOIL · NO SAMPLE"
+                    : `SAMPLE ${r.drillSite} SECURED`}
+                </span>
+                <h2>
+                  {r.sampleResult === "hard"
+                    ? "Try a different site"
+                    : "+1 sample in your cargo box"}
+                </h2>
+                <p>
+                  {r.sampleResult === "hard"
+                    ? "The ground is too hard for this tool. Your other samples are safe."
+                    : r.version >= 3
+                      ? "Sample sealed aboard. Bring it back to the base for delivery."
+                      : `${r.cargo.length} aboard · ${r.deposited.length} delivered. Find one more, then return to base.`}
+                </p>
+                {r.version === 4 && r.sampleResult === "success" ? (
+                  <div className="rover-evidence-readings">
+                    <strong>Instrument readings · awaiting delivery</strong>
+                    <ul>
+                      {session.moon.science.records
+                        .filter(
+                          (record: any) =>
+                            !record.transmitted && record.kind !== "subsurface",
+                        )
+                        .map((record: any) => (
+                          <li key={record.id}>
+                            <b>
+                              {partById(record.instrumentId)?.name ??
+                                record.instrumentId}
+                            </b>
+                            <span>{record.signal}</span>
+                          </li>
+                        ))}
+                    </ul>
+                    {!session.moon.science.records.some(
+                      (record: any) =>
+                        !record.transmitted && record.kind !== "subsurface",
+                    ) ? (
+                      <p>Sample collected. No analytical readings available.</p>
+                    ) : null}
+                  </div>
+                ) : null}
+                <button onClick={() => act({ type: "rover-continue" })}>
+                  {r.sampleResult === "hard" && r.version >= 3
+                    ? "E · Open crew comms"
+                    : "E · Back to driving"}
+                </button>
+              </div>
+            ) : null}
+            {r.paused && !map && !help ? (
+              <div className="rover-pause-card">
+                <h2>Paused</h2>
+                <button onClick={() => act({ type: "rover-resume" })}>
+                  Resume driving
+                </button>
+                <small>P / Esc</small>
+              </div>
+            ) : null}
+            {["deploying", "boarding", "ready", "stowing"].includes(r.phase) ? (
+              <div className="rover-state-card">
+                <strong>
+                  {r.phase === "stowing"
+                    ? r.phaseTime < 1
+                      ? "Opening cargo bay…"
+                      : r.phaseTime < 2.3
+                        ? "Lining up the rover…"
+                        : r.phaseTime < 4.8
+                          ? "Driving up the ramp…"
+                          : "Closing the cargo bay…"
+                    : r.phase === "deploying"
+                      ? "Remote rover link established…"
+                      : r.phase === "boarding"
+                        ? "Samples secured. Ascent cabin readying…"
+                        : "Ready for lunar ascent"}
+                </strong>
+                {r.phase !== "ready" ? (
+                  <progress
+                    max={
+                      r.phase === "stowing"
+                        ? 6
+                        : r.phase === "deploying"
+                          ? 3
+                          : 4
+                    }
+                    value={r.phaseTime}
+                  />
+                ) : (
+                  <button onClick={() => act({ type: "rover-launch" })}>
+                    E · Launch ascent cabin
+                  </button>
+                )}
+              </div>
+            ) : null}
+            {r.phase === "failed" ? (
+              <div className="rover-failed">
+                <RotateCcw size={34} />
+                <h2>
+                  {r.failedReason === "hole"
+                    ? "Rover stuck in a crater"
+                    : r.failedReason === "supplies"
+                      ? "Mission reserve reached"
+                      : "Rover out of power"}
+                </h2>
+                <p>
+                  Retry at {ROVER_CAMPS[r.checkpoint.camp].name}. Your
+                  checkpointed samples stay safe.
+                </p>
+                <button onClick={() => act({ type: "rover-retry" })}>
+                  E · Retry checkpoint
+                </button>
+              </div>
+            ) : null}
+            {map ? (
+              <div
+                ref={mapDialog}
+                className="rover-map-overlay"
+                role="dialog"
+                aria-modal="true"
+                aria-label="Expedition map"
+              >
+                <div className="rover-map-header">
+                  <div>
+                    <h2>
+                      {r.version >= 3
+                        ? "Current mission target"
+                        : "Choose your next stop"}
+                    </h2>
+                    <p>
+                      {r.version >= 3
+                        ? goal.label
+                        : "Routes are suggestions. You drive freely."}
+                    </p>
+                  </div>
+                  <button
+                    ref={mapClose}
+                    aria-label="Close map"
+                    onClick={closeMenu}
+                  >
+                    <X />
+                  </button>
+                </div>
+                <div className="rover-map-full">
+                  <RoverMap
+                    rover={r}
+                    selected={r.version >= 3 ? goalSite : selected.id}
+                    choose={
+                      r.version >= 3
+                        ? undefined
+                        : (id) => {
+                            setTarget(id);
+                            closeMenu();
+                          }
+                    }
+                  />
+                </div>
+                <div className="rover-map-legend">
+                  <span>● Sample sites</span>
+                  <span>☀ Charging camps</span>
+                  <span>○ Craters</span>
+                  <span>• Rocks</span>
+                </div>
+              </div>
+            ) : null}
+          </section>
+        )}
+      </main>
+      {help ? (
+        <GameInfo
+          title="Laptop driving controls"
+          onClose={closeMenu}
+          pages={[
+            <div key="controls">
+              <p>
+                Keyboard and mouse required for driving. Touch-only driving is
+                not supported.
+              </p>
+              <p>
+                W / ↑ accelerates. S / ↓ brakes, then reverses. A / D steer
+                while moving. Release the accelerator to slow down. Steering
+                while reversing works like a car.
+              </p>
+              <p>
+                Drag with the left or right mouse button to look around. C
+                centers the chase camera. Mouse wheel adjusts distance. M opens
+                the map. P or Esc pauses.
+              </p>
+              <p>
+                Drive to the marked target, stop inside its circle and press E.
+                Hit the green timing zone, watch the collection, then
+                acknowledge the result. Deliver the first sample, hold E at
+                Solar Ridge to recharge, then explore the shadow target. A hard
+                layer reveals a nearby replacement site. Deliver the second
+                sample and park the rover in the cargo bay to unlock ascent.
+                Collection does not prove that the soil contains ice.
+              </p>
+            </div>,
+            <div key="course">
+              <p>
+                Narrow rocky passages, ridge climbs and crater bends are the
+                driving challenge. Paths are landmarks; you can leave them.
+                Radar warns about nearby rocks and crater edges.
+              </p>
+              <p>
+                Power use follows your installed equipment. Sunlight feeds your
+                solar panels. Stop in sunlight to save; hold E at Solar Ridge to
+                fast-forward solar charging. A failed run retries there with
+                checkpointed cargo; later unsaved samples must be collected
+                again.
+              </p>
+              <p>
+                Camera motion, terrain, grip and energy rates are authored
+                arcade rules.
+              </p>
+            </div>,
+          ]}
+        />
+      ) : null}
+    </StoryShell>
+  );
 }

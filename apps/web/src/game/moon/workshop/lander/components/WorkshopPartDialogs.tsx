@@ -1,8 +1,8 @@
-import React, { useEffect, useRef } from 'react';
-import { GameInfo } from '@exo/ui';
-import { Term } from '@/game/moon/core/learning/Learning';
-import { GLOSSARY, PART_TERMS } from '@/game/moon/core/learning/glossary';
-import type { WorkshopPart } from '@/game/moon/core/preparation';
+import React, { useEffect, useRef } from "react";
+import { GameInfo } from "@exo/ui";
+import { Term } from "@/game/moon/core/learning/Learning";
+import { GLOSSARY, PART_TERMS } from "@/game/moon/core/learning/glossary";
+import type { WorkshopPart } from "@/game/moon/core/preparation";
 
 export function PartDetails({
   part,
@@ -22,12 +22,23 @@ export function PartDetails({
       pages={[
         <div key="overview">
           <div className="learning-part-intro">
-            <span aria-hidden="true">{PART_TERMS[part.id] ? GLOSSARY[PART_TERMS[part.id]].icon : '🔬'}</span>
-            <p>{PART_TERMS[part.id] ? GLOSSARY[PART_TERMS[part.id]].text : part.description}</p>
+            <span aria-hidden="true">
+              {PART_TERMS[part.id] ? GLOSSARY[PART_TERMS[part.id]].icon : "🔬"}
+            </span>
+            <p>
+              {PART_TERMS[part.id]
+                ? GLOSSARY[PART_TERMS[part.id]].text
+                : part.description}
+            </p>
             {PART_TERMS[part.id] ? (
-              <p className="learning-example">{GLOSSARY[PART_TERMS[part.id]].example}</p>
+              <p className="learning-example">
+                {GLOSSARY[PART_TERMS[part.id]].example}
+              </p>
             ) : (
-              <p className="learning-example">{part.capability}. Successful use earns science; buying it does not.</p>
+              <p className="learning-example">
+                {part.capability}. Successful use earns science; buying it does
+                not.
+              </p>
             )}
           </div>
         </div>,
@@ -38,12 +49,19 @@ export function PartDetails({
               <dd>{part.credits} credits</dd>
             </div>
             <div>
-              <dt><Term term="mass">Mass</Term></dt>
+              <dt>
+                <Term term="mass">Mass</Term>
+              </dt>
               <dd>{part.massKg} kg</dd>
             </div>
             <div>
-              <dt><Term term="power">Power</Term></dt>
-              <dd>{part.nominalPowerW} W{part.peakPowerW ? ` / ${part.peakPowerW} W peak` : ''}</dd>
+              <dt>
+                <Term term="power">Power</Term>
+              </dt>
+              <dd>
+                {part.nominalPowerW} W
+                {part.peakPowerW ? ` / ${part.peakPowerW} W peak` : ""}
+              </dd>
             </div>
             {part.outputW ? (
               <div>
@@ -53,7 +71,9 @@ export function PartDetails({
             ) : null}
             {part.capacityWh ? (
               <div>
-                <dt><Term term="energy">Stored energy</Term></dt>
+                <dt>
+                  <Term term="energy">Stored energy</Term>
+                </dt>
                 <dd>{part.capacityWh} Wh</dd>
               </div>
             ) : null}
@@ -67,7 +87,9 @@ export function PartDetails({
         <div key="notes">
           <p>{part.description}</p>
           <p>These prices and numbers are game values.</p>
-          {part.safetyBonus ? <p>Game safety bonus: +{part.safetyBonus}</p> : null}
+          {part.safetyBonus ? (
+            <p>Game safety bonus: +{part.safetyBonus}</p>
+          ) : null}
           {part.assumption ? <p>{part.assumption}</p> : null}
           {part.source ? (
             <a href={part.source} target="_blank" rel="noreferrer">
@@ -80,7 +102,13 @@ export function PartDetails({
   );
 }
 
-export function QuickBuildDialog({ onClose, onConfirm }: { onClose(): void; onConfirm(): void }) {
+export function QuickBuildDialog({
+  onClose,
+  onConfirm,
+}: {
+  onClose(): void;
+  onConfirm(): void;
+}) {
   const dialog = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -94,14 +122,17 @@ export function QuickBuildDialog({ onClose, onConfirm }: { onClose(): void; onCo
       className="workshop-dialog"
       ref={dialog}
       onCancel={onClose}
-      onClose={event => {
+      onClose={(event) => {
         if (!event.currentTarget.open) onClose();
       }}
       aria-labelledby="quick-build-title"
     >
       <span className="selection-eyebrow">QUICK PREVIEW</span>
       <h2 id="quick-build-title">Auto-build this explorer?</h2>
-      <p>Watch all five stages in about 12 seconds. Replaces your parts; you can edit afterward.</p>
+      <p>
+        Watch all five stages in about 12 seconds. Replaces your parts; you can
+        edit afterward.
+      </p>
       <div className="workshop-dialog-actions">
         <button onClick={onClose} autoFocus>
           Keep building
@@ -113,4 +144,3 @@ export function QuickBuildDialog({ onClose, onConfirm }: { onClose(): void; onCo
     </dialog>
   );
 }
-

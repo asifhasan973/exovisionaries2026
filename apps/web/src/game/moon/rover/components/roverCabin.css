@@ -1,4 +1,332 @@
-.rover-cabin{position:relative;isolation:isolate;flex:1;min-height:0;overflow:hidden;border:1px solid #96b3bd66;border-radius:18px;background:#11151b;box-shadow:inset 0 0 70px #0008}.rover-cabin-scene{position:absolute;inset:0;background-size:cover;background-position:center 45%;z-index:-2}.rover-cabin-scene:after{content:"";position:absolute;inset:0;background:linear-gradient(#050b1210 45%,#070e1780)}.rover-cabin-location{position:absolute;top:4%;left:50%;transform:translateX(-50%);padding:7px 13px;border:1px solid #c2d6d64a;border-radius:6px;background:#08121dc4;color:#c1d9d7;font-size:9px;letter-spacing:2px;white-space:nowrap}.rover-cabin-crew{position:absolute;inset:12% 8% 13%;overflow:hidden;pointer-events:none}.rover-cabin-person{position:absolute;bottom:0;width:43%;height:100%;filter:brightness(.75) saturate(.82);transition:filter .2s}.rover-cabin-person.is-speaking{filter:brightness(1) saturate(1)}.rover-cabin-commander{left:0}.rover-cabin-scientist{right:0}.rover-cabin-commander .conversation-actor{position:absolute;left:9%;bottom:-20%;width:82%;height:120%;margin:0}.rover-cabin-commander .conversation-actor canvas{width:100%;height:100%}.rover-cabin-commander figcaption{display:none}.rover-cabin-scientist>img{position:absolute;left:-6%;bottom:-32%;height:132%;width:112%;object-fit:contain;filter:drop-shadow(0 8px 10px #0008)}.rover-cabin-person>span{position:absolute;bottom:34%;left:5%;right:5%;text-align:center;font-size:10px;color:#d0e3e6;text-shadow:0 2px 5px #000;background:#0b1620cc;border:1px solid #9bc1c13d;border-radius:6px;padding:6px}.rover-cabin-person.is-speaking>span{border-color:#a2ddc9;color:#d4ffe9}.rover-cabin-console{position:absolute;left:3%;right:3%;bottom:0;height:39%;display:grid;grid-template-columns:1fr 1.25fr .7fr;align-content:start;gap:16px;padding:18px 7% 90px;box-sizing:border-box;background:linear-gradient(180deg,#48535a,#202a32 12%,#101a23 45%,#080e17);border-top:3px solid #9eacae;clip-path:polygon(3% 0,97% 0,100% 17%,100% 100%,0 100%,0 17%);box-shadow:0 -8px 20px #0008}.rover-cabin-screen{position:relative;height:75px;border:3px solid #3c4a51;border-radius:8px;background:radial-gradient(#1e3d43,#07191e);box-shadow:0 0 12px #8ce2c21c;display:grid;grid-template-rows:auto 1fr auto;color:#a0dfcf;overflow:hidden;text-align:center}.rover-cabin-screen small{font-size:7px;letter-spacing:1.5px;padding-top:4px}.rover-cabin-screen img{position:absolute;left:25%;top:10%;width:50%;height:77%;object-fit:contain}.rover-cabin-screen>span{font-size:6px;letter-spacing:1px;align-self:end;padding:4px}.rover-cabin-readings{display:grid;gap:8px;padding:6px 10px;font-size:8px;letter-spacing:1px;color:#a4bcbc}.rover-cabin-readings>span{display:flex;justify-content:space-between;gap:10px}.rover-cabin-readings b{color:#c8f7d7;font-size:10px}.rover-cabin-switches{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;align-content:center;padding:10px}.rover-cabin-switches i{height:9px;border-radius:2px;border:1px solid #778b8d;background:#9acd9d;box-shadow:0 0 7px #6ac2a34a}.rover-cabin-switches i:nth-child(3n){background:#cbb67b}.rover-cabin-switches strong{grid-column:1/-1;font-size:8px;text-align:center;color:#bcd6d3;letter-spacing:2px}.rover-cabin-dialogue{position:absolute;left:13%;right:13%;bottom:4%;min-height:78px;box-sizing:border-box;padding:12px 60px 15px 17px;display:grid;align-content:center;gap:6px;background:#0b1825f5;border:1px solid #b5cfd16b;border-radius:12px;box-shadow:0 6px 16px #0006;color:#e8f1ee}.rover-cabin-dialogue>strong{font-size:9px;letter-spacing:1.6px;color:#b9e6d2;text-transform:uppercase}.rover-cabin .rover-cabin-dialogue p{font-size:clamp(15px,1.8vw,24px);line-height:1.25;margin:0}.rover-cabin-dialogue button{position:absolute;right:12px;top:12px;width:35px;height:35px;border:1px solid #92b8b666;border-radius:8px;background:#25414c;color:#c7e7dc;display:grid;place-content:center;cursor:pointer}.rover-cabin-dialogue>small{position:absolute;right:18px;bottom:8px;font-size:9px;color:#a7c3c6}
-@media(max-height:650px){.rover-cabin-console{height:41%;padding-top:12px;gap:10px}.rover-cabin-screen{height:58px}.rover-cabin-dialogue{left:10%;right:10%;min-height:65px;padding-top:9px;padding-bottom:11px}.rover-cabin .rover-cabin-dialogue p{font-size:18px}.rover-cabin-readings{gap:5px;padding:4px 0}.rover-cabin-person>span{font-size:9px;padding:4px}.rover-cabin-location{font-size:8px}}
-@media(max-width:1050px){.rover-cabin-console{padding-left:5%;padding-right:5%}.rover-cabin-dialogue{left:8%;right:8%}.rover-cabin-person>span{left:0;right:0}.rover-cabin-crew{left:6%;right:6%}}
-@media(max-height:450px){.rover-cabin-screen,.rover-cabin-switches{display:none}.rover-cabin-console{height:43%;display:block}.rover-cabin-readings{display:flex;justify-content:space-between;gap:14px}.rover-cabin-readings>span{font-size:7px;gap:5px}.rover-cabin-dialogue{bottom:3%;min-height:57px}.rover-cabin .rover-cabin-dialogue p{font-size:15px}.rover-cabin-location{top:3%;padding:4px 7px;font-size:7px}.rover-cabin-person>span{bottom:36%;font-size:8px}}
+.rover-cabin {
+  position: relative;
+  isolation: isolate;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid #96b3bd66;
+  border-radius: 18px;
+  background: #11151b;
+  box-shadow: inset 0 0 70px #0008;
+}
+.rover-cabin-scene {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center 45%;
+  z-index: -2;
+}
+.rover-cabin-scene:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(#050b1210 45%, #070e1780);
+}
+.rover-cabin-location {
+  position: absolute;
+  top: 4%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 7px 13px;
+  border: 1px solid #c2d6d64a;
+  border-radius: 6px;
+  background: #08121dc4;
+  color: #c1d9d7;
+  font-size: 9px;
+  letter-spacing: 2px;
+  white-space: nowrap;
+}
+.rover-cabin-crew {
+  position: absolute;
+  inset: 12% 8% 13%;
+  overflow: hidden;
+  pointer-events: none;
+}
+.rover-cabin-person {
+  position: absolute;
+  bottom: 0;
+  width: 43%;
+  height: 100%;
+  filter: brightness(0.75) saturate(0.82);
+  transition: filter 0.2s;
+}
+.rover-cabin-person.is-speaking {
+  filter: brightness(1) saturate(1);
+}
+.rover-cabin-commander {
+  left: 0;
+}
+.rover-cabin-scientist {
+  right: 0;
+}
+.rover-cabin-commander .conversation-actor {
+  position: absolute;
+  left: 9%;
+  bottom: -20%;
+  width: 82%;
+  height: 120%;
+  margin: 0;
+}
+.rover-cabin-commander .conversation-actor canvas {
+  width: 100%;
+  height: 100%;
+}
+.rover-cabin-commander figcaption {
+  display: none;
+}
+.rover-cabin-scientist > img {
+  position: absolute;
+  left: -6%;
+  bottom: -32%;
+  height: 132%;
+  width: 112%;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 10px #0008);
+}
+.rover-cabin-person > span {
+  position: absolute;
+  bottom: 34%;
+  left: 5%;
+  right: 5%;
+  text-align: center;
+  font-size: 10px;
+  color: #d0e3e6;
+  text-shadow: 0 2px 5px #000;
+  background: #0b1620cc;
+  border: 1px solid #9bc1c13d;
+  border-radius: 6px;
+  padding: 6px;
+}
+.rover-cabin-person.is-speaking > span {
+  border-color: #a2ddc9;
+  color: #d4ffe9;
+}
+.rover-cabin-console {
+  position: absolute;
+  left: 3%;
+  right: 3%;
+  bottom: 0;
+  height: 39%;
+  display: grid;
+  grid-template-columns: 1fr 1.25fr 0.7fr;
+  align-content: start;
+  gap: 16px;
+  padding: 18px 7% 90px;
+  box-sizing: border-box;
+  background: linear-gradient(
+    180deg,
+    #48535a,
+    #202a32 12%,
+    #101a23 45%,
+    #080e17
+  );
+  border-top: 3px solid #9eacae;
+  clip-path: polygon(3% 0, 97% 0, 100% 17%, 100% 100%, 0 100%, 0 17%);
+  box-shadow: 0 -8px 20px #0008;
+}
+.rover-cabin-screen {
+  position: relative;
+  height: 75px;
+  border: 3px solid #3c4a51;
+  border-radius: 8px;
+  background: radial-gradient(#1e3d43, #07191e);
+  box-shadow: 0 0 12px #8ce2c21c;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  color: #a0dfcf;
+  overflow: hidden;
+  text-align: center;
+}
+.rover-cabin-screen small {
+  font-size: 7px;
+  letter-spacing: 1.5px;
+  padding-top: 4px;
+}
+.rover-cabin-screen img {
+  position: absolute;
+  left: 25%;
+  top: 10%;
+  width: 50%;
+  height: 77%;
+  object-fit: contain;
+}
+.rover-cabin-screen > span {
+  font-size: 6px;
+  letter-spacing: 1px;
+  align-self: end;
+  padding: 4px;
+}
+.rover-cabin-readings {
+  display: grid;
+  gap: 8px;
+  padding: 6px 10px;
+  font-size: 8px;
+  letter-spacing: 1px;
+  color: #a4bcbc;
+}
+.rover-cabin-readings > span {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+.rover-cabin-readings b {
+  color: #c8f7d7;
+  font-size: 10px;
+}
+.rover-cabin-switches {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 7px;
+  align-content: center;
+  padding: 10px;
+}
+.rover-cabin-switches i {
+  height: 9px;
+  border-radius: 2px;
+  border: 1px solid #778b8d;
+  background: #9acd9d;
+  box-shadow: 0 0 7px #6ac2a34a;
+}
+.rover-cabin-switches i:nth-child(3n) {
+  background: #cbb67b;
+}
+.rover-cabin-switches strong {
+  grid-column: 1/-1;
+  font-size: 8px;
+  text-align: center;
+  color: #bcd6d3;
+  letter-spacing: 2px;
+}
+.rover-cabin-dialogue {
+  position: absolute;
+  left: 13%;
+  right: 13%;
+  bottom: 4%;
+  min-height: 78px;
+  box-sizing: border-box;
+  padding: 12px 60px 15px 17px;
+  display: grid;
+  align-content: center;
+  gap: 6px;
+  background: #0b1825f5;
+  border: 1px solid #b5cfd16b;
+  border-radius: 12px;
+  box-shadow: 0 6px 16px #0006;
+  color: #e8f1ee;
+}
+.rover-cabin-dialogue > strong {
+  font-size: 9px;
+  letter-spacing: 1.6px;
+  color: #b9e6d2;
+  text-transform: uppercase;
+}
+.rover-cabin .rover-cabin-dialogue p {
+  font-size: clamp(15px, 1.8vw, 24px);
+  line-height: 1.25;
+  margin: 0;
+}
+.rover-cabin-dialogue button {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  width: 35px;
+  height: 35px;
+  border: 1px solid #92b8b666;
+  border-radius: 8px;
+  background: #25414c;
+  color: #c7e7dc;
+  display: grid;
+  place-content: center;
+  cursor: pointer;
+}
+.rover-cabin-dialogue > small {
+  position: absolute;
+  right: 18px;
+  bottom: 8px;
+  font-size: 9px;
+  color: #a7c3c6;
+}
+@media (max-height: 650px) {
+  .rover-cabin-console {
+    height: 41%;
+    padding-top: 12px;
+    gap: 10px;
+  }
+  .rover-cabin-screen {
+    height: 58px;
+  }
+  .rover-cabin-dialogue {
+    left: 10%;
+    right: 10%;
+    min-height: 65px;
+    padding-top: 9px;
+    padding-bottom: 11px;
+  }
+  .rover-cabin .rover-cabin-dialogue p {
+    font-size: 18px;
+  }
+  .rover-cabin-readings {
+    gap: 5px;
+    padding: 4px 0;
+  }
+  .rover-cabin-person > span {
+    font-size: 9px;
+    padding: 4px;
+  }
+  .rover-cabin-location {
+    font-size: 8px;
+  }
+}
+@media (max-width: 1050px) {
+  .rover-cabin-console {
+    padding-left: 5%;
+    padding-right: 5%;
+  }
+  .rover-cabin-dialogue {
+    left: 8%;
+    right: 8%;
+  }
+  .rover-cabin-person > span {
+    left: 0;
+    right: 0;
+  }
+  .rover-cabin-crew {
+    left: 6%;
+    right: 6%;
+  }
+}
+@media (max-height: 450px) {
+  .rover-cabin-screen,
+  .rover-cabin-switches {
+    display: none;
+  }
+  .rover-cabin-console {
+    height: 43%;
+    display: block;
+  }
+  .rover-cabin-readings {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+  }
+  .rover-cabin-readings > span {
+    font-size: 7px;
+    gap: 5px;
+  }
+  .rover-cabin-dialogue {
+    bottom: 3%;
+    min-height: 57px;
+  }
+  .rover-cabin .rover-cabin-dialogue p {
+    font-size: 15px;
+  }
+  .rover-cabin-location {
+    top: 3%;
+    padding: 4px 7px;
+    font-size: 7px;
+  }
+  .rover-cabin-person > span {
+    bottom: 36%;
+    font-size: 8px;
+  }
+}

@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useState, type ReactNode } from 'react';
-import { RotateCw, Sparkles, Expand, Compass } from 'lucide-react';
-import { useOrientationLifecycleStore } from '../state/orientationLifecycleStore';
-import { useLoadingStore } from '../state/loadingStore';
-import { checkIsLandscape } from '../state/orientationStore';
-import './orientationGuard.css';
+import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { RotateCw, Sparkles, Expand, Compass } from "lucide-react";
+import { useOrientationLifecycleStore } from "../state/orientationLifecycleStore";
+import { useLoadingStore } from "../state/loadingStore";
+import { checkIsLandscape } from "../state/orientationStore";
+import "./orientationGuard.css";
 
 interface OrientationGuardProps {
   children?: ReactNode;
@@ -15,13 +15,18 @@ interface OrientationGuardProps {
  * OrientationGuard:
  * Blocks interaction and displays an aesthetic space-mission instruction screen
  * if the user is in portrait orientation.
- * 
+ *
  * Uses dynamic eventListeners on matchMedia, screen.orientation, resize, and orientationchange
  * to immediately detect mode changes without requiring page reload.
  */
-export function OrientationGuard({ children, forceBlock = false }: OrientationGuardProps) {
-  const loading = useLoadingStore(state => state.isLoading);
-  const [isLandscape, setIsLandscape] = useState(() => (forceBlock ? false : checkIsLandscape()));
+export function OrientationGuard({
+  children,
+  forceBlock = false,
+}: OrientationGuardProps) {
+  const loading = useLoadingStore((state) => state.isLoading);
+  const [isLandscape, setIsLandscape] = useState(() =>
+    forceBlock ? false : checkIsLandscape(),
+  );
   const [fullscreenError, setFullscreenError] = useState<string | null>(null);
 
   const updateOrientation = useCallback(() => {
@@ -35,7 +40,10 @@ export function OrientationGuard({ children, forceBlock = false }: OrientationGu
 
   useEffect(() => {
     // Event listener 1: Media query change listener
-    const mql = typeof window.matchMedia === 'function' ? window.matchMedia('(orientation: landscape)') : null;
+    const mql =
+      typeof window.matchMedia === "function"
+        ? window.matchMedia("(orientation: landscape)")
+        : null;
     const handleMqlChange = () => {
       updateOrientation();
       // Micro-check for mobile browsers that update dimensions slightly after the event
@@ -44,10 +52,15 @@ export function OrientationGuard({ children, forceBlock = false }: OrientationGu
     };
 
     if (mql) {
-      if (typeof mql.addEventListener === 'function') {
-        mql.addEventListener('change', handleMqlChange);
-      } else if (typeof (mql as unknown as { addListener: (cb: () => void) => void }).addListener === 'function') {
-        (mql as unknown as { addListener: (cb: () => void) => void }).addListener(handleMqlChange);
+      if (typeof mql.addEventListener === "function") {
+        mql.addEventListener("change", handleMqlChange);
+      } else if (
+        typeof (mql as unknown as { addListener: (cb: () => void) => void })
+          .addListener === "function"
+      ) {
+        (
+          mql as unknown as { addListener: (cb: () => void) => void }
+        ).addListener(handleMqlChange);
       }
     }
 
@@ -59,15 +72,18 @@ export function OrientationGuard({ children, forceBlock = false }: OrientationGu
       setTimeout(updateOrientation, 150);
     };
 
-    if (screenOrientation && typeof screenOrientation.addEventListener === 'function') {
-      screenOrientation.addEventListener('change', handleScreenChange);
+    if (
+      screenOrientation &&
+      typeof screenOrientation.addEventListener === "function"
+    ) {
+      screenOrientation.addEventListener("change", handleScreenChange);
     }
 
     // Event listener 3: Window resize (desktop window resizing, mobile layout adjustments)
     const handleResize = () => {
       updateOrientation();
     };
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
 
     // Event listener 4: Window orientationchange (mobile devices tilt)
     const handleOrientationChange = () => {
@@ -76,23 +92,32 @@ export function OrientationGuard({ children, forceBlock = false }: OrientationGu
       setTimeout(updateOrientation, 150);
       setTimeout(updateOrientation, 300);
     };
-    window.addEventListener('orientationchange', handleOrientationChange);
+    window.addEventListener("orientationchange", handleOrientationChange);
 
     return () => {
       if (mql) {
-        if (typeof mql.removeEventListener === 'function') {
-          mql.removeEventListener('change', handleMqlChange);
-        } else if (typeof (mql as unknown as { removeListener: (cb: () => void) => void }).removeListener === 'function') {
-          (mql as unknown as { removeListener: (cb: () => void) => void }).removeListener(handleMqlChange);
+        if (typeof mql.removeEventListener === "function") {
+          mql.removeEventListener("change", handleMqlChange);
+        } else if (
+          typeof (
+            mql as unknown as { removeListener: (cb: () => void) => void }
+          ).removeListener === "function"
+        ) {
+          (
+            mql as unknown as { removeListener: (cb: () => void) => void }
+          ).removeListener(handleMqlChange);
         }
       }
 
-      if (screenOrientation && typeof screenOrientation.removeEventListener === 'function') {
-        screenOrientation.removeEventListener('change', handleScreenChange);
+      if (
+        screenOrientation &&
+        typeof screenOrientation.removeEventListener === "function"
+      ) {
+        screenOrientation.removeEventListener("change", handleScreenChange);
       }
 
-      window.removeEventListener('resize', handleResize);
-      window.removeEventListener('orientationchange', handleOrientationChange);
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("orientationchange", handleOrientationChange);
     };
   }, [updateOrientation]);
 
@@ -100,18 +125,25 @@ export function OrientationGuard({ children, forceBlock = false }: OrientationGu
   const handleRequestLandscape = async () => {
     setFullscreenError(null);
     try {
-      if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+      if (
+        !document.fullscreenElement &&
+        document.documentElement.requestFullscreen
+      ) {
         await document.documentElement.requestFullscreen();
       }
 
       // Try orientation lock if supported
-      const orientation = window.screen?.orientation as (ScreenOrientation & { lock?: (o: string) => Promise<void> }) | undefined;
-      if (orientation && typeof orientation.lock === 'function') {
-        await orientation.lock('landscape');
+      const orientation = window.screen?.orientation as
+        | (ScreenOrientation & { lock?: (o: string) => Promise<void> })
+        | undefined;
+      if (orientation && typeof orientation.lock === "function") {
+        await orientation.lock("landscape");
       }
     } catch {
       // In mobile Safari or unsupported contexts, orientation lock may throw; user rotating device handles it
-      setFullscreenError('Please rotate your device manually or check screen rotation lock.');
+      setFullscreenError(
+        "Please rotate your device manually or check screen rotation lock.",
+      );
     }
   };
 
@@ -125,19 +157,23 @@ export function OrientationGuard({ children, forceBlock = false }: OrientationGu
   useEffect(() => {
     const blockGameKeys = (event: KeyboardEvent) => {
       if (!isBlocked && !loading) return;
-      if (event.target instanceof Element && event.target.closest('.orientation-blocker-overlay')) return;
+      if (
+        event.target instanceof Element &&
+        event.target.closest(".orientation-blocker-overlay")
+      )
+        return;
       event.preventDefault();
       event.stopImmediatePropagation();
     };
-    window.addEventListener('keydown', blockGameKeys, true);
-    return () => window.removeEventListener('keydown', blockGameKeys, true);
+    window.addEventListener("keydown", blockGameKeys, true);
+    return () => window.removeEventListener("keydown", blockGameKeys, true);
   }, [isBlocked, loading]);
 
   return (
     <>
       {/* Underlying game children: disabled and made inert while blocked to preserve state */}
       <div
-        className={`orientation-guard-wrapper ${isBlocked ? 'is-blocked' : ''}`}
+        className={`orientation-guard-wrapper ${isBlocked ? "is-blocked" : ""}`}
         inert={isBlocked ? true : undefined}
         aria-hidden={isBlocked}
       >
@@ -191,8 +227,9 @@ export function OrientationGuard({ children, forceBlock = false }: OrientationGu
             {/* Instruction Heading and Message */}
             <h2 id="orientation-title">Rotate to Landscape Mode</h2>
             <p id="orientation-desc" className="orientation-instruction">
-              Commander, the spacecraft flight deck and navigation systems require <strong>Landscape Orientation</strong>.
-              Please turn your device sideways to continue your mission.
+              Commander, the spacecraft flight deck and navigation systems
+              require <strong>Landscape Orientation</strong>. Please turn your
+              device sideways to continue your mission.
             </p>
 
             {/* Status indicator */}
@@ -214,13 +251,16 @@ export function OrientationGuard({ children, forceBlock = false }: OrientationGu
               </button>
 
               {fullscreenError ? (
-                <p className="orientation-hint" style={{ color: '#fca5a5' }}>
+                <p className="orientation-hint" style={{ color: "#fca5a5" }}>
                   {fullscreenError}
                 </p>
               ) : (
                 <p className="orientation-hint">
                   <Sparkles size={12} color="#f5cf77" />
-                  <span>If auto-rotate is disabled, unlock screen rotation in your control center.</span>
+                  <span>
+                    If auto-rotate is disabled, unlock screen rotation in your
+                    control center.
+                  </span>
                 </p>
               )}
             </div>

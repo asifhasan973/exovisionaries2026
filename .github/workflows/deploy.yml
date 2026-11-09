@@ -65,7 +65,7 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
           packageManager: pnpm
-          wranglerVersion: '4.151.2'
+          wranglerVersion: "4.151.2"
           command: pages deploy apps/web/dist --project-name=zero-to-beyond --branch=main
 
       - name: Verify live frontend

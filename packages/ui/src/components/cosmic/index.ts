@@ -1,3 +1,2 @@
-export * from './cosmicRenderer';
-export * from './CosmicBackground';
-
+export * from "./cosmicRenderer";
+export * from "./CosmicBackground";

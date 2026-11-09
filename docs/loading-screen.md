@@ -3,7 +3,8 @@
 ## 1. Overview & Architectural Purpose
 
 The **Loading Screen Component** ([LoadingScreen.tsx](../packages/ui/src/components/LoadingScreen.tsx)) serves as an architectural shield and cinematic entry point for **Exovisionaries-2k26**:
-1. **Cinematic Progression Flow**: 
+
+1. **Cinematic Progression Flow**:
    - **Step 1: Intro Splash**: On initial visit of the day/session, a solid pitch-black screen presents `"ExoVisionaries-2k26 Presents"`.
    - **Step 2: Looping NASA Carousel**: The intro splash smoothly cross-fades to reveal an endlessly looping full-screen carousel of authentic NASA space exploration imagery and educational captions.
    - **Step 3: Real Progress Tracking**: A sleek glowing progress bar tracks real background engineering tasks from `0%` to `100%`.
@@ -18,11 +19,11 @@ The **Loading Screen Component** ([LoadingScreen.tsx](../packages/ui/src/compone
 
 All timing values, minimum durations, and deliberate visual testing delays are retrieved dynamically from Vite environment variables (with fallback defaults) via [loadingConfig.ts](../packages/ui/src/config/loadingConfig.ts):
 
-| Environment Variable | Default Value | Description |
-|---|---|---|
-| `VITE_LOADING_PROGRESS_MULTIPLIER` | `1` | Multiplier mechanism to simulate weak network conditions by slowing down progress bar loading X times (e.g. `2`, `3`, or `5`). Does not alter carousel slide timing or hold the splash screen. |
-| `VITE_SLIDE_DISPLAY_MIN_MS` | `2800` | Minimum duration in milliseconds each carousel slide remains active. |
-| `VITE_INTRO_SPLASH_DISPLAY_MS` | `1800` | Optional display duration for generic splash screens. |
+| Environment Variable               | Default Value | Description                                                                                                                                                                                    |
+| ---------------------------------- | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `VITE_LOADING_PROGRESS_MULTIPLIER` | `1`           | Multiplier mechanism to simulate weak network conditions by slowing down progress bar loading X times (e.g. `2`, `3`, or `5`). Does not alter carousel slide timing or hold the splash screen. |
+| `VITE_SLIDE_DISPLAY_MIN_MS`        | `2800`        | Minimum duration in milliseconds each carousel slide remains active.                                                                                                                           |
+| `VITE_INTRO_SPLASH_DISPLAY_MS`     | `1800`        | Optional display duration for generic splash screens.                                                                                                                                          |
 
 To customize these settings locally, copy `.env.example` to `.env` or `.env.local` and adjust the variables.
 
@@ -72,6 +73,7 @@ To customize these settings locally, copy `.env.example` to `.env` or `.env.loca
 ## 4. Key Functional Behaviors
 
 ### 4.1 Intro Splash Screen Flow
+
 - When landing into the app, the pitch-black Intro Splash screen displays with zero container mount animation, followed by sequential text line animations powered by Framer Motion:
   > **NASA Space Apps Challenge 2026** (400ms delay, 400ms duration)  
   > **ExoVisionaries-2k26 PRESENTS** (800ms delay, 400ms duration)  
@@ -81,11 +83,13 @@ To customize these settings locally, copy `.env.example` to `.env` or `.env.loca
 - **Carousel & Progress Synchronization**: Once the intro splash finishes exiting, the carousel mounts and the glowing progress bar starts strictly from `0%`, smoothly interpolating up to 100% based on backend engineering readiness.
 
 ### 4.2 Looping Carousel & Guaranteed Dismissal
+
 - The NASA carousel slides cycle continuously (`0 -> 1 -> 2 -> 3 -> 4 -> 0 -> 1...`) for the duration of the loading process.
 - The carousel is decoupled from the progress percentage: the progress bar reflects real engineering completion, while the carousel provides continuous ambient cosmic imagery until engineering workloads finish.
 - When progress reaches 100%, the loading screen container performs a smooth 500ms fade-out and dismisses cleanly into the game. Subsequent mission loads reset state and proceed smoothly without sticking.
 
 ### 4.3 Real Subsystem Preloading Pipeline
+
 - **Entry Preloading** (`preloadEntrySubsystems`):
   - Preloads `HomeViewport.tsx` 3D Moon sphere and shaders, `SelectionScreens.tsx`, `NasaMissionArchive.tsx` and timeline bubbles, `/story/moon-mission-hero.webp`, and the NASA loading slides (`artemis_launch.jpg`, `orion_earth_view.jpg`, `carina_nebula.webp`, `apollo_bootprint.jpg`, `mars_perseverance.jpg`).
 - **Mission Preloading** (`preloadMissionSubsystems`):
@@ -94,6 +98,7 @@ To customize these settings locally, copy `.env.example` to `.env` or `.env.loca
   - Always concludes by setting progress to 100% in a safe `finally` block. As soon as all tasks finish, the loader dismisses.
 
 ### 4.4 Universal Lifecycle Freeze & Loading Screen Halting
+
 - **Unified Engine Suspension**: When `LoadingScreen` is active (`isLoading = true`) or when `OrientationGuard` blocks in portrait mode (`isBlocked = true`), the entire application state halts via the centralized lifecycle store (`packages/ui/src/state/orientationLifecycleStore.ts`):
   - **Simulation Loops Halted**: Descent physics, flight timers, lunar rover telemetry, and automated assembly are paused in-place. If the user reloads in the middle of a mission and restarts, no underlying game ticks or progress advance behind the loading screen.
   - **Audio & Spoken Dialogue**: Web Audio synthesizer contexts are suspended in-place via `SoundEngine.pauseAll()`, and active spoken narration is held silent. Spoken dialogue is prevented from starting until loading completes; upon unfreezing at 100% progress, dialogue replays from the beginning of the line so the player hears the complete context without clipping or browser synthesis freeze.
@@ -103,6 +108,7 @@ To customize these settings locally, copy `.env.example` to `.env` or `.env.loca
 - While `LoadingScreen` is active, the underlying game views are rendered inert and protected from clicks or key events.
 
 ### 4.5 Browser Cache Storage & 7-Day Inactivity Purge
+
 - Preloaded images and assets are stored in the browser's native **Cache Storage API** under cache name `'exovisionaries-assets-v1'`.
 - The system records `exovisionaries_cache_last_active_v1` in `localStorage`.
 - On boot, if `Date.now() - lastActive > 7 days` (604,800,000 ms), the cache is purged via `caches.delete('exovisionaries-assets-v1')`, handing storage lifecycle management to the browser.

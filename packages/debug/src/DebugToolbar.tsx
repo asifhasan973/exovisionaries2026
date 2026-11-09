@@ -1,10 +1,15 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Compass, GripVertical } from 'lucide-react';
-import { isDevelopment, getDebugCategories, parseDebugHash, type DebugItem } from './debugConfig';
-import { sound } from '@exo/audio';
-import { useDraggablePill } from './useDraggablePill';
-import { DebugModal } from './DebugModal';
-import './debugToolbar.css';
+import React, { useState, useEffect, useMemo, useRef } from "react";
+import { Compass, GripVertical } from "lucide-react";
+import {
+  isDevelopment,
+  getDebugCategories,
+  parseDebugHash,
+  type DebugItem,
+} from "./debugConfig";
+import { sound } from "@exo/audio";
+import { useDraggablePill } from "./useDraggablePill";
+import { DebugModal } from "./DebugModal";
+import "./debugToolbar.css";
 
 export function DebugToolbar() {
   return isDevelopment ? <DevelopmentDebugToolbar /> : null;
@@ -12,8 +17,8 @@ export function DebugToolbar() {
 
 function DevelopmentDebugToolbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const [search, setSearch] = useState('');
-  const [filterType, setFilterType] = useState<'all' | 'page' | 'step'>('all');
+  const [search, setSearch] = useState("");
+  const [filterType, setFilterType] = useState<"all" | "page" | "step">("all");
   const [currentHash, setCurrentHash] = useState(() => window.location.hash);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -39,18 +44,20 @@ function DevelopmentDebugToolbar() {
     const handleHashChange = () => {
       setCurrentHash(window.location.hash);
     };
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
+    window.addEventListener("hashchange", handleHashChange);
+    return () => window.removeEventListener("hashchange", handleHashChange);
   }, []);
 
   // Global hotkey: ~ (backquote/tilde) to toggle, Escape to close
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      const isInput = ['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement)?.tagName);
-      if (e.key === '`' || e.key === '~') {
+      const isInput = ["INPUT", "TEXTAREA", "SELECT"].includes(
+        (e.target as HTMLElement)?.tagName,
+      );
+      if (e.key === "`" || e.key === "~") {
         if (!isInput || e.target === searchInputRef.current) {
           e.preventDefault();
-          setIsOpen(prev => {
+          setIsOpen((prev) => {
             const next = !prev;
             if (next) {
               setTimeout(() => searchInputRef.current?.focus(), 50);
@@ -58,13 +65,13 @@ function DevelopmentDebugToolbar() {
             return next;
           });
         }
-      } else if (e.key === 'Escape' && isOpen) {
+      } else if (e.key === "Escape" && isOpen) {
         e.preventDefault();
         setIsOpen(false);
       }
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen]);
 
   const activeRoute = useMemo(() => parseDebugHash(currentHash), [currentHash]);
@@ -74,20 +81,21 @@ function DevelopmentDebugToolbar() {
   const filteredCategories = useMemo(() => {
     const query = search.trim().toLowerCase();
     return categories
-      .map(cat => {
-        const items = cat.items.filter(item => {
-          if (filterType !== 'all' && item.type !== filterType) return false;
+      .map((cat) => {
+        const items = cat.items.filter((item) => {
+          if (filterType !== "all" && item.type !== filterType) return false;
           if (!query) return true;
           return (
             item.label.toLowerCase().includes(query) ||
             item.id.toLowerCase().includes(query) ||
-            (item.description && item.description.toLowerCase().includes(query)) ||
+            (item.description &&
+              item.description.toLowerCase().includes(query)) ||
             item.hash.toLowerCase().includes(query)
           );
         });
         return { ...cat, items };
       })
-      .filter(cat => cat.items.length > 0);
+      .filter((cat) => cat.items.length > 0);
   }, [categories, search, filterType]);
 
   const navigateTo = (item: DebugItem) => {
@@ -102,20 +110,23 @@ function DevelopmentDebugToolbar() {
     try {
       sound.playClick();
     } catch {}
-    window.location.assign('#');
-    setCurrentHash('');
+    window.location.assign("#");
+    setCurrentHash("");
     setIsOpen(false);
   };
 
   return (
-    <div className="debug-toolbar-container" aria-label="Development Debug Navigator">
+    <div
+      className="debug-toolbar-container"
+      aria-label="Development Debug Navigator"
+    >
       {/* Floating draggable & dockable launcher badge */}
       {!isOpen && (
         <button
           ref={pillRef}
-          className={`debug-launcher-btn ${isDragging ? 'is-dragging' : ''} ${
-            position.dockSide ? `is-docked-${position.dockSide}` : ''
-          } ${isCompact ? 'is-compact' : ''}`}
+          className={`debug-launcher-btn ${isDragging ? "is-dragging" : ""} ${
+            position.dockSide ? `is-docked-${position.dockSide}` : ""
+          } ${isCompact ? "is-compact" : ""}`}
           style={{
             left: `${position.x}px`,
             top: `${position.y}px`,
@@ -124,7 +135,7 @@ function DevelopmentDebugToolbar() {
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
           onPointerCancel={handlePointerCancel}
-          onClick={event => {
+          onClick={(event) => {
             if (event.detail === 0) {
               openModal();
             }
@@ -145,7 +156,10 @@ function DevelopmentDebugToolbar() {
               </span>
               <span>DEBUG</span>
               {activeRoute ? (
-                <span className="debug-active-pill" title={`Active: ${activeRoute.id}`}>
+                <span
+                  className="debug-active-pill"
+                  title={`Active: ${activeRoute.id}`}
+                >
                   {activeRoute.id}
                 </span>
               ) : null}

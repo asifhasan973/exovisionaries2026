@@ -1,21 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import {
-  ArrowLeft,
-  Volume2,
-  VolumeX,
-  Radio
-} from 'lucide-react';
-import { TimelineSlider } from './TimelineSlider';
-import { MissionEventTree } from './MissionEventTree';
-import { sound } from '@exo/audio';
-import { useAudioStore } from '@exo/audio';
-import './nasaArchive.css';
+import React, { useState, useEffect } from "react";
+import { ArrowLeft, Volume2, VolumeX, Radio } from "lucide-react";
+import { TimelineSlider } from "./TimelineSlider";
+import { MissionEventTree } from "./MissionEventTree";
+import { sound } from "@exo/audio";
+import { useAudioStore } from "@exo/audio";
+import "./nasaArchive.css";
 
 interface NasaMissionArchiveProps {
   onBack: () => void;
 }
 
-export const NasaMissionArchive: React.FC<NasaMissionArchiveProps> = ({ onBack }) => {
+export const NasaMissionArchive: React.FC<NasaMissionArchiveProps> = ({
+  onBack,
+}) => {
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const isMuted = useAudioStore((s) => s.isMuted);
@@ -45,12 +42,12 @@ export const NasaMissionArchive: React.FC<NasaMissionArchiveProps> = ({ onBack }
       // Continuation
     };
 
-    window.addEventListener('game-orientation-pause', handleFreeze);
-    window.addEventListener('game-orientation-resume', handleResume);
+    window.addEventListener("game-orientation-pause", handleFreeze);
+    window.addEventListener("game-orientation-resume", handleResume);
 
     return () => {
-      window.removeEventListener('game-orientation-pause', handleFreeze);
-      window.removeEventListener('game-orientation-resume', handleResume);
+      window.removeEventListener("game-orientation-pause", handleFreeze);
+      window.removeEventListener("game-orientation-resume", handleResume);
     };
   }, []);
 
@@ -88,7 +85,10 @@ export const NasaMissionArchive: React.FC<NasaMissionArchiveProps> = ({ onBack }
             }}
             title="Return to starting page"
           >
-            <ArrowLeft size={17} className="transform group-hover:-translate-x-1 transition-transform" />
+            <ArrowLeft
+              size={17}
+              className="transform group-hover:-translate-x-1 transition-transform"
+            />
             <span>Back</span>
           </button>
         </div>
@@ -110,10 +110,16 @@ export const NasaMissionArchive: React.FC<NasaMissionArchiveProps> = ({ onBack }
             type="button"
             className="navbar-sound-toggle"
             onClick={toggleSfx}
-            title={sfxActive ? 'Mute sound effects' : 'Enable sound effects'}
-            aria-label={sfxActive ? 'Mute sound effects' : 'Enable sound effects'}
+            title={sfxActive ? "Mute sound effects" : "Enable sound effects"}
+            aria-label={
+              sfxActive ? "Mute sound effects" : "Enable sound effects"
+            }
           >
-            {sfxActive ? <Volume2 size={18} className="text-cyan-400" /> : <VolumeX size={18} />}
+            {sfxActive ? (
+              <Volume2 size={18} className="text-cyan-400" />
+            ) : (
+              <VolumeX size={18} />
+            )}
           </button>
         </div>
       </header>

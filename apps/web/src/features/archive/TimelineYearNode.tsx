@@ -1,6 +1,6 @@
-import React from 'react';
-import type { TimelineYearItem } from '@exo/engine';
-import { TimelineBubbleCluster } from './TimelineBubbleCluster';
+import React from "react";
+import type { TimelineYearItem } from "@exo/engine";
+import { TimelineBubbleCluster } from "./TimelineBubbleCluster";
 
 export interface TimelineYearNodeProps {
   item: TimelineYearItem;
@@ -34,10 +34,10 @@ export const TimelineYearNode: React.FC<TimelineYearNodeProps> = ({
     <div
       key={item.year}
       data-year={item.year}
-      className={`timeline-year-node ${isMilestone ? 'has-events' : 'empty-year'} ${
-        isSelected ? 'is-selected' : ''
-      } ${isCenter ? 'is-center' : ''} ${isFuture ? 'is-future' : ''} ${
-        isMilestone ? (isAbove ? 'placement-above' : 'placement-below') : ''
+      className={`timeline-year-node ${isMilestone ? "has-events" : "empty-year"} ${
+        isSelected ? "is-selected" : ""
+      } ${isCenter ? "is-center" : ""} ${isFuture ? "is-future" : ""} ${
+        isMilestone ? (isAbove ? "placement-above" : "placement-below") : ""
       }`}
     >
       <div className="timeline-zone zone-upper">
@@ -67,15 +67,17 @@ export const TimelineYearNode: React.FC<TimelineYearNodeProps> = ({
           <span className="sub-tick tick-80" />
         </div>
 
-        <div className={`ruler-major-tick ${isMilestone ? 'is-milestone-tick' : ''}`}>
+        <div
+          className={`ruler-major-tick ${isMilestone ? "is-milestone-tick" : ""}`}
+        >
           <span className="major-tick-dot" />
           <span className="major-tick-line" />
         </div>
 
         <button
           type="button"
-          className={`timeline-year-btn ${item.year % 5 === 0 || isMilestone ? 'is-major' : 'is-minor'} ${
-            isCenter ? 'is-active-center' : ''
+          className={`timeline-year-btn ${item.year % 5 === 0 || isMilestone ? "is-major" : "is-minor"} ${
+            isCenter ? "is-active-center" : ""
           }`}
           onClick={() => onYearClick(item.year)}
         >
@@ -107,4 +109,3 @@ export const TimelineYearNode: React.FC<TimelineYearNodeProps> = ({
     </div>
   );
 };
-

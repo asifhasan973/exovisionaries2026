@@ -1,3 +1,2 @@
-export * from './MilestonePage';
-export * from './MilestoneRing';
-
+export * from "./MilestonePage";
+export * from "./MilestoneRing";
