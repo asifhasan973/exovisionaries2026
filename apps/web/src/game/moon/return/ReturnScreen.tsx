@@ -1,9 +1,9 @@
-import { MissionDebrief } from "./debrief/MissionDebrief.tsx";
 import {
   SceneBoundary,
   SceneFallback,
   GameInfo,
   isEngineFrozen,
+  useLoadingStore,
 } from "@exo/ui";
 import { GEOLOGY_LABELS } from "@/game/moon/science/geologyCopy";
 import { lazy, Suspense, useEffect, useState, useEffectEvent } from "react";
@@ -41,6 +41,11 @@ import {
   downloadMissionCard,
 } from "@/game/moon/shared/missionCard";
 import "./return.css";
+const MissionDebrief = lazy(() => {
+  const task = import("./debrief/MissionDebrief.tsx");
+  useLoadingStore.getState().registerLoaderTask(task);
+  return task.then((m) => ({ default: m.MissionDebrief }));
+});
 const ReturnViewport = lazy(() =>
   import("./ReturnViewport.tsx").then((m) => ({ default: m.ReturnViewport })),
 );
@@ -235,7 +240,9 @@ export function ReturnScreen({
           progress={
             <span>
               {debrief
-                ? "Moon mission · complete"
+                ? complete
+                  ? "Moon mission · report"
+                  : "Mission record · recovery incomplete"
                 : "Return · " + (stageIndex + 1) + "/5"}
             </span>
           }
@@ -277,69 +284,21 @@ export function ReturnScreen({
           </button>
         </div>
         {debrief && card ? (
-          <section className="return-finale" aria-label="Mission complete">
-            <SceneBoundary
-              fallback={<SceneFallback scene="return" label="Crew recovered" />}
-            >
-              <Suspense
-                fallback={
-                  <div className="return-fallback">
-                    Crew recovered · opening mission results…
-                  </div>
-                }
-              >
-                <ReturnViewport flight={r} gentle={gentle} />
-              </Suspense>
-            </SceneBoundary>
-            <div className="return-finale-card">
-              <span>
-                {card.crewRecovered === 3
-                  ? "MISSION COMPLETE"
-                  : "MISSION RECORD"}
-              </span>
-              <h2>
-                {card.crewRecovered === 3
-                  ? "You brought everyone home."
-                  : "Mission review"}
-              </h2>
-              <p>
-                {card.crewRecovered === 3
-                  ? "From the Moon to Earth. Your crew is safe."
-                  : "This record has not reached crew recovery."}
-              </p>
-              <div className="return-finale-rewards">
-                <div>
-                  <strong>{card.crewRecovered} / 3</strong>
-                  <small>CREW HOME</small>
-                </div>
-                <div>
-                  <strong>
-                    {session.moon.rover
-                      ? session.moon.rover.deposited.length
-                      : card.deliveredSciencePoints}
-                  </strong>
-                  <small>
-                    {session.moon.rover ? "SAMPLES RETURNED" : "SCIENCE POINTS"}
-                  </small>
-                </div>
-              </div>
-              <p className="return-finale-evidence">
-                {card.outcome?.reasons[1]}
-              </p>
-              <MissionDebrief session={session} />
-              <button className="return-play-action" onClick={frame.onHome}>
-                Finish mission <span>✓</span>
-              </button>
-              <div className="return-finale-options">
-                <button onClick={() => setPanel("notes")}>
-                  See discoveries
-                </button>
-                <button onClick={() => setPanel("retry")}>
-                  Play another mission
-                </button>
-              </div>
-            </div>
-          </section>
+          <Suspense
+            fallback={
+              <p role="status">Opening your recorded mission report…</p>
+            }
+          >
+            <MissionDebrief
+              session={session}
+              onHome={frame.onHome}
+              onRetry={() => setPanel("retry")}
+              preview={
+                reviewing ||
+                (import.meta.env.DEV && window.location.hash.includes("debug"))
+              }
+            />
+          </Suspense>
         ) : (
           <>
             <div className="return-layout">

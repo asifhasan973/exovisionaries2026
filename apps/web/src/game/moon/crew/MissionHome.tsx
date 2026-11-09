@@ -1,13 +1,10 @@
-import { useState } from "react";
-import {
-  ArrowRight,
-  Play,
-  RotateCcw,
-  Sparkles,
-  Compass,
-  Download,
-  Award,
-} from "lucide-react";
+import "./homeHero.css";
+import { navigatePage } from "@/shared/site/siteNavigation";
+import "@/features/exploration/exploration.css";
+import { SiteNavbar } from "@/shared/site/SiteNavbar";
+import { useOrientationLifecycleStore } from "@exo/ui";
+import { useEffect, useRef, useState } from "react";
+import { ArrowRight, Play, RotateCcw, Download, Award } from "lucide-react";
 import { sound } from "@exo/audio";
 import { usePwaStore } from "@exo/ui";
 import { StoryShell } from "@/shared/shell";
@@ -21,7 +18,7 @@ export function MissionHome({
   onContinue,
   onRestart,
   frame,
-  onOpenArchive,
+  onOpenArchive: _onOpenArchive,
 }: {
   progress: StoryProgress;
   onContinue(): void;
@@ -35,8 +32,39 @@ export function MissionHome({
   const { isInstalled, promptInstall } = usePwaStore();
   const [judgeInstructionsOpen, setJudgeInstructionsOpen] = useState(false);
 
+  const frozen = useOrientationLifecycleStore((s) => s.isFrozen);
+  const entryAction = useRef<"play" | "restart" | null>(null);
+  useEffect(() => {
+    if (frozen) return;
+    const query = new URLSearchParams(location.search);
+    const action =
+      query.get("play") === "1"
+        ? "play"
+        : query.get("restart") === "1"
+          ? "restart"
+          : null;
+    if (!action || entryAction.current) return;
+    entryAction.current = action;
+    window.history.replaceState(null, "", "/");
+    if (action === "play") onContinue();
+    else onRestart();
+  }, [frozen, onContinue, onRestart]);
   return (
-    <StoryShell {...frame} controls={null}>
+    <StoryShell
+      {...frame}
+      controls={null}
+      pageHeader={
+        <SiteNavbar
+          activePage="home"
+          onNavigate={(page) => {
+            if (page === "mission") {
+              mobileGame.start();
+              onContinue();
+            } else navigatePage(page);
+          }}
+        />
+      }
+    >
       <main
         className="mission-home"
         id="story-content"
@@ -90,29 +118,6 @@ export function MissionHome({
                 <span>New Game</span>
               </button>
             ) : null}
-          </div>
-
-          {/* Secondary entry button for NASA Mission Archive */}
-          <div className="home-archive-wrapper">
-            <button
-              type="button"
-              className="home-archive-button"
-              onClick={() => {
-                sound.playClick(650);
-                onOpenArchive?.();
-              }}
-              title="Explore historical and upcoming NASA mission milestones"
-            >
-              <span className="archive-icon-wrapper">
-                <Sparkles size={14} className="archive-sparkle" />
-                <Compass size={18} />
-              </span>
-              <span className="archive-button-copy">
-                <strong>NASA Mission Archive</strong>
-                <small>1958 — 2030+ Historical Timeline</small>
-              </span>
-              <span className="archive-pill-tag">EXPLORE</span>
-            </button>
           </div>
 
           <div className="home-other-actions">

@@ -1,11 +1,4 @@
-import {
-  ArrowLeft,
-  ArrowRight,
-  Rocket,
-  SkipForward,
-  Volume2,
-  VolumeX,
-} from "lucide-react";
+import { ArrowLeft, ArrowRight, Rocket, SkipForward } from "lucide-react";
 import { useEffect, useRef } from "react";
 import type { ReactNode } from "react";
 import "./viewport.css";
@@ -15,7 +8,6 @@ import {
   LearningControls,
 } from "@/game/moon/core/learning/Learning";
 import { useMobileGame } from "./mobile";
-import { SourcesButton } from "@/game/moon/core/learning/MissionSources";
 import { useStoryNavigation } from "@/game/moon/core/storyNavigationContext";
 import { MilestoneRing } from "@/game/moon/stages/milestones/MilestoneRing";
 
@@ -23,6 +15,7 @@ export interface StoryShellProps {
   children: ReactNode;
   controls: ReactNode;
   headerExtra?: ReactNode;
+  pageHeader?: ReactNode;
   onHome?: () => void;
   exitURL?: string;
   voiceEnabled?: boolean;
@@ -38,16 +31,12 @@ export function StoryShell({
   children,
   controls,
   headerExtra,
+  pageHeader,
   onHome,
   exitURL = import.meta.env.BASE_URL,
-  voiceEnabled = true,
-  soundActive,
-  onToggleVoice,
-  voiceAvailable = true,
   skipTarget = "story-content",
   isDebugSession,
 }: StoryShellProps) {
-  const isSoundOn = soundActive ?? voiceEnabled;
   const mobileGame = useMobileGame();
   const navigation = useStoryNavigation(),
     shell = useRef<HTMLDivElement>(null);
@@ -138,59 +127,30 @@ export function StoryShell({
       <a className="conversation-skip" href={`#${skipTarget}`}>
         Skip to mission
       </a>
-      {!mobileGame.active || controls === null ? (
-        <header className="conversation-header">
-          {onHome ? (
-            <button
-              className="conversation-brand"
-              onClick={onHome}
-              aria-label="Zero To Beyond home"
-            >
-              {brand}
-            </button>
-          ) : (
-            <a className="conversation-brand" href={exitURL}>
-              {brand}
-            </a>
-          )}
-          <nav aria-label="Mission controls">
-            {headerExtra}
-            <MilestoneRing />
-            <LearningControls />
-            <SourcesButton />
-            <SettingsButton />
-            {onToggleVoice ? (
+      {pageHeader ??
+        (!mobileGame.active || controls === null ? (
+          <header className="conversation-header">
+            {onHome ? (
               <button
-                className="conversation-icon labeled-control"
-                onClick={onToggleVoice}
-                disabled={!voiceAvailable}
-                aria-label={
-                  !voiceAvailable
-                    ? "Sound unavailable"
-                    : isSoundOn
-                      ? "Mute sound"
-                      : "Enable sound"
-                }
-                aria-pressed={isSoundOn && voiceAvailable}
-                title={
-                  !voiceAvailable
-                    ? "Sound unavailable"
-                    : isSoundOn
-                      ? "Mute sound"
-                      : "Enable sound"
-                }
+                className="conversation-brand"
+                onClick={onHome}
+                aria-label="Zero To Beyond home"
               >
-                {isSoundOn && voiceAvailable ? (
-                  <Volume2 size={21} />
-                ) : (
-                  <VolumeX size={21} />
-                )}
-                <span>Sound</span>
+                {brand}
               </button>
-            ) : null}
-          </nav>
-        </header>
-      ) : null}
+            ) : (
+              <a className="conversation-brand" href={exitURL}>
+                {brand}
+              </a>
+            )}
+            <nav aria-label="Mission controls">
+              {headerExtra}
+              <MilestoneRing />
+              <LearningControls />
+              <SettingsButton />
+            </nav>
+          </header>
+        ) : null)}
       {children}
       {reviewing ? (
         <span className="story-review-note" role="status">

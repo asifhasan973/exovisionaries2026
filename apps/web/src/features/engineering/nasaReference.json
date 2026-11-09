@@ -1,0 +1,363 @@
+{
+  "sites": {
+    "shackleton": {
+      "lat": -89.5,
+      "lon": 0,
+      "elevation": -782,
+      "temperature": 208.6,
+      "slope": 9.1,
+      "thermalPixel": [1203, 1266]
+    },
+    "cabeus": {
+      "lat": -85.3,
+      "lon": 318.5,
+      "elevation": -3543,
+      "temperature": 122.8,
+      "slope": 13.2,
+      "thermalPixel": [821, 872]
+    },
+    "malapert": {
+      "lat": -85.99,
+      "lon": 2.83,
+      "elevation": 5021,
+      "temperature": 229.4,
+      "slope": 5.4,
+      "thermalPixel": [760, 1291]
+    }
+  },
+  "terrain": {
+    "product": "LDEM_16 V3.1",
+    "period": "2009-07-13 to 2016-11-29",
+    "resolution": "16 pixels/degree (~1.895 km north–south); interpolated coarse overview",
+    "source": "https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/cylindrical/img/ldem_16.lbl",
+    "slopeBaselineM": 2952
+  },
+  "thermal": {
+    "product": "polar_south_80_summer_max",
+    "period": "2009-07-05 to 2019-02-17; summer maximum bolometric brightness temperature",
+    "source": "https://luna1.diviner.ucla.edu/~jpierre/diviner/level4_polar/additional_maps/polar_south_80_summer_max-float.tif",
+    "reference": "https://doi.org/10.1029/2019JE006028"
+  },
+  "geometry": {
+    "epoch": "2026-11-08T00:00:00Z",
+    "source": "https://svs.gsfc.nasa.gov/5587/",
+    "raw": "https://svs.gsfc.nasa.gov/vis/a000000/a005500/a005587/mooninfo_2026.json",
+    "rows": [
+      {
+        "hour": 0,
+        "distance": 393752,
+        "lon": 4.829,
+        "lat": 5.933
+      },
+      {
+        "hour": 1,
+        "distance": 393887,
+        "lon": 4.807,
+        "lat": 5.958
+      },
+      {
+        "hour": 2,
+        "distance": 394021,
+        "lon": 4.785,
+        "lat": 5.983
+      },
+      {
+        "hour": 3,
+        "distance": 394155,
+        "lon": 4.762,
+        "lat": 6.008
+      },
+      {
+        "hour": 4,
+        "distance": 394289,
+        "lon": 4.74,
+        "lat": 6.032
+      },
+      {
+        "hour": 5,
+        "distance": 394423,
+        "lon": 4.717,
+        "lat": 6.056
+      },
+      {
+        "hour": 6,
+        "distance": 394556,
+        "lon": 4.693,
+        "lat": 6.079
+      },
+      {
+        "hour": 7,
+        "distance": 394689,
+        "lon": 4.67,
+        "lat": 6.102
+      },
+      {
+        "hour": 8,
+        "distance": 394821,
+        "lon": 4.646,
+        "lat": 6.124
+      },
+      {
+        "hour": 9,
+        "distance": 394953,
+        "lon": 4.621,
+        "lat": 6.145
+      },
+      {
+        "hour": 10,
+        "distance": 395085,
+        "lon": 4.597,
+        "lat": 6.166
+      },
+      {
+        "hour": 11,
+        "distance": 395217,
+        "lon": 4.572,
+        "lat": 6.187
+      },
+      {
+        "hour": 12,
+        "distance": 395348,
+        "lon": 4.547,
+        "lat": 6.206
+      },
+      {
+        "hour": 13,
+        "distance": 395479,
+        "lon": 4.521,
+        "lat": 6.226
+      },
+      {
+        "hour": 14,
+        "distance": 395609,
+        "lon": 4.496,
+        "lat": 6.245
+      },
+      {
+        "hour": 15,
+        "distance": 395740,
+        "lon": 4.47,
+        "lat": 6.263
+      },
+      {
+        "hour": 16,
+        "distance": 395869,
+        "lon": 4.444,
+        "lat": 6.281
+      },
+      {
+        "hour": 17,
+        "distance": 395999,
+        "lon": 4.417,
+        "lat": 6.298
+      },
+      {
+        "hour": 18,
+        "distance": 396128,
+        "lon": 4.39,
+        "lat": 6.315
+      },
+      {
+        "hour": 19,
+        "distance": 396256,
+        "lon": 4.363,
+        "lat": 6.331
+      },
+      {
+        "hour": 20,
+        "distance": 396385,
+        "lon": 4.335,
+        "lat": 6.347
+      },
+      {
+        "hour": 21,
+        "distance": 396512,
+        "lon": 4.308,
+        "lat": 6.362
+      },
+      {
+        "hour": 22,
+        "distance": 396640,
+        "lon": 4.28,
+        "lat": 6.376
+      },
+      {
+        "hour": 23,
+        "distance": 396767,
+        "lon": 4.251,
+        "lat": 6.39
+      },
+      {
+        "hour": 24,
+        "distance": 396893,
+        "lon": 4.223,
+        "lat": 6.404
+      }
+    ]
+  },
+  "weather": {
+    "fetchedAt": "2026-11-08T18:03:18.169Z",
+    "startDate": "2026-11-02",
+    "endDate": "2026-11-08",
+    "channels": [
+      {
+        "type": "FLR",
+        "url": "https://ccmc.gsfc.nasa.gov/DONKI/WS/get/FLR?startDate=2026-11-02&endDate=2026-11-08",
+        "available": true,
+        "events": [
+          {
+            "id": "2026-11-05T18:21:00-FLR-001",
+            "time": "2026-11-05T18:21Z",
+            "classType": "M3.5",
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/FLR/49391/-1"
+          },
+          {
+            "id": "2026-11-07T12:26:00-FLR-001",
+            "time": "2026-11-07T12:26Z",
+            "classType": "M1.2",
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/FLR/49433/-1"
+          },
+          {
+            "id": "2026-11-07T17:11:00-FLR-001",
+            "time": "2026-11-07T17:11Z",
+            "classType": "M1.4",
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/FLR/49442/-1"
+          },
+          {
+            "id": "2026-11-07T18:21:00-FLR-001",
+            "time": "2026-11-07T18:21Z",
+            "classType": "M1.9",
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/FLR/49448/-1"
+          },
+          {
+            "id": "2026-11-08T07:33:00-FLR-001",
+            "time": "2026-11-08T07:33Z",
+            "classType": "M1.7",
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/FLR/49453/-1"
+          },
+          {
+            "id": "2026-11-08T15:29:00-FLR-001",
+            "time": "2026-11-08T15:29Z",
+            "classType": "M1.1",
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/FLR/49456/-1"
+          }
+        ]
+      },
+      {
+        "type": "CME",
+        "url": "https://ccmc.gsfc.nasa.gov/DONKI/WS/get/CME?startDate=2026-11-02&endDate=2026-11-08",
+        "available": true,
+        "events": [
+          {
+            "id": "2026-11-03T09:36:00-CME-001",
+            "time": "2026-11-03T09:36Z",
+            "classType": null,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/49370/-1"
+          },
+          {
+            "id": "2026-11-04T02:48:00-CME-001",
+            "time": "2026-11-04T02:48Z",
+            "classType": null,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/49382/-1"
+          },
+          {
+            "id": "2026-11-05T04:24:00-CME-001",
+            "time": "2026-11-05T04:24Z",
+            "classType": null,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/49386/-1"
+          },
+          {
+            "id": "2026-11-05T11:48:00-CME-001",
+            "time": "2026-11-05T11:48Z",
+            "classType": null,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/49389/-1"
+          },
+          {
+            "id": "2026-11-05T20:00:00-CME-001",
+            "time": "2026-11-05T20:00Z",
+            "classType": null,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/49394/-1"
+          },
+          {
+            "id": "2026-11-05T21:24:00-CME-001",
+            "time": "2026-11-05T21:24Z",
+            "classType": null,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/49398/-1"
+          },
+          {
+            "id": "2026-11-06T01:26:00-CME-001",
+            "time": "2026-11-06T01:26Z",
+            "classType": null,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/49403/-1"
+          },
+          {
+            "id": "2026-11-06T10:53:00-CME-001",
+            "time": "2026-11-06T10:53Z",
+            "classType": null,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/49405/-1"
+          },
+          {
+            "id": "2026-11-06T13:15:00-CME-001",
+            "time": "2026-11-06T13:15Z",
+            "classType": null,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/49416/-1"
+          },
+          {
+            "id": "2026-11-06T16:15:00-CME-001",
+            "time": "2026-11-06T16:15Z",
+            "classType": null,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/49426/-1"
+          },
+          {
+            "id": "2026-11-06T20:24:00-CME-001",
+            "time": "2026-11-06T20:24Z",
+            "classType": null,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/49431/-1"
+          },
+          {
+            "id": "2026-11-07T06:24:00-CME-001",
+            "time": "2026-11-07T06:24Z",
+            "classType": null,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/49445/-1"
+          },
+          {
+            "id": "2026-11-07T09:36:00-CME-001",
+            "time": "2026-11-07T09:36Z",
+            "classType": null,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/49434/-1"
+          },
+          {
+            "id": "2026-11-07T10:24:00-CME-001",
+            "time": "2026-11-07T10:24Z",
+            "classType": null,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/49437/-1"
+          },
+          {
+            "id": "2026-11-07T18:30:00-CME-001",
+            "time": "2026-11-07T18:30Z",
+            "classType": null,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/49451/-1"
+          },
+          {
+            "id": "2026-11-08T00:48:00-CME-001",
+            "time": "2026-11-08T00:48Z",
+            "classType": null,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/49454/-1"
+          },
+          {
+            "id": "2026-11-08T08:48:00-CME-001",
+            "time": "2026-11-08T08:48Z",
+            "classType": null,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/49459/-1"
+          }
+        ]
+      },
+      {
+        "type": "SEP",
+        "url": "https://ccmc.gsfc.nasa.gov/DONKI/WS/get/SEP?startDate=2026-11-02&endDate=2026-11-08",
+        "available": true,
+        "events": []
+      }
+    ]
+  }
+}

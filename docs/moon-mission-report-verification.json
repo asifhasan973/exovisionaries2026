@@ -1,0 +1,2397 @@
+{
+  "checks": [
+    "All six sections at five landscape sizes; NASA layers, units, region, zoom; focus and immutable mission save",
+    "Comparison v1 save, legacy Atlas to completed report, no mission overwrite",
+    "Debrief \u2192 overview \u2192 findings \u2192 reference \u2192 overview; preview distinguished from real recovery",
+    "Keyboard Enter, section focus, reduced motion and overlapping loading/orientation freeze",
+    "NASA data failure inside a completed report leaves overview and mission save intact",
+    "Missing NASA data and Retry; fresh legacy reference does not create or claim a completed save",
+    "Rendered report fixture: missing resource balances show Unavailable, not fabricated consumption"
+  ],
+  "layouts": [
+    {
+      "viewport": [667, 375],
+      "scroll": [667, 375],
+      "report": {
+        "x": 8,
+        "y": 57,
+        "right": 659,
+        "bottom": 370,
+        "width": 651,
+        "height": 313
+      },
+      "content": {
+        "x": 154,
+        "y": 121.046875,
+        "right": 658,
+        "bottom": 318,
+        "width": 504,
+        "height": 196.953125
+      },
+      "footer": {
+        "x": 9,
+        "y": 318,
+        "right": 658,
+        "bottom": 369,
+        "width": 649,
+        "height": 51
+      },
+      "sectionLinks": [
+        {
+          "x": 15,
+          "y": 127.046875,
+          "right": 147,
+          "bottom": 169.046875,
+          "width": 132,
+          "height": 42
+        },
+        {
+          "x": 15,
+          "y": 171.046875,
+          "right": 147,
+          "bottom": 213.046875,
+          "width": 132,
+          "height": 42
+        },
+        {
+          "x": 15,
+          "y": 215.046875,
+          "right": 147,
+          "bottom": 257.046875,
+          "width": 132,
+          "height": 42
+        },
+        {
+          "x": 15,
+          "y": 259.046875,
+          "right": 147,
+          "bottom": 301.046875,
+          "width": 132,
+          "height": 42
+        },
+        {
+          "x": 15,
+          "y": 303.046875,
+          "right": 147,
+          "bottom": 345.046875,
+          "width": 132,
+          "height": 42
+        },
+        {
+          "x": 15,
+          "y": 347.046875,
+          "right": 147,
+          "bottom": 389.046875,
+          "width": 132,
+          "height": 42
+        }
+      ],
+      "section": "Overview"
+    },
+    {
+      "viewport": [667, 375],
+      "scroll": [667, 375],
+      "report": {
+        "x": 8,
+        "y": 57,
+        "right": 659,
+        "bottom": 370,
+        "width": 651,
+        "height": 313
+      },
+      "content": {
+        "x": 154,
+        "y": 121.046875,
+        "right": 658,
+        "bottom": 318,
+        "width": 504,
+        "height": 196.953125
+      },
+      "footer": {
+        "x": 9,
+        "y": 318,
+        "right": 658,
+        "bottom": 369,
+        "width": 649,
+        "height": 51
+      },
+      "sectionLinks": [
+        {
+          "x": 15,
+          "y": 127.046875,
+          "right": 147,
+          "bottom": 169.046875,
+          "width": 132,
+          "height": 42
+        },
+        {
+          "x": 15,
+          "y": 171.046875,
+          "right": 147,
+          "bottom": 213.046875,
+          "width": 132,
+          "height": 42
+        },
+        {
+          "x": 15,
+          "y": 215.046875,
+          "right": 147,
+          "bottom": 257.046875,
+          "width": 132,
+          "height": 42
+        },
+        {
+          "x": 15,
+          "y": 259.046875,
+          "right": 147,
+          "bottom": 301.046875,
+          "width": 132,
+          "height": 42
+        },
+        {
+          "x": 15,
+          "y": 303.046875,
+          "right": 147,
+          "bottom": 345.046875,
+          "width": 132,
+          "height": 42
+        },
+        {
+          "x": 15,
+          "y": 347.046875,
+          "right": 147,
+          "bottom": 389.046875,
+          "width": 132,
+          "height": 42
+        }
+      ],
+      "section": "What we found"
+    },
+    {
+      "viewport": [667, 375],
+      "scroll": [667, 375],
+      "report": {
+        "x": 8,
+        "y": 57,
+        "right": 659,
+        "bottom": 370,
+        "width": 651,
+        "height": 313
+      },
+      "content": {
+        "x": 154,
+        "y": 121.046875,
+        "right": 658,
+        "bottom": 318,
+        "width": 504,
+        "height": 196.953125
+      },
+      "footer": {
+        "x": 9,
+        "y": 318,
+        "right": 658,
+        "bottom": 369,
+        "width": 649,
+        "height": 51
+      },
+      "sectionLinks": [
+        {
+          "x": 15,
+          "y": 127.046875,
+          "right": 147,
+          "bottom": 169.046875,
+          "width": 132,
+          "height": 42
+        },
+        {
+          "x": 15,
+          "y": 171.046875,
+          "right": 147,
+          "bottom": 213.046875,
+          "width": 132,
+          "height": 42
+        },
+        {
+          "x": 15,
+          "y": 215.046875,
+          "right": 147,
+          "bottom": 257.046875,
+          "width": 132,
+          "height": 42
+        },
+        {
+          "x": 15,
+          "y": 259.046875,
+          "right": 147,
+          "bottom": 301.046875,
+          "width": 132,
+          "height": 42
+        },
+        {
+          "x": 15,
+          "y": 303.046875,
+          "right": 147,
+          "bottom": 345.046875,
+          "width": 132,
+          "height": 42
+        },
+        {
+          "x": 15,
+          "y": 347.046875,
+          "right": 147,
+          "bottom": 389.046875,
+          "width": 132,
+          "height": 42
+        }
+      ],
+      "section": "What it means"
+    },
+    {
+      "viewport": [667, 375],
+      "scroll": [667, 375],
+      "report": {
+        "x": 8,
+        "y": 57,
+        "right": 659,
+        "bottom": 370,
+        "width": 651,
+        "height": 313
+      },
+      "content": {
+        "x": 154,
+        "y": 121.046875,
+        "right": 658,
+        "bottom": 318,
+        "width": 504,
+        "height": 196.953125
+      },
+      "footer": {
+        "x": 9,
+        "y": 318,
+        "right": 658,
+        "bottom": 369,
+        "width": 649,
+        "height": 51
+      },
+      "sectionLinks": [
+        {
+          "x": 15,
+          "y": 127.046875,
+          "right": 147,
+          "bottom": 169.046875,
+          "width": 132,
+          "height": 42
+        },
+        {
+          "x": 15,
+          "y": 171.046875,
+          "right": 147,
+          "bottom": 213.046875,
+          "width": 132,
+          "height": 42
+        },
+        {
+          "x": 15,
+          "y": 215.046875,
+          "right": 147,
+          "bottom": 257.046875,
+          "width": 132,
+          "height": 42
+        },
+        {
+          "x": 15,
+          "y": 259.046875,
+          "right": 147,
+          "bottom": 301.046875,
+          "width": 132,
+          "height": 42
+        },
+        {
+          "x": 15,
+          "y": 303.046875,
+          "right": 147,
+          "bottom": 345.046875,
+          "width": 132,
+          "height": 42
+        },
+        {
+          "x": 15,
+          "y": 347.046875,
+          "right": 147,
+          "bottom": 389.046875,
+          "width": 132,
+          "height": 42
+        }
+      ],
+      "section": "Explore the location"
+    },
+    {
+      "viewport": [667, 375],
+      "scroll": [667, 375],
+      "report": {
+        "x": 8,
+        "y": 57,
+        "right": 659,
+        "bottom": 370,
+        "width": 651,
+        "height": 313
+      },
+      "content": {
+        "x": 154,
+        "y": 121.046875,
+        "right": 658,
+        "bottom": 318,
+        "width": 504,
+        "height": 196.953125
+      },
+      "footer": {
+        "x": 9,
+        "y": 318,
+        "right": 658,
+        "bottom": 369,
+        "width": 649,
+        "height": 51
+      },
+      "sectionLinks": [
+        {
+          "x": 15,
+          "y": 100.046875,
+          "right": 147,
+          "bottom": 142.046875,
+          "width": 132,
+          "height": 42
+        },
+        {
+          "x": 15,
+          "y": 144.046875,
+          "right": 147,
+          "bottom": 186.046875,
+          "width": 132,
+          "height": 42
+        },
+        {
+          "x": 15,
+          "y": 188.046875,
+          "right": 147,
+          "bottom": 230.046875,
+          "width": 132,
+          "height": 42
+        },
+        {
+          "x": 15,
+          "y": 232.046875,
+          "right": 147,
+          "bottom": 274.046875,
+          "width": 132,
+          "height": 42
+        },
+        {
+          "x": 15,
+          "y": 276.046875,
+          "right": 147,
+          "bottom": 318.046875,
+          "width": 132,
+          "height": 42
+        },
+        {
+          "x": 15,
+          "y": 320.046875,
+          "right": 147,
+          "bottom": 362.046875,
+          "width": 132,
+          "height": 42
+        }
+      ],
+      "section": "Engineering lessons"
+    },
+    {
+      "viewport": [667, 375],
+      "scroll": [667, 375],
+      "report": {
+        "x": 8,
+        "y": 57,
+        "right": 659,
+        "bottom": 370,
+        "width": 651,
+        "height": 313
+      },
+      "content": {
+        "x": 154,
+        "y": 121.046875,
+        "right": 658,
+        "bottom": 318,
+        "width": 504,
+        "height": 196.953125
+      },
+      "footer": {
+        "x": 9,
+        "y": 318,
+        "right": 658,
+        "bottom": 369,
+        "width": 649,
+        "height": 51
+      },
+      "sectionLinks": [
+        {
+          "x": 15,
+          "y": 50.046875,
+          "right": 147,
+          "bottom": 92.046875,
+          "width": 132,
+          "height": 42
+        },
+        {
+          "x": 15,
+          "y": 94.046875,
+          "right": 147,
+          "bottom": 136.046875,
+          "width": 132,
+          "height": 42
+        },
+        {
+          "x": 15,
+          "y": 138.046875,
+          "right": 147,
+          "bottom": 180.046875,
+          "width": 132,
+          "height": 42
+        },
+        {
+          "x": 15,
+          "y": 182.046875,
+          "right": 147,
+          "bottom": 224.046875,
+          "width": 132,
+          "height": 42
+        },
+        {
+          "x": 15,
+          "y": 226.046875,
+          "right": 147,
+          "bottom": 268.046875,
+          "width": 132,
+          "height": 42
+        },
+        {
+          "x": 15,
+          "y": 270.046875,
+          "right": 147,
+          "bottom": 312.046875,
+          "width": 132,
+          "height": 42
+        }
+      ],
+      "section": "Next investigation"
+    },
+    {
+      "viewport": [1024, 600],
+      "scroll": [1024, 600],
+      "report": {
+        "x": 22,
+        "y": 86,
+        "right": 1002,
+        "bottom": 586,
+        "width": 980,
+        "height": 500
+      },
+      "content": {
+        "x": 198,
+        "y": 166.140625,
+        "right": 1001,
+        "bottom": 516,
+        "width": 803,
+        "height": 349.859375
+      },
+      "footer": {
+        "x": 23,
+        "y": 516,
+        "right": 1001,
+        "bottom": 585,
+        "width": 978,
+        "height": 69
+      },
+      "sectionLinks": [
+        {
+          "x": 35,
+          "y": 182.140625,
+          "right": 185,
+          "bottom": 230.140625,
+          "width": 150,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 235.140625,
+          "right": 185,
+          "bottom": 283.140625,
+          "width": 150,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 288.140625,
+          "right": 185,
+          "bottom": 336.140625,
+          "width": 150,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 341.140625,
+          "right": 185,
+          "bottom": 389.140625,
+          "width": 150,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 394.140625,
+          "right": 185,
+          "bottom": 442.140625,
+          "width": 150,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 447.140625,
+          "right": 185,
+          "bottom": 495.140625,
+          "width": 150,
+          "height": 48
+        }
+      ],
+      "section": "Overview"
+    },
+    {
+      "viewport": [1024, 600],
+      "scroll": [1024, 600],
+      "report": {
+        "x": 22,
+        "y": 86,
+        "right": 1002,
+        "bottom": 586,
+        "width": 980,
+        "height": 500
+      },
+      "content": {
+        "x": 198,
+        "y": 166.140625,
+        "right": 1001,
+        "bottom": 516,
+        "width": 803,
+        "height": 349.859375
+      },
+      "footer": {
+        "x": 23,
+        "y": 516,
+        "right": 1001,
+        "bottom": 585,
+        "width": 978,
+        "height": 69
+      },
+      "sectionLinks": [
+        {
+          "x": 35,
+          "y": 182.140625,
+          "right": 185,
+          "bottom": 230.140625,
+          "width": 150,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 235.140625,
+          "right": 185,
+          "bottom": 283.140625,
+          "width": 150,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 288.140625,
+          "right": 185,
+          "bottom": 336.140625,
+          "width": 150,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 341.140625,
+          "right": 185,
+          "bottom": 389.140625,
+          "width": 150,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 394.140625,
+          "right": 185,
+          "bottom": 442.140625,
+          "width": 150,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 447.140625,
+          "right": 185,
+          "bottom": 495.140625,
+          "width": 150,
+          "height": 48
+        }
+      ],
+      "section": "What we found"
+    },
+    {
+      "viewport": [1024, 600],
+      "scroll": [1024, 600],
+      "report": {
+        "x": 22,
+        "y": 86,
+        "right": 1002,
+        "bottom": 586,
+        "width": 980,
+        "height": 500
+      },
+      "content": {
+        "x": 198,
+        "y": 166.140625,
+        "right": 1001,
+        "bottom": 516,
+        "width": 803,
+        "height": 349.859375
+      },
+      "footer": {
+        "x": 23,
+        "y": 516,
+        "right": 1001,
+        "bottom": 585,
+        "width": 978,
+        "height": 69
+      },
+      "sectionLinks": [
+        {
+          "x": 35,
+          "y": 182.140625,
+          "right": 185,
+          "bottom": 230.140625,
+          "width": 150,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 235.140625,
+          "right": 185,
+          "bottom": 283.140625,
+          "width": 150,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 288.140625,
+          "right": 185,
+          "bottom": 336.140625,
+          "width": 150,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 341.140625,
+          "right": 185,
+          "bottom": 389.140625,
+          "width": 150,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 394.140625,
+          "right": 185,
+          "bottom": 442.140625,
+          "width": 150,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 447.140625,
+          "right": 185,
+          "bottom": 495.140625,
+          "width": 150,
+          "height": 48
+        }
+      ],
+      "section": "What it means"
+    },
+    {
+      "viewport": [1024, 600],
+      "scroll": [1024, 600],
+      "report": {
+        "x": 22,
+        "y": 86,
+        "right": 1002,
+        "bottom": 586,
+        "width": 980,
+        "height": 500
+      },
+      "content": {
+        "x": 198,
+        "y": 166.140625,
+        "right": 1001,
+        "bottom": 516,
+        "width": 803,
+        "height": 349.859375
+      },
+      "footer": {
+        "x": 23,
+        "y": 516,
+        "right": 1001,
+        "bottom": 585,
+        "width": 978,
+        "height": 69
+      },
+      "sectionLinks": [
+        {
+          "x": 35,
+          "y": 182.140625,
+          "right": 185,
+          "bottom": 230.140625,
+          "width": 150,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 235.140625,
+          "right": 185,
+          "bottom": 283.140625,
+          "width": 150,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 288.140625,
+          "right": 185,
+          "bottom": 336.140625,
+          "width": 150,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 341.140625,
+          "right": 185,
+          "bottom": 389.140625,
+          "width": 150,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 394.140625,
+          "right": 185,
+          "bottom": 442.140625,
+          "width": 150,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 447.140625,
+          "right": 185,
+          "bottom": 495.140625,
+          "width": 150,
+          "height": 48
+        }
+      ],
+      "section": "Explore the location"
+    },
+    {
+      "viewport": [1024, 600],
+      "scroll": [1024, 600],
+      "report": {
+        "x": 22,
+        "y": 86,
+        "right": 1002,
+        "bottom": 586,
+        "width": 980,
+        "height": 500
+      },
+      "content": {
+        "x": 198,
+        "y": 166.140625,
+        "right": 1001,
+        "bottom": 516,
+        "width": 803,
+        "height": 349.859375
+      },
+      "footer": {
+        "x": 23,
+        "y": 516,
+        "right": 1001,
+        "bottom": 585,
+        "width": 978,
+        "height": 69
+      },
+      "sectionLinks": [
+        {
+          "x": 35,
+          "y": 182.140625,
+          "right": 185,
+          "bottom": 230.140625,
+          "width": 150,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 235.140625,
+          "right": 185,
+          "bottom": 283.140625,
+          "width": 150,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 288.140625,
+          "right": 185,
+          "bottom": 336.140625,
+          "width": 150,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 341.140625,
+          "right": 185,
+          "bottom": 389.140625,
+          "width": 150,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 394.140625,
+          "right": 185,
+          "bottom": 442.140625,
+          "width": 150,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 447.140625,
+          "right": 185,
+          "bottom": 495.140625,
+          "width": 150,
+          "height": 48
+        }
+      ],
+      "section": "Engineering lessons"
+    },
+    {
+      "viewport": [1024, 600],
+      "scroll": [1024, 600],
+      "report": {
+        "x": 22,
+        "y": 86,
+        "right": 1002,
+        "bottom": 586,
+        "width": 980,
+        "height": 500
+      },
+      "content": {
+        "x": 198,
+        "y": 166.140625,
+        "right": 1001,
+        "bottom": 516,
+        "width": 803,
+        "height": 349.859375
+      },
+      "footer": {
+        "x": 23,
+        "y": 516,
+        "right": 1001,
+        "bottom": 585,
+        "width": 978,
+        "height": 69
+      },
+      "sectionLinks": [
+        {
+          "x": 35,
+          "y": 182.140625,
+          "right": 185,
+          "bottom": 230.140625,
+          "width": 150,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 235.140625,
+          "right": 185,
+          "bottom": 283.140625,
+          "width": 150,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 288.140625,
+          "right": 185,
+          "bottom": 336.140625,
+          "width": 150,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 341.140625,
+          "right": 185,
+          "bottom": 389.140625,
+          "width": 150,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 394.140625,
+          "right": 185,
+          "bottom": 442.140625,
+          "width": 150,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 447.140625,
+          "right": 185,
+          "bottom": 495.140625,
+          "width": 150,
+          "height": 48
+        }
+      ],
+      "section": "Next investigation"
+    },
+    {
+      "viewport": [1196, 588],
+      "scroll": [1196, 588],
+      "report": {
+        "x": 22,
+        "y": 86,
+        "right": 1174,
+        "bottom": 574,
+        "width": 1152,
+        "height": 488
+      },
+      "content": {
+        "x": 223,
+        "y": 166.140625,
+        "right": 1173,
+        "bottom": 504,
+        "width": 950,
+        "height": 337.859375
+      },
+      "footer": {
+        "x": 23,
+        "y": 504,
+        "right": 1173,
+        "bottom": 573,
+        "width": 1150,
+        "height": 69
+      },
+      "sectionLinks": [
+        {
+          "x": 35,
+          "y": 182.140625,
+          "right": 210,
+          "bottom": 230.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 235.140625,
+          "right": 210,
+          "bottom": 283.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 288.140625,
+          "right": 210,
+          "bottom": 336.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 341.140625,
+          "right": 210,
+          "bottom": 389.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 394.140625,
+          "right": 210,
+          "bottom": 442.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 447.140625,
+          "right": 210,
+          "bottom": 495.140625,
+          "width": 175,
+          "height": 48
+        }
+      ],
+      "section": "Overview"
+    },
+    {
+      "viewport": [1196, 588],
+      "scroll": [1196, 588],
+      "report": {
+        "x": 22,
+        "y": 86,
+        "right": 1174,
+        "bottom": 574,
+        "width": 1152,
+        "height": 488
+      },
+      "content": {
+        "x": 223,
+        "y": 166.140625,
+        "right": 1173,
+        "bottom": 504,
+        "width": 950,
+        "height": 337.859375
+      },
+      "footer": {
+        "x": 23,
+        "y": 504,
+        "right": 1173,
+        "bottom": 573,
+        "width": 1150,
+        "height": 69
+      },
+      "sectionLinks": [
+        {
+          "x": 35,
+          "y": 182.140625,
+          "right": 210,
+          "bottom": 230.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 235.140625,
+          "right": 210,
+          "bottom": 283.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 288.140625,
+          "right": 210,
+          "bottom": 336.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 341.140625,
+          "right": 210,
+          "bottom": 389.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 394.140625,
+          "right": 210,
+          "bottom": 442.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 447.140625,
+          "right": 210,
+          "bottom": 495.140625,
+          "width": 175,
+          "height": 48
+        }
+      ],
+      "section": "What we found"
+    },
+    {
+      "viewport": [1196, 588],
+      "scroll": [1196, 588],
+      "report": {
+        "x": 22,
+        "y": 86,
+        "right": 1174,
+        "bottom": 574,
+        "width": 1152,
+        "height": 488
+      },
+      "content": {
+        "x": 223,
+        "y": 166.140625,
+        "right": 1173,
+        "bottom": 504,
+        "width": 950,
+        "height": 337.859375
+      },
+      "footer": {
+        "x": 23,
+        "y": 504,
+        "right": 1173,
+        "bottom": 573,
+        "width": 1150,
+        "height": 69
+      },
+      "sectionLinks": [
+        {
+          "x": 35,
+          "y": 182.140625,
+          "right": 210,
+          "bottom": 230.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 235.140625,
+          "right": 210,
+          "bottom": 283.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 288.140625,
+          "right": 210,
+          "bottom": 336.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 341.140625,
+          "right": 210,
+          "bottom": 389.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 394.140625,
+          "right": 210,
+          "bottom": 442.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 447.140625,
+          "right": 210,
+          "bottom": 495.140625,
+          "width": 175,
+          "height": 48
+        }
+      ],
+      "section": "What it means"
+    },
+    {
+      "viewport": [1196, 588],
+      "scroll": [1196, 588],
+      "report": {
+        "x": 22,
+        "y": 86,
+        "right": 1174,
+        "bottom": 574,
+        "width": 1152,
+        "height": 488
+      },
+      "content": {
+        "x": 223,
+        "y": 166.140625,
+        "right": 1173,
+        "bottom": 504,
+        "width": 950,
+        "height": 337.859375
+      },
+      "footer": {
+        "x": 23,
+        "y": 504,
+        "right": 1173,
+        "bottom": 573,
+        "width": 1150,
+        "height": 69
+      },
+      "sectionLinks": [
+        {
+          "x": 35,
+          "y": 182.140625,
+          "right": 210,
+          "bottom": 230.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 235.140625,
+          "right": 210,
+          "bottom": 283.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 288.140625,
+          "right": 210,
+          "bottom": 336.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 341.140625,
+          "right": 210,
+          "bottom": 389.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 394.140625,
+          "right": 210,
+          "bottom": 442.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 447.140625,
+          "right": 210,
+          "bottom": 495.140625,
+          "width": 175,
+          "height": 48
+        }
+      ],
+      "section": "Explore the location"
+    },
+    {
+      "viewport": [1196, 588],
+      "scroll": [1196, 588],
+      "report": {
+        "x": 22,
+        "y": 86,
+        "right": 1174,
+        "bottom": 574,
+        "width": 1152,
+        "height": 488
+      },
+      "content": {
+        "x": 223,
+        "y": 166.140625,
+        "right": 1173,
+        "bottom": 504,
+        "width": 950,
+        "height": 337.859375
+      },
+      "footer": {
+        "x": 23,
+        "y": 504,
+        "right": 1173,
+        "bottom": 573,
+        "width": 1150,
+        "height": 69
+      },
+      "sectionLinks": [
+        {
+          "x": 35,
+          "y": 182.140625,
+          "right": 210,
+          "bottom": 230.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 235.140625,
+          "right": 210,
+          "bottom": 283.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 288.140625,
+          "right": 210,
+          "bottom": 336.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 341.140625,
+          "right": 210,
+          "bottom": 389.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 394.140625,
+          "right": 210,
+          "bottom": 442.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 447.140625,
+          "right": 210,
+          "bottom": 495.140625,
+          "width": 175,
+          "height": 48
+        }
+      ],
+      "section": "Engineering lessons"
+    },
+    {
+      "viewport": [1196, 588],
+      "scroll": [1196, 588],
+      "report": {
+        "x": 22,
+        "y": 86,
+        "right": 1174,
+        "bottom": 574,
+        "width": 1152,
+        "height": 488
+      },
+      "content": {
+        "x": 223,
+        "y": 166.140625,
+        "right": 1173,
+        "bottom": 504,
+        "width": 950,
+        "height": 337.859375
+      },
+      "footer": {
+        "x": 23,
+        "y": 504,
+        "right": 1173,
+        "bottom": 573,
+        "width": 1150,
+        "height": 69
+      },
+      "sectionLinks": [
+        {
+          "x": 35,
+          "y": 182.140625,
+          "right": 210,
+          "bottom": 230.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 235.140625,
+          "right": 210,
+          "bottom": 283.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 288.140625,
+          "right": 210,
+          "bottom": 336.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 341.140625,
+          "right": 210,
+          "bottom": 389.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 394.140625,
+          "right": 210,
+          "bottom": 442.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 447.140625,
+          "right": 210,
+          "bottom": 495.140625,
+          "width": 175,
+          "height": 48
+        }
+      ],
+      "section": "Next investigation"
+    },
+    {
+      "viewport": [1440, 900],
+      "scroll": [1440, 900],
+      "report": {
+        "x": 22,
+        "y": 86,
+        "right": 1418,
+        "bottom": 886,
+        "width": 1396,
+        "height": 800
+      },
+      "content": {
+        "x": 223,
+        "y": 187.140625,
+        "right": 1417,
+        "bottom": 816,
+        "width": 1194,
+        "height": 628.859375
+      },
+      "footer": {
+        "x": 23,
+        "y": 816,
+        "right": 1417,
+        "bottom": 885,
+        "width": 1394,
+        "height": 69
+      },
+      "sectionLinks": [
+        {
+          "x": 35,
+          "y": 203.140625,
+          "right": 210,
+          "bottom": 251.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 256.140625,
+          "right": 210,
+          "bottom": 304.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 309.140625,
+          "right": 210,
+          "bottom": 357.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 362.140625,
+          "right": 210,
+          "bottom": 410.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 415.140625,
+          "right": 210,
+          "bottom": 463.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 468.140625,
+          "right": 210,
+          "bottom": 516.140625,
+          "width": 175,
+          "height": 48
+        }
+      ],
+      "section": "Overview"
+    },
+    {
+      "viewport": [1440, 900],
+      "scroll": [1440, 900],
+      "report": {
+        "x": 22,
+        "y": 86,
+        "right": 1418,
+        "bottom": 886,
+        "width": 1396,
+        "height": 800
+      },
+      "content": {
+        "x": 223,
+        "y": 187.140625,
+        "right": 1417,
+        "bottom": 816,
+        "width": 1194,
+        "height": 628.859375
+      },
+      "footer": {
+        "x": 23,
+        "y": 816,
+        "right": 1417,
+        "bottom": 885,
+        "width": 1394,
+        "height": 69
+      },
+      "sectionLinks": [
+        {
+          "x": 35,
+          "y": 203.140625,
+          "right": 210,
+          "bottom": 251.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 256.140625,
+          "right": 210,
+          "bottom": 304.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 309.140625,
+          "right": 210,
+          "bottom": 357.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 362.140625,
+          "right": 210,
+          "bottom": 410.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 415.140625,
+          "right": 210,
+          "bottom": 463.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 468.140625,
+          "right": 210,
+          "bottom": 516.140625,
+          "width": 175,
+          "height": 48
+        }
+      ],
+      "section": "What we found"
+    },
+    {
+      "viewport": [1440, 900],
+      "scroll": [1440, 900],
+      "report": {
+        "x": 22,
+        "y": 86,
+        "right": 1418,
+        "bottom": 886,
+        "width": 1396,
+        "height": 800
+      },
+      "content": {
+        "x": 223,
+        "y": 187.140625,
+        "right": 1417,
+        "bottom": 816,
+        "width": 1194,
+        "height": 628.859375
+      },
+      "footer": {
+        "x": 23,
+        "y": 816,
+        "right": 1417,
+        "bottom": 885,
+        "width": 1394,
+        "height": 69
+      },
+      "sectionLinks": [
+        {
+          "x": 35,
+          "y": 203.140625,
+          "right": 210,
+          "bottom": 251.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 256.140625,
+          "right": 210,
+          "bottom": 304.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 309.140625,
+          "right": 210,
+          "bottom": 357.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 362.140625,
+          "right": 210,
+          "bottom": 410.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 415.140625,
+          "right": 210,
+          "bottom": 463.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 468.140625,
+          "right": 210,
+          "bottom": 516.140625,
+          "width": 175,
+          "height": 48
+        }
+      ],
+      "section": "What it means"
+    },
+    {
+      "viewport": [1440, 900],
+      "scroll": [1440, 900],
+      "report": {
+        "x": 22,
+        "y": 86,
+        "right": 1418,
+        "bottom": 886,
+        "width": 1396,
+        "height": 800
+      },
+      "content": {
+        "x": 223,
+        "y": 187.140625,
+        "right": 1417,
+        "bottom": 816,
+        "width": 1194,
+        "height": 628.859375
+      },
+      "footer": {
+        "x": 23,
+        "y": 816,
+        "right": 1417,
+        "bottom": 885,
+        "width": 1394,
+        "height": 69
+      },
+      "sectionLinks": [
+        {
+          "x": 35,
+          "y": 203.140625,
+          "right": 210,
+          "bottom": 251.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 256.140625,
+          "right": 210,
+          "bottom": 304.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 309.140625,
+          "right": 210,
+          "bottom": 357.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 362.140625,
+          "right": 210,
+          "bottom": 410.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 415.140625,
+          "right": 210,
+          "bottom": 463.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 468.140625,
+          "right": 210,
+          "bottom": 516.140625,
+          "width": 175,
+          "height": 48
+        }
+      ],
+      "section": "Explore the location"
+    },
+    {
+      "viewport": [1440, 900],
+      "scroll": [1440, 900],
+      "report": {
+        "x": 22,
+        "y": 86,
+        "right": 1418,
+        "bottom": 886,
+        "width": 1396,
+        "height": 800
+      },
+      "content": {
+        "x": 223,
+        "y": 187.140625,
+        "right": 1417,
+        "bottom": 816,
+        "width": 1194,
+        "height": 628.859375
+      },
+      "footer": {
+        "x": 23,
+        "y": 816,
+        "right": 1417,
+        "bottom": 885,
+        "width": 1394,
+        "height": 69
+      },
+      "sectionLinks": [
+        {
+          "x": 35,
+          "y": 203.140625,
+          "right": 210,
+          "bottom": 251.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 256.140625,
+          "right": 210,
+          "bottom": 304.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 309.140625,
+          "right": 210,
+          "bottom": 357.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 362.140625,
+          "right": 210,
+          "bottom": 410.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 415.140625,
+          "right": 210,
+          "bottom": 463.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 468.140625,
+          "right": 210,
+          "bottom": 516.140625,
+          "width": 175,
+          "height": 48
+        }
+      ],
+      "section": "Engineering lessons"
+    },
+    {
+      "viewport": [1440, 900],
+      "scroll": [1440, 900],
+      "report": {
+        "x": 22,
+        "y": 86,
+        "right": 1418,
+        "bottom": 886,
+        "width": 1396,
+        "height": 800
+      },
+      "content": {
+        "x": 223,
+        "y": 187.140625,
+        "right": 1417,
+        "bottom": 816,
+        "width": 1194,
+        "height": 628.859375
+      },
+      "footer": {
+        "x": 23,
+        "y": 816,
+        "right": 1417,
+        "bottom": 885,
+        "width": 1394,
+        "height": 69
+      },
+      "sectionLinks": [
+        {
+          "x": 35,
+          "y": 203.140625,
+          "right": 210,
+          "bottom": 251.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 256.140625,
+          "right": 210,
+          "bottom": 304.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 309.140625,
+          "right": 210,
+          "bottom": 357.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 362.140625,
+          "right": 210,
+          "bottom": 410.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 415.140625,
+          "right": 210,
+          "bottom": 463.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 35,
+          "y": 468.140625,
+          "right": 210,
+          "bottom": 516.140625,
+          "width": 175,
+          "height": 48
+        }
+      ],
+      "section": "Next investigation"
+    },
+    {
+      "viewport": [2560, 1080],
+      "scroll": [2560, 1080],
+      "report": {
+        "x": 440,
+        "y": 86,
+        "right": 2120,
+        "bottom": 1066,
+        "width": 1680,
+        "height": 980
+      },
+      "content": {
+        "x": 641,
+        "y": 187.140625,
+        "right": 2119,
+        "bottom": 996,
+        "width": 1478,
+        "height": 808.859375
+      },
+      "footer": {
+        "x": 441,
+        "y": 996,
+        "right": 2119,
+        "bottom": 1065,
+        "width": 1678,
+        "height": 69
+      },
+      "sectionLinks": [
+        {
+          "x": 453,
+          "y": 203.140625,
+          "right": 628,
+          "bottom": 251.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 453,
+          "y": 256.140625,
+          "right": 628,
+          "bottom": 304.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 453,
+          "y": 309.140625,
+          "right": 628,
+          "bottom": 357.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 453,
+          "y": 362.140625,
+          "right": 628,
+          "bottom": 410.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 453,
+          "y": 415.140625,
+          "right": 628,
+          "bottom": 463.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 453,
+          "y": 468.140625,
+          "right": 628,
+          "bottom": 516.140625,
+          "width": 175,
+          "height": 48
+        }
+      ],
+      "section": "Overview"
+    },
+    {
+      "viewport": [2560, 1080],
+      "scroll": [2560, 1080],
+      "report": {
+        "x": 440,
+        "y": 86,
+        "right": 2120,
+        "bottom": 1066,
+        "width": 1680,
+        "height": 980
+      },
+      "content": {
+        "x": 641,
+        "y": 187.140625,
+        "right": 2119,
+        "bottom": 996,
+        "width": 1478,
+        "height": 808.859375
+      },
+      "footer": {
+        "x": 441,
+        "y": 996,
+        "right": 2119,
+        "bottom": 1065,
+        "width": 1678,
+        "height": 69
+      },
+      "sectionLinks": [
+        {
+          "x": 453,
+          "y": 203.140625,
+          "right": 628,
+          "bottom": 251.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 453,
+          "y": 256.140625,
+          "right": 628,
+          "bottom": 304.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 453,
+          "y": 309.140625,
+          "right": 628,
+          "bottom": 357.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 453,
+          "y": 362.140625,
+          "right": 628,
+          "bottom": 410.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 453,
+          "y": 415.140625,
+          "right": 628,
+          "bottom": 463.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 453,
+          "y": 468.140625,
+          "right": 628,
+          "bottom": 516.140625,
+          "width": 175,
+          "height": 48
+        }
+      ],
+      "section": "What we found"
+    },
+    {
+      "viewport": [2560, 1080],
+      "scroll": [2560, 1080],
+      "report": {
+        "x": 440,
+        "y": 86,
+        "right": 2120,
+        "bottom": 1066,
+        "width": 1680,
+        "height": 980
+      },
+      "content": {
+        "x": 641,
+        "y": 187.140625,
+        "right": 2119,
+        "bottom": 996,
+        "width": 1478,
+        "height": 808.859375
+      },
+      "footer": {
+        "x": 441,
+        "y": 996,
+        "right": 2119,
+        "bottom": 1065,
+        "width": 1678,
+        "height": 69
+      },
+      "sectionLinks": [
+        {
+          "x": 453,
+          "y": 203.140625,
+          "right": 628,
+          "bottom": 251.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 453,
+          "y": 256.140625,
+          "right": 628,
+          "bottom": 304.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 453,
+          "y": 309.140625,
+          "right": 628,
+          "bottom": 357.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 453,
+          "y": 362.140625,
+          "right": 628,
+          "bottom": 410.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 453,
+          "y": 415.140625,
+          "right": 628,
+          "bottom": 463.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 453,
+          "y": 468.140625,
+          "right": 628,
+          "bottom": 516.140625,
+          "width": 175,
+          "height": 48
+        }
+      ],
+      "section": "What it means"
+    },
+    {
+      "viewport": [2560, 1080],
+      "scroll": [2560, 1080],
+      "report": {
+        "x": 440,
+        "y": 86,
+        "right": 2120,
+        "bottom": 1066,
+        "width": 1680,
+        "height": 980
+      },
+      "content": {
+        "x": 641,
+        "y": 187.140625,
+        "right": 2119,
+        "bottom": 996,
+        "width": 1478,
+        "height": 808.859375
+      },
+      "footer": {
+        "x": 441,
+        "y": 996,
+        "right": 2119,
+        "bottom": 1065,
+        "width": 1678,
+        "height": 69
+      },
+      "sectionLinks": [
+        {
+          "x": 453,
+          "y": 203.140625,
+          "right": 628,
+          "bottom": 251.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 453,
+          "y": 256.140625,
+          "right": 628,
+          "bottom": 304.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 453,
+          "y": 309.140625,
+          "right": 628,
+          "bottom": 357.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 453,
+          "y": 362.140625,
+          "right": 628,
+          "bottom": 410.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 453,
+          "y": 415.140625,
+          "right": 628,
+          "bottom": 463.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 453,
+          "y": 468.140625,
+          "right": 628,
+          "bottom": 516.140625,
+          "width": 175,
+          "height": 48
+        }
+      ],
+      "section": "Explore the location"
+    },
+    {
+      "viewport": [2560, 1080],
+      "scroll": [2560, 1080],
+      "report": {
+        "x": 440,
+        "y": 86,
+        "right": 2120,
+        "bottom": 1066,
+        "width": 1680,
+        "height": 980
+      },
+      "content": {
+        "x": 641,
+        "y": 187.140625,
+        "right": 2119,
+        "bottom": 996,
+        "width": 1478,
+        "height": 808.859375
+      },
+      "footer": {
+        "x": 441,
+        "y": 996,
+        "right": 2119,
+        "bottom": 1065,
+        "width": 1678,
+        "height": 69
+      },
+      "sectionLinks": [
+        {
+          "x": 453,
+          "y": 203.140625,
+          "right": 628,
+          "bottom": 251.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 453,
+          "y": 256.140625,
+          "right": 628,
+          "bottom": 304.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 453,
+          "y": 309.140625,
+          "right": 628,
+          "bottom": 357.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 453,
+          "y": 362.140625,
+          "right": 628,
+          "bottom": 410.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 453,
+          "y": 415.140625,
+          "right": 628,
+          "bottom": 463.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 453,
+          "y": 468.140625,
+          "right": 628,
+          "bottom": 516.140625,
+          "width": 175,
+          "height": 48
+        }
+      ],
+      "section": "Engineering lessons"
+    },
+    {
+      "viewport": [2560, 1080],
+      "scroll": [2560, 1080],
+      "report": {
+        "x": 440,
+        "y": 86,
+        "right": 2120,
+        "bottom": 1066,
+        "width": 1680,
+        "height": 980
+      },
+      "content": {
+        "x": 641,
+        "y": 187.140625,
+        "right": 2119,
+        "bottom": 996,
+        "width": 1478,
+        "height": 808.859375
+      },
+      "footer": {
+        "x": 441,
+        "y": 996,
+        "right": 2119,
+        "bottom": 1065,
+        "width": 1678,
+        "height": 69
+      },
+      "sectionLinks": [
+        {
+          "x": 453,
+          "y": 203.140625,
+          "right": 628,
+          "bottom": 251.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 453,
+          "y": 256.140625,
+          "right": 628,
+          "bottom": 304.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 453,
+          "y": 309.140625,
+          "right": 628,
+          "bottom": 357.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 453,
+          "y": 362.140625,
+          "right": 628,
+          "bottom": 410.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 453,
+          "y": 415.140625,
+          "right": 628,
+          "bottom": 463.140625,
+          "width": 175,
+          "height": 48
+        },
+        {
+          "x": 453,
+          "y": 468.140625,
+          "right": 628,
+          "bottom": 516.140625,
+          "width": 175,
+          "height": 48
+        }
+      ],
+      "section": "Next investigation"
+    }
+  ],
+  "pageErrors": [],
+  "date": "2026-11-09",
+  "browser": "Headless Chromium; isolated reducer-generated fixtures; software WebGL",
+  "modelChecks": "scripts/check-mission-report.mjs passed",
+  "lint": "Workspace: 0 warnings, 0 errors",
+  "typecheck": "@exo/web tsc --noEmit -p tsconfig.app.json passed",
+  "build": "Turborepo production build passed",
+  "format": "Repository Prettier check passed",
+  "limitations": [
+    "No physical-device or screen-reader certification.",
+    "Real unassisted new-user comprehension remains pending.",
+    "No complete manual launch/landing/rover playthrough; this feature leaves those reducers unchanged.",
+    "Current mission regions have no documented Atlas coordinate transform."
+  ]
+}

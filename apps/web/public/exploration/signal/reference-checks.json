@@ -1,0 +1,211 @@
+{
+  "samples": [
+    {
+      "site": "shackleton",
+      "time": 0.0,
+      "direct": false,
+      "up": true,
+      "down": true
+    },
+    {
+      "site": "shackleton",
+      "time": 1234.567,
+      "direct": false,
+      "up": true,
+      "down": true
+    },
+    {
+      "site": "shackleton",
+      "time": 43200.0,
+      "direct": false,
+      "up": true,
+      "down": true
+    },
+    {
+      "site": "shackleton",
+      "time": 129601.23,
+      "direct": false,
+      "up": true,
+      "down": true
+    },
+    {
+      "site": "shackleton",
+      "time": 259200.0,
+      "direct": false,
+      "up": true,
+      "down": true
+    },
+    {
+      "site": "cabeus",
+      "time": 0.0,
+      "direct": false,
+      "up": true,
+      "down": true
+    },
+    {
+      "site": "cabeus",
+      "time": 1234.567,
+      "direct": false,
+      "up": true,
+      "down": true
+    },
+    {
+      "site": "cabeus",
+      "time": 43200.0,
+      "direct": false,
+      "up": true,
+      "down": true
+    },
+    {
+      "site": "cabeus",
+      "time": 129601.23,
+      "direct": false,
+      "up": true,
+      "down": true
+    },
+    {
+      "site": "cabeus",
+      "time": 259200.0,
+      "direct": true,
+      "up": true,
+      "down": true
+    },
+    {
+      "site": "malapert",
+      "time": 0.0,
+      "direct": false,
+      "up": true,
+      "down": true
+    },
+    {
+      "site": "malapert",
+      "time": 1234.567,
+      "direct": false,
+      "up": true,
+      "down": true
+    },
+    {
+      "site": "malapert",
+      "time": 43200.0,
+      "direct": false,
+      "up": true,
+      "down": true
+    },
+    {
+      "site": "malapert",
+      "time": 129601.23,
+      "direct": false,
+      "up": true,
+      "down": true
+    },
+    {
+      "site": "malapert",
+      "time": 259200.0,
+      "direct": true,
+      "up": true,
+      "down": true
+    },
+    {
+      "site": "far",
+      "time": 0.0,
+      "direct": false,
+      "up": true,
+      "down": true
+    },
+    {
+      "site": "far",
+      "time": 1234.567,
+      "direct": false,
+      "up": true,
+      "down": true
+    },
+    {
+      "site": "far",
+      "time": 43200.0,
+      "direct": false,
+      "up": true,
+      "down": true
+    },
+    {
+      "site": "far",
+      "time": 129601.23,
+      "direct": false,
+      "up": true,
+      "down": true
+    },
+    {
+      "site": "far",
+      "time": 259200.0,
+      "direct": false,
+      "up": true,
+      "down": true
+    },
+    {
+      "site": "near",
+      "time": 0.0,
+      "direct": true,
+      "up": false,
+      "down": true
+    },
+    {
+      "site": "near",
+      "time": 1234.567,
+      "direct": true,
+      "up": false,
+      "down": true
+    },
+    {
+      "site": "near",
+      "time": 43200.0,
+      "direct": true,
+      "up": false,
+      "down": true
+    },
+    {
+      "site": "near",
+      "time": 129601.23,
+      "direct": true,
+      "up": false,
+      "down": true
+    },
+    {
+      "site": "near",
+      "time": 259200.0,
+      "direct": true,
+      "up": false,
+      "down": true
+    }
+  ],
+  "events": {
+    "shackleton": [
+      45679.66071696926,
+      60537.6442588466,
+      153405.6760635491,
+      168406.52250951933
+    ],
+    "cabeus": [
+      46216.72893380675,
+      61089.39652310163,
+      153759.45113852847,
+      168808.12601002847,
+      241325.81819254957
+    ],
+    "malapert": [
+      45618.99506095825,
+      60619.06174841524,
+      153126.59208881334,
+      168327.63342551573,
+      205264.91610876075
+    ],
+    "far": [
+      45696.183200346866,
+      60395.711124695685,
+      153729.90718202794,
+      168498.43415017746
+    ],
+    "near": [
+      162071.2907518909,
+      164901.65825635075
+    ]
+  }
+}

@@ -1,0 +1,168 @@
+{
+  "id": "lcrns-3.1-2027-03-01-v1",
+  "title": "LCRNS Reference Constellation 3.1",
+  "type": "reference-design",
+  "epoch": "2027-03-01T00:00:00Z",
+  "duration": 259200,
+  "step": 30,
+  "count": 8641,
+  "frame": "MOON_ME_DE421",
+  "integrationFrame": "Moon-centered J2000 / ICRF",
+  "gravityFrame": "MOON_PA_DE421",
+  "units": "km, km/s, seconds",
+  "layout": "Float64 little endian; rows of 42 numbers: SV1..SV5, Earth, Sun; each x,y,z,vx,vy,vz",
+  "radius": 1737.4,
+  "earthRadius": 6378.1366,
+  "lightSpeed": 299792.458,
+  "initialStates": [
+    [
+      -198.931445,
+      386.023132,
+      3458.355412,
+      -1.539867,
+      0.022243,
+      -0.091059
+    ],
+    [
+      1089.980598,
+      -2260.918271,
+      -18984.562823,
+      0.280301,
+      -0.004049,
+      0.016575
+    ],
+    [
+      9187.665852,
+      -260.470721,
+      -8543.222759,
+      0.273629,
+      0.417588,
+      -0.313828
+    ],
+    [
+      6484.019002,
+      14329.883921,
+      -7966.345594,
+      -0.258433,
+      0.033951,
+      0.235264
+    ],
+    [
+      -5074.242314,
+      14473.022751,
+      -8638.530033,
+      -0.229931,
+      -0.026926,
+      -0.264381
+    ]
+  ],
+  "model": {
+    "gravity": "GRGM900C fully normalized, degree/order 25; reference radius 1738 km",
+    "mu": 4902.79996708864,
+    "ephemeris": "DE421",
+    "thirdBodies": [
+      "SUN",
+      "VENUS",
+      "EARTH",
+      "MARS BARYCENTER",
+      "JUPITER BARYCENTER",
+      "SATURN BARYCENTER"
+    ],
+    "thirdBodyGMs": [
+      132712440041.9393,
+      324858.592,
+      398600.4354360959,
+      42828.37521400002,
+      126712764.8000002,
+      37940585.2
+    ],
+    "gmSource": "gm_de431.tpc; declared mass-constant interpretation, not exact original design environment",
+    "srp": "1367 W/m\u00b2 at 1 AU, Cr 1.8, area 1 m\u00b2, mass 850 kg; binary spherical lunar eclipse; no penumbra or Earth shadow",
+    "disabled": [
+      "solid tides",
+      "atmospheric drag"
+    ],
+    "integrator": "SciPy DOP853, rtol 2e-12, atol 1e-12, max step 180 s"
+  },
+  "validation": {
+    "gravityGradientErrorKmS2": 7.793654009005657e-15,
+    "crossIntegratorMaxKm": 0.000783362424547345,
+    "crossCheck": "RK45, rtol 3e-11, atol 2e-12, max step 120 s; matched force model, not independent force implementation",
+    "hermiteProbeMaxKm": 3.375891928153233e-07,
+    "initialStatesMatchSource": true
+  },
+  "limits": [
+    "Non-final NASA reference design, not live satellites or operational service.",
+    "Numerically propagated study; not an exact recreation of the original mission-design software.",
+    "Spherical Moon and zero-degree horizon; no local terrain, antenna, RF or station scheduling.",
+    "Instantaneous Earth-center direction and distance/c; no processing or moving-endpoint light-time correction.",
+    "GM and shadow interpretations are disclosed; matching numerical integrators does not validate real flight accuracy."
+  ],
+  "sources": [
+    {
+      "id": "paper",
+      "url": "https://ntrs.nasa.gov/api/citations/20250002698/downloads/LCRNS_Reference_Constellation_White_Paper_03_2025.docx",
+      "sha256": "a0812ed8405567125c3266c6cd0e7cbd7f115fff220f688bb978c4f7eccac0aa",
+      "retrieved": "2026-11-08"
+    },
+    {
+      "id": "gravity-label",
+      "url": "https://pds-geosciences.wustl.edu/grail/grail-l-lgrs-5-rdr-v1/grail_1001/shadr/gggrx_0900c_sha.lbl",
+      "sha256": "acc623e4b42a19f8feba1e7bda5189e984aa907491db12dede64bd426a1681c0",
+      "retrieved": "2026-11-08"
+    },
+    {
+      "id": "gravity",
+      "url": "https://pds-geosciences.wustl.edu/grail/grail-l-lgrs-5-rdr-v1/grail_1001/shadr/gggrx_0900c_sha.tab",
+      "sha256": "dab6ab06e0d3d7cbc594ea4bd03151a65534ed5fdf4f147ae38662428c04454e",
+      "retrieved": "2026-11-08"
+    },
+    {
+      "id": "ephemeris",
+      "url": "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/a_old_versions/de421.bsp",
+      "sha256": "08b20db2ae22488650641c5a9033e5bfda4b1c4b440cfeaf20f621cfa18ecdb3",
+      "retrieved": "2026-11-08"
+    },
+    {
+      "id": "orientation",
+      "url": "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/moon_pa_de421_1900-2050.bpc",
+      "sha256": "656f90616403d75a75f0cd6c8830fc5b44f8cb4facb5ccb8915e752b397520cf",
+      "retrieved": "2026-11-08"
+    },
+    {
+      "id": "frames",
+      "url": "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/fk/satellites/moon_080317.tf",
+      "sha256": "78732477b96f9863e7b0d65bcee3c22b8707ca5ed0db56d1173319cb2e8c7993",
+      "retrieved": "2026-11-08"
+    },
+    {
+      "id": "leapseconds",
+      "url": "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/lsk/naif0012.tls",
+      "sha256": "678e32bdb5a744117a467cd9601cd6b373f0e9bc9bbde1371d5eee39600a039b",
+      "retrieved": "2026-11-08"
+    },
+    {
+      "id": "masses",
+      "url": "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/gm_de431.tpc",
+      "sha256": "15756c162151853f329d473fa00c38d35e62d83c3e25ddceece6516bbd98738b",
+      "retrieved": "2026-11-08"
+    },
+    {
+      "id": "radii",
+      "url": "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/pck00011.tpc",
+      "sha256": "3dff7b1dbeceaa01f25467767d3fa25816051c85d162d1edf04acb310ee28bb1",
+      "retrieved": "2026-11-08"
+    },
+    {
+      "id": "moon-color",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004700/a004720/lroc_color_poles_2k.tif",
+      "sha256": "13b797422e8c4b8607ff2b2623ac3a046a6da0132d567c2d272d92fad7052c4a",
+      "retrieved": "2026-11-08"
+    }
+  ],
+  "credits": "NASA GSFC LCRNS: Grant Ryden and Michael Volle. Moon map: NASA GSFC / Arizona State University, NASA SVS CGI Moon Kit.",
+  "artifacts": {
+    "states.bin": "6d38e263cd87e05306ba98ac0da249434f3c07deb1083638aa27d15b20824b6c",
+    "moon.webp": "f837beb779f86ecb9b4269bb6e8b203a832781b39fcb9b3a0a5733117cb082ec"
+  }
+}

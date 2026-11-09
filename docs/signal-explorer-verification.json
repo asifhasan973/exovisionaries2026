@@ -1,0 +1,1897 @@
+{
+  "date": "2026-11-09",
+  "browser": "Headless Chromium, software WebGL; not physical-device certification",
+  "limitations": [
+    "Shared application loading still has existing remote NASA carousel CORS errors; signal assets are local.",
+    "No physical-device, hardware-GPU frame-rate or screen-reader certification.",
+    "One-second event bracketing cannot guarantee sub-second grazing opportunities.",
+    "Numerical checks share a force model and do not establish real flight accuracy."
+  ],
+  "scientificChecks": {
+    "command": "node scripts/check-signal.mjs",
+    "result": "passed",
+    "sites": 5,
+    "maxTestedEventErrorSeconds": 0.03049841523898067,
+    "limits": "Event comparisons use independently calculated SPICE/dense-integrator roots for SV-2 and direct paths; not operational coverage certification."
+  },
+  "previousChecks": [
+    "route loading",
+    "playback",
+    "orientation freeze",
+    "overlapping suspension",
+    "manual pause persistence",
+    "explicit reset",
+    "site comparison and baseline",
+    "modal focus and Escape return",
+    "responsive bounds at eight sizes",
+    "WebGL fallback geometry",
+    "zero page JavaScript exceptions",
+    "keyboard time scrubbing",
+    "trace mode camera fits selected relay",
+    "14 NASA source URLs returned HTTP 200",
+    "nonzero blocked path guides and blockage marker",
+    "blocked-route delay unavailable",
+    "hidden relay cannot be picked",
+    "dynamic ray bounds current after relay change",
+    "clickable camera-aware Earth badge",
+    "individual relay-leg change navigation",
+    "route cards and fixed metrics visible at eight landscape sizes",
+    "42px compact controls and minimum 11px tested labels",
+    "short landscape timeline popover and Escape",
+    "zero GPU redraws in stationary paused view"
+  ],
+  "previousLayouts": [
+    {
+      "viewport": [667, 375],
+      "scroll": [667, 375],
+      "scene": {
+        "x": 12,
+        "y": 58,
+        "width": 405,
+        "height": 211,
+        "bottom": 269,
+        "right": 417
+      },
+      "inspector": {
+        "x": 425,
+        "y": 58,
+        "width": 230,
+        "height": 211,
+        "bottom": 269,
+        "right": 655
+      },
+      "metrics": {
+        "x": 426,
+        "y": 206.234375,
+        "width": 228,
+        "height": 61.765625,
+        "bottom": 268,
+        "right": 654
+      },
+      "sources": {
+        "x": 12,
+        "y": 333,
+        "width": 643,
+        "height": 42,
+        "bottom": 375,
+        "right": 655
+      },
+      "route": {
+        "x": 434,
+        "y": 113,
+        "width": 212,
+        "height": 88,
+        "bottom": 201,
+        "right": 646
+      },
+      "body": {
+        "x": 426,
+        "y": 59,
+        "width": 228,
+        "height": 147.234375,
+        "bottom": 206.234375,
+        "right": 654
+      },
+      "buttons": [42, 42, 42, 42, 42, 42, 42, 42, 42, 42, 42, 42],
+      "fonts": [11, 11, 11, 11]
+    },
+    {
+      "viewport": [844, 390],
+      "scroll": [844, 390],
+      "scene": {
+        "x": 12,
+        "y": 58,
+        "width": 525,
+        "height": 226,
+        "bottom": 284,
+        "right": 537
+      },
+      "inspector": {
+        "x": 545,
+        "y": 58,
+        "width": 287,
+        "height": 226,
+        "bottom": 284,
+        "right": 832
+      },
+      "metrics": {
+        "x": 546,
+        "y": 221.234375,
+        "width": 285,
+        "height": 61.765625,
+        "bottom": 283,
+        "right": 831
+      },
+      "sources": {
+        "x": 12,
+        "y": 348,
+        "width": 820,
+        "height": 42,
+        "bottom": 390,
+        "right": 832
+      },
+      "route": {
+        "x": 554,
+        "y": 113,
+        "width": 269,
+        "height": 88,
+        "bottom": 201,
+        "right": 823
+      },
+      "body": {
+        "x": 546,
+        "y": 59,
+        "width": 285,
+        "height": 162.234375,
+        "bottom": 221.234375,
+        "right": 831
+      },
+      "buttons": [42, 42, 42, 42, 42, 42, 42, 42, 42, 42, 42, 42],
+      "fonts": [11, 11, 11, 11]
+    },
+    {
+      "viewport": [1024, 600],
+      "scroll": [1024, 600],
+      "scene": {
+        "x": 22.515625,
+        "y": 198,
+        "width": 646.921875,
+        "height": 280,
+        "bottom": 478,
+        "right": 669.4375
+      },
+      "inspector": {
+        "x": 678.4375,
+        "y": 198,
+        "width": 323.046875,
+        "height": 280,
+        "bottom": 478,
+        "right": 1001.484375
+      },
+      "metrics": {
+        "x": 679.4375,
+        "y": 366.625,
+        "width": 321.046875,
+        "height": 89.375,
+        "bottom": 456,
+        "right": 1000.484375
+      },
+      "sources": {
+        "x": 22.515625,
+        "y": 556,
+        "width": 978.96875,
+        "height": 44,
+        "bottom": 600,
+        "right": 1001.484375
+      },
+      "route": {
+        "x": 698.4375,
+        "y": 258.234375,
+        "width": 283.046875,
+        "height": 107,
+        "bottom": 365.234375,
+        "right": 981.484375
+      },
+      "body": {
+        "x": 679.4375,
+        "y": 199,
+        "width": 321.046875,
+        "height": 167.625,
+        "bottom": 366.625,
+        "right": 1000.484375
+      },
+      "buttons": [44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44],
+      "fonts": [11, 12, 12, 12]
+    },
+    {
+      "viewport": [1280, 720],
+      "scroll": [1280, 720],
+      "scene": {
+        "x": 28.15625,
+        "y": 198,
+        "width": 823.109375,
+        "height": 400,
+        "bottom": 598,
+        "right": 851.265625
+      },
+      "inspector": {
+        "x": 860.265625,
+        "y": 198,
+        "width": 391.578125,
+        "height": 400,
+        "bottom": 598,
+        "right": 1251.84375
+      },
+      "metrics": {
+        "x": 861.265625,
+        "y": 486.625,
+        "width": 389.578125,
+        "height": 89.375,
+        "bottom": 576,
+        "right": 1250.84375
+      },
+      "sources": {
+        "x": 28.15625,
+        "y": 676,
+        "width": 1223.6875,
+        "height": 44,
+        "bottom": 720,
+        "right": 1251.84375
+      },
+      "route": {
+        "x": 880.265625,
+        "y": 258.234375,
+        "width": 351.578125,
+        "height": 107,
+        "bottom": 365.234375,
+        "right": 1231.84375
+      },
+      "body": {
+        "x": 861.265625,
+        "y": 199,
+        "width": 389.578125,
+        "height": 287.625,
+        "bottom": 486.625,
+        "right": 1250.84375
+      },
+      "buttons": [44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44],
+      "fonts": [11, 12, 12, 12]
+    },
+    {
+      "viewport": [1440, 900],
+      "scroll": [1440, 900],
+      "scene": {
+        "x": 31.671875,
+        "y": 259.484375,
+        "width": 920.140625,
+        "height": 397.515625,
+        "bottom": 657,
+        "right": 951.8125
+      },
+      "inspector": {
+        "x": 967.8125,
+        "y": 259.484375,
+        "width": 440.515625,
+        "height": 397.515625,
+        "bottom": 657,
+        "right": 1408.328125
+      },
+      "metrics": {
+        "x": 968.8125,
+        "y": 545.625,
+        "width": 438.515625,
+        "height": 89.375,
+        "bottom": 635,
+        "right": 1407.328125
+      },
+      "sources": {
+        "x": 31.671875,
+        "y": 854,
+        "width": 1376.65625,
+        "height": 46,
+        "bottom": 900,
+        "right": 1408.328125
+      },
+      "route": {
+        "x": 987.8125,
+        "y": 367.46875,
+        "width": 400.515625,
+        "height": 115,
+        "bottom": 482.46875,
+        "right": 1388.328125
+      },
+      "body": {
+        "x": 968.8125,
+        "y": 260.484375,
+        "width": 438.515625,
+        "height": 285.140625,
+        "bottom": 545.625,
+        "right": 1407.328125
+      },
+      "buttons": [44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44],
+      "fonts": [11, 11, 11, 11, 12, 12, 12]
+    },
+    {
+      "viewport": [1920, 1080],
+      "scroll": [1920, 1080],
+      "scene": {
+        "x": 126,
+        "y": 264.875,
+        "width": 1118.25,
+        "height": 572.125,
+        "bottom": 837,
+        "right": 1244.25
+      },
+      "inspector": {
+        "x": 1260.25,
+        "y": 264.875,
+        "width": 533.75,
+        "height": 572.125,
+        "bottom": 837,
+        "right": 1794
+      },
+      "metrics": {
+        "x": 1261.25,
+        "y": 725.625,
+        "width": 531.75,
+        "height": 89.375,
+        "bottom": 815,
+        "right": 1793
+      },
+      "sources": {
+        "x": 126,
+        "y": 1034,
+        "width": 1668,
+        "height": 46,
+        "bottom": 1080,
+        "right": 1794
+      },
+      "route": {
+        "x": 1280.25,
+        "y": 375.171875,
+        "width": 493.75,
+        "height": 115,
+        "bottom": 490.171875,
+        "right": 1774
+      },
+      "body": {
+        "x": 1261.25,
+        "y": 265.875,
+        "width": 531.75,
+        "height": 459.75,
+        "bottom": 725.625,
+        "right": 1793
+      },
+      "buttons": [44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44],
+      "fonts": [11, 11, 11, 11, 12, 12, 12]
+    },
+    {
+      "viewport": [2560, 1080],
+      "scroll": [2560, 1080],
+      "scene": {
+        "x": 446,
+        "y": 264.875,
+        "width": 1118.25,
+        "height": 572.125,
+        "bottom": 837,
+        "right": 1564.25
+      },
+      "inspector": {
+        "x": 1580.25,
+        "y": 264.875,
+        "width": 533.75,
+        "height": 572.125,
+        "bottom": 837,
+        "right": 2114
+      },
+      "metrics": {
+        "x": 1581.25,
+        "y": 725.625,
+        "width": 531.75,
+        "height": 89.375,
+        "bottom": 815,
+        "right": 2113
+      },
+      "sources": {
+        "x": 446,
+        "y": 1034,
+        "width": 1668,
+        "height": 46,
+        "bottom": 1080,
+        "right": 2114
+      },
+      "route": {
+        "x": 1600.25,
+        "y": 375.171875,
+        "width": 493.75,
+        "height": 115,
+        "bottom": 490.171875,
+        "right": 2094
+      },
+      "body": {
+        "x": 1581.25,
+        "y": 265.875,
+        "width": 531.75,
+        "height": 459.75,
+        "bottom": 725.625,
+        "right": 2113
+      },
+      "buttons": [44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44],
+      "fonts": [11, 11, 11, 11, 12, 12, 12]
+    },
+    {
+      "viewport": [3840, 2160],
+      "scroll": [3840, 2160],
+      "scene": {
+        "x": 1086,
+        "y": 695.875,
+        "width": 1118.25,
+        "height": 790.125,
+        "bottom": 1486,
+        "right": 2204.25
+      },
+      "inspector": {
+        "x": 2220.25,
+        "y": 695.875,
+        "width": 533.75,
+        "height": 790.125,
+        "bottom": 1486,
+        "right": 2754
+      },
+      "metrics": {
+        "x": 2221.25,
+        "y": 1374.625,
+        "width": 531.75,
+        "height": 89.375,
+        "bottom": 1464,
+        "right": 2753
+      },
+      "sources": {
+        "x": 1086,
+        "y": 1683,
+        "width": 1668,
+        "height": 46,
+        "bottom": 1729,
+        "right": 2754
+      },
+      "route": {
+        "x": 2240.25,
+        "y": 806.171875,
+        "width": 493.75,
+        "height": 115,
+        "bottom": 921.171875,
+        "right": 2734
+      },
+      "body": {
+        "x": 2221.25,
+        "y": 696.875,
+        "width": 531.75,
+        "height": 677.75,
+        "bottom": 1374.625,
+        "right": 2753
+      },
+      "buttons": [44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44],
+      "fonts": [11, 11, 11, 11, 12, 12, 12]
+    }
+  ],
+  "previousReviewFixResults": {
+    "blocked": {
+      "length": 2,
+      "positions": [
+        0.008726535364985466, -0.9999619126319885, 0, 0.8849745988845825,
+        1.7558451890945435, -0.3981623351573944
+      ],
+      "visible": true,
+      "depthTest": false,
+      "marker": true,
+      "delay": "Site \u2192 relay\n5,072 km\nRelay delay\nUnavailable\nRoute blocked"
+    },
+    "hidden": {
+      "x": 568.7510760917858,
+      "y": 316.50859645543306
+    },
+    "bounds": {
+      "centerError": 0,
+      "radiusError": 0
+    },
+    "earth": {
+      "clickable": true,
+      "pointer": "auto",
+      "note": "\u2192EARTH DIRECTION\nBehind camera \u00b7 show Earth",
+      "bearing": "rotate(-0.289127rad)"
+    },
+    "idleRenderFrames": 0,
+    "eventSeconds": 200326,
+    "errors": []
+  },
+  "guidedLearning": {
+    "date": "2026-11-09",
+    "browser": "Headless Chromium with software WebGL",
+    "checks": [
+      "Direct path obstruction, hidden satellites, manual pause and overlapping lifecycle freeze",
+      "Two relay legs reveal sequentially from shared geometry",
+      "Comparison changes layout, preserves time, refreshes site totals and maintains modal focus",
+      "Clear direct path and both kinds of blocked relay route",
+      "Four landscape sizes, completed-step actions, full comparison values, sources and navigation bounds",
+      "Reduced motion shows the result without message animation",
+      "WebGL fallback retains diagram and calculated route",
+      "Repeated checks restart safely; step changes cancel unfinished illustrations",
+      "Compact playback overlays the scene without covering verdict or actions",
+      "Compact camera buttons have 42 by 42 pixel targets; object labels stay above controls",
+      "Compact comparison location picker refreshes totals in step 3"
+    ],
+    "layouts": [
+      {
+        "size": [667, 375],
+        "step": 1,
+        "scroll": [667, 375],
+        "container": {
+          "x": 272.390625,
+          "y": 130,
+          "right": 657,
+          "bottom": 329,
+          "width": 384.609375,
+          "height": 199
+        },
+        "critical": [
+          {
+            "x": 281.390625,
+            "y": 236.609375,
+            "right": 648,
+            "bottom": 261,
+            "width": 366.609375,
+            "height": 24.390625
+          },
+          {
+            "x": 281.390625,
+            "y": 265,
+            "right": 365.875,
+            "bottom": 307,
+            "width": 84.484375,
+            "height": 42
+          },
+          {
+            "x": 368.875,
+            "y": 265,
+            "right": 490.46875,
+            "bottom": 307,
+            "width": 121.59375,
+            "height": 42
+          },
+          {
+            "x": 281.390625,
+            "y": 311,
+            "right": 648,
+            "bottom": 322,
+            "width": 366.609375,
+            "height": 11
+          }
+        ],
+        "sources": {
+          "x": 10,
+          "y": 333,
+          "right": 657,
+          "bottom": 375,
+          "width": 647,
+          "height": 42
+        },
+        "settings": {
+          "x": 562.1875,
+          "y": 4.5,
+          "right": 650.328125,
+          "bottom": 46.5,
+          "width": 88.140625,
+          "height": 42
+        },
+        "engineering": {
+          "x": 568,
+          "y": 82,
+          "right": 610,
+          "bottom": 126,
+          "width": 42,
+          "height": 44
+        }
+      },
+      {
+        "size": [667, 375],
+        "step": 2,
+        "scroll": [667, 375],
+        "container": {
+          "x": 272.390625,
+          "y": 130,
+          "right": 657,
+          "bottom": 329,
+          "width": 384.609375,
+          "height": 199
+        },
+        "critical": [
+          {
+            "x": 281.390625,
+            "y": 236.609375,
+            "right": 648,
+            "bottom": 261,
+            "width": 366.609375,
+            "height": 24.390625
+          },
+          {
+            "x": 281.390625,
+            "y": 265,
+            "right": 368.921875,
+            "bottom": 307,
+            "width": 87.53125,
+            "height": 42
+          },
+          {
+            "x": 371.921875,
+            "y": 265,
+            "right": 508.515625,
+            "bottom": 307,
+            "width": 136.59375,
+            "height": 42
+          },
+          {
+            "x": 511.515625,
+            "y": 265,
+            "right": 557.15625,
+            "bottom": 307,
+            "width": 45.640625,
+            "height": 42
+          },
+          {
+            "x": 281.390625,
+            "y": 311,
+            "right": 648,
+            "bottom": 322,
+            "width": 366.609375,
+            "height": 11
+          }
+        ],
+        "sources": {
+          "x": 10,
+          "y": 333,
+          "right": 657,
+          "bottom": 375,
+          "width": 647,
+          "height": 42
+        },
+        "settings": {
+          "x": 562.1875,
+          "y": 4.5,
+          "right": 650.328125,
+          "bottom": 46.5,
+          "width": 88.140625,
+          "height": 42
+        },
+        "engineering": {
+          "x": 568,
+          "y": 82,
+          "right": 610,
+          "bottom": 126,
+          "width": 42,
+          "height": 44
+        }
+      },
+      {
+        "size": [667, 375],
+        "step": 3,
+        "scroll": [667, 375],
+        "container": {
+          "x": 10,
+          "y": 130,
+          "right": 657,
+          "bottom": 329,
+          "width": 647,
+          "height": 199
+        },
+        "critical": [
+          {
+            "x": 26,
+            "y": 222.5,
+            "right": 216.328125,
+            "bottom": 239.5,
+            "width": 190.328125,
+            "height": 17
+          },
+          {
+            "x": 26,
+            "y": 253.5,
+            "right": 216.328125,
+            "bottom": 270.5,
+            "width": 190.328125,
+            "height": 17
+          },
+          {
+            "x": 238.328125,
+            "y": 222.5,
+            "right": 428.65625,
+            "bottom": 239.5,
+            "width": 190.328125,
+            "height": 17
+          },
+          {
+            "x": 238.328125,
+            "y": 253.5,
+            "right": 428.65625,
+            "bottom": 270.5,
+            "width": 190.328125,
+            "height": 17
+          },
+          {
+            "x": 450.65625,
+            "y": 222.5,
+            "right": 640.984375,
+            "bottom": 239.5,
+            "width": 190.328125,
+            "height": 17
+          },
+          {
+            "x": 450.65625,
+            "y": 253.5,
+            "right": 640.984375,
+            "bottom": 270.5,
+            "width": 190.328125,
+            "height": 17
+          },
+          {
+            "x": 18,
+            "y": 281,
+            "right": 649,
+            "bottom": 323,
+            "width": 631,
+            "height": 42
+          },
+          {
+            "x": 482.65625,
+            "y": 281,
+            "right": 649,
+            "bottom": 323,
+            "width": 166.34375,
+            "height": 42
+          }
+        ],
+        "sources": {
+          "x": 10,
+          "y": 333,
+          "right": 657,
+          "bottom": 375,
+          "width": 647,
+          "height": 42
+        },
+        "settings": {
+          "x": 562.1875,
+          "y": 4.5,
+          "right": 650.328125,
+          "bottom": 46.5,
+          "width": 88.140625,
+          "height": 42
+        },
+        "engineering": {
+          "x": 568,
+          "y": 82,
+          "right": 610,
+          "bottom": 126,
+          "width": 42,
+          "height": 44
+        }
+      },
+      {
+        "size": [1024, 600],
+        "step": 1,
+        "scroll": [1024, 600],
+        "container": {
+          "x": 493.828125,
+          "y": 210.1875,
+          "right": 1003.53125,
+          "bottom": 547,
+          "width": 509.703125,
+          "height": 336.8125
+        },
+        "critical": [
+          {
+            "x": 504.828125,
+            "y": 399.59375,
+            "right": 992.53125,
+            "bottom": 453.171875,
+            "width": 487.703125,
+            "height": 53.578125
+          },
+          {
+            "x": 504.828125,
+            "y": 459.171875,
+            "right": 643.78125,
+            "bottom": 503.171875,
+            "width": 138.953125,
+            "height": 44
+          },
+          {
+            "x": 648.78125,
+            "y": 459.171875,
+            "right": 793.796875,
+            "bottom": 503.171875,
+            "width": 145.015625,
+            "height": 44
+          },
+          {
+            "x": 504.828125,
+            "y": 509.171875,
+            "right": 992.53125,
+            "bottom": 522.171875,
+            "width": 487.703125,
+            "height": 13
+          }
+        ],
+        "sources": {
+          "x": 20.46875,
+          "y": 554,
+          "right": 1003.53125,
+          "bottom": 600,
+          "width": 983.0625,
+          "height": 46
+        },
+        "settings": {
+          "x": 898.765625,
+          "y": 11.5,
+          "right": 998.40625,
+          "bottom": 59.5,
+          "width": 99.640625,
+          "height": 48
+        },
+        "engineering": {
+          "x": 853.40625,
+          "y": 158.1875,
+          "right": 1003.53125,
+          "bottom": 200.1875,
+          "width": 150.125,
+          "height": 42
+        }
+      },
+      {
+        "size": [1024, 600],
+        "step": 2,
+        "scroll": [1024, 600],
+        "container": {
+          "x": 493.828125,
+          "y": 210.1875,
+          "right": 1003.53125,
+          "bottom": 547,
+          "width": 509.703125,
+          "height": 336.8125
+        },
+        "critical": [
+          {
+            "x": 504.828125,
+            "y": 399.59375,
+            "right": 992.53125,
+            "bottom": 453.171875,
+            "width": 487.703125,
+            "height": 53.578125
+          },
+          {
+            "x": 504.828125,
+            "y": 459.171875,
+            "right": 657.578125,
+            "bottom": 503.171875,
+            "width": 152.75,
+            "height": 44
+          },
+          {
+            "x": 662.578125,
+            "y": 459.171875,
+            "right": 823.9375,
+            "bottom": 503.171875,
+            "width": 161.359375,
+            "height": 44
+          },
+          {
+            "x": 828.9375,
+            "y": 459.171875,
+            "right": 959.859375,
+            "bottom": 503.171875,
+            "width": 130.921875,
+            "height": 44
+          },
+          {
+            "x": 504.828125,
+            "y": 509.171875,
+            "right": 992.53125,
+            "bottom": 522.171875,
+            "width": 487.703125,
+            "height": 13
+          }
+        ],
+        "sources": {
+          "x": 20.46875,
+          "y": 554,
+          "right": 1003.53125,
+          "bottom": 600,
+          "width": 983.0625,
+          "height": 46
+        },
+        "settings": {
+          "x": 898.765625,
+          "y": 11.5,
+          "right": 998.40625,
+          "bottom": 59.5,
+          "width": 99.640625,
+          "height": 48
+        },
+        "engineering": {
+          "x": 853.40625,
+          "y": 158.1875,
+          "right": 1003.53125,
+          "bottom": 200.1875,
+          "width": 150.125,
+          "height": 42
+        }
+      },
+      {
+        "size": [1024, 600],
+        "step": 3,
+        "scroll": [1024, 600],
+        "container": {
+          "x": 20.46875,
+          "y": 210.1875,
+          "right": 1003.53125,
+          "bottom": 547,
+          "width": 983.0625,
+          "height": 336.8125
+        },
+        "critical": [
+          {
+            "x": 42.46875,
+            "y": 403.59375,
+            "right": 331.484375,
+            "bottom": 423.59375,
+            "width": 289.015625,
+            "height": 20
+          },
+          {
+            "x": 42.46875,
+            "y": 445.59375,
+            "right": 331.484375,
+            "bottom": 465.59375,
+            "width": 289.015625,
+            "height": 20
+          },
+          {
+            "x": 367.484375,
+            "y": 403.59375,
+            "right": 656.5,
+            "bottom": 423.59375,
+            "width": 289.015625,
+            "height": 20
+          },
+          {
+            "x": 367.484375,
+            "y": 445.59375,
+            "right": 656.5,
+            "bottom": 465.59375,
+            "width": 289.015625,
+            "height": 20
+          },
+          {
+            "x": 692.5,
+            "y": 403.59375,
+            "right": 981.53125,
+            "bottom": 423.59375,
+            "width": 289.03125,
+            "height": 20
+          },
+          {
+            "x": 692.5,
+            "y": 445.59375,
+            "right": 981.53125,
+            "bottom": 465.59375,
+            "width": 289.03125,
+            "height": 20
+          },
+          {
+            "x": 31.46875,
+            "y": 494,
+            "right": 992.53125,
+            "bottom": 536,
+            "width": 961.0625,
+            "height": 42
+          },
+          {
+            "x": 792.859375,
+            "y": 494,
+            "right": 992.53125,
+            "bottom": 536,
+            "width": 199.671875,
+            "height": 42
+          }
+        ],
+        "sources": {
+          "x": 20.46875,
+          "y": 554,
+          "right": 1003.53125,
+          "bottom": 600,
+          "width": 983.0625,
+          "height": 46
+        },
+        "settings": {
+          "x": 898.765625,
+          "y": 11.5,
+          "right": 998.40625,
+          "bottom": 59.5,
+          "width": 99.640625,
+          "height": 48
+        },
+        "engineering": {
+          "x": 853.40625,
+          "y": 158.1875,
+          "right": 1003.53125,
+          "bottom": 200.1875,
+          "width": 150.125,
+          "height": 42
+        }
+      },
+      {
+        "size": [1440, 900],
+        "step": 1,
+        "scroll": [1440, 900],
+        "container": {
+          "x": 775.65625,
+          "y": 256.265625,
+          "right": 1411.1875,
+          "bottom": 844,
+          "width": 635.53125,
+          "height": 587.734375
+        },
+        "critical": [
+          {
+            "x": 799.6875,
+            "y": 634.90625,
+            "right": 1387.15625,
+            "bottom": 702.296875,
+            "width": 587.46875,
+            "height": 67.390625
+          },
+          {
+            "x": 799.6875,
+            "y": 714.296875,
+            "right": 950.46875,
+            "bottom": 758.296875,
+            "width": 150.78125,
+            "height": 44
+          },
+          {
+            "x": 957.46875,
+            "y": 714.296875,
+            "right": 1114.90625,
+            "bottom": 758.296875,
+            "width": 157.4375,
+            "height": 44
+          },
+          {
+            "x": 799.6875,
+            "y": 770.296875,
+            "right": 1387.15625,
+            "bottom": 784.296875,
+            "width": 587.46875,
+            "height": 14
+          }
+        ],
+        "sources": {
+          "x": 28.796875,
+          "y": 854,
+          "right": 1411.203125,
+          "bottom": 900,
+          "width": 1382.40625,
+          "height": 46
+        },
+        "settings": {
+          "x": 1296.359375,
+          "y": 11.5,
+          "right": 1404,
+          "bottom": 59.5,
+          "width": 107.640625,
+          "height": 48
+        },
+        "engineering": {
+          "x": 1252.640625,
+          "y": 197.265625,
+          "right": 1411.203125,
+          "bottom": 241.265625,
+          "width": 158.5625,
+          "height": 44
+        }
+      },
+      {
+        "size": [1440, 900],
+        "step": 2,
+        "scroll": [1440, 900],
+        "container": {
+          "x": 775.65625,
+          "y": 256.265625,
+          "right": 1411.1875,
+          "bottom": 844,
+          "width": 635.53125,
+          "height": 587.734375
+        },
+        "critical": [
+          {
+            "x": 799.6875,
+            "y": 618.5,
+            "right": 1387.15625,
+            "bottom": 685.890625,
+            "width": 587.46875,
+            "height": 67.390625
+          },
+          {
+            "x": 799.6875,
+            "y": 697.890625,
+            "right": 965.421875,
+            "bottom": 741.890625,
+            "width": 165.734375,
+            "height": 44
+          },
+          {
+            "x": 972.421875,
+            "y": 697.890625,
+            "right": 1147.5625,
+            "bottom": 741.890625,
+            "width": 175.140625,
+            "height": 44
+          },
+          {
+            "x": 1154.5625,
+            "y": 697.890625,
+            "right": 1298.5625,
+            "bottom": 741.890625,
+            "width": 144,
+            "height": 44
+          },
+          {
+            "x": 799.6875,
+            "y": 753.890625,
+            "right": 1387.15625,
+            "bottom": 767.890625,
+            "width": 587.46875,
+            "height": 14
+          }
+        ],
+        "sources": {
+          "x": 28.796875,
+          "y": 854,
+          "right": 1411.203125,
+          "bottom": 900,
+          "width": 1382.40625,
+          "height": 46
+        },
+        "settings": {
+          "x": 1296.359375,
+          "y": 11.5,
+          "right": 1404,
+          "bottom": 59.5,
+          "width": 107.640625,
+          "height": 48
+        },
+        "engineering": {
+          "x": 1252.640625,
+          "y": 197.265625,
+          "right": 1411.203125,
+          "bottom": 241.265625,
+          "width": 158.5625,
+          "height": 44
+        }
+      },
+      {
+        "size": [1440, 900],
+        "step": 3,
+        "scroll": [1440, 900],
+        "container": {
+          "x": 28.796875,
+          "y": 256.265625,
+          "right": 1411.203125,
+          "bottom": 844,
+          "width": 1382.40625,
+          "height": 587.734375
+        },
+        "critical": [
+          {
+            "x": 77.828125,
+            "y": 600.625,
+            "right": 464.5625,
+            "bottom": 636.625,
+            "width": 386.734375,
+            "height": 36
+          },
+          {
+            "x": 77.828125,
+            "y": 682.421875,
+            "right": 464.5625,
+            "bottom": 718.421875,
+            "width": 386.734375,
+            "height": 36
+          },
+          {
+            "x": 526.625,
+            "y": 600.625,
+            "right": 913.359375,
+            "bottom": 636.625,
+            "width": 386.734375,
+            "height": 36
+          },
+          {
+            "x": 526.625,
+            "y": 682.421875,
+            "right": 913.359375,
+            "bottom": 718.421875,
+            "width": 386.734375,
+            "height": 36
+          },
+          {
+            "x": 975.421875,
+            "y": 600.625,
+            "right": 1362.171875,
+            "bottom": 636.625,
+            "width": 386.75,
+            "height": 36
+          },
+          {
+            "x": 975.421875,
+            "y": 682.421875,
+            "right": 1362.171875,
+            "bottom": 718.421875,
+            "width": 386.75,
+            "height": 36
+          },
+          {
+            "x": 53.796875,
+            "y": 775,
+            "right": 1386.203125,
+            "bottom": 819,
+            "width": 1332.40625,
+            "height": 44
+          },
+          {
+            "x": 1186.53125,
+            "y": 775,
+            "right": 1386.203125,
+            "bottom": 819,
+            "width": 199.671875,
+            "height": 44
+          }
+        ],
+        "sources": {
+          "x": 28.796875,
+          "y": 854,
+          "right": 1411.203125,
+          "bottom": 900,
+          "width": 1382.40625,
+          "height": 46
+        },
+        "settings": {
+          "x": 1296.359375,
+          "y": 11.5,
+          "right": 1404,
+          "bottom": 59.5,
+          "width": 107.640625,
+          "height": 48
+        },
+        "engineering": {
+          "x": 1252.640625,
+          "y": 197.265625,
+          "right": 1411.203125,
+          "bottom": 241.265625,
+          "width": 158.5625,
+          "height": 44
+        }
+      },
+      {
+        "size": [2560, 1080],
+        "step": 1,
+        "scroll": [2560, 1080],
+        "container": {
+          "x": 1345.90625,
+          "y": 259.015625,
+          "right": 2117.984375,
+          "bottom": 1024,
+          "width": 772.078125,
+          "height": 764.984375
+        },
+        "critical": [
+          {
+            "x": 1370.90625,
+            "y": 727.046875,
+            "right": 2092.984375,
+            "bottom": 794.4375,
+            "width": 722.078125,
+            "height": 67.390625
+          },
+          {
+            "x": 1370.90625,
+            "y": 806.4375,
+            "right": 1521.6875,
+            "bottom": 850.4375,
+            "width": 150.78125,
+            "height": 44
+          },
+          {
+            "x": 1528.6875,
+            "y": 806.4375,
+            "right": 1686.125,
+            "bottom": 850.4375,
+            "width": 157.4375,
+            "height": 44
+          },
+          {
+            "x": 1370.90625,
+            "y": 862.4375,
+            "right": 2092.984375,
+            "bottom": 876.4375,
+            "width": 722.078125,
+            "height": 14
+          }
+        ],
+        "sources": {
+          "x": 442,
+          "y": 1034,
+          "right": 2118,
+          "bottom": 1080,
+          "width": 1676,
+          "height": 46
+        },
+        "settings": {
+          "x": 2414.359375,
+          "y": 11.5,
+          "right": 2522,
+          "bottom": 59.5,
+          "width": 107.640625,
+          "height": 48
+        },
+        "engineering": {
+          "x": 1959.4375,
+          "y": 200.015625,
+          "right": 2118,
+          "bottom": 244.015625,
+          "width": 158.5625,
+          "height": 44
+        }
+      },
+      {
+        "size": [2560, 1080],
+        "step": 2,
+        "scroll": [2560, 1080],
+        "container": {
+          "x": 1345.90625,
+          "y": 259.015625,
+          "right": 2117.984375,
+          "bottom": 1024,
+          "width": 772.078125,
+          "height": 764.984375
+        },
+        "critical": [
+          {
+            "x": 1370.90625,
+            "y": 710.25,
+            "right": 2092.984375,
+            "bottom": 777.640625,
+            "width": 722.078125,
+            "height": 67.390625
+          },
+          {
+            "x": 1370.90625,
+            "y": 789.640625,
+            "right": 1536.640625,
+            "bottom": 833.640625,
+            "width": 165.734375,
+            "height": 44
+          },
+          {
+            "x": 1543.640625,
+            "y": 789.640625,
+            "right": 1718.78125,
+            "bottom": 833.640625,
+            "width": 175.140625,
+            "height": 44
+          },
+          {
+            "x": 1725.78125,
+            "y": 789.640625,
+            "right": 1869.78125,
+            "bottom": 833.640625,
+            "width": 144,
+            "height": 44
+          },
+          {
+            "x": 1370.90625,
+            "y": 845.640625,
+            "right": 2092.984375,
+            "bottom": 859.640625,
+            "width": 722.078125,
+            "height": 14
+          }
+        ],
+        "sources": {
+          "x": 442,
+          "y": 1034,
+          "right": 2118,
+          "bottom": 1080,
+          "width": 1676,
+          "height": 46
+        },
+        "settings": {
+          "x": 2414.359375,
+          "y": 11.5,
+          "right": 2522,
+          "bottom": 59.5,
+          "width": 107.640625,
+          "height": 48
+        },
+        "engineering": {
+          "x": 1959.4375,
+          "y": 200.015625,
+          "right": 2118,
+          "bottom": 244.015625,
+          "width": 158.5625,
+          "height": 44
+        }
+      },
+      {
+        "size": [2560, 1080],
+        "step": 3,
+        "scroll": [2560, 1080],
+        "container": {
+          "x": 442,
+          "y": 259.015625,
+          "right": 2118,
+          "bottom": 1024,
+          "width": 1676,
+          "height": 764.984375
+        },
+        "critical": [
+          {
+            "x": 492,
+            "y": 690,
+            "right": 974.65625,
+            "bottom": 728,
+            "width": 482.65625,
+            "height": 38
+          },
+          {
+            "x": 492,
+            "y": 773.796875,
+            "right": 974.65625,
+            "bottom": 811.796875,
+            "width": 482.65625,
+            "height": 38
+          },
+          {
+            "x": 1038.65625,
+            "y": 690,
+            "right": 1521.328125,
+            "bottom": 728,
+            "width": 482.671875,
+            "height": 38
+          },
+          {
+            "x": 1038.65625,
+            "y": 773.796875,
+            "right": 1521.328125,
+            "bottom": 811.796875,
+            "width": 482.671875,
+            "height": 38
+          },
+          {
+            "x": 1585.328125,
+            "y": 690,
+            "right": 2068,
+            "bottom": 728,
+            "width": 482.671875,
+            "height": 38
+          },
+          {
+            "x": 1585.328125,
+            "y": 773.796875,
+            "right": 2068,
+            "bottom": 811.796875,
+            "width": 482.671875,
+            "height": 38
+          },
+          {
+            "x": 467,
+            "y": 955,
+            "right": 2093,
+            "bottom": 999,
+            "width": 1626,
+            "height": 44
+          },
+          {
+            "x": 1893.328125,
+            "y": 955,
+            "right": 2093,
+            "bottom": 999,
+            "width": 199.671875,
+            "height": 44
+          }
+        ],
+        "sources": {
+          "x": 442,
+          "y": 1034,
+          "right": 2118,
+          "bottom": 1080,
+          "width": 1676,
+          "height": 46
+        },
+        "settings": {
+          "x": 2414.359375,
+          "y": 11.5,
+          "right": 2522,
+          "bottom": 59.5,
+          "width": 107.640625,
+          "height": 48
+        },
+        "engineering": {
+          "x": 1959.4375,
+          "y": 200.015625,
+          "right": 2118,
+          "bottom": 244.015625,
+          "width": 158.5625,
+          "height": 44
+        }
+      }
+    ],
+    "secondLegBlockedCase": {
+      "relay": 3,
+      "time": 258180,
+      "site": "far"
+    },
+    "pageErrors": [],
+    "comprehensionTest": {
+      "status": "pending",
+      "participantsRequired": 3,
+      "method": "Two minutes without coaching; identify objects, explain obstruction and relays, describe the steps, and distinguish simulation and geometric opportunity from live guaranteed radio service."
+    },
+    "build": "npm run build passed",
+    "lint": "Focused oxlint passed with no warnings"
+  },
+  "liveEngineeringAndLocationPicker": {
+    "date": "2026-11-09",
+    "browser": "Headless Chromium with software WebGL",
+    "checks": [
+      "All three steps show one existing renderer, selected satellite and three live paths; Done preserves edits, step and manual pause",
+      "Whole reference tracks fit; scene pointer rotation/zoom, keyboard movement outside panel and Escape focus return",
+      "Native full-viewport picker has five study coordinates, current badge, keyboard activation/trap, Cancel/close/Escape focus return, no background dismissal; selection resets Step 1 and preserves satellite/time",
+      "667\u00d7375, 1024\u00d7600, 1440\u00d7900, 2560\u00d71080: separate scene/panel bounds, persistent Done, full picker and all cards reachable, no document scroll",
+      "Overlapping orientation/loading freeze, manual pause persistence, reduced motion, eight open/close cycles keep one canvas and stable GPU memory/asset requests",
+      "Rapid selection and pending/error analysis hide stale totals; retry recovers selected analysis; Methods dialog styling and focus return",
+      "Start over restores complete defaults; WebGL fallback remains available from Step 3 and updates live"
+    ],
+    "layouts": [
+      {
+        "size": [667, 375],
+        "scene": {
+          "x": 10,
+          "y": 130,
+          "width": 341,
+          "height": 199,
+          "right": 351,
+          "bottom": 329
+        },
+        "panel": {
+          "x": 357,
+          "y": 130,
+          "width": 300,
+          "height": 199,
+          "right": 657,
+          "bottom": 329
+        },
+        "done": {
+          "x": 368,
+          "y": 279,
+          "width": 278,
+          "height": 44,
+          "right": 646,
+          "bottom": 323
+        },
+        "scroll": [667, 375],
+        "canvasSame": true
+      },
+      {
+        "size": [1024, 600],
+        "scene": {
+          "x": 20.46875,
+          "y": 210.1875,
+          "width": 645.390625,
+          "height": 336.8125,
+          "right": 665.859375,
+          "bottom": 547
+        },
+        "panel": {
+          "x": 675.859375,
+          "y": 210.1875,
+          "width": 327.671875,
+          "height": 336.8125,
+          "right": 1003.53125,
+          "bottom": 547
+        },
+        "done": {
+          "x": 690.859375,
+          "y": 493,
+          "width": 297.671875,
+          "height": 44,
+          "right": 988.53125,
+          "bottom": 537
+        },
+        "scroll": [1024, 600],
+        "canvasSame": true
+      },
+      {
+        "size": [1440, 900],
+        "scene": {
+          "x": 28.796875,
+          "y": 256.265625,
+          "width": 946.40625,
+          "height": 587.734375,
+          "right": 975.203125,
+          "bottom": 844
+        },
+        "panel": {
+          "x": 991.203125,
+          "y": 256.265625,
+          "width": 420,
+          "height": 587.734375,
+          "right": 1411.203125,
+          "bottom": 844
+        },
+        "done": {
+          "x": 1006.203125,
+          "y": 790,
+          "width": 390,
+          "height": 44,
+          "right": 1396.203125,
+          "bottom": 834
+        },
+        "scroll": [1440, 900],
+        "canvasSame": true
+      },
+      {
+        "size": [2560, 1080],
+        "scene": {
+          "x": 442,
+          "y": 259.015625,
+          "width": 1240,
+          "height": 764.984375,
+          "right": 1682,
+          "bottom": 1024
+        },
+        "panel": {
+          "x": 1698,
+          "y": 259.015625,
+          "width": 420,
+          "height": 764.984375,
+          "right": 2118,
+          "bottom": 1024
+        },
+        "done": {
+          "x": 1713,
+          "y": 970,
+          "width": 390,
+          "height": 44,
+          "right": 2103,
+          "bottom": 1014
+        },
+        "scroll": [2560, 1080],
+        "canvasSame": true
+      }
+    ],
+    "pageErrors": [],
+    "command": "node scripts/check-signal-ui.mjs (running Vite development server and local Playwright/Chromium)",
+    "supplementalBrowserChecks": [
+      "Normal-motion sidebar transition and interrupted illustration stays manually paused after Done",
+      "Actual WEBGL_lose_context loss, live fallback selection, reachable Retry 3D recovery and focus on the new Step 1 check button at 1440\u00d7900 and 667\u00d7375",
+      "Four normal-motion open/close cycles from hidden Step 3 retain a finite camera position and transform"
+    ],
+    "focusedLint": {
+      "command": "npx oxlint src/exploration/SignalLab.tsx src/exploration/SignalViewport.tsx scripts/check-signal-ui.mjs",
+      "result": "passed, no warnings"
+    },
+    "productionBuild": {
+      "command": "npm run build",
+      "result": "passed",
+      "notes": "Existing chunk-size and ineffective dynamic-import warnings remain."
+    },
+    "scientificRegression": {
+      "commands": [
+        "node scripts/check-signal.mjs",
+        "node scripts/check-exploration.mjs"
+      ],
+      "result": "passed",
+      "changes": "NASA data files, geometry calculations and scientific assumptions unchanged."
+    },
+    "comprehensionTest": {
+      "status": "pending",
+      "note": "Real new-user testing requires separate observation; automated UI checks do not establish comprehension."
+    },
+    "limitations": [
+      "Headless Chromium software WebGL only; not hardware-GPU performance or physical-device certification.",
+      "Screen-reader testing and real new-user comprehension remain pending."
+    ]
+  },
+  "monorepoRestoration": {
+    "date": "2026-11-09",
+    "scope": "Independent exploration routes and Home/navbar entries. Existing gameplay reducers, mission router, checkpoints, flight and surface screens are unchanged.",
+    "sourceRoots": [
+      "apps/web/src/features/engineering",
+      "apps/web/src/features/exploration",
+      "apps/web/src/features/archive",
+      "apps/web/src/shared/site"
+    ],
+    "homeNavigation": {
+      "result": "passed",
+      "sizes": [
+        [667, 375],
+        [1024, 600],
+        [1440, 900],
+        [2560, 1080]
+      ],
+      "checks": [
+        "All four pages open from the shared navbar and direct links",
+        "Standalone routes do not mount the game and preserve saved mission values",
+        "Home destinations remain reachable in compact landscape without document scrolling",
+        "Play Mission enters the existing flow with its normal HUD",
+        "Standalone Settings requests the existing new-mission confirmation"
+      ]
+    },
+    "signalBrowserChecks": {
+      "date": "2026-11-09",
+      "browser": "Headless Chromium with software WebGL",
+      "checks": [
+        "All three steps show one existing renderer, selected satellite and three live paths; Done preserves edits, step and manual pause",
+        "Whole reference tracks fit; scene pointer rotation/zoom, keyboard movement outside panel and Escape focus return",
+        "Native full-viewport picker has five study coordinates, current badge, keyboard activation/trap, Cancel/close/Escape focus return, no background dismissal; selection resets Step 1 and preserves satellite/time",
+        "667\u00d7375, 1024\u00d7600, 1440\u00d7900, 2560\u00d71080: separate scene/panel bounds, persistent Done, full picker and all cards reachable, no document scroll",
+        "Overlapping orientation/loading freeze, manual pause persistence, reduced motion, eight open/close cycles keep one canvas and stable GPU memory/asset requests",
+        "Rapid selection and pending/error analysis hide stale totals; retry recovers selected analysis; Methods dialog styling and focus return",
+        "Start over restores complete defaults; WebGL fallback remains available from Step 3 and updates live"
+      ],
+      "layouts": [
+        {
+          "size": [667, 375],
+          "scene": {
+            "x": 10,
+            "y": 130,
+            "width": 341,
+            "height": 199,
+            "right": 351,
+            "bottom": 329
+          },
+          "panel": {
+            "x": 357,
+            "y": 130,
+            "width": 300,
+            "height": 199,
+            "right": 657,
+            "bottom": 329
+          },
+          "done": {
+            "x": 368,
+            "y": 279,
+            "width": 278,
+            "height": 44,
+            "right": 646,
+            "bottom": 323
+          },
+          "scroll": [667, 375],
+          "canvasSame": true
+        },
+        {
+          "size": [1024, 600],
+          "scene": {
+            "x": 20.46875,
+            "y": 210.1875,
+            "width": 645.390625,
+            "height": 336.8125,
+            "right": 665.859375,
+            "bottom": 547
+          },
+          "panel": {
+            "x": 675.859375,
+            "y": 210.1875,
+            "width": 327.671875,
+            "height": 336.8125,
+            "right": 1003.53125,
+            "bottom": 547
+          },
+          "done": {
+            "x": 690.859375,
+            "y": 493,
+            "width": 297.671875,
+            "height": 44,
+            "right": 988.53125,
+            "bottom": 537
+          },
+          "scroll": [1024, 600],
+          "canvasSame": true
+        },
+        {
+          "size": [1440, 900],
+          "scene": {
+            "x": 28.796875,
+            "y": 256.265625,
+            "width": 946.40625,
+            "height": 587.734375,
+            "right": 975.203125,
+            "bottom": 844
+          },
+          "panel": {
+            "x": 991.203125,
+            "y": 256.265625,
+            "width": 420,
+            "height": 587.734375,
+            "right": 1411.203125,
+            "bottom": 844
+          },
+          "done": {
+            "x": 1006.203125,
+            "y": 790,
+            "width": 390,
+            "height": 44,
+            "right": 1396.203125,
+            "bottom": 834
+          },
+          "scroll": [1440, 900],
+          "canvasSame": true
+        },
+        {
+          "size": [2560, 1080],
+          "scene": {
+            "x": 442,
+            "y": 259.015625,
+            "width": 1240,
+            "height": 764.984375,
+            "right": 1682,
+            "bottom": 1024
+          },
+          "panel": {
+            "x": 1698,
+            "y": 259.015625,
+            "width": 420,
+            "height": 764.984375,
+            "right": 2118,
+            "bottom": 1024
+          },
+          "done": {
+            "x": 1713,
+            "y": 970,
+            "width": 390,
+            "height": 44,
+            "right": 2103,
+            "bottom": 1014
+          },
+          "scroll": [2560, 1080],
+          "canvasSame": true
+        }
+      ],
+      "pageErrors": []
+    },
+    "scientificChecks": {
+      "result": "passed",
+      "commands": [
+        "node --import ./scripts/register-workspace.mjs scripts/check-engineering.mjs",
+        "node --import ./scripts/register-workspace.mjs scripts/check-nasa-engineering.mjs",
+        "node --import ./scripts/register-workspace.mjs scripts/check-signal.mjs",
+        "node --import ./scripts/register-workspace.mjs scripts/check-exploration.mjs"
+      ]
+    },
+    "lint": {
+      "command": "pnpm run lint",
+      "result": "passed; zero warnings and errors across six packages"
+    },
+    "productionBuild": {
+      "command": "pnpm run build",
+      "result": "passed; six package builds"
+    },
+    "formatting": {
+      "command": "pnpm run format:check",
+      "result": "Generated scientific datasets are excluded through .prettierignore; source data formatting is preserved."
+    },
+    "limitations": [
+      "Physical-device and screen-reader certification remain pending",
+      "Unassisted new-user comprehension testing remains pending"
+    ]
+  }
+}

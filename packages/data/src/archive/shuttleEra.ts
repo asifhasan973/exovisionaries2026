@@ -18,7 +18,7 @@ export const SHUTTLE_ERA_EVENTS: NasaMissionEvent[] = [
       "Returned over 50,000 photographs",
       "Sampled soil for metabolic and organic signatures",
     ],
-    nasaUrl: "https://www.nasa.gov/mission/viking-1/",
+    nasaUrl: "https://science.nasa.gov/mission/viking-1/",
   },
   {
     id: "viking-2-landing",
@@ -36,7 +36,7 @@ export const SHUTTLE_ERA_EVENTS: NasaMissionEvent[] = [
       "Photographed pure water frost on Martian rocks",
       "Radioed weather station data across 4 seasons",
     ],
-    nasaUrl: "https://www.nasa.gov/mission/viking-2/",
+    nasaUrl: "https://science.nasa.gov/mission/viking-2/",
   },
 
   // 1977
@@ -56,7 +56,7 @@ export const SHUTTLE_ERA_EVENTS: NasaMissionEvent[] = [
       "Discovered active nitrogen geysers on Triton",
       "Entered interstellar space in November 2018",
     ],
-    nasaUrl: "https://www.nasa.gov/mission/voyager-2/",
+    nasaUrl: "https://science.nasa.gov/mission/voyager-2/",
   },
   {
     id: "voyager-1-launch",
@@ -74,7 +74,7 @@ export const SHUTTLE_ERA_EVENTS: NasaMissionEvent[] = [
       "First spacecraft to cross into interstellar space (2012)",
       "Discovered active volcanic eruption plumes on Io",
     ],
-    nasaUrl: "https://www.nasa.gov/mission/voyager-1/",
+    nasaUrl: "https://science.nasa.gov/mission/voyager-1/",
   },
 
   // 1981
@@ -113,7 +113,7 @@ export const SHUTTLE_ERA_EVENTS: NasaMissionEvent[] = [
       "Photographed bizarre fractured canyons on moon Miranda",
       "Discovered Uranus’s unique 60° tilted magnetic axis",
     ],
-    nasaUrl: "https://www.nasa.gov/mission/voyager-2/",
+    nasaUrl: "https://science.nasa.gov/mission/voyager-2/",
   },
 
   // 1989
@@ -133,7 +133,7 @@ export const SHUTTLE_ERA_EVENTS: NasaMissionEvent[] = [
       "Found 6 new moons and complete ring arcs",
       "Photographed nitrogen ice geysers shooting 8 km high on Triton",
     ],
-    nasaUrl: "https://www.nasa.gov/mission/voyager-2/",
+    nasaUrl: "https://science.nasa.gov/mission/voyager-2/",
   },
   {
     id: "galileo-launch",
@@ -151,7 +151,7 @@ export const SHUTTLE_ERA_EVENTS: NasaMissionEvent[] = [
       "Discovered first asteroid moon (Dactyl)",
       "Deployed first probe into Jupiter’s stormy atmosphere",
     ],
-    nasaUrl: "https://www.nasa.gov/mission/galileo/",
+    nasaUrl: "https://science.nasa.gov/mission/galileo/",
   },
 
   // 1990
@@ -171,7 +171,7 @@ export const SHUTTLE_ERA_EVENTS: NasaMissionEvent[] = [
       "Determined the expansion rate of the universe (Hubble constant)",
       "Produced iconic images like the Pillars of Creation",
     ],
-    nasaUrl: "https://www.nasa.gov/mission/hubble-space-telescope/",
+    nasaUrl: "https://science.nasa.gov/mission/hubble/",
   },
   {
     id: "pale-blue-dot",
@@ -209,7 +209,7 @@ export const SHUTTLE_ERA_EVENTS: NasaMissionEvent[] = [
       "Measured winds exceeding 650 km/h deep in the atmosphere",
       "Found Jupiter atmosphere is drier and windier than modeled",
     ],
-    nasaUrl: "https://www.nasa.gov/mission/galileo/",
+    nasaUrl: "https://science.nasa.gov/mission/galileo/",
   },
 
   // 1997
@@ -229,7 +229,7 @@ export const SHUTTLE_ERA_EVENTS: NasaMissionEvent[] = [
       "Used groundbreaking airbag impact cushioning",
       "Streamed live images to millions on the early World Wide Web",
     ],
-    nasaUrl: "https://www.nasa.gov/mission/mars-pathfinder/",
+    nasaUrl: "https://science.nasa.gov/mission/mars-pathfinder/",
   },
   {
     id: "cassini-launch",
@@ -285,6 +285,6 @@ export const SHUTTLE_ERA_EVENTS: NasaMissionEvent[] = [
       "Achieved 16,265 hours of continuous thrusting",
       "Paved the way for Dawn mission to Vesta & Ceres",
     ],
-    nasaUrl: "https://www.nasa.gov/mission/deep-space-1/",
+    nasaUrl: "https://science.nasa.gov/mission/deep-space-1/",
   },
 ];

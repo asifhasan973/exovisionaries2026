@@ -3052,3 +3052,15 @@ body:has(.conversation-game) {
     font-size: 10.5px;
   }
 }
+
+/* Compact mission tools retain their accessible names. */
+.conversation-header button[aria-label="Game settings"],
+.conversation-header button[aria-label="Open space keywords"] {
+  width: 44px;
+  min-width: 44px;
+  padding: 10px;
+}
+.conversation-header button[aria-label="Game settings"] > span,
+.conversation-header button[aria-label="Open space keywords"] > span {
+  display: none;
+}

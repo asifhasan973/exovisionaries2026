@@ -35,6 +35,10 @@ const RoverLabPreview = lazy(() =>
     default: m.RoverLabPreview,
   })),
 );
+const SitePage = lazy(() => import("./shared/site/SitePage"));
+const SavedMissionReport = lazy(
+  () => import("./game/moon/return/debrief/SavedMissionReport"),
+);
 const ExactStory = lazy(() => import("./game/moon/stages/ExactStory"));
 
 export default function App() {
@@ -69,7 +73,17 @@ export default function App() {
 
   // Determine active view to render
   let content;
-  if (isDevelopment && debugRoute) {
+  const site = query.get("explore");
+  if (query.get("report") === "1") {
+    content = <SavedMissionReport />;
+  } else if (
+    site === "atlas" ||
+    site === "signal" ||
+    site === "engineering" ||
+    site === "archive"
+  ) {
+    content = <SitePage page={site} />;
+  } else if (isDevelopment && debugRoute) {
     if (debugRoute.type === "page") {
       if (debugRoute.id === "preview") {
         content = <ConversationPreview />;

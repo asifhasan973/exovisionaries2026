@@ -71,7 +71,7 @@ export interface JourneyState {
   assisted: boolean;
 }
 export const emptyJourney = (): JourneyState => ({
-  version: 2,
+  version: 1,
   signature: null,
   route: null,
   stage: "route",
@@ -278,6 +278,7 @@ function reduceJourneyCore(
   j: JourneyState,
   event: JourneyEvent,
   moon: MoonSession,
+  replaying = false,
 ): JourneyState {
   if (event.type === "journey-confirm")
     return j.stage === "route" &&
@@ -286,13 +287,17 @@ function reduceJourneyCore(
       ? { ...j, stage: "tli-window", elapsed: 0, paused: false }
       : j;
   if (event.type === "journey-select-orbit")
-    return {
-      ...j,
-      orbitTier: event.tier,
-      feedback: null,
-    };
+    return Object.hasOwn(LUNAR_ORBIT_TIERS, event.tier)
+      ? {
+          ...j,
+          orbitTier: event.tier,
+          feedback: null,
+        }
+      : j;
   if (event.type === "journey-date")
-    return j.stage === "route" && TRANSFER_DATES.includes(event.date)
+    return j.stage === "route" &&
+      (TRANSFER_DATES.includes(event.date) ||
+        (replaying && validSavedDate(event.date)))
       ? {
           ...j,
           version: 2,
@@ -554,6 +559,14 @@ export function reduceJourney(
       : [];
   return { ...next, commands: [...(j.commands ?? []), ...prefix, command] };
 }
+function validSavedDate(value: unknown): value is string {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value))
+    return false;
+  const time = Date.parse(value + "T00:00:00Z");
+  return (
+    Number.isFinite(time) && new Date(time).toISOString().slice(0, 10) === value
+  );
+}
 export function restoreJourney(raw: unknown, moon: MoonSession): JourneyState {
   const clean = emptyJourney();
   if (!raw || typeof raw !== "object") return clean;
@@ -578,7 +591,7 @@ export function restoreJourney(raw: unknown, moon: MoonSession): JourneyState {
     return clean;
   if (
     saved.version === 2 &&
-    (!TRANSFER_DATES.includes(saved.date ?? "") ||
+    (!validSavedDate(saved.date) ||
       ![
         saved.angle,
         saved.throttle,
@@ -605,6 +618,7 @@ export function restoreJourney(raw: unknown, moon: MoonSession): JourneyState {
     };
     const allowed = [
       "journey-date",
+      "journey-select-orbit",
       "journey-route",
       "journey-confirm",
       "journey-pilot",
@@ -629,10 +643,15 @@ export function restoreJourney(raw: unknown, moon: MoonSession): JourneyState {
         )
       )
         return clean;
-      rebuilt = reduceJourneyCore(rebuilt, command, {
-        ...moon,
-        journey: rebuilt,
-      });
+      rebuilt = reduceJourneyCore(
+        rebuilt,
+        command,
+        {
+          ...moon,
+          journey: rebuilt,
+        },
+        true,
+      );
     }
     return {
       ...rebuilt,

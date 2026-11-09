@@ -1,0 +1,1786 @@
+.exploration.exploration-signal {
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 50% 0%, #361c4760, transparent 65%), #100b21;
+  font-family: Outfit, system-ui, sans-serif;
+}
+.exploration-signal #explorer-content {
+  height: 100%;
+  max-width: 1740px;
+  padding: clamp(10px, 1.5vw, 24px) clamp(12px, 2vw, 32px) 0;
+}
+.exploration-signal .lunar-workspace,
+.exploration-signal .lunar-workspace * {
+  box-sizing: border-box;
+}
+.exploration-signal .lunar-workspace {
+  --border: #9e7eb33b;
+  --muted: #c1b2ce;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 10px;
+  color: #f6effc;
+}
+.exploration-signal .lunar-workspace button,
+.exploration-signal .lunar-workspace select {
+  font: inherit;
+}
+.exploration-signal .lunar-workspace button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #291c39;
+  color: #e8dcef;
+  min-height: 44px;
+  padding: 8px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    transform 0.2s;
+}
+.exploration-signal .lunar-workspace button:hover {
+  background: #42264e;
+  border-color: #c99ad080;
+}
+.exploration-signal .lunar-workspace button:active {
+  transform: scale(0.97);
+}
+.exploration-signal .lunar-workspace button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.exploration-signal .lunar-workspace :focus-visible {
+  outline: 2px solid #ffdf89;
+  outline-offset: -3px;
+}
+.exploration-signal .lunar-workspace [hidden] {
+  display: none !important;
+}
+.exploration-signal .lunar-workspace select {
+  min-height: 44px;
+  max-width: 100%;
+  border: 1px solid #a781bc66;
+  border-radius: 8px;
+  padding: 7px 10px;
+  color: #f2e6fa;
+  background: #291c39;
+}
+.exploration-signal .lunar-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #d4b7e1;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.3px;
+}
+.exploration-signal .signal-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.exploration-signal .signal-heading h1 {
+  font-size: clamp(22px, 2.2vw, 32px);
+  font-weight: 500;
+  letter-spacing: -0.6px;
+  margin: 4px 0 0;
+}
+.exploration-signal .signal-reference {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  color: #d0bddc;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+.exploration-signal .signal-reference svg {
+  flex-shrink: 0;
+  color: #c4a7e1;
+}
+.exploration-signal .signal-navigation {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+.exploration-signal .signal-steps {
+  display: flex;
+  gap: 6px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  background: #110d1c;
+}
+.exploration-signal .signal-steps button {
+  background: transparent;
+  border-color: transparent;
+  padding: 9px 18px;
+  color: #cbbbd7;
+}
+.exploration-signal .signal-steps b {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #3a2848;
+  font-size: 12px;
+}
+.exploration-signal .signal-steps button[aria-current="step"] {
+  color: #fff;
+  background: linear-gradient(120deg, #713d7f, #51275d);
+  border-color: #be7ac45e;
+}
+.exploration-signal .signal-steps button[aria-current="step"] b {
+  background: #f0b3e9;
+  color: #321337;
+}
+.exploration-signal .signal-learning-content {
+  flex: 1;
+  min-height: 0;
+}
+.exploration-signal .signal-scene-layout {
+  height: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: 16px;
+}
+.exploration-signal .signal-lesson {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 12px;
+  padding: clamp(14px, 1.6vw, 24px);
+  border: 1px solid var(--border);
+  border-radius: 17px;
+  background: linear-gradient(145deg, #261932, #181120);
+}
+.exploration-signal .signal-instruction h2 {
+  margin: 8px 0;
+  font-size: clamp(20px, 1.9vw, 28px);
+  line-height: 1.2;
+  font-weight: 500;
+}
+.exploration-signal .signal-instruction p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.exploration-signal .signal-diagram {
+  flex-shrink: 1;
+  min-height: 0;
+  margin: 0;
+  padding: 12px 14px;
+  background: #0f0c1aaa;
+  border: 1px solid #a783be30;
+  border-radius: 12px;
+}
+.exploration-signal .signal-diagram figcaption {
+  font-size: 11px;
+  color: #b7a4c8;
+  margin-bottom: 10px;
+}
+.exploration-signal .signal-diagram-nodes {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 12px;
+  padding: 0 0;
+}
+.exploration-signal .signal-diagram-nodes > span {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  width: 17%;
+  color: #ffdf89;
+  text-align: center;
+}
+.exploration-signal .signal-diagram-nodes > span:last-child {
+  color: #a8d4fa;
+}
+.exploration-signal .signal-diagram-nodes > span:nth-child(2):not(:last-child) {
+  color: #ed9ae7;
+}
+.exploration-signal .signal-diagram-nodes svg {
+  width: 27px;
+  height: 27px;
+}
+.exploration-signal .signal-diagram-nodes strong {
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.exploration-signal .signal-diagram > svg {
+  display: block;
+  width: 100%;
+  height: 54px;
+  overflow: visible;
+}
+.exploration-signal .signal-diagram-summary {
+  font-size: 12px;
+  line-height: 1.4;
+  color: #c5b4d1;
+  margin: 6px 0 0;
+}
+.exploration-signal .signal-verdict {
+  flex-shrink: 0;
+  padding: 12px 14px;
+  border: 1px solid #a780bc44;
+  border-left-width: 3px;
+  border-radius: 10px;
+  background: #1b1326;
+}
+.exploration-signal .signal-verdict strong {
+  display: block;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+.exploration-signal .signal-verdict span {
+  display: block;
+  font-size: 11px;
+  line-height: 1.4;
+  color: #c0accd;
+  margin-top: 5px;
+}
+.exploration-signal .signal-verdict.is-clear {
+  border-left-color: #8ce2c2;
+}
+.exploration-signal .signal-verdict.is-clear strong {
+  color: #a7f0d2;
+}
+.exploration-signal .signal-verdict.is-blocked {
+  border-left-color: #efa1ac;
+}
+.exploration-signal .signal-verdict.is-blocked strong {
+  color: #ffc0c8;
+}
+.exploration-signal .signal-lesson-actions {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.exploration-signal .lunar-workspace .signal-primary {
+  background: #ebadea;
+  color: #27102c;
+  border-color: #ebadea;
+  font-weight: 500;
+}
+.exploration-signal .lunar-workspace .signal-primary:hover {
+  background: #f4c5f3;
+}
+.exploration-signal .signal-lesson-foot {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #bfa9cf;
+}
+.exploration-signal .signal-comparison {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: clamp(14px, 1.7vw, 24px);
+  border: 1px solid var(--border);
+  background: linear-gradient(140deg, #251832, #151020);
+  border-radius: 17px;
+}
+.exploration-signal .signal-comparison-intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(230px, 32%);
+  gap: 22px;
+  align-items: center;
+}
+.exploration-signal .signal-comparison h2 {
+  margin: 8px 0;
+  font-size: clamp(22px, 2vw, 29px);
+  line-height: 1.2;
+  font-weight: 500;
+}
+.exploration-signal .signal-conclusion {
+  margin: 8px 0 0;
+  color: #e1d2eb;
+  font-size: 14px;
+  line-height: 1.6;
+  max-width: 800px;
+}
+.exploration-signal .signal-diagram.is-compact {
+  padding: 8px 12px;
+}
+.exploration-signal .signal-diagram.is-compact .signal-diagram-nodes svg {
+  width: 22px;
+  height: 22px;
+}
+.exploration-signal .signal-diagram.is-compact .signal-diagram-summary {
+  display: none;
+}
+.exploration-signal .signal-diagram.is-compact > svg {
+  height: 40px;
+}
+.exploration-signal .signal-comparison-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  flex: 1;
+  min-height: 0;
+}
+.exploration-signal .signal-comparison-cards article {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  padding: clamp(14px, 1.6vw, 24px);
+  border: 1px solid #b98ad13b;
+  background: #120e1e90;
+  border-radius: 13px;
+}
+.exploration-signal .signal-card-number {
+  color: #b393c8;
+  font-size: 13px;
+  letter-spacing: 2px;
+}
+.exploration-signal .signal-comparison-cards h3 {
+  font-size: clamp(16px, 1.4vw, 21px);
+  margin: 8px 0 14px;
+  font-weight: 500;
+  min-height: 50px;
+}
+.exploration-signal .signal-comparison-bar {
+  height: 7px;
+  border-radius: 5px;
+  background: #392640;
+  overflow: hidden;
+}
+.exploration-signal .signal-comparison-bar i {
+  display: block;
+  height: 100%;
+  background: #d39ae3;
+}
+.exploration-signal .signal-comparison-cards article:first-child i {
+  background: #ffdf89;
+}
+.exploration-signal .signal-comparison-cards article:last-child i {
+  background: #8ce2c2;
+}
+.exploration-signal .signal-comparison-cards dl {
+  display: grid;
+  gap: 22px;
+  margin: 20px 0 0;
+}
+.exploration-signal .signal-comparison-cards dt {
+  font-size: 12px;
+  color: #c9b4d7;
+  line-height: 1.4;
+}
+.exploration-signal .signal-comparison-cards dd {
+  font-size: clamp(19px, 2vw, 30px);
+  margin: 7px 0 0;
+  color: #f1def8;
+  font-variant-numeric: tabular-nums;
+}
+.exploration-signal .signal-comparison-footer {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.exploration-signal .signal-comparison-footer > p {
+  flex: 1;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #c9b4d7;
+  margin: 0;
+  min-width: 190px;
+}
+.exploration-signal .signal-comparison-footer label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+.exploration-signal .signal-watch {
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 8px 12px;
+  background: #21162d;
+}
+.exploration-signal .signal-watch output {
+  display: block;
+  font-size: 12px;
+  color: #d8c3e3;
+  margin-top: 6px;
+}
+.exploration-signal .signal-playback-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.exploration-signal .signal-playback-controls label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+.exploration-signal .signal-scrubber {
+  flex: 1;
+  min-width: 140px;
+}
+.exploration-signal .signal-scrubber input {
+  width: 100%;
+  min-width: 50px;
+  margin: 0;
+  accent-color: #ebadea;
+}
+.exploration-signal .signal-speed select {
+  min-height: 42px;
+}
+.exploration-signal .lunar-sources-strip {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  min-height: 44px;
+  padding: 0 2px 4px;
+  gap: 20px;
+  font-size: 12px;
+  color: #cbb6da;
+}
+.exploration-signal .lunar-sources-strip > span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+}
+.exploration-signal .lunar-sources-strip nav {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.exploration-signal .lunar-sources-strip a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #cab4d6;
+  text-decoration: none;
+  min-height: 42px;
+}
+.exploration-signal .lunar-sources-strip a:hover {
+  color: #f4b4ed;
+}
+.exploration-signal .lunar-workspace .lunar-sources-strip button {
+  margin-left: auto;
+  border: 0;
+  background: transparent;
+  min-height: 42px;
+  padding: 2px;
+  color: #e8b1e6;
+  font-size: 12px;
+}
+.exploration-signal .signal-selectors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 14px;
+}
+.exploration-signal .signal-selectors label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 12px;
+}
+.exploration-signal .signal-engineering-metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin: 20px 0;
+}
+.exploration-signal .signal-engineering-metrics div {
+  border: 1px solid #8f6aa444;
+  border-radius: 9px;
+  padding: 10px;
+}
+.exploration-signal .signal-engineering-metrics dt {
+  font-size: 12px;
+  color: #c4afcf;
+}
+.exploration-signal .signal-engineering-metrics dd {
+  font-size: 17px;
+  margin: 8px 0 0;
+}
+.exploration-signal .signal-baseline {
+  border: 1px solid #8f6aa444;
+  border-radius: 9px;
+  padding: 12px;
+  margin-top: 12px;
+}
+.exploration-signal .lunar-timeline-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 30px;
+}
+.exploration-signal .lunar-timeline-row > span {
+  width: 165px;
+  font-size: 11px;
+  flex-shrink: 0;
+  color: #d2bddf;
+}
+.exploration-signal .lunar-timeline-row > div {
+  position: relative;
+  height: 9px;
+  flex: 1;
+  background: #392640;
+  border-radius: 3px;
+}
+.exploration-signal .lunar-timeline-row i {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: #90d5ba;
+  border-radius: 2px;
+}
+.exploration-signal .lunar-timeline-row.direct i {
+  background: #e2c084;
+}
+.exploration-signal .lunar-timeline-row.selected i {
+  background: #c692d7;
+}
+.exploration-signal .lunar-timeline-row b {
+  position: absolute;
+  height: 15px;
+  top: -3px;
+  width: 2px;
+  background: #fff0fc;
+}
+.exploration-signal .lunar-stage {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 17px;
+  background:
+    radial-gradient(ellipse at 45% 40%, #1d173030, transparent 70%), #090914;
+}
+.exploration-signal .lunar-stage::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(#b69ad22b 0.6px, transparent 0.6px);
+  background-size: 53px 53px;
+  opacity: 0.3;
+}
+.exploration-signal .lunar-stage-top {
+  position: absolute;
+  top: 17px;
+  left: 19px;
+  right: 19px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 11px;
+  letter-spacing: 1.2px;
+  color: #ac9cbd;
+  z-index: 3;
+  pointer-events: none;
+}
+.exploration-signal .lunar-stage-top > span:first-child {
+  color: #d0bfdc;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.exploration-signal .lunar-stage-top i {
+  width: 5px;
+  height: 5px;
+  background: #a2e8ce;
+  border-radius: 50%;
+}
+.exploration-signal .lunar-canvas {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.exploration-signal .lunar-canvas canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+.exploration-signal .lunar-moon-label {
+  position: absolute;
+  left: 25px;
+  top: 55px;
+  z-index: 1;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 3px;
+  color: #f1e5f8;
+  pointer-events: none;
+}
+.exploration-signal .lunar-moon-label span {
+  display: block;
+  margin-top: 7px;
+  font-size: 11px;
+  letter-spacing: 0.7px;
+  color: #a89bb8;
+}
+.exploration-signal .lunar-workspace .lunar-object-label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  display: block;
+  width: max-content;
+  max-width: 190px;
+  min-height: 0;
+  padding: 8px 10px;
+  border: 1px solid #c2a3db38;
+  border-left: 2px solid #cf9ae2;
+  background: #171020e8;
+  color: #eeddf5;
+  border-radius: 4px 9px 9px 4px;
+  font-size: 12px;
+  text-align: left;
+  line-height: 1.4;
+  margin: 0;
+  margin: 0;
+}
+.exploration-signal .lunar-object-label::before {
+  content: "";
+  position: absolute;
+  left: -1px;
+  top: -17px;
+  width: 1px;
+  height: 17px;
+  background: #cf9ae270;
+}
+.exploration-signal .lunar-object-label small {
+  display: block;
+  font-size: 11px;
+  color: #bba9c8;
+  margin-top: 3px;
+}
+.exploration-signal .lunar-workspace .lunar-site-label {
+  border-left-color: #ffdf89;
+  color: #ffdf89;
+}
+.exploration-signal .lunar-workspace .lunar-earth-label {
+  border-left-color: #a0c6df;
+  color: #b2d5ef;
+  font-size: 11px;
+}
+.exploration-signal .lunar-object-label[data-position="behind"] {
+  border-style: dashed;
+}
+.exploration-signal .lunar-stage-bottom {
+  position: absolute;
+  z-index: 3;
+  left: 16px;
+  right: 16px;
+  bottom: 37px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.exploration-signal .lunar-camera-controls {
+  display: flex;
+  gap: 5px;
+  padding: 4px;
+  background: #100d1cde;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+}
+.exploration-signal .lunar-camera-controls button {
+  min-height: 44px;
+  padding: 7px 9px;
+  font-size: 12px;
+  background: transparent;
+  border-color: transparent;
+}
+.exploration-signal .lunar-camera-controls button[aria-pressed="true"] {
+  color: #f6ccf2;
+  background: #63336b66;
+  border-color: #a66bb24d;
+}
+.exploration-signal .lunar-camera-hint {
+  font-size: 11px;
+  color: #ae9cbd;
+}
+.exploration-signal .lunar-scale-note {
+  pointer-events: none;
+  position: absolute;
+  bottom: 12px;
+  left: 20px;
+  right: 14px;
+  color: #ae9fbd;
+  font-size: 11px;
+}
+
+.exploration-signal .lunar-workspace .lunar-earth-label [data-bearing] {
+  display: inline-block;
+  transform-origin: center;
+  margin-right: 6px;
+}
+.exploration-signal .lunar-workspace .lunar-object-label {
+  min-height: 44px;
+}
+.exploration-signal .lunar-stage-bottom {
+  flex-wrap: wrap;
+}
+.exploration-signal .lunar-camera-controls {
+  flex-wrap: wrap;
+  max-width: 100%;
+}
+.exploration-signal .lunar-camera-hint {
+  display: none;
+}
+.exploration-signal .lunar-fallback svg {
+  max-height: 190px;
+  width: 100%;
+}
+.exploration-signal .lunar-fallback h2 {
+  margin: 0;
+}
+.exploration-signal .lunar-fallback {
+  position: absolute;
+  inset: 50px 16px 110px;
+  padding: 12px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  background: #100d1cee;
+}
+@media (max-height: 800px) {
+  .exploration-signal .lunar-workspace {
+    gap: 7px;
+  }
+  .exploration-signal .signal-heading h1 {
+    font-size: 23px;
+  }
+  .exploration-signal .signal-heading .lunar-eyebrow {
+    display: none;
+  }
+  .exploration-signal .signal-lesson {
+    padding: 12px;
+    gap: 8px;
+  }
+  .exploration-signal .signal-instruction h2 {
+    font-size: 20px;
+    margin: 5px 0;
+  }
+  .exploration-signal .signal-instruction p {
+    font-size: 12px;
+  }
+  .exploration-signal .signal-diagram {
+    padding: 8px 10px;
+  }
+  .exploration-signal .signal-diagram figcaption {
+    margin-bottom: 6px;
+  }
+  .exploration-signal .signal-diagram-nodes svg {
+    width: 22px;
+    height: 22px;
+  }
+  .exploration-signal .signal-diagram > svg {
+    height: 40px;
+  }
+  .exploration-signal .signal-diagram-summary {
+    display: none;
+  }
+  .exploration-signal .signal-verdict {
+    padding: 8px 10px;
+  }
+  .exploration-signal .signal-verdict strong {
+    font-size: 13px;
+  }
+  .exploration-signal .signal-lesson-actions button {
+    font-size: 12px;
+    padding: 7px 10px;
+  }
+  .exploration-signal .signal-comparison {
+    gap: 12px;
+    padding: 14px;
+  }
+  .exploration-signal .signal-comparison h2 {
+    font-size: 22px;
+  }
+  .exploration-signal .signal-conclusion {
+    font-size: 12px;
+    margin-top: 5px;
+  }
+  .exploration-signal .signal-comparison-intro {
+    gap: 16px;
+  }
+  .exploration-signal .signal-comparison-cards article {
+    padding: 14px;
+  }
+  .exploration-signal .signal-comparison-cards h3 {
+    font-size: 16px;
+    min-height: 40px;
+    margin: 4px 0 10px;
+  }
+  .exploration-signal .signal-comparison-cards dl {
+    gap: 12px;
+    margin-top: 12px;
+  }
+  .exploration-signal .signal-comparison-cards dd {
+    font-size: 23px;
+    margin-top: 3px;
+  }
+}
+@media (max-width: 1100px) {
+  .exploration-signal .signal-scene-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    gap: 10px;
+  }
+  .exploration-signal .signal-steps button {
+    padding: 8px 11px;
+    font-size: 12px;
+  }
+  .exploration-signal .signal-engineering-button span {
+    font-size: 12px;
+  }
+  .exploration-signal .signal-comparison-intro {
+    grid-template-columns: minmax(0, 1fr) 230px;
+  }
+  .exploration-signal .signal-comparison h2 {
+    font-size: 21px;
+  }
+  .exploration-signal .signal-diagram-nodes strong {
+    font-size: 11px;
+  }
+  .exploration-signal .lunar-camera-controls button {
+    padding: 7px;
+  }
+  .exploration-signal .lunar-camera-controls button > span {
+    display: none;
+  }
+  .exploration-signal .lunar-camera-controls button {
+    min-width: 44px;
+  }
+  .exploration-signal .lunar-stage-top {
+    left: 12px;
+    right: 12px;
+  }
+  .exploration-signal .lunar-stage-top > span:last-child {
+    display: none;
+  }
+}
+@media (min-height: 451px) and (max-height: 650px) {
+  .exploration-signal #explorer-content {
+    padding-top: 8px;
+  }
+  .exploration-signal .signal-heading h1 {
+    font-size: 21px;
+  }
+  .exploration-signal .signal-heading button {
+    min-height: 42px;
+  }
+  .exploration-signal .signal-navigation button {
+    min-height: 42px;
+  }
+  .exploration-signal .signal-steps {
+    padding: 2px;
+  }
+  .exploration-signal .signal-lesson {
+    gap: 6px;
+    padding: 10px;
+  }
+  .exploration-signal .signal-instruction .lunar-eyebrow {
+    font-size: 10px;
+  }
+  .exploration-signal .signal-instruction h2 {
+    font-size: 18px;
+  }
+  .exploration-signal .signal-diagram-nodes {
+    flex-direction: row;
+  }
+  .exploration-signal .signal-diagram-nodes > span {
+    flex-direction: row;
+    justify-content: center;
+    width: auto;
+  }
+  .exploration-signal .signal-diagram-nodes svg {
+    width: 16px;
+    height: 16px;
+  }
+  .exploration-signal .signal-diagram > svg {
+    height: 30px;
+  }
+  .exploration-signal .signal-diagram figcaption {
+    margin-bottom: 5px;
+  }
+  .exploration-signal .signal-verdict span {
+    margin-top: 2px;
+  }
+  .exploration-signal .signal-lesson-actions {
+    gap: 5px;
+  }
+  .exploration-signal .signal-lesson-foot {
+    font-size: 10px;
+  }
+  .exploration-signal .signal-lesson-foot button {
+    min-height: 42px;
+    padding: 7px;
+    font-size: 11px;
+  }
+  .exploration-signal .signal-comparison {
+    gap: 10px;
+    padding: 10px;
+  }
+  .exploration-signal .signal-comparison-intro {
+    grid-template-columns: minmax(0, 1fr) 210px;
+  }
+  .exploration-signal .signal-comparison-intro .signal-diagram {
+    padding: 6px;
+  }
+  .exploration-signal .signal-comparison h2 {
+    font-size: 19px;
+    margin: 4px 0;
+  }
+  .exploration-signal .signal-comparison-cards h3 {
+    font-size: 14px;
+    min-height: 34px;
+  }
+  .exploration-signal .signal-card-number {
+    display: none;
+  }
+  .exploration-signal .signal-comparison-cards dl {
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .exploration-signal .signal-comparison-cards dt {
+    font-size: 11px;
+  }
+  .exploration-signal .signal-comparison-cards dd {
+    font-size: 20px;
+  }
+  .exploration-signal .signal-comparison-footer p {
+    font-size: 11px;
+  }
+  .exploration-signal .signal-comparison-footer button {
+    min-height: 42px;
+  }
+}
+@media (max-height: 450px) {
+  .exploration-signal #explorer-content {
+    padding: 4px 10px 0;
+  }
+  .exploration-signal .lunar-workspace {
+    gap: 4px;
+  }
+  .exploration-signal .signal-heading {
+    position: absolute;
+    top: 25px;
+    right: 47px;
+    z-index: 2;
+  }
+  .exploration-signal .signal-heading > div {
+    display: none;
+  }
+  .exploration-signal .signal-heading button {
+    font-size: 0;
+    gap: 0;
+    min-height: 42px;
+    width: 42px;
+    padding: 7px;
+  }
+  .exploration-signal .signal-reference {
+    font-size: 11px;
+    min-height: 22px;
+  }
+  .exploration-signal .signal-reference svg {
+    width: 12px;
+  }
+  .exploration-signal .signal-navigation {
+    min-height: 42px;
+    gap: 4px;
+    padding-right: 47px;
+  }
+  .exploration-signal .signal-steps {
+    padding: 0;
+    border: 0;
+    gap: 2px;
+    flex: 1;
+  }
+  .exploration-signal .signal-steps button {
+    min-height: 42px;
+    padding: 6px 7px;
+    gap: 5px;
+    font-size: 12px;
+  }
+  .exploration-signal .signal-steps b {
+    width: 18px;
+    height: 18px;
+    font-size: 11px;
+  }
+  .exploration-signal .signal-engineering-button {
+    width: 42px;
+    padding: 7px !important;
+  }
+  .exploration-signal .signal-engineering-button span {
+    display: none;
+  }
+  .exploration-signal .signal-scene-layout {
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    gap: 6px;
+  }
+  .exploration-signal .signal-lesson {
+    padding: 6px 8px;
+    gap: 4px;
+    justify-content: space-between;
+    border-radius: 10px;
+  }
+  .exploration-signal .signal-instruction .lunar-eyebrow {
+    display: none;
+  }
+  .exploration-signal .signal-instruction h2 {
+    font-size: 14px;
+    margin: 0 0 3px;
+    line-height: 1.15;
+  }
+  .exploration-signal .signal-instruction p {
+    font-size: 11px;
+    line-height: 1.2;
+  }
+  .exploration-signal .signal-diagram {
+    padding: 3px 6px;
+    border-radius: 7px;
+    flex-shrink: 1;
+  }
+  .exploration-signal .signal-diagram figcaption {
+    font-size: 10px;
+    margin-bottom: 3px;
+  }
+  .exploration-signal .signal-diagram-nodes {
+    gap: 5px;
+  }
+  .exploration-signal .signal-diagram-nodes > span {
+    width: auto;
+    flex-direction: row;
+    gap: 3px;
+  }
+  .exploration-signal .signal-diagram-nodes svg {
+    width: 13px;
+    height: 13px;
+  }
+  .exploration-signal .signal-diagram-nodes strong {
+    font-size: 11px;
+  }
+  .exploration-signal .signal-diagram > svg {
+    height: 25px;
+  }
+  .exploration-signal .signal-diagram-summary {
+    display: none;
+  }
+  .exploration-signal .signal-verdict {
+    padding: 4px 7px;
+    border-radius: 7px;
+  }
+  .exploration-signal .signal-verdict strong {
+    font-size: 12px;
+    line-height: 1.2;
+  }
+  .exploration-signal .signal-verdict span {
+    display: none;
+  }
+  .exploration-signal .signal-lesson-actions {
+    gap: 4px;
+    flex-wrap: nowrap;
+  }
+  .exploration-signal .signal-lesson-actions button {
+    min-height: 42px;
+    font-size: 11px;
+    padding: 5px 7px;
+    gap: 3px;
+  }
+  .exploration-signal .signal-lesson-actions button svg {
+    width: 12px;
+  }
+  .exploration-signal .signal-lesson-foot {
+    font-size: 10px;
+    line-height: 1.1;
+  }
+  .exploration-signal .signal-lesson-foot button {
+    min-height: 42px;
+    font-size: 11px;
+    padding: 5px;
+  }
+  .exploration-signal .lunar-sources-strip {
+    min-height: 42px;
+    gap: 10px;
+    padding: 0;
+    font-size: 11px;
+  }
+  .exploration-signal .lunar-sources-strip nav {
+    gap: 12px;
+  }
+  .exploration-signal .lunar-workspace .lunar-sources-strip button {
+    font-size: 11px;
+  }
+  .exploration-signal .lunar-sources-strip > span svg {
+    display: none;
+  }
+  .exploration-signal .lunar-stage {
+    border-radius: 10px;
+  }
+  .exploration-signal .lunar-stage-top {
+    top: 10px;
+    font-size: 10px;
+  }
+  .exploration-signal .lunar-moon-label {
+    display: none;
+  }
+  .exploration-signal .lunar-stage-bottom {
+    left: 5px;
+    right: 5px;
+    bottom: 24px;
+  }
+  .exploration-signal .lunar-camera-controls {
+    gap: 2px;
+    padding: 1px;
+  }
+  .exploration-signal .lunar-camera-controls button {
+    min-height: 42px;
+    min-width: 42px;
+    padding: 5px;
+  }
+  .exploration-signal .lunar-camera-controls button svg {
+    width: 14px;
+  }
+  .exploration-signal .lunar-scale-note {
+    bottom: 5px;
+    left: 8px;
+    font-size: 10px;
+  }
+  .exploration-signal .lunar-workspace .lunar-object-label {
+    max-width: 110px;
+    min-height: 32px;
+    font-size: 11px;
+    padding: 5px 7px;
+  }
+  .exploration-signal .lunar-object-label small {
+    display: none;
+  }
+  .exploration-signal .lunar-workspace .lunar-earth-label {
+    font-size: 10px;
+  }
+  .exploration-signal .signal-comparison {
+    padding: 7px 9px;
+    gap: 6px;
+    border-radius: 10px;
+  }
+  .exploration-signal .signal-comparison-intro {
+    display: block;
+  }
+  .exploration-signal .signal-comparison-intro .lunar-eyebrow {
+    display: none;
+  }
+  .exploration-signal .signal-comparison h2 {
+    font-size: 15px;
+    margin: 0 0 3px;
+  }
+  .exploration-signal .signal-conclusion {
+    font-size: 11px;
+    line-height: 1.3;
+    margin: 0;
+  }
+  .exploration-signal .signal-comparison-intro .signal-diagram {
+    display: none;
+  }
+  .exploration-signal .signal-comparison-cards {
+    gap: 6px;
+  }
+  .exploration-signal .signal-comparison-cards article {
+    padding: 6px 8px;
+    border-radius: 8px;
+  }
+  .exploration-signal .signal-card-number {
+    display: none;
+  }
+  .exploration-signal .signal-comparison-cards h3 {
+    font-size: 12px;
+    min-height: 28px;
+    margin: 0 0 4px;
+  }
+  .exploration-signal .signal-comparison-bar {
+    height: 4px;
+  }
+  .exploration-signal .signal-comparison-cards dl {
+    gap: 4px;
+    margin-top: 5px;
+  }
+  .exploration-signal .signal-comparison-cards dt {
+    font-size: 10px;
+    line-height: 1.2;
+  }
+  .exploration-signal .signal-comparison-cards dd {
+    font-size: 16px;
+    margin-top: 2px;
+  }
+  .exploration-signal .signal-comparison-footer {
+    gap: 6px;
+    flex-wrap: nowrap;
+  }
+  .exploration-signal .signal-comparison-footer p {
+    font-size: 10px;
+    line-height: 1.2;
+    min-width: 120px;
+  }
+  .exploration-signal .signal-comparison-footer button {
+    min-height: 42px;
+    font-size: 11px;
+    padding: 5px 7px;
+  }
+  .exploration-signal .signal-comparison-footer label {
+    font-size: 0;
+  }
+  .exploration-signal .signal-comparison-footer select {
+    min-height: 42px;
+    max-width: 142px;
+    font-size: 11px;
+  }
+  .exploration-signal .signal-watch {
+    position: absolute;
+    z-index: 5;
+    bottom: 48px;
+    left: 0;
+    width: 40%;
+    max-height: calc(100% - 72px);
+    overflow: auto;
+    padding: 6px;
+    box-shadow: 0 4px 20px #000a;
+  }
+  .exploration-signal .signal-watch .signal-playback-controls {
+    gap: 4px;
+  }
+  .exploration-signal .signal-watch button {
+    font-size: 11px;
+    min-height: 42px;
+    padding: 5px;
+  }
+  .exploration-signal .signal-watch .signal-scrubber {
+    min-width: 120px;
+  }
+  .exploration-signal .signal-watch output {
+    font-size: 11px;
+  }
+  .exploration-signal .lunar-sources-dialog {
+    max-height: 92dvh;
+    width: 94vw;
+  }
+  .exploration-signal .lunar-sources-dialog > header {
+    padding: 8px 16px;
+  }
+  .exploration-signal .lunar-sources-dialog h2 {
+    font-size: 19px;
+  }
+  .exploration-signal .lunar-sources-content {
+    padding: 6px 16px 14px;
+  }
+  .exploration-signal .lunar-fallback {
+    inset: 30px 6px 82px;
+    padding: 5px;
+  }
+  .exploration-signal .lunar-fallback h2 {
+    font-size: 14px;
+  }
+  .exploration-signal .lunar-fallback svg {
+    max-height: 80px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .exploration-signal .lunar-workspace button {
+    transition: none;
+  }
+}
+.exploration-signal [data-gentle-motion="true"] .lunar-workspace button {
+  transition: none;
+}
+@media (min-height: 1600px) {
+  .exploration-signal #explorer-content {
+    display: flex;
+    align-items: center;
+  }
+  .exploration-signal .lunar-workspace {
+    width: 100%;
+    max-height: 1200px;
+  }
+}
+
+/* Override dimensions retained by the older exploration diagram. */
+.exploration-signal .signal-diagram {
+  height: auto;
+  min-height: 0;
+}
+.exploration-signal .signal-short-label {
+  display: none;
+}
+@media (max-height: 450px) {
+  .exploration-signal .signal-heading {
+    right: 0;
+  }
+  .exploration-signal .signal-lesson-actions .signal-full-label {
+    display: none;
+  }
+  .exploration-signal .signal-lesson-actions .signal-short-label {
+    display: inline;
+  }
+  .exploration-signal .signal-lesson-actions {
+    gap: 3px;
+  }
+  .exploration-signal .signal-lesson-actions button {
+    padding: 5px 6px;
+  }
+  .exploration-signal .signal-comparison {
+    padding: 5px 7px;
+    gap: 4px;
+  }
+  .exploration-signal .signal-comparison h2 {
+    font-size: 14px;
+    line-height: 16px;
+    margin: 0 0 2px;
+  }
+  .exploration-signal .signal-conclusion {
+    font-size: 10px;
+    line-height: 12px;
+  }
+  .exploration-signal .signal-comparison-cards article {
+    padding: 5px 7px;
+  }
+  .exploration-signal .signal-comparison-cards h3 {
+    font-size: 11px;
+    line-height: 12px;
+    min-height: 24px;
+    margin: 0 0 3px;
+  }
+  .exploration-signal .signal-comparison-cards dl {
+    margin: 4px 0 0;
+    gap: 3px;
+  }
+  .exploration-signal .signal-comparison-cards dt {
+    font-size: 10px;
+    line-height: 10px;
+  }
+  .exploration-signal .signal-comparison-cards dd {
+    font-size: 16px;
+    line-height: 17px;
+    margin-top: 1px;
+  }
+}
+@media (min-height: 451px) and (max-height: 650px) {
+  .exploration-signal .signal-comparison-cards article {
+    padding: 10px;
+  }
+  .exploration-signal .signal-comparison-cards h3 {
+    min-height: 32px;
+    font-size: 14px;
+    line-height: 16px;
+    margin: 0 0 6px;
+  }
+  .exploration-signal .signal-comparison-cards dl {
+    gap: 7px;
+    margin-top: 8px;
+  }
+  .exploration-signal .signal-comparison-cards dt {
+    font-size: 11px;
+    line-height: 13px;
+  }
+  .exploration-signal .signal-comparison-cards dd {
+    font-size: 20px;
+    line-height: 20px;
+    margin-top: 2px;
+  }
+  .exploration-signal .signal-diagram.is-compact .signal-diagram-nodes svg {
+    display: none;
+  }
+  .exploration-signal .signal-diagram.is-compact .signal-diagram-nodes > span {
+    width: auto;
+  }
+  .exploration-signal .signal-diagram.is-compact .signal-diagram-nodes strong {
+    font-size: 10px;
+  }
+}
+@media (min-height: 451px) and (max-height: 720px) {
+  .exploration-signal .signal-watch {
+    position: absolute;
+    z-index: 5;
+    bottom: 52px;
+    left: 0;
+    width: 46%;
+    max-height: 220px;
+    overflow: auto;
+    box-shadow: 0 4px 20px #000a;
+  }
+}
+
+/* Methods retain a modal layout; engineering remains an interactive scene sibling. */
+.exploration-signal .lunar-sources-dialog {
+  width: min(850px, 92vw);
+  max-width: none;
+  max-height: 88dvh;
+  padding: 0;
+  border: 1px solid #a781bc66;
+  border-radius: 18px;
+  background: #1b1228;
+  color: #eee2f6;
+  box-shadow: 0 24px 90px #000b;
+  overflow: hidden;
+}
+.exploration-signal .lunar-sources-dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+.exploration-signal .lunar-sources-dialog::backdrop,
+.exploration-signal .signal-location-picker::backdrop {
+  background: #090611dc;
+}
+.exploration-signal .lunar-sources-dialog > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-shrink: 0;
+  padding: 18px 24px;
+  border-bottom: 1px solid #a781bc44;
+}
+.exploration-signal .lunar-sources-dialog h2 {
+  margin: 6px 0 0;
+  font-size: 24px;
+}
+.exploration-signal .lunar-sources-content {
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 10px 24px 24px;
+}
+.exploration-signal .lunar-sources-content article {
+  padding: 14px 0;
+  border-bottom: 1px solid #a781bc33;
+}
+.exploration-signal .lunar-sources-content a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #edb5ed;
+}
+.exploration-signal .lunar-sources-content p,
+.exploration-signal .lunar-sources-content li {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #d1bddc;
+}
+.exploration-signal .lunar-sources-content code {
+  overflow-wrap: anywhere;
+}
+.exploration-signal
+  .lunar-workspace[data-engineering="true"]
+  .signal-scene-layout {
+  grid-template-columns: minmax(0, 1fr) clamp(300px, 32vw, 420px);
+}
+.exploration-signal .signal-engineering-panel {
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  overflow: hidden;
+  border: 1px solid #b780ca66;
+  border-radius: 16px;
+  background: linear-gradient(150deg, #291a37, #181020);
+  animation: signal-panel-enter 0.18s ease-out;
+}
+.exploration-signal .signal-engineering-panel > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.exploration-signal .signal-engineering-panel h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 500;
+}
+.exploration-signal .signal-engineering-panel > header p {
+  margin: 5px 0 0;
+  font-size: 11px;
+  color: #e8bbef;
+}
+.exploration-signal .signal-engineering-content {
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 0 14px 16px;
+}
+.exploration-signal .signal-engineering-content p,
+.exploration-signal .signal-engineering-content li {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #d1bddc;
+  overflow-wrap: anywhere;
+}
+.exploration-signal .signal-engineering-content h3 {
+  font-size: 15px;
+  margin: 20px 0 8px;
+}
+.exploration-signal .signal-engineering-panel > footer {
+  padding: 9px 14px;
+  border-top: 1px solid var(--border);
+  background: #24182f;
+}
+.exploration-signal .signal-engineering-panel > footer button {
+  width: 100%;
+}
+.exploration-signal .signal-engineering-content .signal-selectors {
+  display: grid;
+  gap: 8px;
+}
+.exploration-signal .signal-selectors label {
+  min-width: 0;
+  margin: 4px 0;
+}
+.exploration-signal .signal-selectors select {
+  width: 100%;
+  margin: 0;
+}
+.exploration-signal .signal-engineering-content .signal-engineering-metrics {
+  grid-template-columns: 1fr;
+  gap: 8px;
+  margin: 12px 0;
+}
+.exploration-signal .signal-engineering-metrics dd {
+  font-variant-numeric: tabular-nums;
+}
+.exploration-signal .signal-path-status {
+  padding: 4px 10px;
+  margin-top: 12px;
+  border-radius: 8px;
+  background: #130d1d;
+}
+.exploration-signal .signal-path-status p {
+  margin: 7px 0;
+}
+.exploration-signal .signal-path-status strong {
+  color: #f0d8f7;
+  font-weight: 500;
+}
+.exploration-signal .signal-engineering-content .signal-playback-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 6px;
+}
+.exploration-signal
+  .signal-engineering-content
+  .signal-playback-controls
+  label {
+  margin: 5px 0;
+}
+.exploration-signal .signal-engineering-content .signal-scrubber {
+  flex-wrap: wrap;
+}
+.exploration-signal .signal-engineering-content .signal-scrubber input {
+  flex-basis: 100%;
+  min-height: 32px;
+}
+.exploration-signal .signal-engineering-content .lunar-timeline-row {
+  display: grid;
+  gap: 5px;
+  margin: 10px 0;
+}
+.exploration-signal .signal-engineering-content .lunar-timeline-row > span {
+  width: auto;
+}
+.exploration-signal .signal-engineering-content ul {
+  padding-left: 18px;
+}
+.exploration-signal .signal-location-picker {
+  position: fixed;
+  inset: 0;
+  width: 100dvw;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background:
+    radial-gradient(ellipse at 10% 0%, #40214f70, transparent 60%), #140d21;
+  color: #f4e8fb;
+  overflow: hidden;
+}
+.exploration-signal .signal-location-picker[open] {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+}
+.exploration-signal .signal-location-picker > header,
+.exploration-signal .signal-location-picker > footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 20px max(24px, calc((100vw - 1500px) / 2));
+  border-bottom: 1px solid #a781bc44;
+}
+.exploration-signal .signal-location-picker h2 {
+  font-size: clamp(22px, 2.5vw, 34px);
+  font-weight: 500;
+  margin: 7px 0;
+}
+.exploration-signal .signal-location-picker header p {
+  font-size: 13px;
+  margin: 0;
+  color: #c9b3d8;
+}
+.exploration-signal .signal-location-picker > footer {
+  justify-content: flex-end;
+  border-top: 1px solid #a781bc44;
+  border-bottom: 0;
+}
+.exploration-signal .signal-location-grid {
+  display: grid;
+  grid-auto-rows: max-content;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-content: start;
+  gap: 18px;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 24px max(24px, calc((100vw - 1500px) / 2));
+}
+.exploration-signal .lunar-workspace .signal-location-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 12px;
+  min-width: 0;
+  padding: 24px;
+  border: 1px solid #ad7dc657;
+  background: linear-gradient(140deg, #2d1c3e, #1d142b);
+  text-align: left;
+  color: #d5bfdc;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.exploration-signal .signal-location-card .signal-location-name {
+  font-size: 20px;
+  font-weight: 500;
+  color: #f4e0fc;
+}
+.exploration-signal .signal-location-coordinates {
+  font-variant-numeric: tabular-nums;
+  color: #e4bae9;
+}
+.exploration-signal .signal-location-card[aria-current="location"] {
+  background: #3a2248;
+  border-color: #e3a6eb;
+}
+.exploration-signal .signal-location-card strong {
+  font-size: 11px;
+  font-weight: 500;
+  color: #f8d5f8;
+  padding: 4px 9px;
+  border: 1px solid #b67ac855;
+  border-radius: 20px;
+}
+@keyframes signal-panel-enter {
+  from {
+    opacity: 0;
+    transform: translateX(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+.exploration-signal
+  .lunar-workspace[data-gentle-motion="true"]
+  .signal-engineering-panel {
+  animation: none;
+}
+.exploration-signal .lunar-workspace[data-gentle-motion="true"] button {
+  transition: none;
+}
+.exploration-signal .lunar-workspace[data-frozen="true"] * {
+  animation-play-state: paused !important;
+}
+@media (max-height: 450px) {
+  .exploration-signal
+    .lunar-workspace[data-engineering="true"]
+    .signal-scene-layout {
+    grid-template-columns: minmax(0, 1fr) 300px;
+  }
+  .exploration-signal .signal-engineering-panel > header {
+    padding: 6px 10px;
+  }
+  .exploration-signal .signal-engineering-panel h2 {
+    font-size: 16px;
+  }
+  .exploration-signal .signal-engineering-panel > footer {
+    padding: 5px 10px;
+  }
+  .exploration-signal .signal-location-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 12px 18px;
+    gap: 10px;
+  }
+  .exploration-signal .signal-location-picker > header,
+  .exploration-signal .signal-location-picker > footer {
+    padding: 8px 18px;
+  }
+  .exploration-signal .signal-location-picker h2 {
+    font-size: 22px;
+    margin: 2px 0;
+  }
+  .exploration-signal .signal-location-picker header p {
+    font-size: 11px;
+  }
+  .exploration-signal .lunar-workspace .signal-location-card {
+    padding: 14px;
+    gap: 7px;
+  }
+  .exploration-signal .signal-location-card .signal-location-name {
+    font-size: 17px;
+  }
+  .exploration-signal
+    .lunar-workspace[data-engineering="true"]
+    .lunar-stage-top
+    > span:last-child {
+    display: none;
+  }
+}
+@media (max-width: 1100px) {
+  .exploration-signal
+    .lunar-workspace[data-engineering="true"]
+    .lunar-camera-controls
+    span {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .exploration-signal .signal-engineering-panel {
+    animation: none;
+  }
+}

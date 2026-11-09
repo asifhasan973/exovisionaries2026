@@ -36,7 +36,8 @@ export const ARTEMIS_ERA_EVENTS: NasaMissionEvent[] = [
       "Flew 72 times, logging 128.8 flight minutes and 17 km distance",
       "Paved the way for future aerial planetary exploration",
     ],
-    nasaUrl: "https://science.nasa.gov/mission/ingenuity/",
+    nasaUrl:
+      "https://science.nasa.gov/mission/mars-2020-perseverance/ingenuity-mars-helicopter/",
   },
   {
     id: "jwst-launch",
@@ -92,7 +93,7 @@ export const ARTEMIS_ERA_EVENTS: NasaMissionEvent[] = [
       "Shortened Dimorphos orbit around Didymos by 33 minutes",
       "Proved humanity can deflect hazardous near-Earth asteroids",
     ],
-    nasaUrl: "https://www.nasa.gov/planetary-defense/dart/",
+    nasaUrl: "https://science.nasa.gov/mission/dart/",
   },
   {
     id: "artemis-1",

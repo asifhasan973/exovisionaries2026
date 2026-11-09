@@ -6,6 +6,7 @@ import {
   returnResources,
   missionOutcome,
   RETURN_MODEL,
+  returnComplete,
 } from "@/game/moon/return/return";
 import { equipmentIds, equipmentReport } from "./catalog";
 import { missionAssistance } from "./assistance";
@@ -48,10 +49,18 @@ export function missionCard(s: WorkshopSession) {
         ? s.progress.playerName
         : (id?.replaceAll("-", " ") ?? "unassigned"),
     ),
-    crewRecovered: r.crewLocation === "ocean" ? 3 : 0,
-    deliveredSciencePoints: deliveredPoints(m.science),
-    physicalSampleReturnedKg:
-      r.crewLocation === "ocean" ? returnedSampleKg(m) : 0,
+    crewRecovered: returnComplete(r, m.designSignature) ? 3 : 0,
+    deliveredSciencePoints: deliveredPoints({
+      ...m.science,
+      records: [
+        ...new Map(
+          m.science.records.map((record) => [record.id, record]),
+        ).values(),
+      ],
+    }),
+    physicalSampleReturnedKg: returnComplete(r, m.designSignature)
+      ? returnedSampleKg(m)
+      : 0,
     samples: m.rover
       ? m.rover.deposited.map((id: any) => ({
           id: `crew-sample-${id}`,
@@ -62,7 +71,7 @@ export function missionCard(s: WorkshopSession) {
         }))
       : m.science.samples,
     seismometerSite: m.science.seismometerSite,
-    measurements: m.science.records.map((record: any) => ({ ...record })),
+    measurements: m.science.records.map((record) => ({ ...record })),
     interpretations: { ...m.science.accepted },
     equipment: equipment.parts.map((p: any) => ({ id: p.id, name: p.name })),
     credits: budget?.spent ?? equipment.credits,

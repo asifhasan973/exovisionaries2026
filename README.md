@@ -120,3 +120,11 @@ Driving requires a keyboard and mouse: W/S accelerate/brake/reverse, A/D steer, 
 See [release verification and scientific limits](temp/old_backup/docs/story/release-readiness.md), [the 90-second judge walkthrough](temp/old_backup/docs/story/judge-demo-90-seconds.md), and [the rover model and compatibility notes](temp/old_backup/docs/story/free-rover.md). Preserved debrief verification checks: `node --experimental-strip-types temp/old_backup/scripts/check-mission-debrief.mjs`. Judge-tour checks use assistance and must not be represented as manual unassisted playthroughs.
 
 The Moon route planner includes a bounded NASA/JPL ephemeris dataset, computed transfer candidates, throttle/alignment burn controls, a local lunar-capture orbit preview and a solar-system overview. See [Moon transfer game](temp/old_backup/docs/story/moon-transfer-game.md) for dates, controls, reproducibility, source URLs and the distinction between measured celestial data and educational spacecraft assumptions.
+
+## Independent NASA exploration pages
+
+Home and the shared navbar open [Engineering Lab](docs/engineering-lab.md) (`/?explore=engineering`), [Moon Atlas and Orbit & Signal Lab](docs/exploration.md) (`/?explore=atlas`, `/?explore=signal`), and the [NASA Mission Archive](docs/mission-archive.md) (`/?explore=archive`). These routes live in `apps/web/src/features/` and preserve saved mission progress. The standalone page frame and home navigation are documented in [Shared page navigation](docs/site-navigation.md); the existing game flow and mechanics remain separate.
+
+### Your Moon Mission Report
+
+The final Moon mission debrief is one report covering recorded outcomes, observations, physical sample return, evidence interpretation, engineering lessons and the existing previous-run comparison. “Explore the location” shows lazy-loaded NASA reference layers separately from simulated mission results. Moon Atlas is removed from primary navigation; its old URL remains a non-destructive preview. Completed reports reopen from the existing mission save at `/?report=1`. See [report data mapping and compatibility](docs/moon-mission-report.md).

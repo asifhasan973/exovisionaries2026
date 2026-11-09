@@ -19,10 +19,10 @@ export function missionDebrief(s: WorkshopSession) {
     prep = r ? roverEquipment(m) : s.preparation,
     origin = landingResources(m, m.landing),
     end = m.resources;
-  const readings = card.measurements.filter((x: any) => x.transmitted),
+  const readings = card.measurements.filter((x) => x.transmitted),
     findings = [
       ...new Set(
-        readings.flatMap((x: any) =>
+        readings.flatMap((x) =>
           x.kind === "water-evidence"
             ? [x.result ?? "inconclusive"]
             : x.kind === "mineral-evidence"
@@ -57,7 +57,7 @@ export function missionDebrief(s: WorkshopSession) {
       `${partById(prep.solarId)?.name ?? "Selected panels"} generate ${sun.solarW.toFixed(0)} W in full game sunlight, against ${sun.loadW.toFixed(0)} W traverse load. ${sun.solarW >= sun.loadW ? "This configuration can cover that load in sunlight." : "The battery covers the remaining load even in sunlight."}`,
     );
     decisions.push(
-      `${partById(cap.collector)?.name ?? "Collection tool"} reached ${cap.depth} cm in this run; the authored target limit is 40 cm.`,
+      `${partById(cap.collector)?.name ?? "Collection tool"} can reach up to ${cap.depth} cm with the saved equipment; the authored target limit is 40 cm.`,
     );
   }
   if (!readings.length)
@@ -66,7 +66,7 @@ export function missionDebrief(s: WorkshopSession) {
     );
   else if (
     m.objective === "lunar-ice" &&
-    !readings.some((x: any) => x.result === "confirmed")
+    !readings.some((x) => x.result === "confirmed")
   )
     recommendations.push(
       prep.sciencePartIds.includes("msolo")
@@ -76,7 +76,7 @@ export function missionDebrief(s: WorkshopSession) {
   else if (
     m.objective === "lunar-geology" &&
     !readings.some(
-      (x: any) => x.classification && x.classification !== "inconclusive",
+      (x) => x.classification && x.classification !== "inconclusive",
     )
   )
     recommendations.push(
@@ -114,12 +114,16 @@ export function missionDebrief(s: WorkshopSession) {
     recommendations: recommendations.slice(0, 3),
     operational:
       card.crewRecovered === 3 ? "Crew recovered" : "Crew not yet recovered",
-    collected: r ? r.cargo.length + r.deposited.length : card.samples.length,
+    collected: r
+      ? new Set([...r.cargo, ...r.deposited]).size
+      : new Set(card.samples.map((sample) => sample.id)).size,
     returned:
       card.crewRecovered === 3
         ? r
-          ? r.deposited.length
-          : card.samples.filter((x: any) => x.stowed).length
+          ? new Set(r.deposited).size
+          : new Set(
+              card.samples.filter((x) => x.stowed).map((sample) => sample.id),
+            ).size
         : 0,
     battery:
       origin.capacityWh > 0
@@ -137,19 +141,24 @@ export function missionDebrief(s: WorkshopSession) {
         : null,
     resources: {
       elapsedDays: card.elapsedDays,
-      crewDaysUsed: supplied
-        ? supplied.capacityCrewDays - (end.supportUnitsRemaining ?? 0)
-        : null,
-      cabinUsedKWh: supplied
-        ? (supplied.lifeSupportCapacityWh - (end.platformEnergyWh ?? 0)) / 1000
-        : null,
+      crewDaysUsed:
+        supplied && end.supportUnitsRemaining != null
+          ? supplied.capacityCrewDays - (end.supportUnitsRemaining ?? 0)
+          : null,
+      cabinUsedKWh:
+        supplied && end.platformEnergyWh != null
+          ? (supplied.lifeSupportCapacityWh - (end.platformEnergyWh ?? 0)) /
+            1000
+          : null,
       descentUsedKg:
-        PLATFORM_MODEL.descentPropellantKg -
-        (end.descentPropellantKg ?? PLATFORM_MODEL.descentPropellantKg),
+        end.descentPropellantKg == null
+          ? null
+          : PLATFORM_MODEL.descentPropellantKg - end.descentPropellantKg,
       ascentUsedKg: card.ascentFuelUsedKg,
-      serviceUsedKg: supplied
-        ? supplied.service.propellantKg - (end.returnPropellantKg ?? 0)
-        : null,
+      serviceUsedKg:
+        supplied && end.returnPropellantKg != null
+          ? supplied.service.propellantKg - (end.returnPropellantKg ?? 0)
+          : null,
     },
   };
 }

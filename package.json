@@ -6,8 +6,8 @@
   "scripts": {
     "build": "turbo run build",
     "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{css,ts,tsx,json,html,md,yaml,yml}\" --ignore-path .gitignore",
-    "format:check": "prettier --check \"**/*.{css,ts,tsx,json,html,md,yaml,yml}\" --ignore-path .gitignore",
+    "format": "prettier --write \"**/*.{css,ts,tsx,json,html,md,yaml,yml}\" --ignore-path .gitignore --ignore-path .prettierignore",
+    "format:check": "prettier --check \"**/*.{css,ts,tsx,json,html,md,yaml,yml}\" --ignore-path .gitignore --ignore-path .prettierignore",
     "format:css": "prettier --write \"apps/**/*.css\" \"packages/**/*.css\"",
     "dev": "turbo run dev",
     "preview": "turbo run preview",

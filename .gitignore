@@ -36,3 +36,8 @@ dist-ssr
 
 # superpowers docs
 docs/superpowers/*
+
+# Local visual review captures and commit preparation
+.impeccable/review/
+temp/COMMIT_MSG.txt
+temp/PR_MSG.txt

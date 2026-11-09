@@ -1,0 +1,587 @@
+.moon-report {
+  --report-line: #ad8bc844;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+  max-width: 1680px;
+  width: 100%;
+  margin: 0 auto;
+  color: #f6edff;
+  background: #1b1230;
+  border: 1px solid var(--report-line);
+  border-radius: 16px;
+  overflow: hidden;
+  font-family: Outfit, system-ui, sans-serif;
+}
+.moon-report *,
+.report-atlas * {
+  box-sizing: border-box;
+}
+.moon-report-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--report-line);
+}
+.moon-report-heading h2 {
+  margin: 0 0 5px;
+  color: #f6edff;
+  font:
+    500 28px Fredoka,
+    sans-serif;
+}
+.moon-report-heading p {
+  margin: 0;
+  font-size: 13px;
+  color: #d8c4e6;
+}
+.report-state {
+  font-size: 13px;
+  color: #b6edda;
+  max-width: 210px;
+}
+.report-preview-note {
+  margin: 0;
+  padding: 7px 24px;
+  background: #352348;
+  color: #ffdfad;
+  font-size: 12px;
+}
+.moon-report-layout {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr);
+  flex: 1;
+  min-height: 0;
+}
+.moon-report-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 16px 12px;
+  border-right: 1px solid var(--report-line);
+  overflow: auto;
+}
+.moon-report button,
+.report-atlas button {
+  min-height: 48px;
+  border: 1px solid #a97dc05c;
+  border-radius: 10px;
+  padding: 9px 12px;
+  background: #352047;
+  color: #f6e6ff;
+  font:
+    500 13px Outfit,
+    sans-serif;
+  cursor: pointer;
+  transition: background 180ms ease-out;
+}
+.moon-report button:hover,
+.report-atlas button:hover {
+  background: #50305f;
+}
+.moon-report button:disabled,
+.report-atlas button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.moon-report-sections button {
+  text-align: left;
+  background: transparent;
+  border-color: transparent;
+}
+.moon-report-sections button[aria-current] {
+  color: #fff3ff;
+  border-color: #ac7dc0;
+  background: #593368;
+}
+.moon-report-content {
+  overflow: auto;
+  min-width: 0;
+  min-height: 0;
+  padding: 22px 28px;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #a67db9 #241731;
+}
+.moon-report-content h3 {
+  margin: 0 0 18px;
+  font:
+    500 23px Fredoka,
+    sans-serif;
+  color: #f6edff;
+}
+.moon-report-content h4 {
+  font-size: 17px;
+  line-height: 1.35;
+  margin: 24px 0 8px;
+  color: #ead4f8;
+}
+.moon-report-content p,
+.moon-report-content li,
+.report-atlas p {
+  font-size: 14px;
+  line-height: 1.65;
+  color: #ddcfe8;
+  max-width: 72ch;
+}
+.moon-report-content li {
+  margin-bottom: 12px;
+}
+.report-overview {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 240px;
+  gap: 26px;
+}
+.report-overview h4 {
+  margin-top: 0;
+  font-size: 22px;
+}
+.report-companion {
+  max-height: 330px;
+  min-width: 0;
+  overflow: hidden;
+}
+.report-companion .workshop-engineer {
+  min-height: 0;
+  height: 100%;
+}
+.report-key-results {
+  margin: 18px 0 0;
+}
+.report-key-results > div {
+  display: grid;
+  grid-template-columns: minmax(140px, 1fr) minmax(0, 1fr);
+  gap: 16px;
+  padding: 13px 0;
+  border-top: 1px solid var(--report-line);
+}
+.report-key-results dt {
+  font-size: 13px;
+  color: #d5bfe3;
+}
+.report-key-results dd {
+  margin: 0;
+  font-size: 20px;
+  color: #f6edff;
+  font-variant-numeric: tabular-nums;
+}
+.report-key-results small {
+  display: block;
+  margin-top: 5px;
+  font-size: 12px;
+  color: #d6c0e5;
+}
+.report-journey {
+  display: flex;
+  gap: 18px;
+  padding: 0;
+  list-style: none;
+  flex-wrap: wrap;
+}
+.report-journey li {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 13px;
+}
+.report-journey span {
+  font-size: 12px;
+  color: #c5aed6;
+}
+.moon-report-footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  border-top: 1px solid var(--report-line);
+  flex-shrink: 0;
+}
+.moon-report-footer > span {
+  margin-right: auto;
+  font-size: 12px;
+  color: #d1bbdf;
+}
+.moon-report :focus-visible,
+.report-atlas :focus-visible {
+  outline: 2px solid #ffdf89;
+  outline-offset: -3px;
+}
+.moon-report ::selection,
+.report-atlas ::selection {
+  background: #a25eb1;
+  color: #fff;
+}
+.report-observations {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+.report-observations article {
+  border-top: 1px solid var(--report-line);
+  padding-top: 8px;
+}
+.report-observations h4 {
+  margin-top: 4px;
+}
+.report-observations dl {
+  font-size: 12px;
+}
+.report-observations dl > div {
+  margin-bottom: 8px;
+}
+.report-observations dt {
+  color: #c7aad9;
+}
+.report-observations dd {
+  margin: 3px 0 0;
+  overflow-wrap: anywhere;
+}
+.report-table-scroll {
+  overflow-x: auto;
+}
+.moon-report table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 13px;
+}
+.moon-report th,
+.moon-report td {
+  padding: 12px 10px;
+  border-bottom: 1px solid var(--report-line);
+}
+.moon-report caption {
+  text-align: left;
+  padding: 12px 0;
+  color: #d5bfe3;
+}
+.report-interpretation {
+  padding: 4px 0 14px;
+  border-bottom: 1px solid var(--report-line);
+}
+.report-resource-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  font-size: 13px;
+}
+.report-resource-list dd {
+  margin: 6px 0 0;
+  color: #f1dafc;
+}
+.report-resource-list dt {
+  color: #cbb3da;
+}
+.moon-report details {
+  border-top: 1px solid var(--report-line);
+  padding: 15px 0;
+}
+.moon-report summary {
+  min-height: 48px;
+  cursor: pointer;
+  font-size: 15px;
+  color: #edd2ff;
+}
+.moon-report a,
+.report-atlas a {
+  color: #f0b8fa;
+  text-underline-offset: 3px;
+}
+.report-atlas h3 {
+  font-size: 21px;
+}
+.report-atlas {
+  color: #f6edff;
+  font-family: Outfit, sans-serif;
+}
+.report-atlas-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 24px;
+}
+.report-layer-buttons {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.report-layer-buttons button[aria-pressed="true"] {
+  background: #633b76;
+  border-color: #d7ace7;
+}
+.report-reference-map {
+  width: 100%;
+  max-height: 390px;
+  aspect-ratio: 1;
+  display: block;
+  background: #100b20;
+  border-radius: 12px;
+}
+.report-map-controls {
+  display: flex;
+  gap: 8px;
+}
+.report-atlas label {
+  display: block;
+  color: #ead5f5;
+  font-size: 13px;
+}
+.report-atlas select {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  min-height: 48px;
+  margin-top: 8px;
+  color: #f4e4ff;
+  background: #2c1b3c;
+  border: 1px solid #a781be;
+  border-radius: 9px;
+  font: inherit;
+}
+.report-reference-values {
+  font-size: 13px;
+}
+.report-reference-values > div {
+  padding: 12px 0;
+  border-bottom: 1px solid #ad8bc844;
+}
+.report-reference-values dt {
+  color: #cfb8df;
+}
+.report-reference-values dd {
+  margin: 6px 0 0;
+}
+.report-reference-sources {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin: 12px 0;
+}
+.report-atlas details {
+  margin-top: 20px;
+}
+.report-atlas summary {
+  min-height: 48px;
+  cursor: pointer;
+}
+.return-main.is-debrief {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 12px 20px;
+}
+.return-main.is-debrief > .return-heading {
+  display: none;
+}
+.return-main.is-debrief > .moon-report {
+  flex: 1;
+}
+.saved-report-page {
+  height: 100%;
+  padding: 14px 22px;
+  min-height: 0;
+  background: #100b26;
+}
+.atlas-compatibility {
+  height: 100%;
+  overflow: auto;
+  padding: 20px 28px;
+  background: #1b1230;
+  color: #f6edff;
+  font-family: Outfit, sans-serif;
+}
+.atlas-compatibility > header {
+  max-width: 1100px;
+  margin: 0 auto 20px;
+}
+.atlas-compatibility .report-atlas {
+  max-width: 1200px;
+  margin: auto;
+}
+.atlas-compatibility button {
+  min-height: 48px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #643777;
+  color: #fff;
+  border: 1px solid #b68acb;
+  font: inherit;
+}
+@media (max-width: 1100px) {
+  .report-overview {
+    grid-template-columns: minmax(0, 1fr) 170px;
+    gap: 14px;
+  }
+  .moon-report-layout {
+    grid-template-columns: 175px minmax(0, 1fr);
+  }
+  .moon-report-content {
+    padding: 18px 20px;
+  }
+}
+@media (max-height: 720px) {
+  .moon-report-heading {
+    padding: 12px 18px;
+  }
+  .moon-report-heading h2 {
+    font-size: 24px;
+  }
+  .moon-report-content {
+    padding: 16px 20px;
+  }
+  .moon-report-content h3 {
+    margin-bottom: 12px;
+    font-size: 21px;
+  }
+  .moon-report-content p,
+  .moon-report-content li {
+    font-size: 13px;
+  }
+  .report-key-results > div {
+    padding: 10px 0;
+  }
+  .report-companion {
+    max-height: 260px;
+  }
+}
+@media (max-height: 450px) {
+  .return-main.is-debrief {
+    padding: 5px 10px;
+  }
+  .moon-report {
+    border-radius: 10px;
+  }
+  .moon-report-heading {
+    padding: 8px 12px;
+    gap: 10px;
+  }
+  .moon-report-heading h2 {
+    font-size: 20px;
+  }
+  .moon-report-heading p {
+    font-size: 11px;
+  }
+  .report-state {
+    font-size: 11px;
+    max-width: 120px;
+  }
+  .report-preview-note {
+    padding: 4px 12px;
+    font-size: 11px;
+  }
+  .moon-report-layout {
+    grid-template-columns: 145px minmax(0, 1fr);
+  }
+  .moon-report-sections {
+    padding: 6px;
+    gap: 2px;
+  }
+  .moon-report button,
+  .report-atlas button {
+    min-height: 42px;
+    padding: 7px 8px;
+    font-size: 12px;
+  }
+  .moon-report-content {
+    padding: 10px 14px;
+  }
+  .moon-report-content h3 {
+    font-size: 19px;
+  }
+  .moon-report-content h4 {
+    font-size: 16px;
+  }
+  .report-overview {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .report-companion {
+    display: none;
+  }
+  .report-key-results dd {
+    font-size: 17px;
+  }
+  .report-key-results > div {
+    padding: 8px 0;
+  }
+  .moon-report-footer {
+    padding: 4px 10px;
+    gap: 6px;
+  }
+  .moon-report-footer > span {
+    font-size: 10px;
+  }
+  .report-observations {
+    grid-template-columns: 1fr;
+  }
+  .report-atlas-layout {
+    gap: 12px;
+  }
+  .report-layer-buttons {
+    flex-direction: column;
+  }
+  .report-reference-map {
+    max-height: 240px;
+  }
+  .saved-report-page {
+    padding: 5px 8px;
+  }
+  .report-reference-values {
+    font-size: 12px;
+  }
+  .atlas-compatibility {
+    padding: 10px 16px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .moon-report button,
+  .report-atlas button {
+    transition: none;
+  }
+}
+.report-companion .conversation-actor {
+  position: relative;
+  inset: auto;
+  width: 100%;
+  height: 255px;
+  margin: 0;
+}
+.report-companion .conversation-actor canvas {
+  width: 100%;
+  height: 100%;
+}
+.report-companion figcaption {
+  display: none;
+}
+@media (max-height: 450px) {
+  .moon-report-content[data-section="overview"] > h3 {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .report-key-results {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .report-key-results > div {
+    display: block;
+    padding: 8px 0;
+  }
+  .report-key-results dt {
+    font-size: 11px;
+    min-height: 30px;
+  }
+  .report-key-results dd {
+    font-size: 15px;
+    margin-top: 4px;
+  }
+  .report-key-results small {
+    font-size: 11px;
+  }
+}

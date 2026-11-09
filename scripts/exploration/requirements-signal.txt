@@ -1,0 +1,5 @@
+numpy==2.0.2
+scipy==1.13.1
+numba==0.60.0
+spiceypy==6.0.0
+Pillow==10.4.0

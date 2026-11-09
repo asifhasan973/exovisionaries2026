@@ -54,7 +54,7 @@ export const APOLLO_ERA_EVENTS: NasaMissionEvent[] = [
       "Confirmed polar caps are primarily solid frozen CO2",
       "Covered 20% of Martian terrain",
     ],
-    nasaUrl: "https://www.nasa.gov/mission/mariner-6/",
+    nasaUrl: "https://science.nasa.gov/mission/mariner-6/",
   },
 
   // 1970
@@ -94,7 +94,7 @@ export const APOLLO_ERA_EVENTS: NasaMissionEvent[] = [
       "First craft to reach Jupiter escape velocity",
       "Carries Carl Sagan’s pictorial interstellar plaque",
     ],
-    nasaUrl: "https://www.nasa.gov/mission/pioneer-10/",
+    nasaUrl: "https://science.nasa.gov/mission/pioneer-10/",
   },
   {
     id: "apollo-17",
@@ -150,7 +150,7 @@ export const APOLLO_ERA_EVENTS: NasaMissionEvent[] = [
       "Discovered Jovian radiation is 10,000x Earth levels",
       "Charted Galilean moons Io, Europa, Ganymede, Callisto",
     ],
-    nasaUrl: "https://www.nasa.gov/mission/pioneer-10/",
+    nasaUrl: "https://science.nasa.gov/mission/pioneer-10/",
   },
 
   // 1975
@@ -170,7 +170,7 @@ export const APOLLO_ERA_EVENTS: NasaMissionEvent[] = [
       "Universal docking system engineering breakthrough",
       "Ended the Space Race through scientific cooperation",
     ],
-    nasaUrl: "https://www.nasa.gov/history/apollo-soyuz-test-project/",
+    nasaUrl: "https://www.nasa.gov/apollo-soyuz-test-project/",
   },
   {
     id: "viking-1-launch",
@@ -188,6 +188,6 @@ export const APOLLO_ERA_EVENTS: NasaMissionEvent[] = [
       "Automated biological chemistry labs",
       "Paved the way for modern robotic surface operations",
     ],
-    nasaUrl: "https://www.nasa.gov/mission/viking-1/",
+    nasaUrl: "https://science.nasa.gov/mission/viking-1/",
   },
 ];

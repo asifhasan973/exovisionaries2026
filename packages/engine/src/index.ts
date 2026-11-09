@@ -17,3 +17,5 @@ export * from "./physics/validation";
 
 // Loading & Asset Engine
 export * from "./loadingEngine";
+
+export * from "./atlas";

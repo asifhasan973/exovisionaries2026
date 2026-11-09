@@ -18,8 +18,7 @@ export const EARLY_DECADE_EVENTS: NasaMissionEvent[] = [
       "First US scientific satellite in space",
       "Weighed only 13.97 kg",
     ],
-    nasaUrl:
-      "https://www.nasa.gov/history/65-years-ago-explorer-1-first-satellite-launched-by-the-united-states/",
+    nasaUrl: "https://science.nasa.gov/mission/explorer-1/",
   },
   {
     id: "nasa-establishment",
@@ -37,7 +36,8 @@ export const EARLY_DECADE_EVENTS: NasaMissionEvent[] = [
       "Established purely civilian exploration doctrine",
       "Opened for operations on October 1, 1958",
     ],
-    nasaUrl: "https://www.nasa.gov/history/the-birth-of-nasa/",
+    nasaUrl:
+      "https://www.nasa.gov/history/60-years-ago-nasa-opens-for-business/",
   },
   {
     id: "project-mercury-inauguration",
@@ -55,7 +55,7 @@ export const EARLY_DECADE_EVENTS: NasaMissionEvent[] = [
       "Laid ground communication networks",
       "Developed heat shield ablation technology",
     ],
-    nasaUrl: "https://www.nasa.gov/mission/mercury/",
+    nasaUrl: "https://www.nasa.gov/project-mercury/",
   },
 
   // 1961
@@ -74,7 +74,7 @@ export const EARLY_DECADE_EVENTS: NasaMissionEvent[] = [
       "First pilot-controlled manual spacecraft attitude",
       "Splashdown safely in Atlantic Ocean",
     ],
-    nasaUrl: "https://www.nasa.gov/mission/mercury-redstone-3/",
+    nasaUrl: "https://www.nasa.gov/mission/mercury-redstone-3-freedom-7/",
   },
   {
     id: "jfk-moon-goal",
@@ -111,7 +111,7 @@ export const EARLY_DECADE_EVENTS: NasaMissionEvent[] = [
       "Manual fly-by-wire reentry attitude control",
       "Overcame faulty landing bag sensor alarm",
     ],
-    nasaUrl: "https://www.nasa.gov/mission/mercury-atlas-6/",
+    nasaUrl: "https://www.nasa.gov/mission/mercury-atlas-6-friendship-7/",
   },
   {
     id: "mariner-2",
@@ -129,7 +129,7 @@ export const EARLY_DECADE_EVENTS: NasaMissionEvent[] = [
       "Measured continuous solar wind stream",
       "Passed within 34,773 km of Venus",
     ],
-    nasaUrl: "https://www.nasa.gov/mission/mariner-2/",
+    nasaUrl: "https://science.nasa.gov/mission/mariner-2/",
   },
 
   // 1965
@@ -167,7 +167,7 @@ export const EARLY_DECADE_EVENTS: NasaMissionEvent[] = [
       "Measured thin CO2 atmospheric pressure (4-7 mbar)",
       "Passed within 9,846 km of Martian surface",
     ],
-    nasaUrl: "https://www.nasa.gov/mission/mariner-4/",
+    nasaUrl: "https://science.nasa.gov/mission/mariner-4/",
   },
 
   // 1968

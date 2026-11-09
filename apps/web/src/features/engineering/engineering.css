@@ -1,0 +1,602 @@
+.engineering-lab {
+  height: 100dvh;
+  overflow: auto;
+  background:
+    radial-gradient(ellipse at 85% 12%, #461a6260, transparent 55%), #100b26;
+  color: #f3eafb;
+  font-family: Outfit, system-ui, sans-serif;
+  color-scheme: dark;
+}
+.engineering-lab * {
+  box-sizing: border-box;
+}
+.engineering-lab button,
+.engineering-lab input {
+  font: inherit;
+}
+.engineering-lab button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  border: 1px solid #9365aa66;
+  background: #312040;
+  color: #f0def8;
+  border-radius: 8px;
+  padding: 9px 14px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.engineering-lab button:hover {
+  background: #472659;
+}
+.engineering-lab button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.engineering-lab :focus-visible {
+  outline: 3px solid #ffcf88;
+  outline-offset: 3px;
+}
+.eng-header {
+  min-height: 65px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 12px 3vw;
+  border-bottom: 1px solid #9970ae33;
+  background: #100b26e8;
+  position: sticky;
+  top: 0;
+  z-index: 3;
+}
+.eng-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #edc3f6;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.8px;
+}
+.eng-brand span {
+  font-size: 9px;
+  color: #b69bc9;
+  border-left: 1px solid #79568c;
+  padding-left: 14px;
+}
+.eng-badge {
+  margin-left: auto;
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: #8ce2c2;
+  border: 1px solid #8ce2c244;
+  border-radius: 5px;
+  padding: 7px 10px;
+}
+.engineering-lab main {
+  max-width: 1440px;
+  margin: auto;
+  padding: 32px 4vw;
+}
+.eng-intro {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: center;
+  margin-bottom: 28px;
+}
+.eng-eyebrow {
+  color: #eca3ed;
+  font-size: 10px;
+  letter-spacing: 1.8px;
+  font-weight: 700;
+}
+.eng-intro h1 {
+  font-size: clamp(28px, 3.4vw, 48px);
+  letter-spacing: -1.5px;
+  margin: 12px 0;
+}
+.engineering-lab p {
+  color: #d9c4e6;
+  line-height: 1.65;
+  font-size: 13px;
+}
+.eng-intro p {
+  font-size: 14px;
+  margin: 0;
+}
+.eng-intro-note {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  max-width: 300px;
+  color: #edc3f6;
+  font-size: 13px;
+}
+.eng-intro-note small {
+  display: block;
+  color: #b59acb;
+  font-size: 10px;
+  line-height: 1.6;
+  margin-top: 7px;
+}
+.eng-steps {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 5px;
+  border: 1px solid #9970ae33;
+  background: #211435;
+  padding: 6px;
+  border-radius: 11px;
+  margin-bottom: 20px;
+}
+.eng-steps button {
+  justify-content: flex-start;
+  background: transparent;
+  border-color: transparent;
+  font-weight: 600;
+}
+.eng-steps button > span {
+  font-size: 11px;
+  color: #c4a2d6;
+}
+.eng-steps button svg {
+  margin-left: auto;
+  opacity: 0.5;
+}
+.eng-steps button[aria-current] {
+  background: #ed8def19;
+  border-color: #ed8def66;
+  color: #f0c5f4;
+}
+.eng-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 20px;
+}
+.eng-workbench {
+  background: linear-gradient(150deg, #352149, #211435);
+  border: 1px solid #9970ae55;
+  border-radius: 14px;
+  padding: 28px;
+  min-width: 0;
+  min-height: 460px;
+}
+.engineering-lab h2 {
+  font-size: 23px;
+  letter-spacing: -0.6px;
+  margin: 12px 0;
+}
+.engineering-lab h3 {
+  font-size: 14px;
+  margin: 14px 0 8px;
+}
+.engineering-lab label {
+  display: block;
+  font-size: 11px;
+  color: #dac5e6;
+  margin: 14px 0;
+}
+.engineering-lab input {
+  display: block;
+  width: 100%;
+  border: 1px solid #9365aa88;
+  border-radius: 7px;
+  background: #130d28;
+  color: #f3eafb;
+  padding: 11px 12px;
+  margin-top: 7px;
+  font-size: 14px;
+  min-height: 42px;
+}
+.eng-input-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0 16px;
+}
+.eng-phase-table {
+  overflow-x: auto;
+}
+.engineering-lab table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 18px 0;
+  font-size: 12px;
+}
+.engineering-lab th,
+.engineering-lab td {
+  border-bottom: 1px solid #9970ae33;
+  padding: 12px 8px;
+  text-align: left;
+}
+.engineering-lab th {
+  color: #dcc5e5;
+  font-weight: 500;
+}
+.eng-phase-table input {
+  min-width: 72px;
+  margin: 0;
+}
+.eng-phase-table thead {
+  font-size: 10px;
+}
+.eng-mission-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin: 24px 0;
+}
+.eng-mission-cards article {
+  border: 1px solid #9970ae44;
+  border-radius: 9px;
+  padding: 16px;
+  background: #160f2b88;
+}
+.eng-mission-cards b {
+  color: #8ce2c2;
+  font-size: 12px;
+}
+.eng-mission-cards p {
+  font-size: 11px;
+}
+.eng-notice {
+  border-left: 3px solid #ffcf88;
+  background: #ffcf8808;
+  padding: 14px 16px;
+  margin: 18px 0;
+  color: #d8c9aa;
+  font-size: 12px;
+}
+.eng-notice p {
+  font-size: 12px;
+  margin: 7px 0 0;
+}
+.engineering-lab .eng-primary {
+  background: linear-gradient(110deg, #f27be9, #c947ef);
+  color: #1b1028;
+  border-color: #ed8def;
+  font-weight: 700;
+}
+.engineering-lab .eng-primary:hover {
+  background: linear-gradient(110deg, #ff9af2, #df70fa);
+}
+.eng-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+.eng-results {
+  border: 1px solid #8ce2c233;
+  border-radius: 14px;
+  background: #2b1b3c;
+  padding: 24px;
+  align-self: start;
+}
+.eng-result-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.eng-result-title h2 {
+  font-size: 18px;
+}
+.eng-result-title svg {
+  flex-shrink: 0;
+}
+.eng-result-title.good {
+  color: #8ce2c2;
+}
+.eng-result-title.warn {
+  color: #ffcf88;
+}
+.eng-muted {
+  font-size: 11px !important;
+  color: #bea5d1 !important;
+}
+.eng-metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px 12px;
+  margin: 25px 0;
+}
+.eng-metrics b {
+  display: block;
+  font-size: 24px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+.eng-metrics small {
+  font-size: 12px;
+  color: #b89ecb;
+}
+.eng-metrics span {
+  display: block;
+  font-size: 10px;
+  color: #bfa6d0;
+  margin-top: 6px;
+}
+.eng-diagnosis {
+  border-top: 1px solid #8ce2c222;
+  padding-top: 18px;
+}
+.eng-status {
+  color: #b3f2da !important;
+  font-size: 11px !important;
+}
+.eng-errors {
+  border: 1px solid #f9aa8466;
+  padding: 8px 16px;
+  border-radius: 8px;
+  margin-top: 15px;
+}
+.eng-errors p {
+  color: #ffcfb3;
+}
+.eng-chart {
+  margin: 22px 0;
+}
+.eng-chart svg {
+  display: block;
+  width: 100%;
+  max-height: 260px;
+  background: #160f2b;
+  border: 1px solid #9970ae44;
+  border-radius: 10px;
+}
+.eng-chart figcaption {
+  font-size: 10px;
+  line-height: 1.5;
+  color: #bea5d1;
+  margin-top: 8px;
+}
+.eng-method {
+  border-top: 1px solid #9970ae44;
+  margin-top: 22px;
+  padding: 16px 0;
+}
+.eng-method summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: #dcc5e5;
+  min-height: 42px;
+  padding: 10px 0;
+}
+.eng-method-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+}
+.eng-method a {
+  color: #8ce2c2;
+}
+.eng-empty {
+  text-align: center;
+  padding: 45px 10px;
+  color: #8ce2c2;
+}
+@media (max-width: 1000px) {
+  .eng-intro-note {
+    display: none;
+  }
+  .eng-workspace {
+    grid-template-columns: minmax(0, 1fr) 270px;
+  }
+  .eng-input-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .eng-workbench {
+    padding: 20px;
+  }
+  .eng-results {
+    padding: 18px;
+  }
+  .eng-brand span {
+    display: none;
+  }
+}
+@media (max-height: 450px) and (min-width: 600px) {
+  .engineering-lab {
+    overflow: hidden;
+  }
+  .eng-header {
+    min-height: 48px;
+    height: 48px;
+    padding: 3px 16px;
+  }
+  .eng-badge {
+    display: none;
+  }
+  .engineering-lab main {
+    height: calc(100dvh - 48px);
+    padding: 8px 16px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .eng-intro {
+    margin: 0 0 6px;
+  }
+  .eng-intro h1 {
+    font-size: 23px;
+    margin: 0;
+    letter-spacing: -0.6px;
+  }
+  .eng-intro p,
+  .eng-intro .eng-eyebrow {
+    display: none;
+  }
+  .eng-steps {
+    margin: 0 0 7px;
+    padding: 2px;
+  }
+  .eng-steps button {
+    padding: 5px 10px;
+  }
+  .eng-workspace {
+    flex: 1;
+    min-height: 0;
+    gap: 10px;
+    grid-template-columns: minmax(0, 1fr) 270px;
+  }
+  .eng-workbench,
+  .eng-results {
+    min-height: 0;
+    height: 100%;
+    overflow: auto;
+    padding: 14px;
+  }
+  .eng-method {
+    margin: 5px 0 0;
+    padding: 0;
+    max-height: 40%;
+    overflow: auto;
+  }
+  .eng-method summary {
+    min-height: 26px;
+    padding: 5px;
+  }
+  .eng-mission-cards {
+    gap: 8px;
+  }
+  .eng-mission-cards article {
+    padding: 10px;
+  }
+  .eng-intro-note {
+    display: none;
+  }
+}
+@media (max-width: 600px) {
+  .eng-header {
+    gap: 10px;
+  }
+  .eng-badge {
+    display: none;
+  }
+  .eng-workspace {
+    grid-template-columns: 1fr;
+  }
+  .eng-results {
+    order: -1;
+  }
+  .eng-metrics {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .eng-mission-cards,
+  .eng-method-grid {
+    grid-template-columns: 1fr;
+  }
+  .eng-steps button {
+    padding: 8px 4px;
+    gap: 5px;
+  }
+  .eng-steps button svg {
+    display: none;
+  }
+  .eng-intro h1 {
+    font-size: 29px;
+  }
+  .eng-header button {
+    font-size: 10px;
+  }
+  .eng-brand {
+    font-size: 10px;
+  }
+  .eng-input-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.eng-nasa a {
+  color: #b3f2da;
+  font-size: 12px;
+}
+.eng-data-card {
+  background: #160f2b88;
+  border: 1px solid #9970ae55;
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 18px;
+}
+.eng-data-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.eng-data-heading h3 {
+  margin: 0;
+}
+.eng-data-heading > span {
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: #eca3ed;
+}
+.eng-data-values {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 20px 0;
+}
+.eng-data-values b {
+  display: block;
+  font-size: clamp(16px, 2vw, 24px);
+  color: #8ce2c2;
+  font-variant-numeric: tabular-nums;
+}
+.eng-data-values small {
+  display: block;
+  font-size: 10px;
+  color: #cbb6da;
+  margin-top: 7px;
+}
+.eng-nasa select {
+  display: block;
+  width: 100%;
+  margin-top: 7px;
+  padding: 11px 12px;
+  min-height: 42px;
+  background: #130d28;
+  border: 1px solid #9365aa88;
+  border-radius: 7px;
+  color: #f3eafb;
+  font: inherit;
+}
+.eng-nasa input[type="range"] {
+  padding: 0;
+  accent-color: #ed8def;
+}
+.eng-nasa summary {
+  min-height: 42px;
+  cursor: pointer;
+  font-size: 12px;
+  color: #edc3f6;
+  padding: 10px 0;
+}
+.eng-nasa details {
+  margin-bottom: 14px;
+}
+.engineering-lab [hidden] {
+  display: none !important;
+}
+@media (max-height: 450px) and (min-width: 600px) {
+  .eng-data-card {
+    padding: 14px;
+  }
+  .eng-data-heading > span {
+    font-size: 8px;
+  }
+  .eng-data-values {
+    gap: 8px;
+  }
+  .eng-data-values b {
+    font-size: 17px;
+  }
+  .eng-steps button {
+    font-size: 11px;
+  }
+}

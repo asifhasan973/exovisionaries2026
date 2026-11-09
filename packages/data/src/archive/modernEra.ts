@@ -168,7 +168,7 @@ export const MODERN_ERA_EVENTS: NasaMissionEvent[] = [
       "First direct sampling of pristine interstellar medium",
       "Transmitting data across 22 light-hours distance",
     ],
-    nasaUrl: "https://www.nasa.gov/mission/voyager-1/",
+    nasaUrl: "https://science.nasa.gov/mission/voyager-1/",
   },
 
   // 2015
@@ -300,6 +300,7 @@ export const MODERN_ERA_EVENTS: NasaMissionEvent[] = [
       "Certified Commercial Crew public-private partnership",
       "Safe parachute splashdown in Gulf of Mexico",
     ],
-    nasaUrl: "https://www.nasa.gov/commercial-crew-program/",
+    nasaUrl:
+      "https://www.nasa.gov/humans-in-space/commercial-space/commercial-crew-program/",
   },
 ];
