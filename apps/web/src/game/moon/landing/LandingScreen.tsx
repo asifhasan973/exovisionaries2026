@@ -63,8 +63,12 @@ export function LandingScreen({
   const navigation = useStoryNavigation();
   const [notes, setNotes] = useState(false),
     [hint, setHint] = useState(false);
+  const [pressedInputs, setPressedInputs] = useState<Record<string, boolean>>(
+    {},
+  );
   const latest = useRef(l),
     held = useRef(new Set<string>());
+  const lastNextTrigger = useRef(0);
   useEffect(() => {
     latest.current = l;
   }, [l]);
@@ -77,6 +81,9 @@ export function LandingScreen({
     !l.paused &&
     !l.decisionPending &&
     !navigation?.reviewing;
+  const isLeft = playable && (l.direction < 0 || !!pressedInputs.left);
+  const isRight = playable && (l.direction > 0 || !!pressedInputs.right);
+  const isBrake = playable && (l.brake || !!pressedInputs.brake);
   const pad = LANDING_PADS.find((p) => p.id === l.target)!;
   const distance = pad.x - l.x,
     aligned = pad.safe && Math.abs(distance) <= LANDING_MODEL.padRadius;
@@ -120,19 +127,27 @@ export function LandingScreen({
   }, [dispatch]);
   const release = useCallback(() => {
     held.current.clear();
+    setPressedInputs({});
     controls();
   }, [controls]);
   useEffect(() => {
     if (!moving || l.paused || navigation?.reviewing) return;
-    let last = performance.now();
-    const timer = window.setInterval(() => {
-      const now = performance.now(),
-        elapsed = (now - last) / 1000;
+    let last = performance.now(),
+      accumulated = 0,
+      frameId = 0;
+    const stepTarget = 1 / 30;
+    const tick = (now: number) => {
+      const elapsed = Math.min(0.1, (now - last) / 1000);
       last = now;
-      if (!document.hidden && !isEngineFrozen())
-        dispatch({ type: "landing-tick", seconds: elapsed });
-    }, 50);
-    return () => clearInterval(timer);
+      accumulated += elapsed;
+      if (accumulated >= stepTarget && !document.hidden && !isEngineFrozen()) {
+        dispatch({ type: "landing-tick", seconds: accumulated });
+        accumulated = 0;
+      }
+      frameId = requestAnimationFrame(tick);
+    };
+    frameId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frameId);
   }, [moving, l.paused, l.stage, dispatch, navigation?.reviewing]);
   // The approach is one short cinematic; manual control begins after the terrain scan.
   useEffect(() => {
@@ -190,24 +205,36 @@ export function LandingScreen({
       )
         return;
       event.preventDefault();
-      if (held.current.has(input)) return;
+      if (event.repeat || held.current.has(input)) return;
       if (input === "left" || input === "right") {
         held.current.delete("pointer-left");
         held.current.delete("pointer-right");
       }
       held.current.add(input);
+      setPressedInputs((prev) => ({
+        ...prev,
+        [input]: true,
+        ...(input === "left"
+          ? { right: false }
+          : input === "right"
+            ? { left: false }
+            : {}),
+      }));
       controls();
     };
     const up = (event: KeyboardEvent) => {
       const input = keyFor(event.key.toLowerCase());
       if (input) {
+        event.preventDefault();
         held.current.delete(input);
+        setPressedInputs((prev) => ({ ...prev, [input]: false }));
         controls();
       }
     };
     const heldSet = held.current;
     const freeze = () => {
       heldSet.clear();
+      setPressedInputs({});
     };
     window.addEventListener("keydown", down);
     window.addEventListener("keyup", up);
@@ -219,6 +246,7 @@ export function LandingScreen({
     window.addEventListener("game-orientation-resume", release);
     return () => {
       heldSet.clear();
+      setPressedInputs({});
       window.removeEventListener("keydown", down);
       window.removeEventListener("keyup", up);
       window.removeEventListener("blur", pause);
@@ -255,27 +283,57 @@ export function LandingScreen({
     else if (l.stage === "failed") sound.playStagingThud();
     else if (l.decisionPending || danger) sound.playRadioBeep();
   }, [l.stage, l.decisionPending, danger, effects, navigation?.reviewing]);
-  const togglePilot = (input: "left" | "right" | "brake" | "stop") => {
-    if (!playable || isEngineFrozen()) return;
-    sound.setMuted(!effects);
-    sound.playClick();
-    if (input === "stop") {
-      ["left", "right", "pointer-left", "pointer-right"].forEach((key) =>
-        held.current.delete(key),
-      );
-    } else {
-      const key = `pointer-${input}`,
-        wasHeld = held.current.has(key);
-      if (input !== "brake") {
+  const engagePilot = useCallback(
+    (input: "left" | "right" | "brake") => {
+      if (!playable || isEngineFrozen()) return;
+      sound.setMuted(!effects);
+      sound.playClick();
+      navigator.vibrate?.(15);
+      if (input === "left" || input === "right") {
         held.current.delete("pointer-left");
         held.current.delete("pointer-right");
       }
-      if (wasHeld) held.current.delete(key);
-      else held.current.add(key);
-    }
+      held.current.add(`pointer-${input}`);
+      setPressedInputs((prev) => ({
+        ...prev,
+        [input]: true,
+        ...(input === "left"
+          ? { right: false }
+          : input === "right"
+            ? { left: false }
+            : {}),
+      }));
+      controls();
+    },
+    [playable, effects, controls],
+  );
+
+  const disengagePilot = useCallback(
+    (input: "left" | "right" | "brake") => {
+      held.current.delete(`pointer-${input}`);
+      setPressedInputs((prev) => ({ ...prev, [input]: false }));
+      controls();
+    },
+    [controls],
+  );
+
+  const stopPilot = useCallback(() => {
+    if (!playable || isEngineFrozen()) return;
+    sound.setMuted(!effects);
+    sound.playClick();
+    navigator.vibrate?.(25);
+    ["left", "right", "pointer-left", "pointer-right"].forEach((key) =>
+      held.current.delete(key),
+    );
+    setPressedInputs((prev) => ({ ...prev, left: false, right: false }));
     controls();
-  };
-  const next = () => {
+  }, [playable, effects, controls]);
+  const next = useCallback(() => {
+    const now = performance.now();
+    if (now - lastNextTrigger.current < 250) return;
+    lastNextTrigger.current = now;
+    sound.setMuted(!effects);
+    sound.playClick();
     release();
     setHint(false);
     document.getElementById("story-content")?.focus({ preventScroll: true });
@@ -288,7 +346,16 @@ export function LandingScreen({
       act({ type: "landing-restart" });
     else if (l.decisionPending) act({ type: "landing-continue" });
     else act({ type: l.paused ? "landing-resume" : "landing-pause" });
-  };
+  }, [
+    effects,
+    release,
+    l.stage,
+    l.mode,
+    l.decisionPending,
+    l.paused,
+    dispatch,
+    act,
+  ]);
   const nextLabel =
     l.stage === "ready"
       ? "Begin landing"
@@ -520,7 +587,13 @@ export function LandingScreen({
                 <kbd>Space</kbd>
                 <span>Slow down</span>
               </div>
-              <button className="landing-primary" onClick={next}>
+              <button
+                className="landing-primary"
+                onPointerDown={(e) => {
+                  if (e.button === 0) next();
+                }}
+                onClick={next}
+              >
                 <Play size={18} fill="currentColor" />
                 Begin landing
               </button>
@@ -583,14 +656,26 @@ export function LandingScreen({
                   </span>
                 </div>
               ) : null}
-              <button className="landing-primary" onClick={next}>
+              <button
+                className="landing-primary"
+                onPointerDown={(e) => {
+                  if (e.button === 0) next();
+                }}
+                onClick={next}
+              >
                 {l.stage === "landed" ? "Explore the Moon" : "Retry landing"}
                 <ArrowRight size={19} />
               </button>
             </div>
           ) : null}
           {l.paused && !l.decisionPending && !hint && !terminal ? (
-            <button className="landing-pause-overlay" onClick={next}>
+            <button
+              className="landing-pause-overlay"
+              onPointerDown={(e) => {
+                if (e.button === 0) next();
+              }}
+              onClick={next}
+            >
               <Play fill="currentColor" />
               Resume landing
             </button>
@@ -599,46 +684,88 @@ export function LandingScreen({
             <div className="landing-pilot-controls">
               <div className="landing-direction-controls">
                 <button
-                  onClick={() => togglePilot("left")}
+                  onPointerDown={(e) => {
+                    e.currentTarget.setPointerCapture?.(e.pointerId);
+                    engagePilot("left");
+                  }}
+                  onPointerUp={(e) => {
+                    try {
+                      e.currentTarget.releasePointerCapture?.(e.pointerId);
+                    } catch {}
+                    disengagePilot("left");
+                  }}
+                  onPointerCancel={() => disengagePilot("left")}
+                  onContextMenu={(e) => e.preventDefault()}
                   disabled={!playable}
-                  aria-label="Move left"
-                  aria-pressed={l.direction < 0}
+                  aria-label="Steer left (hold to fire)"
+                  aria-pressed={isLeft}
+                  className={isLeft ? "is-active" : ""}
                 >
                   <ArrowLeft />
                   <kbd>A</kbd>
                 </button>
                 <button
                   className="landing-stop"
-                  onClick={() => togglePilot("stop")}
+                  onPointerDown={(e) => {
+                    if (e.button === 0) stopPilot();
+                  }}
+                  onClick={stopPilot}
+                  onContextMenu={(e) => e.preventDefault()}
                   disabled={!playable}
-                  aria-label="Stop sideways movement"
+                  aria-label="Stop sideways drift"
                 >
                   <Crosshair size={19} />
                 </button>
                 <button
-                  onClick={() => togglePilot("right")}
+                  onPointerDown={(e) => {
+                    e.currentTarget.setPointerCapture?.(e.pointerId);
+                    engagePilot("right");
+                  }}
+                  onPointerUp={(e) => {
+                    try {
+                      e.currentTarget.releasePointerCapture?.(e.pointerId);
+                    } catch {}
+                    disengagePilot("right");
+                  }}
+                  onPointerCancel={() => disengagePilot("right")}
+                  onContextMenu={(e) => e.preventDefault()}
                   disabled={!playable}
-                  aria-label="Move right"
-                  aria-pressed={l.direction > 0}
+                  aria-label="Steer right (hold to fire)"
+                  aria-pressed={isRight}
+                  className={isRight ? "is-active" : ""}
                 >
                   <ArrowRight />
                   <kbd>D</kbd>
                 </button>
               </div>
               <button
-                className="landing-brake"
-                onClick={() => togglePilot("brake")}
+                className={`landing-brake ${isBrake ? "is-active" : ""}`}
+                onPointerDown={(e) => {
+                  e.currentTarget.setPointerCapture?.(e.pointerId);
+                  engagePilot("brake");
+                }}
+                onPointerUp={(e) => {
+                  try {
+                    e.currentTarget.releasePointerCapture?.(e.pointerId);
+                  } catch {}
+                  disengagePilot("brake");
+                }}
+                onPointerCancel={() => disengagePilot("brake")}
+                onContextMenu={(e) => e.preventDefault()}
                 disabled={!playable}
-                aria-label="Toggle descent brake"
-                aria-pressed={l.brake}
+                aria-label="Descent thruster (hold to fire)"
+                aria-pressed={isBrake}
               >
                 <ArrowDown />
-                <strong>{l.brake ? "Brake on" : "Slow descent"}</strong>
+                <strong>{isBrake ? "Thruster active" : "Slow descent"}</strong>
                 <kbd>Space</kbd>
               </button>
               <button
                 className="landing-pause"
                 aria-label={l.paused ? "Resume landing" : "Pause landing"}
+                onPointerDown={(e) => {
+                  if (e.button === 0) next();
+                }}
                 onClick={next}
               >
                 {l.paused ? <Play /> : <Pause />}

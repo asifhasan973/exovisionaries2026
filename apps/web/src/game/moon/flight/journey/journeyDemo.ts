@@ -140,7 +140,7 @@ export function createLandingDemo(
     { type: "flight-skip" },
     { type: "next" },
     { type: "journey-route", id: "balanced" },
-    { type: "journey-confirm-route" },
+    { type: "journey-confirm" },
     { type: "journey-skip" },
     { type: "next" },
     { type: "next" },

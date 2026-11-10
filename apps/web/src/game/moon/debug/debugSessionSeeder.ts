@@ -11,25 +11,47 @@ import { createStoryProgress, reduceStoryProgress } from "../core/progress";
 import { quickPreparation } from "../core/preparation";
 import {
   createWorkshopSession,
-  reduceMission,
   type WorkshopSession,
 } from "../workshop/lander/workshopSession";
 import { createBaseMission } from "../core/baseMission";
-import { scienceResult } from "../science/science";
-import {
-  createReadinessDemo,
-  createLandingDemo,
-  createSurfaceDemo,
-  createScienceDemo,
-  createIncidentDemo,
-  createReturnDemo,
-} from "../flight/journey/journeyDemo";
+import { createReadinessDemo } from "../flight/journey/journeyDemo";
+import { emptyLanding, LANDING_MODEL } from "../landing/landing";
+import { freshSurface } from "../surface/surface";
+import { freshScience } from "../science/science";
+import { freshReturn } from "../return/return";
+import { emptyIncidents } from "../hazards/incidents";
+import { randomInitialAngle, routeReport } from "../flight/journey/journey";
+import { FLIGHT_DURATION } from "../flight/launch/flight";
+import { departureResources } from "../shared/validation";
 
 export interface DebugSessionOptions {
   objective?: MoonObjective;
   gender?: PlayerGender;
   site?: ChoiceId;
   playerName?: string;
+}
+
+/**
+ * Returns all activities that canonically precede the given story step.
+ */
+export function getCompletedActivitiesUpToStep(
+  targetStepId: StoryStepId,
+): ActivityId[] {
+  const targetIndex = STORY_FLOW.findIndex((item) => item.id === targetStepId);
+  if (targetIndex <= 0) return [];
+
+  const completed: ActivityId[] = [];
+  for (let i = 0; i < targetIndex; i++) {
+    const item = STORY_FLOW[i];
+    if (
+      item.kind === "activity" &&
+      item.activity &&
+      !completed.includes(item.activity)
+    ) {
+      completed.push(item.activity);
+    }
+  }
+  return completed;
 }
 
 /**
@@ -85,6 +107,10 @@ function finalizeSession(
     selections.site = selections.site || site;
   }
 
+  const priorActivities = getCompletedActivitiesUpToStep(
+    targetStepId as StoryStepId,
+  );
+
   return {
     ...session,
     progress: {
@@ -95,6 +121,12 @@ function finalizeSession(
         options?.playerName ?? session.progress.playerName ?? playerName,
       playerGender: options?.gender ?? session.progress.playerGender ?? gender,
       selections,
+      completedActivities: [
+        ...new Set([
+          ...(session.progress.completedActivities ?? []),
+          ...priorActivities,
+        ]),
+      ],
     },
   };
 }
@@ -236,16 +268,16 @@ function createDebugSessionInternal(
       // Crew must be assigned so crewReport.complete is true and Next is enabled
       const scientistId =
         objective === "lunar-ice" ? "astrobiologist" : "geologist";
-      const assigned = reduceMission(session, {
-        type: "moon-assign-crew",
-        role: "scientist",
-        id: scientistId,
-      });
-      return reduceMission(assigned, {
-        type: "moon-assign-crew",
-        role: "support",
-        id: "robotics-specialist",
-      });
+      const supportId = "robotics-specialist";
+      session.moon = {
+        ...session.moon,
+        crew: {
+          ...session.moon.crew,
+          scientist: scientistId,
+          support: supportId,
+        },
+      };
+      return session;
     }
     return session;
   }
@@ -286,242 +318,412 @@ function createDebugSessionInternal(
     return session;
   }
 
-  // Module 06: Orbit & Trans-Lunar Injection
-  if (moduleNum === 6) {
-    let s = createReadinessDemo(gender, objective, "liftoff", {
+  // Helper to construct a robust base flight-ready session with all hardware, crew, and authorizations signed
+  const createFlightBase = () => {
+    const s = createReadinessDemo(gender, objective, "liftoff", {
       preparation: quickPreparation(objective),
       playerName,
     });
-    s = reduceMission(s, { type: "flight-skip" });
-    s = reduceMission(s, { type: "next" });
+    s.flight = {
+      ...s.flight,
+      signature: s.moon.designSignature,
+      status: "complete",
+      t: FLIGHT_DURATION,
+      events: ["booster", "fairing"],
+      skipped: true,
+    };
+    s.moon = {
+      ...s.moon,
+      launchSnapshot: {
+        signature: s.moon.designSignature,
+        platformId: s.moon.human.approved?.platformId ?? "crewed-lander",
+        equipmentIds: s.moon.human.approved?.equipment.map((p) => p.id) ?? [],
+        crew: s.moon.crew,
+      },
+    };
+    const res = departureResources(s.moon, s.preparation);
+    s.moon.checkpoints = [
+      {
+        id: "pre-departure",
+        phase: "validate",
+        designSignature: s.moon.designSignature,
+        resources: { ...res },
+      },
+    ];
+    return s;
+  };
+
+  // Module 06: Orbit & Trans-Lunar Injection
+  if (moduleNum === 6) {
+    const s = createFlightBase();
+    s.moon.phase =
+      validStepId === "earth-orbit"
+        ? "earth-orbit"
+        : validStepId === "moon-transfer"
+          ? "transfer"
+          : "lunar-orbit";
+    const report = routeReport(s.moon, "balanced");
 
     if (validStepId === "earth-orbit") {
+      s.moon.journey = {
+        ...s.moon.journey,
+        signature: s.moon.designSignature,
+        stage: "tli-burn",
+        version: 2,
+        route: "balanced",
+        angle: randomInitialAngle(),
+        throttle: 0.5,
+        firing: false,
+        dv: 0,
+        radialDv: 0,
+      };
       s.progress = { ...s.progress, stepId: "earth-orbit", lineIndex: 0 };
       return s;
     }
 
-    s = reduceMission(s, { type: "journey-route", id: "balanced" });
-    s = reduceMission(s, { type: "journey-confirm-route" });
-
     if (validStepId === "moon-transfer") {
+      s.moon.journey = {
+        ...s.moon.journey,
+        signature: s.moon.designSignature,
+        stage: "coast",
+        version: 2,
+        route: "balanced",
+        burns: ["tli"],
+        dv: report.tliMS,
+        radialDv: 0,
+        firing: false,
+      };
       s.progress = { ...s.progress, stepId: "moon-transfer", lineIndex: 0 };
       return s;
     }
 
-    s = reduceMission(s, { type: "journey-skip" });
-    s = reduceMission(s, { type: "next" });
+    s.moon.journey = {
+      ...s.moon.journey,
+      signature: s.moon.designSignature,
+      stage: "complete",
+      version: 2,
+      route: "balanced",
+      burns: ["tli", "loi"],
+      dv: report.tliMS + report.loiMS,
+      radialDv: 0,
+      firing: false,
+    };
     s.progress = { ...s.progress, stepId: "lunar-orbit", lineIndex: 0 };
     return s;
   }
 
   // Module 07: Lunar Descent & Touchdown
   if (moduleNum === 7) {
-    const session = createLandingDemo(gender, objective, {
-      preparation: quickPreparation(objective),
-      playerName,
-    });
-    session.progress = {
-      ...session.progress,
+    const s = createFlightBase();
+    s.moon.journey = {
+      ...s.moon.journey,
+      signature: s.moon.designSignature,
+      stage: "complete",
+      route: "balanced",
+      burns: ["tli", "loi"],
+    };
+    s.moon.landing = {
+      ...emptyLanding(),
+      signature: s.moon.designSignature,
+      stage: "descending",
+      mode: "medium",
+      target: "left",
+      hazardSeen: true,
+      decisionPending: false,
+      height: LANDING_MODEL.initialHeight,
+      vy: -5.5,
+      x: -12,
+      vx: 0,
+      fuelKg: 420,
+      throttle: 0.3,
+      commands: [],
+    };
+    s.moon.phase = "descent";
+    s.progress = {
+      ...s.progress,
       stepId: "lunar-descent",
       lineIndex: 0,
       milestones: {
         introduced: true,
-        celebrated: session.progress.milestones?.celebrated ?? [],
+        celebrated: s.progress.milestones?.celebrated ?? [],
       },
     };
-    return session;
+    return s;
   }
 
   // Module 08: Lunar Surface Deployment & Exploration
   if (moduleNum === 8) {
-    let s = createSurfaceDemo(gender, objective, {
-      preparation: quickPreparation(objective),
-      playerName,
-    });
+    const s = createFlightBase();
+    s.moon.journey = {
+      ...s.moon.journey,
+      signature: s.moon.designSignature,
+      stage: "complete",
+      route: "balanced",
+      burns: ["tli", "loi"],
+    };
+    s.moon.landing = {
+      ...emptyLanding(),
+      signature: s.moon.designSignature,
+      stage: "landed",
+      mode: "medium",
+      target: "left",
+      x: -45,
+      height: 0,
+      vx: 0,
+      vy: 0,
+      fuelKg: 350,
+      commands: [],
+    };
+    s.moon.phase = "surface";
 
-    if (validStepId === "lunar-surface") {
-      s.progress = { ...s.progress, stepId: "lunar-surface", lineIndex: 0 };
-      return s;
-    }
+    const isExplore = validStepId === "surface-explore";
+    const isReady = validStepId === "surface-ready";
 
-    s = reduceMission(s, { type: "surface-deploy" });
-    for (let i = 0; i < 40 && s.moon.surface.stage === "deploying"; i++) {
-      s = reduceMission(s, { type: "surface-tick", seconds: 0.25 });
-    }
-    s = reduceMission(s, { type: "next" });
-
-    if (validStepId === "surface-explore") {
-      s.progress = { ...s.progress, stepId: "surface-explore", lineIndex: 0 };
-      return s;
-    }
-
-    s = reduceMission(s, { type: "surface-select", edge: "base-ridge" });
-    s = reduceMission(s, { type: "surface-start" });
-    for (let i = 0; i < 50 && s.moon.surface.stage === "driving"; i++) {
-      s = reduceMission(s, { type: "surface-tick", seconds: 0.25 });
-    }
-    s = reduceMission(s, { type: "surface-arm" });
-    s = reduceMission(s, { type: "surface-select", edge: "ridge-edge" });
-    s = reduceMission(s, { type: "surface-start" });
-    for (let i = 0; i < 90 && s.moon.surface.stage === "driving"; i++) {
-      s = reduceMission(s, { type: "surface-tick", seconds: 0.25 });
-    }
-    s = reduceMission(s, { type: "surface-home" });
-    for (let i = 0; i < 90 && s.moon.surface.stage === "driving"; i++) {
-      s = reduceMission(s, { type: "surface-tick", seconds: 0.25 });
-    }
-    s = reduceMission(s, { type: "surface-charge" });
-    for (let i = 0; i < 40 && s.moon.surface.stage === "charging"; i++) {
-      s = reduceMission(s, { type: "surface-tick", seconds: 0.25 });
-    }
-    s = reduceMission(s, { type: "next" });
-    s.progress = { ...s.progress, stepId: "surface-ready", lineIndex: 0 };
+    s.moon.surface = {
+      ...freshSurface(s.moon),
+      signature: s.moon.designSignature,
+      stage: isExplore ? "driving" : "idle",
+      location: isReady ? "lookout" : "base",
+      deployed: validStepId !== "lunar-surface",
+      crewSheltered: true,
+      visited: isReady
+        ? objective === "lunar-geology"
+          ? ["base", "lookout"]
+          : ["base", "lookout", "edge"]
+        : ["base"],
+      traversed: isReady
+        ? objective === "lunar-geology"
+          ? ["base-lookout"]
+          : ["base-lookout", "lookout-edge"]
+        : [],
+      batteryWh: s.moon.resources.capacityWh || 800,
+    };
+    s.progress = {
+      ...s.progress,
+      stepId: validStepId as StoryStepId,
+      lineIndex: 0,
+    };
     return s;
   }
 
   // Module 09: Ice Drilling & Spectrometry Science
   if (moduleNum === 9) {
-    let s = createScienceDemo(gender, {
-      preparation: quickPreparation(objective),
-      playerName,
-    });
-
-    if (validStepId === "ice-science") {
-      s.progress = { ...s.progress, stepId: "ice-science", lineIndex: 0 };
-      return s;
-    }
-
-    s = reduceMission(s, { type: "science-program", program: "sample" });
-    s = reduceMission(s, { type: "science-start" });
-    for (
-      let i = 0;
-      i < 240 &&
-      !s.moon.science.hazards.pending &&
-      s.moon.science.phase !== "failed";
-      i++
-    ) {
-      s = reduceMission(s, { type: "science-tick", seconds: 0.25 });
-    }
-    if (s.moon.science.hazards.pending) {
-      s = reduceMission(s, {
-        type: "science-incident",
-        action: "continue-dust",
-      });
-    }
-    for (
-      let i = 0;
-      i < 1600 &&
-      [
-        "outbound",
-        "survey",
-        "drilling",
-        "analysis",
-        "returning",
-        "recovering",
-        "transmitting",
-      ].includes(s.moon.science.phase);
-      i++
-    ) {
-      s = reduceMission(s, { type: "science-tick", seconds: 0.25 });
-    }
-    if (s.moon.science.phase === "report") {
-      s = reduceMission(s, {
-        type: "science-claim",
-        finding: scienceResult(s.moon.science),
-      });
-      s = reduceMission(s, { type: "science-transmit" });
-    }
-    s = reduceMission(s, { type: "next" });
-    s.progress = { ...s.progress, stepId: "science-ready", lineIndex: 0 };
+    const s = createFlightBase();
+    s.moon.landing = {
+      ...emptyLanding(),
+      signature: s.moon.designSignature,
+      stage: "landed",
+      mode: "medium",
+      target: "left",
+      x: -45,
+      height: 0,
+      vx: 0,
+      vy: 0,
+      fuelKg: 350,
+      commands: [],
+    };
+    s.moon.phase = "surface";
+    s.moon.surface = {
+      ...freshSurface(s.moon),
+      signature: s.moon.designSignature,
+      stage: "idle",
+      location: "lookout",
+      deployed: true,
+      crewSheltered: true,
+      visited: ["base", "lookout"],
+      traversed: ["base-lookout"],
+      batteryWh: s.moon.resources.capacityWh || 800,
+    };
+    const isScienceReady = validStepId === "science-ready";
+    s.moon.science = {
+      ...freshScience(s.moon, s.preparation),
+      signature: s.moon.designSignature,
+      phase: isScienceReady ? "ready" : "survey",
+      target: "lookout",
+      program: "sample",
+      committed: isScienceReady,
+      fieldworkStopped: isScienceReady,
+      records: isScienceReady
+        ? [
+            {
+              id: "rec-lookout-01",
+              objective,
+              locationId: "lookout",
+              instrumentId: "nirvss",
+              depthCm: 35,
+              kind:
+                objective === "lunar-geology"
+                  ? "mineral-evidence"
+                  : "water-evidence",
+              confidence: "high",
+              points: 25,
+              transmitted: true,
+            },
+          ]
+        : [],
+      hazards: {
+        ...emptyIncidents(),
+        pending: null,
+        recovery: null,
+      },
+    };
+    s.progress = {
+      ...s.progress,
+      stepId: validStepId as StoryStepId,
+      lineIndex: 0,
+    };
     return s;
   }
 
   // Module 10: Surface Incident & Recovery
   if (moduleNum === 10) {
-    let s = createIncidentDemo(gender);
-    const science = s.moon.science;
-    if (science.hazards.pending) {
-      s = reduceMission(s, {
-        type: "science-incident",
-        action: "continue-dust",
-      });
-    }
-    for (
-      let i = 0;
-      i < 1600 &&
-      [
-        "outbound",
-        "survey",
-        "drilling",
-        "analysis",
-        "returning",
-        "recovering",
-        "transmitting",
-      ].includes(s.moon.science.phase);
-      i++
-    ) {
-      s = reduceMission(s, { type: "science-tick", seconds: 0.25 });
-    }
-    if (s.moon.science.phase === "report") {
-      s = reduceMission(s, {
-        type: "science-claim",
-        finding: scienceResult(s.moon.science),
-      });
-      s = reduceMission(s, { type: "science-transmit" });
-    }
-    s = reduceMission(s, { type: "next" }); // to science-ready
-    s = reduceMission(s, { type: "next" }); // to surface-recovery
-
-    if (validStepId === "surface-recovery") {
-      s.progress = { ...s.progress, stepId: "surface-recovery", lineIndex: 0 };
-      return s;
-    }
-
-    s = reduceMission(s, { type: "science-secure", item: "rover" });
-    s = reduceMission(s, { type: "science-secure", item: "data" });
-    for (let i = 0; i < 100 && s.moon.science.phase === "transmitting"; i++) {
-      s = reduceMission(s, { type: "science-tick", seconds: 0.25 });
-    }
-    s = reduceMission(s, { type: "science-secure", item: "crew" });
-    s = reduceMission(s, { type: "next" }); // to surface-secured
-    s.progress = { ...s.progress, stepId: "surface-secured", lineIndex: 0 };
+    const s = createFlightBase();
+    s.moon.landing = {
+      ...emptyLanding(),
+      signature: s.moon.designSignature,
+      stage: "landed",
+      mode: "medium",
+      target: "left",
+      x: -45,
+      height: 0,
+      vx: 0,
+      vy: 0,
+      fuelKg: 350,
+      commands: [],
+    };
+    s.moon.surface = {
+      ...freshSurface(s.moon),
+      signature: s.moon.designSignature,
+      stage: "idle",
+      location: "base",
+      deployed: true,
+      crewSheltered: true,
+      visited: ["base", "lookout"],
+      traversed: ["base-lookout"],
+      batteryWh: s.moon.resources.capacityWh || 800,
+    };
+    const secured = validStepId === "surface-secured";
+    s.moon.science = {
+      ...freshScience(s.moon, s.preparation),
+      signature: s.moon.designSignature,
+      committed: true,
+      fieldworkStopped: true,
+      phase: "ready",
+      records: [
+        {
+          id: "rec-lookout-01",
+          objective,
+          locationId: "lookout",
+          instrumentId: "nirvss",
+          depthCm: 35,
+          kind:
+            objective === "lunar-geology"
+              ? "mineral-evidence"
+              : "water-evidence",
+          confidence: "high",
+          points: 25,
+          transmitted: true,
+        },
+      ],
+      hazards: {
+        ...emptyIncidents(),
+        pending: null,
+        recovery: null,
+        roverParked: secured,
+        dataArchived: secured,
+        crewChecked: secured,
+      },
+    };
+    s.moon.phase = "surface";
+    s.progress = {
+      ...s.progress,
+      stepId: validStepId as StoryStepId,
+      lineIndex: 0,
+    };
     return s;
   }
 
   // Module 11: Crew Return & Mission Debrief
   if (moduleNum === 11) {
-    let s = createReturnDemo(gender);
-
-    if (validStepId === "crew-return") {
-      s.progress = { ...s.progress, stepId: "crew-return", lineIndex: 0 };
-      return s;
+    const s = createFlightBase();
+    s.moon.landing = {
+      ...emptyLanding(),
+      signature: s.moon.designSignature,
+      stage: "landed",
+      mode: "medium",
+      target: "left",
+      x: -45,
+      height: 0,
+      vx: 0,
+      vy: 0,
+      fuelKg: 350,
+      commands: [],
+    };
+    s.moon.surface = {
+      ...freshSurface(s.moon),
+      signature: s.moon.designSignature,
+      stage: "idle",
+      location: "base",
+      deployed: true,
+      crewSheltered: true,
+      visited: ["base", "lookout"],
+      traversed: ["base-lookout"],
+      batteryWh: s.moon.resources.capacityWh || 800,
+    };
+    s.moon.science = {
+      ...freshScience(s.moon, s.preparation),
+      signature: s.moon.designSignature,
+      committed: true,
+      fieldworkStopped: true,
+      phase: "ready",
+      records: [
+        {
+          id: "rec-lookout-01",
+          objective,
+          locationId: "lookout",
+          instrumentId: "nirvss",
+          depthCm: 35,
+          kind:
+            objective === "lunar-geology"
+              ? "mineral-evidence"
+              : "water-evidence",
+          confidence: "high",
+          points: 25,
+          transmitted: true,
+        },
+      ],
+      hazards: {
+        ...emptyIncidents(),
+        pending: null,
+        recovery: null,
+        roverParked: true,
+        dataArchived: true,
+        crewChecked: true,
+      },
+    };
+    const isDebrief = validStepId === "mission-debrief";
+    s.moon.phase = isDebrief ? "debrief" : "ascent";
+    s.moon.returnFlight = {
+      ...freshReturn(s.moon),
+      signature: s.moon.designSignature,
+      stage: isDebrief ? "splashdown" : "ready",
+      crewLocation: isDebrief ? "ocean" : "moon-and-orbit",
+      assisted: false,
+    };
+    if (isDebrief) {
+      s.moon.outcome = {
+        status: "success",
+        reasons: [
+          "All crew safely recovered",
+          "Scientific objectives achieved",
+        ],
+      };
     }
-
-    for (
-      let i = 0;
-      i < 600 && s.moon.returnFlight.stage !== "splashdown";
-      i++
-    ) {
-      const stage = s.moon.returnFlight.stage;
-      if (stage === "ready") {
-        s = reduceMission(s, { type: "return-action", action: "launch" });
-      } else if (stage === "rendezvous") {
-        s = reduceMission(s, { type: "return-action", action: "assist" });
-        s = reduceMission(s, { type: "return-action", action: "dock" });
-      } else if (stage === "docked") {
-        s = reduceMission(s, { type: "return-action", action: "depart" });
-      } else if (stage === "coast") {
-        s = reduceMission(s, { type: "return-action", action: "skip-coast" });
-      } else if (stage === "entry-ready") {
-        s = reduceMission(s, { type: "return-action", action: "shield" });
-      } else if (stage === "chute-ready") {
-        s = reduceMission(s, { type: "return-action", action: "chutes" });
-      } else {
-        s = reduceMission(s, { type: "return-tick", seconds: 0.5 });
-      }
-    }
-    s = reduceMission(s, { type: "next" }); // to mission-debrief
-    s.progress = { ...s.progress, stepId: "mission-debrief", lineIndex: 0 };
+    s.progress = {
+      ...s.progress,
+      stepId: validStepId as StoryStepId,
+      lineIndex: 0,
+    };
     return s;
   }
 

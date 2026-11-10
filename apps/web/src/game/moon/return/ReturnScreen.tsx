@@ -153,7 +153,54 @@ export function ReturnScreen({
       )
         return;
       let choice: ReturnAction | null = null;
-      if (r.stage === "rendezvous") {
+      if (r.stage === "burning") {
+        if (event.key === "ArrowLeft" || event.key.toLowerCase() === "a") {
+          event.preventDefault();
+          dispatch({
+            type: "return-burn-pilot",
+            angle: Math.max(-90, (r.burnAngle ?? 0) - 5),
+          });
+          return;
+        }
+        if (event.key === "ArrowRight" || event.key.toLowerCase() === "d") {
+          event.preventDefault();
+          dispatch({
+            type: "return-burn-pilot",
+            angle: Math.min(90, (r.burnAngle ?? 0) + 5),
+          });
+          return;
+        }
+        if (event.key === "ArrowUp" || event.key.toLowerCase() === "w") {
+          event.preventDefault();
+          dispatch({
+            type: "return-burn-pilot",
+            throttle: Math.min(
+              1,
+              Math.round(((r.burnThrottle ?? 0.5) + 0.05) * 100) / 100,
+            ),
+          });
+          return;
+        }
+        if (event.key === "ArrowDown" || event.key.toLowerCase() === "s") {
+          event.preventDefault();
+          dispatch({
+            type: "return-burn-pilot",
+            throttle: Math.max(
+              0,
+              Math.round(((r.burnThrottle ?? 0.5) - 0.05) * 100) / 100,
+            ),
+          });
+          return;
+        }
+        if (event.key === " ") {
+          event.preventDefault();
+          dispatch({
+            type: "return-burn-pilot",
+            firing: !r.burnFiring,
+          });
+          return;
+        }
+      } else if (r.stage === "rendezvous") {
         if (event.key === "ArrowLeft" || event.key.toLowerCase() === "a")
           choice = "left";
         else if (event.key === "ArrowRight" || event.key.toLowerCase() === "d")
@@ -169,7 +216,7 @@ export function ReturnScreen({
     };
     window.addEventListener("keydown", key);
     return () => window.removeEventListener("keydown", key);
-  }, [r, primary, reviewing, debrief, panel]);
+  }, [r, primary, reviewing, debrief, panel, dispatch]);
   const nextLabel = debrief
     ? "Mission home"
     : r.paused
@@ -412,6 +459,206 @@ export function ReturnScreen({
                     <h2>Splashdown!</h2>
                     <p>Three crew recovered. Data ready to review.</p>
                   </div>
+                ) : r.stage === "burning" ? (
+                  <div className="return-burning-console">
+                    <h2>Trans-Earth Injection Burn</h2>
+                    <p className="return-controls-guide">
+                      A/D align SPS engine · W/S throttle · hold Space to fire
+                    </p>
+
+                    {(() => {
+                      const angle = Math.max(
+                        -90,
+                        Math.min(90, r.burnAngle ?? 0),
+                      );
+                      const isAligned = Math.abs(angle) <= 8;
+                      const throttle = Math.max(
+                        0,
+                        Math.min(1, r.burnThrottle ?? 0.5),
+                      );
+                      const throttlePct = Math.round(throttle * 100);
+                      const currentDv = Math.max(
+                        0,
+                        r.burnDv ?? (r.frame / returnFrameLimit(r)) * 1200,
+                      );
+                      const reqDv = 1200;
+                      const vPct = Math.min(
+                        100,
+                        Math.round((currentDv / reqDv) * 100),
+                      );
+
+                      const beamWidthPct = (Math.abs(angle) / 90) * 50;
+                      const beamLeftPct = angle < 0 ? 50 - beamWidthPct : 50;
+
+                      return (
+                        <>
+                          <div
+                            className="journey-align-hud"
+                            role="group"
+                            aria-label="TEI alignment HUD"
+                          >
+                            <div className="journey-align-header">
+                              <span className="journey-hud-title">
+                                Trans-Earth Alignment
+                              </span>
+                              <span className="journey-angle-readout">
+                                {angle > 0 ? `+${angle}°` : `${angle}°`}
+                              </span>
+                              <span
+                                className={`journey-align-badge ${isAligned ? "is-aligned" : "is-misaligned"}`}
+                              >
+                                {isAligned
+                                  ? "ALIGNED 0° (±8°)"
+                                  : angle < -8
+                                    ? "STEER RIGHT → (D)"
+                                    : "← STEER LEFT (A)"}
+                              </span>
+                            </div>
+
+                            <div className="journey-align-scale">
+                              <div className="journey-align-track">
+                                <div
+                                  className={`journey-align-target-zone ${isAligned ? "is-active" : ""}`}
+                                />
+                                <div className="journey-align-center-line" />
+                                {Math.abs(angle) > 0.5 && (
+                                  <div
+                                    className={`journey-align-beam ${isAligned ? "is-aligned" : angle < 0 ? "is-left" : "is-right"}`}
+                                    style={{
+                                      left: `${beamLeftPct}%`,
+                                      width: `${beamWidthPct}%`,
+                                    }}
+                                  >
+                                    <div className="journey-align-tip" />
+                                  </div>
+                                )}
+                              </div>
+
+                              <input
+                                type="range"
+                                min="-90"
+                                max="90"
+                                step="1"
+                                value={angle}
+                                className="journey-align-slider"
+                                aria-label="Spacecraft alignment angle"
+                                onChange={(e) =>
+                                  dispatch({
+                                    type: "return-burn-pilot",
+                                    angle: Number(e.target.value),
+                                  })
+                                }
+                              />
+
+                              <div className="journey-scale-labels">
+                                <span>-90°</span>
+                                <span>-45°</span>
+                                <span className="is-zero">0° EARTH VECTOR</span>
+                                <span>+45°</span>
+                                <span>+90°</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div
+                            className="journey-throttle-hud"
+                            role="group"
+                            aria-label="TEI throttle scale"
+                          >
+                            <div className="journey-throttle-header">
+                              <span className="journey-hud-title">
+                                SPS Engine Throttle
+                              </span>
+                              <span className="journey-throttle-readout region-boost">
+                                {throttlePct}% ·{" "}
+                                {throttle <= 0.35
+                                  ? "Vernier Cutoff"
+                                  : throttle <= 0.7
+                                    ? "Cruise Trim"
+                                    : "High Boost"}
+                              </span>
+                            </div>
+                            <div className="journey-throttle-track-wrapper">
+                              <div className="journey-throttle-regions">
+                                <div className="region-band band-cutoff" />
+                                <div className="region-band band-precision" />
+                                <div className="region-band band-cruise" />
+                                <div className="region-band band-boost" />
+                              </div>
+                              <input
+                                type="range"
+                                min="0"
+                                max="1"
+                                step="0.02"
+                                value={throttle}
+                                className="journey-throttle-slider"
+                                aria-label="Engine throttle scale"
+                                onChange={(e) =>
+                                  dispatch({
+                                    type: "return-burn-pilot",
+                                    throttle: Number(e.target.value),
+                                  })
+                                }
+                              />
+                            </div>
+                            <div className="journey-throttle-labels">
+                              <span>0%</span>
+                              <span className="label-precision">
+                                10–35% VERNIER
+                              </span>
+                              <span className="label-cruise">
+                                35–70% CRUISE
+                              </span>
+                              <span className="label-boost">70–100% BOOST</span>
+                            </div>
+                          </div>
+
+                          <div
+                            className="journey-velocity-hud"
+                            role="group"
+                            aria-label="TEI Delta-V"
+                          >
+                            <div className="journey-velocity-header">
+                              <span className="journey-hud-title">
+                                Earth Return ΔV
+                              </span>
+                              <strong
+                                className={`journey-velocity-number ${currentDv >= 1200 ? "is-acquired" : ""}`}
+                              >
+                                {Math.round(currentDv)} / 1200 m/s ({vPct}%)
+                              </strong>
+                            </div>
+                            <div className="journey-velocity-gauge">
+                              <div
+                                className={`journey-velocity-fill ${currentDv >= 1200 ? "is-acquired" : ""}`}
+                                style={{
+                                  width: `${Math.min(100, (currentDv / reqDv) * 100)}%`,
+                                }}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="journey-pilot-actions">
+                            <button
+                              className="journey-fire"
+                              aria-pressed={!!r.burnFiring}
+                              disabled={r.paused}
+                              onClick={() =>
+                                dispatch({
+                                  type: "return-burn-pilot",
+                                  firing: !r.burnFiring,
+                                })
+                              }
+                            >
+                              {r.burnFiring
+                                ? "Cut SPS Engine (Space)"
+                                : "Fire SPS Engine (Space)"}
+                            </button>
+                          </div>
+                        </>
+                      );
+                    })()}
+                  </div>
                 ) : (
                   <div className="return-running">
                     <h2>{(TITLES as Record<string, string>)[r.stage]}</h2>
@@ -425,11 +672,9 @@ export function ReturnScreen({
                         ? `${((r.frame / returnFrameLimit(r)) * 3).toFixed(1)} / 3 travel days`
                         : r.stage === "ascending"
                           ? "Climbing to the orbiting spacecraft"
-                          : r.stage === "burning"
-                            ? "Engine firing · Earth course locked"
-                            : r.stage === "entry"
-                              ? "Heat shield protecting the crew"
-                              : "Parachutes deployed · descending to the ocean"}
+                          : r.stage === "entry"
+                            ? "Heat shield protecting the crew"
+                            : "Parachutes deployed · descending to the ocean"}
                     </p>
                   </div>
                 )}

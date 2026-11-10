@@ -138,6 +138,9 @@
   border-radius: 16px;
   background: #30203f;
   overflow: hidden;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 .crew-candidate.is-picked {
   outline: 3px solid #ffdb6f;
@@ -162,7 +165,14 @@
   color: #f6ecff;
   cursor: grab;
   touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
   user-select: none;
+}
+.moon-crew-pick * {
+  pointer-events: none;
+  -webkit-user-drag: none;
+  user-drag: none;
 }
 .moon-crew-pick:disabled {
   cursor: default;

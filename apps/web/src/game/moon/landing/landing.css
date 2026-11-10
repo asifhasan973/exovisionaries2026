@@ -465,12 +465,15 @@
   opacity: 0.45;
   cursor: default;
 }
-.landing-pilot-controls button[aria-pressed="true"] {
+.landing-pilot-controls button[aria-pressed="true"],
+.landing-pilot-controls button.is-active,
+.landing-pilot-controls button:active {
   background: #6b4c89;
   box-shadow:
     inset 0 0 0 1px #e4c2ff,
     0 0 20px #d2a0ff40;
   color: white;
+  transform: scale(0.96);
 }
 .landing-pilot-controls .landing-brake {
   min-width: 185px;
@@ -488,12 +491,15 @@
   color: #382340;
   border-color: #34253955;
 }
-.landing-pilot-controls .landing-brake[aria-pressed="true"] {
+.landing-pilot-controls .landing-brake[aria-pressed="true"],
+.landing-pilot-controls .landing-brake.is-active,
+.landing-pilot-controls .landing-brake:active {
   background: #b0f4d5;
   box-shadow:
     inset 0 0 0 1px #d3ffed,
     0 0 25px #87e7c740;
   color: #133e34;
+  transform: scale(0.96);
 }
 .landing-brake > svg {
   width: 18px;

@@ -51,6 +51,7 @@
 .site-navbar-pages {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 3px;
   min-width: 0;
   max-width: 100%;
@@ -81,7 +82,6 @@
 .site-navbar-pages a:hover {
   background: #dba3ef1a;
   color: #fff;
-  transform: scale(1.03);
 }
 .site-navbar-pages a:active,
 .site-navbar-brand:active {

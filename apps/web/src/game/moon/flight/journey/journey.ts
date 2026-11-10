@@ -316,7 +316,7 @@ function reduceJourneyCore(
     return j.version === 2 && !j.paused
       ? {
           ...j,
-          angle: Math.max(-180, Math.min(180, event.angle ?? j.angle ?? 0)),
+          angle: Math.max(-90, Math.min(90, event.angle ?? j.angle ?? 0)),
           throttle: Math.max(
             0,
             Math.min(1, event.throttle ?? j.throttle ?? 0.5),
@@ -329,19 +329,39 @@ function reduceJourneyCore(
     if (!report || j.paused || !j.stage.endsWith("burn")) return j;
     const arrival = j.stage === "loi-burn",
       required = arrival ? getLoiRequiredDv(j, report.loiMS) : report.tliMS;
-    const ok = arrival
-      ? Math.abs((j.dv ?? 0) - required) <= Math.max(60, required * 0.1) ||
-        (j.dv ?? 0) >= required * 0.94
-      : Math.hypot((j.dv ?? 0) - required, j.radialDv ?? 0) <= required * 0.015;
-    if (!ok)
+    const currentDv = j.dv ?? 0;
+    const isAligned = Math.abs(j.angle ?? 0) <= 8;
+
+    // Check overburn
+    if (currentDv > required * 1.008) {
       return {
         ...j,
         paused: true,
         firing: false,
-        feedback: arrival
-          ? "Orbit unsafe. Retry the arrival burn checkpoint."
-          : "Transfer missed. Retry departure; aim at the marker and match the required delta-v.",
+        feedback: `Overburn! Target velocity exceeded (${Math.round(currentDv)} / ${Math.round(required)} m/s). Trajectory unsafe — retry departure.`,
       };
+    }
+
+    if (!isAligned) {
+      return {
+        ...j,
+        feedback: `Craft misaligned (${j.angle ?? 0}°). Align anchor to center 0° target (±8°) before checking trajectory.`,
+      };
+    }
+
+    // Precise target acquisition window: within 0.992 to 1.008 * required
+    const ok =
+      currentDv >= required * 0.992 &&
+      currentDv <= required * 1.008 &&
+      isAligned;
+
+    if (!ok) {
+      return {
+        ...j,
+        feedback: `Target velocity not acquired yet (${Math.round(currentDv)} / ${Math.round(required)} m/s). Fire engine to reach required velocity.`,
+      };
+    }
+
     return {
       ...j,
       stage: arrival ? "complete" : "coast",
@@ -350,6 +370,7 @@ function reduceJourneyCore(
       firing: false,
       dv: arrival ? j.dv : 0,
       radialDv: arrival ? j.radialDv : 0,
+      feedback: null,
     };
   }
   if (event.type === "journey-route")
@@ -493,14 +514,39 @@ function reduceJourneyCore(
     const delta = g0 * isp * Math.log(mass / (mass - fuel)),
       a = ((j.angle ?? 0) * Math.PI) / 180;
     const isAligned = Math.abs(j.angle ?? 0) <= 8;
+    const newDv = (j.dv ?? 0) + (isAligned ? delta * Math.cos(a) : 0);
+    const newRadialDv = (j.radialDv ?? 0) + delta * Math.sin(a);
+    const required = arrival ? getLoiRequiredDv(j, route.loiMS) : route.tliMS;
+
+    // Overburn detection: if pilot failed to throttle down in terminal phase and exceeds target velocity
+    if (newDv > required * 1.008) {
+      return {
+        ...j,
+        elapsed: j.elapsed + seconds,
+        burnSeconds: (j.burnSeconds ?? 0) + seconds,
+        dv: newDv,
+        radialDv: newRadialDv,
+        ...(arrival ? { loiUsed: used + fuel } : { tliUsed: used + fuel }),
+        firing: false,
+        paused: true,
+        feedback: `Overburn! Target velocity exceeded (${Math.round(newDv)} / ${Math.round(required)} m/s). Throttle back to precision cutoff before engine cutoff. Retry departure.`,
+      };
+    }
+
+    // Precision auto-cutoff when accurately hitting target within ±0.4%
+    const autoCutoff = newDv >= required * 0.996 && newDv <= required * 1.004;
+
     return {
       ...j,
       elapsed: j.elapsed + seconds,
       burnSeconds: (j.burnSeconds ?? 0) + seconds,
-      dv: (j.dv ?? 0) + (isAligned ? delta * Math.cos(a) : 0),
-      radialDv: (j.radialDv ?? 0) + delta * Math.sin(a),
+      dv: newDv,
+      radialDv: newRadialDv,
       ...(arrival ? { loiUsed: used + fuel } : { tliUsed: used + fuel }),
-      firing: fuel > 0,
+      firing: autoCutoff ? false : fuel > 0,
+      feedback: autoCutoff
+        ? `Target velocity locked (${Math.round(newDv)} m/s). Press Check trajectory to proceed.`
+        : j.feedback,
     };
   }
   const window = ["tli-window", "loi-window"].includes(j.stage);

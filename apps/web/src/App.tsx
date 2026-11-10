@@ -88,16 +88,16 @@ export default function App() {
       if (debugRoute.id === "preview") {
         content = <ConversationPreview />;
       } else if (debugRoute.id === "archive") {
-        content = <ExactStory initialArchive={true} />;
+        content = <ExactStory key="archive" initialArchive={true} />;
       } else if (debugRoute.id === "rover-lab") {
         content = <RoverLabPreview />;
       } else {
-        content = <ExactStory initialHome={true} />;
+        content = <ExactStory key="home" initialHome={true} />;
       }
     } else if (debugRoute.type === "step") {
-      content = <ExactStory debugStepId={debugRoute.id} />;
+      content = <ExactStory key={debugRoute.id} debugStepId={debugRoute.id} />;
     } else {
-      content = <ExactStory />;
+      content = <ExactStory key="default" />;
     }
   } else {
     content = preview ? <ConversationPreview /> : <ExactStory />;

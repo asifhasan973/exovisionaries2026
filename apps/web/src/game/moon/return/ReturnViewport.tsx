@@ -324,13 +324,25 @@ export function ReturnViewport({
       ascent.rotation.set(0, 0, 0);
       ascent.position.set(-2, r.stage === "ascending" ? p * 10 : 0, 0);
       flame.visible = r.stage === "ascending";
-      burn.visible = r.stage === "burning";
+      burn.visible = r.stage === "burning" && r.burnFiring !== false;
       heat.visible = r.stage === "entry";
       parachutes.visible = r.stage === "chutes";
       const flicker = gentle ? 1 : 1 + Math.sin(r.frame * 2) * 0.1;
       flame.scale.y = flicker;
-      burn.scale.y = flicker;
-      csm.rotation.set(0, 0, -Math.PI / 2);
+
+      const teiThrottle = r.burnThrottle ?? 0.5;
+      burn.scale.set(
+        teiThrottle,
+        flicker * (0.6 + teiThrottle * 0.8),
+        teiThrottle,
+      );
+
+      const teiAngleRad = ((r.burnAngle ?? 0) * Math.PI) / 180;
+      csm.rotation.set(
+        0,
+        0,
+        -Math.PI / 2 + (r.stage === "burning" ? teiAngleRad : 0),
+      );
       csm.position.set(-3, 0, 0);
       capsule.rotation.set(0, 0, 0);
       capsule.position.set(

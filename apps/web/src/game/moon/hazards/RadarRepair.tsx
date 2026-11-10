@@ -47,12 +47,14 @@ export function RadarRepair({
         aria-label="Repair disconnected sensor"
       >
         <button
-          className={connected ? "is-connected" : "is-unplugged"}
+          className={`flex-col ${connected ? "is-connected" : "is-unplugged"}`}
           disabled={connecting || connected}
           onClick={connect}
         >
-          {connected ? <Check size={24} /> : <Zap size={24} />}
-          <strong>Landing radar</strong>
+          <span>
+            {connected ? <Check size={24} /> : <Zap size={24} />}
+            <strong>Landing radar</strong>
+          </span>
           <span>
             {connected
               ? "Online"
@@ -184,6 +186,7 @@ export function RadarRepair({
             strokeWidth="9"
             fill="none"
             strokeLinecap="round"
+            className="radar-cable"
           />
           <g className="radar-plug">
             <rect

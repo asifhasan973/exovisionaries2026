@@ -62,7 +62,13 @@ export type ReturnEvent =
   | { type: "return-speed"; speed: number }
   | { type: "return-mode"; mode: "guided" | "challenge" }
   | { type: "return-hint" }
-  | { type: "return-new-attempt" };
+  | { type: "return-new-attempt" }
+  | {
+      type: "return-burn-pilot";
+      angle?: number;
+      throttle?: number;
+      firing?: boolean;
+    };
 type ReturnCommand =
   | { type: "action"; action: ReturnAction }
   | { type: "advance"; frames: number }
@@ -86,6 +92,10 @@ export interface ReturnState {
   serviceUsedKg: number;
   crewLocation:
     "moon-and-orbit" | "ascent-and-orbit" | "command-module" | "ocean";
+  burnAngle?: number;
+  burnThrottle?: number;
+  burnDv?: number;
+  burnFiring?: boolean;
   feedback:
     | "ready"
     | "ascending"
@@ -123,6 +133,10 @@ export const emptyReturn = (): ReturnState => ({
   ascentUsedKg: 0,
   serviceUsedKg: 0,
   crewLocation: "moon-and-orbit",
+  burnAngle: 0,
+  burnThrottle: 0.5,
+  burnDv: 0,
+  burnFiring: false,
   feedback: "ready",
   commands: [],
 });
@@ -324,7 +338,16 @@ function action(
     }
   }
   if (a === "depart" && r.stage === "docked")
-    return { ...r, stage: "burning", frame: 0, feedback: "burning" };
+    return {
+      ...r,
+      stage: "burning",
+      frame: 0,
+      burnAngle: 0,
+      burnThrottle: 0.5,
+      burnDv: 0,
+      burnFiring: true,
+      feedback: "burning",
+    };
   if (a === "skip-coast" && r.stage === "coast")
     return advance(r, RETURN_MODEL.coastFrames - r.frame, moon, true);
   if (r.stage === "entry-ready") {
@@ -440,6 +463,21 @@ export function reduceReturn(
     return ["ready", "rendezvous"].includes(r.stage)
       ? record(r, { type: "mode", mode: e.mode }, moon)
       : r;
+  if (e.type === "return-burn-pilot") {
+    if (r.stage !== "burning") return r;
+    return {
+      ...r,
+      burnAngle:
+        e.angle !== undefined
+          ? Math.max(-90, Math.min(90, e.angle))
+          : (r.burnAngle ?? 0),
+      burnThrottle:
+        e.throttle !== undefined
+          ? Math.max(0, Math.min(1, e.throttle))
+          : (r.burnThrottle ?? 0.5),
+      burnFiring: e.firing !== undefined ? e.firing : r.burnFiring,
+    };
+  }
   if (e.type === "return-action")
     return r.paused ? r : record(r, { type: "action", action: e.action }, moon);
   if (
@@ -450,6 +488,24 @@ export function reduceReturn(
     e.seconds <= 0
   )
     return r;
+
+  if (r.stage === "burning" && r.burnFiring) {
+    const isAligned = Math.abs(r.burnAngle ?? 0) <= 8;
+    if (isAligned) {
+      const addDv =
+        (1200 / RETURN_MODEL.burnSeconds) *
+        Math.min(e.seconds, 0.5) *
+        (r.burnThrottle ?? 0.5) *
+        2;
+      const nextDv = Math.min(1200, (r.burnDv ?? 0) + addDv);
+      r = {
+        ...r,
+        burnDv: nextDv,
+        burnFiring: nextDv < 1200,
+      };
+    }
+  }
+
   const total = r.remainder + Math.min(e.seconds, 0.5) * r.speed,
     frames = Math.floor((total + 1e-8) / RETURN_MODEL.step);
   const next = frames ? record(r, { type: "advance", frames }, moon) : r;

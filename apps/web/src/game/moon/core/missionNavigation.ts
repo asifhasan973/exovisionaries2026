@@ -206,41 +206,6 @@ export function advanceMissionSkip(source: WorkshopSession): WorkshopSession {
   );
   if (currentStep.kind === "endpoint") return source;
 
-  let s = source;
-  if (currentStep.kind === "name") {
-    s = {
-      ...s,
-      progress: reduceStoryProgress(s.progress, {
-        type: "set-name",
-        name: s.progress.playerName || "Explorer",
-        gender: s.progress.playerGender,
-      }),
-    };
-  }
-  if (currentStep.kind === "choice") {
-    const choice =
-      s.progress.selections[currentStep.choiceKey] ||
-      currentStep.options.find((option) => option.available)!.id;
-    s = {
-      ...s,
-      progress: reduceStoryProgress(s.progress, {
-        type: "select",
-        choiceId: choice,
-      }),
-    };
-  }
-
-  const nextProgress = reduceStoryProgress(s.progress, {
-    type: currentStep.kind === "conversation" ? "skip-briefing" : "next",
-  });
-
-  if (
-    nextProgress.stepId !== source.progress.stepId ||
-    nextProgress.lineIndex !== source.progress.lineIndex
-  ) {
-    return { ...s, progress: nextProgress };
-  }
-
   const currentIndex = STORY_FLOW.findIndex(
     (item) => item.id === currentStep.id,
   );
@@ -255,17 +220,63 @@ export function advanceMissionSkip(source: WorkshopSession): WorkshopSession {
     site: source.progress.selections.site as ChoiceId | undefined,
   });
   if (!seeded) return source;
+
+  // Build merged selections preserving player decisions
+  const selections = {
+    ...seeded.progress.selections,
+    ...source.progress.selections,
+  };
+  if (currentStep.kind === "choice" && !selections[currentStep.choiceKey]) {
+    const defaultOption = currentStep.options.find((o) => o.available)?.id;
+    if (defaultOption) {
+      selections[currentStep.choiceKey] = defaultOption;
+    }
+  }
+
+  // Ensure current step's activity is marked complete if applicable
+  const completed = new Set(seeded.progress.completedActivities ?? []);
+  for (const act of source.progress.completedActivities ?? []) {
+    completed.add(act);
+  }
+  if (currentStep.kind === "activity" && currentStep.activity) {
+    completed.add(currentStep.activity);
+  }
+  if (currentStep.id === "crew-selection") {
+    completed.add("crew-selection");
+    completed.add("crew-plan");
+  }
+
+  const effectiveObjective =
+    source.moon?.objective ||
+    (source.progress.selections.objective as MoonObjective) ||
+    "lunar-ice";
+  const defaultScientist =
+    effectiveObjective === "lunar-ice" ? "astrobiologist" : "geologist";
+  const defaultSupport = "robotics-specialist";
+  const mergedCrew = {
+    ...seeded.moon.crew,
+    scientist:
+      source.moon?.crew?.scientist ||
+      seeded.moon?.crew?.scientist ||
+      defaultScientist,
+    support:
+      source.moon?.crew?.support ||
+      seeded.moon?.crew?.support ||
+      defaultSupport,
+  };
+
   return {
     ...seeded,
+    moon:
+      targetStep.module >= 3 && targetStep.id !== "crew-selection"
+        ? { ...seeded.moon, crew: mergedCrew }
+        : seeded.moon,
     progress: {
       ...seeded.progress,
       playerName: source.progress.playerName || seeded.progress.playerName,
       playerGender:
         source.progress.playerGender ?? seeded.progress.playerGender,
-      selections: {
-        ...seeded.progress.selections,
-        ...source.progress.selections,
-      },
+      selections,
       history: [
         ...source.progress.history,
         {
@@ -273,6 +284,7 @@ export function advanceMissionSkip(source: WorkshopSession): WorkshopSession {
           lineIndex: source.progress.lineIndex,
         },
       ],
+      completedActivities: [...completed],
       milestones: {
         ...seeded.progress.milestones,
         introduced: true,
