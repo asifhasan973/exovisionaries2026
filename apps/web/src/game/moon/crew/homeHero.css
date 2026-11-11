@@ -149,3 +149,45 @@
     width: 12px;
   }
 }
+
+.mission-home .home-completed-summary {
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid #b697d52e;
+  display: grid;
+  gap: 6px;
+  max-width: 48ch;
+}
+.mission-home .home-completed-summary strong {
+  color: var(--mint);
+  font-size: 14px;
+}
+.mission-home .home-completed-summary span,
+.mission-home .home-completed-summary p {
+  color: var(--lavender);
+  font-size: 12px;
+  line-height: 1.5;
+  margin: 0;
+}
+@media (max-height: 650px) {
+  .mission-home .home-completed-summary {
+    margin-top: 12px;
+    padding-top: 10px;
+    gap: 4px;
+  }
+}
+@media (max-height: 450px) {
+  .mission-home .home-completed-summary {
+    margin-top: 4px;
+    padding-top: 7px;
+    gap: 2px;
+  }
+  .mission-home .home-completed-summary strong {
+    font-size: 12px;
+  }
+  .mission-home .home-completed-summary span,
+  .mission-home .home-completed-summary p {
+    font-size: 11px;
+    line-height: 1.3;
+  }
+}

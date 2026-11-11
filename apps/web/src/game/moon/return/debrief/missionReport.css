@@ -1,5 +1,9 @@
+/* Mission report styles remain separate from archive and debug surfaces. */
 .moon-report {
-  --report-line: #ad8bc844;
+  --report-line: #b99aca40;
+  --report-text: #f6edff;
+  --report-muted: #d4bfdc;
+  --report-accent: #ed8def;
   display: flex;
   flex-direction: column;
   min-height: 0;
@@ -7,202 +11,291 @@
   max-width: 1680px;
   width: 100%;
   margin: 0 auto;
-  color: #f6edff;
+  color: var(--report-text);
   background: #1b1230;
   border: 1px solid var(--report-line);
   border-radius: 16px;
   overflow: hidden;
   font-family: Outfit, system-ui, sans-serif;
+  color-scheme: dark;
 }
 .moon-report *,
 .report-atlas * {
   box-sizing: border-box;
 }
-.moon-report-heading {
+.moon-report .moon-report-heading {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
-  padding: 20px 24px;
-  border-bottom: 1px solid var(--report-line);
+  gap: 24px;
+  flex-shrink: 0;
+  padding: clamp(14px, 2vh, 24px) clamp(18px, 2.5vw, 36px);
 }
-.moon-report-heading h2 {
+.moon-report .moon-report-heading h2 {
   margin: 0 0 5px;
-  color: #f6edff;
+  color: var(--report-text);
   font:
-    500 28px Fredoka,
+    500 clamp(22px, 2vw, 30px)/1.15 Fredoka,
     sans-serif;
+  letter-spacing: -0.02em;
 }
-.moon-report-heading p {
+.moon-report .moon-report-heading p {
   margin: 0;
-  font-size: 13px;
-  color: #d8c4e6;
+  font-size: 14px;
+  color: var(--report-muted);
 }
-.report-state {
-  font-size: 13px;
-  color: #b6edda;
-  max-width: 210px;
-}
-.report-preview-note {
-  margin: 0;
-  padding: 7px 24px;
-  background: #352348;
-  color: #ffdfad;
+.moon-report .report-record-context {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+  text-align: right;
+  color: var(--report-muted);
   font-size: 12px;
 }
-.moon-report-layout {
-  display: grid;
-  grid-template-columns: 200px minmax(0, 1fr);
+.moon-report .report-state {
+  color: #b6edda;
+  font-size: 13px;
+}
+.moon-report .report-preview-note {
+  margin: 0;
+  padding: 6px clamp(18px, 2.5vw, 36px);
+  background: #382342;
+  color: #ffdfad;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+.moon-report .moon-report-layout {
+  display: flex;
+  flex-direction: column;
   flex: 1;
   min-height: 0;
 }
-.moon-report-sections {
+.moon-report .moon-report-sections {
   display: flex;
-  flex-direction: column;
-  gap: 5px;
-  padding: 16px 12px;
-  border-right: 1px solid var(--report-line);
-  overflow: auto;
+  gap: clamp(4px, 1vw, 16px);
+  flex-shrink: 0;
+  padding: 0 clamp(12px, 2vw, 28px);
+  border-bottom: 1px solid var(--report-line);
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #a67db9 #241731;
 }
 .moon-report button,
 .report-atlas button {
   min-height: 48px;
   border: 1px solid #a97dc05c;
   border-radius: 10px;
-  padding: 9px 12px;
+  padding: 9px 14px;
   background: #352047;
   color: #f6e6ff;
   font:
-    500 13px Outfit,
+    500 14px Outfit,
     sans-serif;
   cursor: pointer;
-  transition: background 180ms ease-out;
+  transition:
+    background 180ms ease-out,
+    border-color 180ms ease-out;
 }
 .moon-report button:hover,
 .report-atlas button:hover {
   background: #50305f;
+}
+.moon-report button:active {
+  transform: translateY(1px);
 }
 .moon-report button:disabled,
 .report-atlas button:disabled {
   opacity: 0.5;
   cursor: default;
 }
-.moon-report-sections button {
-  text-align: left;
+.moon-report .moon-report-sections button {
+  position: relative;
+  white-space: nowrap;
+  min-width: 90px;
+  text-align: center;
   background: transparent;
-  border-color: transparent;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  border-radius: 7px 7px 0 0;
+  color: var(--report-muted);
 }
-.moon-report-sections button[aria-current] {
-  color: #fff3ff;
-  border-color: #ac7dc0;
-  background: #593368;
+.moon-report .moon-report-sections button:hover {
+  background: #352047;
 }
-.moon-report-content {
+.moon-report .moon-report-sections button[aria-current] {
+  color: var(--report-text);
+  border-bottom-color: var(--report-accent);
+  background: #382245;
+}
+.moon-report .moon-report-content {
+  flex: 1;
   overflow: auto;
   min-width: 0;
   min-height: 0;
-  padding: 22px 28px;
+  padding: clamp(18px, 2.7vh, 30px) clamp(18px, 2.5vw, 36px);
   overscroll-behavior: contain;
   scrollbar-width: thin;
   scrollbar-color: #a67db9 #241731;
+  scrollbar-gutter: stable;
 }
-.moon-report-content h3 {
+.moon-report .moon-report-content h3 {
   margin: 0 0 18px;
   font:
-    500 23px Fredoka,
+    500 23px/1.2 Fredoka,
     sans-serif;
-  color: #f6edff;
+  color: var(--report-text);
 }
-.moon-report-content h4 {
-  font-size: 17px;
+.moon-report .moon-report-content h4 {
+  font-size: 18px;
   line-height: 1.35;
-  margin: 24px 0 8px;
+  margin: 26px 0 10px;
   color: #ead4f8;
+  font-weight: 600;
+  text-wrap: balance;
 }
-.moon-report-content p,
-.moon-report-content li,
+.moon-report .moon-report-content p,
+.moon-report .moon-report-content li,
 .report-atlas p {
-  font-size: 14px;
-  line-height: 1.65;
+  font-size: 15px;
+  line-height: 1.6;
   color: #ddcfe8;
   max-width: 72ch;
 }
-.moon-report-content li {
-  margin-bottom: 12px;
+.moon-report .moon-report-content p + p {
+  margin-top: 10px;
 }
-.report-overview {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 240px;
-  gap: 26px;
+.moon-report .moon-report-content li {
+  margin-bottom: 10px;
 }
-.report-overview h4 {
+.moon-report .moon-report-content .report-section-lead {
   margin-top: 0;
-  font-size: 22px;
+  font-size: 23px;
 }
-.report-companion {
-  max-height: 330px;
-  min-width: 0;
-  overflow: hidden;
+.moon-report .report-overview h4 {
+  margin: 0 0 10px;
+  font:
+    500 clamp(24px, 2.6vw, 36px)/1.2 Fredoka,
+    sans-serif;
+  max-width: 44ch;
+  color: #f5e6fb;
+  letter-spacing: -0.02em;
 }
-.report-companion .workshop-engineer {
-  min-height: 0;
-  height: 100%;
-}
-.report-key-results {
-  margin: 18px 0 0;
-}
-.report-key-results > div {
+.moon-report .report-key-results {
   display: grid;
-  grid-template-columns: minmax(140px, 1fr) minmax(0, 1fr);
-  gap: 16px;
-  padding: 13px 0;
-  border-top: 1px solid var(--report-line);
+  grid-template-columns: 0.9fr 0.9fr 1.2fr;
+  gap: 24px;
+  margin: 24px 0 0;
+  padding: 20px 0;
+  border-block: 1px solid var(--report-line);
 }
-.report-key-results dt {
-  font-size: 13px;
-  color: #d5bfe3;
+.moon-report .report-key-results > div {
+  min-width: 0;
 }
-.report-key-results dd {
-  margin: 0;
-  font-size: 20px;
+.moon-report .report-key-results dt {
+  font-size: 14px;
+  color: var(--report-muted);
+}
+.moon-report .report-key-results dd {
+  margin: 8px 0 0;
+  font:
+    500 clamp(23px, 2.6vw, 34px)/1.15 Fredoka,
+    sans-serif;
   color: #f6edff;
   font-variant-numeric: tabular-nums;
 }
-.report-key-results small {
+.moon-report .report-key-results small {
   display: block;
-  margin-top: 5px;
-  font-size: 12px;
-  color: #d6c0e5;
+  margin-top: 7px;
+  font:
+    400 13px/1.4 Outfit,
+    sans-serif;
+  color: var(--report-muted);
 }
-.report-journey {
-  display: flex;
-  gap: 18px;
+.moon-report .report-journey {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0;
   padding: 0;
   list-style: none;
-  flex-wrap: wrap;
+  margin: 20px 0 22px;
 }
-.report-journey li {
+.moon-report .report-journey li {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 5px;
-  font-size: 13px;
+  padding: 20px 12px 0 0;
+  font-size: 14px;
+  border-top: 1px solid #a08aad66;
 }
-.report-journey span {
+.moon-report .report-journey li::before {
+  content: "";
+  position: absolute;
+  top: -5px;
+  left: 0;
+  width: 9px;
+  height: 9px;
+  border: 1px solid #d4bfdc;
+  background: #1b1230;
+  border-radius: 50%;
+}
+.moon-report .report-journey li[data-recorded="true"]::before {
+  background: #b6edda;
+  border-color: #b6edda;
+}
+.moon-report .report-journey span {
   font-size: 12px;
-  color: #c5aed6;
+  color: var(--report-muted);
 }
-.moon-report-footer {
+.moon-report .report-overview-next {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 20px;
-  border-top: 1px solid var(--report-line);
+  gap: 26px;
+  margin-bottom: 22px;
+}
+.moon-report .report-overview-next p {
+  flex: 1;
+  font-size: 13px;
+}
+.moon-report .report-overview-next button {
   flex-shrink: 0;
 }
-.moon-report-footer > span {
+.moon-report .moon-report-footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px clamp(18px, 2.5vw, 36px);
+  border-top: 1px solid var(--report-line);
+  background: #21152f;
+  flex-shrink: 0;
+}
+.moon-report .moon-report-footer > span {
   margin-right: auto;
-  font-size: 12px;
-  color: #d1bbdf;
+  max-width: 32ch;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--report-muted);
+}
+.moon-report .report-export-actions {
+  display: flex;
+  gap: 4px;
+}
+.moon-report .report-quiet-action {
+  background: transparent;
+  border-color: transparent;
+  color: #e7caed;
+  font-size: 13px;
+  padding-inline: 9px;
+}
+.moon-report .report-home-action {
+  background: #e4a1ed;
+  color: #2b143b;
+  border-color: transparent;
+  font-weight: 700;
+}
+.moon-report .report-home-action:hover {
+  background: #f2c1f8;
 }
 .moon-report :focus-visible,
 .report-atlas :focus-visible {
@@ -214,81 +307,177 @@
   background: #a25eb1;
   color: #fff;
 }
-.report-observations {
+.moon-report .report-observations {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 20px;
+  column-gap: 32px;
+  margin-top: 24px;
 }
-.report-observations article {
+.moon-report .report-observations article {
   border-top: 1px solid var(--report-line);
-  padding-top: 8px;
+  padding: 18px 0 12px;
+  min-width: 0;
 }
-.report-observations h4 {
-  margin-top: 4px;
+.moon-report .report-observation-heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
 }
-.report-observations dl {
+.moon-report .report-observations h4 {
+  margin: 0;
+  font-size: 18px;
+}
+.moon-report .report-delivery-status {
+  flex-shrink: 0;
+  max-width: 125px;
+  color: #ffdfad;
   font-size: 12px;
+  line-height: 1.4;
 }
-.report-observations dl > div {
-  margin-bottom: 8px;
+.moon-report .report-delivery-status[data-delivered="true"] {
+  color: #b6edda;
 }
-.report-observations dt {
-  color: #c7aad9;
+.moon-report .report-observation-result {
+  margin: 14px 0;
+  color: var(--report-text);
+  font-weight: 600;
 }
-.report-observations dd {
-  margin: 3px 0 0;
+.moon-report .report-observations dl {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  font-size: 13px;
+}
+.moon-report .report-observations .report-observation-delivery {
+  grid-column: 1 / -1;
+}
+.moon-report .report-observations dt {
+  color: var(--report-muted);
+}
+.moon-report .report-observations dd {
+  margin: 4px 0 0;
   overflow-wrap: anywhere;
 }
-.report-table-scroll {
+.moon-report code {
+  font-size: 12px;
+  overflow-wrap: anywhere;
+  color: #ead4f8;
+}
+.moon-report .report-empty {
+  margin-top: 18px;
+  padding: 18px 0;
+  border-block: 1px solid var(--report-line);
+}
+.moon-report .report-table-scroll {
   overflow-x: auto;
 }
 .moon-report table {
   width: 100%;
   border-collapse: collapse;
   text-align: left;
-  font-size: 13px;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
 }
 .moon-report th,
 .moon-report td {
-  padding: 12px 10px;
+  padding: 14px 12px;
   border-bottom: 1px solid var(--report-line);
+  vertical-align: top;
+}
+.moon-report th:first-child,
+.moon-report td:first-child {
+  padding-left: 0;
 }
 .moon-report caption {
   text-align: left;
   padding: 12px 0;
-  color: #d5bfe3;
-}
-.report-interpretation {
-  padding: 4px 0 14px;
-  border-bottom: 1px solid var(--report-line);
-}
-.report-resource-list {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 18px;
+  color: var(--report-muted);
   font-size: 13px;
 }
-.report-resource-list dd {
-  margin: 6px 0 0;
-  color: #f1dafc;
+.moon-report .report-interpretation {
+  padding: 0 0 22px;
+  border-bottom: 1px solid var(--report-line);
 }
-.report-resource-list dt {
-  color: #cbb3da;
+.moon-report .report-resource-list,
+.moon-report .report-engineering-takeaways {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  font-size: 14px;
+  margin: 24px 0;
+}
+.moon-report .report-engineering-takeaways {
+  padding: 20px 0;
+  border-block: 1px solid var(--report-line);
+}
+.moon-report .report-resource-list dd,
+.moon-report .report-engineering-takeaways dd {
+  margin: 8px 0 0;
+  color: #f1dafc;
+  font-variant-numeric: tabular-nums;
+}
+.moon-report .report-engineering-takeaways dd {
+  font-size: 22px;
+}
+.moon-report .report-engineering-takeaways small {
+  display: block;
+  color: var(--report-muted);
+  font-size: 13px;
+  line-height: 1.5;
+  margin-top: 7px;
+}
+.moon-report .report-resource-list dt,
+.moon-report .report-engineering-takeaways dt {
+  color: var(--report-muted);
+}
+.moon-report .report-tradeoff {
+  margin-bottom: 24px;
 }
 .moon-report details {
   border-top: 1px solid var(--report-line);
-  padding: 15px 0;
+  padding: 7px 0;
 }
 .moon-report summary {
+  display: list-item;
+  align-content: center;
   min-height: 48px;
   cursor: pointer;
   font-size: 15px;
   color: #edd2ff;
 }
+.moon-report details[open] > summary {
+  margin-bottom: 12px;
+}
+.moon-report .report-recommendations {
+  padding-left: 24px;
+  margin: 22px 0;
+}
+.moon-report .report-recommendations li {
+  padding: 10px 0 10px 9px;
+  border-bottom: 1px solid var(--report-line);
+}
+.moon-report .report-recommendations li::marker {
+  color: #ed8def;
+  font-weight: 600;
+}
+.moon-report .report-comparison {
+  margin: 24px 0;
+}
+.moon-report .report-comparison button {
+  margin-top: 16px;
+}
+.moon-report .report-comparison [role="status"] {
+  margin-top: 10px;
+  color: #b6edda;
+}
 .moon-report a,
 .report-atlas a {
   color: #f0b8fa;
   text-underline-offset: 3px;
+}
+.moon-report .report-location-context {
+  margin-bottom: 18px;
 }
 .report-atlas h3 {
   font-size: 21px;
@@ -410,129 +599,216 @@
   border: 1px solid #b68acb;
   font: inherit;
 }
-@media (max-width: 1100px) {
-  .report-overview {
-    grid-template-columns: minmax(0, 1fr) 170px;
-    gap: 14px;
-  }
-  .moon-report-layout {
-    grid-template-columns: 175px minmax(0, 1fr);
-  }
-  .moon-report-content {
-    padding: 18px 20px;
-  }
+
+/* Map refinements apply only inside the mission report. */
+.moon-report .report-atlas-layout {
+  margin-top: 20px;
+  grid-template-columns: minmax(0, 1.1fr) minmax(250px, 0.9fr);
+}
+.moon-report .report-reference-map {
+  max-height: 430px;
+  aspect-ratio: 1.35;
+}
+.moon-report .report-layer-buttons {
+  gap: 5px;
+}
+.moon-report .report-layer-buttons button {
+  min-height: 44px;
+  padding: 7px 10px;
+  font-size: 13px;
+}
+.moon-report .report-atlas details {
+  margin-top: 24px;
 }
 @media (max-height: 720px) {
-  .moon-report-heading {
-    padding: 12px 18px;
+  .moon-report .moon-report-heading {
+    padding-block: 12px;
   }
-  .moon-report-heading h2 {
-    font-size: 24px;
+  .moon-report .moon-report-content {
+    padding-block: 18px;
   }
-  .moon-report-content {
-    padding: 16px 20px;
-  }
-  .moon-report-content h3 {
-    margin-bottom: 12px;
+  .moon-report .moon-report-content h3 {
+    margin-bottom: 14px;
     font-size: 21px;
   }
-  .moon-report-content p,
-  .moon-report-content li {
-    font-size: 13px;
+  .moon-report .report-overview h4 {
+    font-size: 27px;
   }
-  .report-key-results > div {
-    padding: 10px 0;
+  .moon-report .report-key-results {
+    margin-top: 18px;
+    padding-block: 15px;
   }
-  .report-companion {
-    max-height: 260px;
+  .moon-report .moon-report-footer {
+    padding-block: 8px;
+  }
+  .moon-report .report-reference-map {
+    max-height: 320px;
+  }
+}
+@media (max-width: 1100px) {
+  .moon-report .moon-report-footer > span {
+    display: none;
+  }
+  .moon-report .report-export-actions {
+    margin-right: auto;
+  }
+  .moon-report .report-observation-heading {
+    flex-direction: column;
+    gap: 7px;
+  }
+  .moon-report .report-delivery-status {
+    max-width: none;
   }
 }
 @media (max-height: 450px) {
   .return-main.is-debrief {
     padding: 5px 10px;
   }
-  .moon-report {
-    border-radius: 10px;
-  }
-  .moon-report-heading {
-    padding: 8px 12px;
-    gap: 10px;
-  }
-  .moon-report-heading h2 {
-    font-size: 20px;
-  }
-  .moon-report-heading p {
-    font-size: 11px;
-  }
-  .report-state {
-    font-size: 11px;
-    max-width: 120px;
-  }
-  .report-preview-note {
-    padding: 4px 12px;
-    font-size: 11px;
-  }
-  .moon-report-layout {
-    grid-template-columns: 145px minmax(0, 1fr);
-  }
-  .moon-report-sections {
-    padding: 6px;
-    gap: 2px;
-  }
-  .moon-report button,
-  .report-atlas button {
-    min-height: 42px;
-    padding: 7px 8px;
-    font-size: 12px;
-  }
-  .moon-report-content {
-    padding: 10px 14px;
-  }
-  .moon-report-content h3 {
-    font-size: 19px;
-  }
-  .moon-report-content h4 {
-    font-size: 16px;
-  }
-  .report-overview {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .report-companion {
-    display: none;
-  }
-  .report-key-results dd {
-    font-size: 17px;
-  }
-  .report-key-results > div {
-    padding: 8px 0;
-  }
-  .moon-report-footer {
-    padding: 4px 10px;
-    gap: 6px;
-  }
-  .moon-report-footer > span {
-    font-size: 10px;
-  }
-  .report-observations {
-    grid-template-columns: 1fr;
-  }
-  .report-atlas-layout {
-    gap: 12px;
-  }
-  .report-layer-buttons {
-    flex-direction: column;
-  }
-  .report-reference-map {
-    max-height: 240px;
-  }
   .saved-report-page {
     padding: 5px 8px;
   }
-  .report-reference-values {
+  .moon-report {
+    border-radius: 10px;
+  }
+  .moon-report .moon-report-heading {
+    padding: 8px 14px;
+    gap: 12px;
+  }
+  .moon-report .moon-report-heading h2 {
+    font-size: 20px;
+    margin-bottom: 3px;
+  }
+  .moon-report .moon-report-heading p {
+    font-size: 12px;
+  }
+  .moon-report .report-record-context {
+    font-size: 11px;
+    gap: 3px;
+  }
+  .moon-report .report-state {
+    font-size: 11px;
+  }
+  .moon-report .report-preview-note {
+    padding: 4px 14px;
+    font-size: 11px;
+  }
+  .moon-report .moon-report-sections {
+    padding-inline: 6px;
+    gap: 0;
+  }
+  .moon-report .moon-report-sections button {
+    flex: 1;
+    min-width: max-content;
+    padding-inline: 12px;
+  }
+  .moon-report button,
+  .moon-report summary {
+    min-height: 42px;
+    font-size: 13px;
+  }
+  .moon-report button {
+    padding: 7px 10px;
+  }
+  .moon-report .moon-report-content {
+    padding: 14px 16px;
+  }
+  .moon-report .moon-report-content h3 {
+    font-size: 19px;
+    margin-bottom: 12px;
+  }
+  .moon-report .moon-report-content h4 {
+    font-size: 17px;
+  }
+  .moon-report .moon-report-content .report-section-lead {
+    font-size: 21px;
+  }
+  .moon-report .report-overview h4 {
+    font-size: 23px;
+  }
+  .moon-report .moon-report-content p,
+  .moon-report .moon-report-content li {
+    font-size: 13px;
+  }
+  .moon-report .report-key-results {
+    gap: 14px;
+    margin-top: 14px;
+    padding-block: 13px;
+  }
+  .moon-report .report-key-results dt {
+    font-size: 12px;
+  }
+  .moon-report .report-key-results dd {
+    font-size: 23px;
+  }
+  .moon-report .report-key-results small {
+    font-size: 11px;
+  }
+  .moon-report .report-journey strong {
+    font-size: 12px;
+  }
+  .moon-report .report-journey span {
+    font-size: 11px;
+  }
+  .moon-report .report-overview-next {
+    align-items: start;
+    gap: 14px;
+  }
+  .moon-report .moon-report-footer {
+    padding: 5px 10px;
+    gap: 5px;
+  }
+  .moon-report .report-quiet-action {
+    font-size: 12px;
+    padding-inline: 7px;
+  }
+  .moon-report .report-resource-list {
+    grid-template-columns: 1fr 1fr;
+  }
+  .moon-report .report-engineering-takeaways {
+    gap: 16px;
+  }
+  .moon-report .report-engineering-takeaways dd {
+    font-size: 18px;
+  }
+  .moon-report .report-engineering-takeaways small {
+    font-size: 12px;
+  }
+  .moon-report .report-observations {
+    grid-template-columns: 1fr;
+  }
+  .moon-report .report-observation-heading {
+    flex-direction: row;
+  }
+  .moon-report .report-atlas-layout {
+    gap: 14px;
+    grid-template-columns: minmax(0, 1fr) minmax(210px, 0.9fr);
+  }
+  .moon-report .report-layer-buttons {
+    flex-direction: row;
+  }
+  .moon-report .report-layer-buttons button {
+    font-size: 12px;
+  }
+  .moon-report .report-reference-map {
+    max-height: 240px;
+  }
+  .moon-report .report-reference-values {
     font-size: 12px;
   }
   .atlas-compatibility {
     padding: 10px 16px;
+  }
+  .atlas-compatibility .report-atlas-layout {
+    gap: 12px;
+  }
+  .atlas-compatibility .report-layer-buttons {
+    flex-direction: column;
+  }
+  .atlas-compatibility .report-reference-map {
+    max-height: 240px;
+  }
+  .atlas-compatibility .report-reference-values {
+    font-size: 12px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -541,47 +817,16 @@
     transition: none;
   }
 }
-.report-companion .conversation-actor {
-  position: relative;
-  inset: auto;
-  width: 100%;
-  height: 255px;
-  margin: 0;
-}
-.report-companion .conversation-actor canvas {
-  width: 100%;
-  height: 100%;
-}
-.report-companion figcaption {
-  display: none;
-}
+
 @media (max-height: 450px) {
-  .moon-report-content[data-section="overview"] > h3 {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-  }
-  .report-key-results {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 10px;
-    margin-top: 10px;
-  }
-  .report-key-results > div {
+  .conversation-game.is-mobile-game .moon-report .moon-report-heading {
     display: block;
-    padding: 8px 0;
   }
-  .report-key-results dt {
-    font-size: 11px;
-    min-height: 30px;
-  }
-  .report-key-results dd {
-    font-size: 15px;
-    margin-top: 4px;
-  }
-  .report-key-results small {
-    font-size: 11px;
+  .conversation-game.is-mobile-game .moon-report .report-record-context {
+    flex-direction: row;
+    justify-content: flex-start;
+    text-align: left;
+    gap: 12px;
+    margin-top: 6px;
   }
 }

@@ -31,6 +31,7 @@ import { sound } from "@exo/audio";
 import { isEngineFrozen } from "@exo/ui";
 import {
   freshRover,
+  ROVER_MODEL,
   nearbyRoverSite,
   roverLight,
   roverRocks,
@@ -163,9 +164,6 @@ export function RoverScreen({
       Math.min(100, r.capacityWh ? (r.batteryWh / r.capacityWh) * 100 : 0),
     ),
     interaction = roverInteraction(r);
-  const camp = ROVER_CAMPS.find(
-    (camp: any) => Math.hypot(camp.x - r.x, camp.z - r.z) < 3.5,
-  );
   const threat = [
     ...roverRocks(r).map((item: any) => ({ ...item, hole: false })),
     ...roverHoles(r).map((item: any) => ({ ...item, hole: true })),
@@ -225,7 +223,10 @@ export function RoverScreen({
     const timer = setInterval(() => {
       const now = performance.now();
       if (!isEngineFrozen() && !document.hidden)
-        dispatch({ type: "rover-tick", seconds: (now - last) / 1000 });
+        dispatch({
+          type: "rover-tick",
+          seconds: (now - last) / 1000,
+        });
       last = now;
     }, 50);
     return () => clearInterval(timer);
@@ -529,11 +530,68 @@ export function RoverScreen({
                 </div>
               </div>
             ) : null}
+            <div className="rover-top-energy">
+              <label>
+                BATTERY <b>{percent.toFixed(1)}%</b>
+                <progress
+                  aria-label="Rover battery"
+                  max="100"
+                  value={percent}
+                />
+              </label>
+              <button
+                disabled={
+                  Math.abs(r.speed) > 0.02 ||
+                  !roverLight(r.x, r.z) ||
+                  r.paused ||
+                  reviewing ||
+                  !["exploring", "charging"].includes(r.phase)
+                }
+                onPointerDown={(event) => {
+                  event.currentTarget.setPointerCapture(event.pointerId);
+                  act({ type: "rover-charge", held: true });
+                }}
+                onPointerUp={() =>
+                  dispatch({ type: "rover-charge", held: false })
+                }
+                onPointerCancel={() =>
+                  dispatch({ type: "rover-charge", held: false })
+                }
+                onKeyDown={(event) => {
+                  if ([" ", "Enter"].includes(event.key)) {
+                    event.preventDefault();
+                    act({ type: "rover-charge", held: true });
+                  }
+                }}
+                onKeyUp={() => dispatch({ type: "rover-charge", held: false })}
+                onBlur={() => dispatch({ type: "rover-charge", held: false })}
+              >
+                {r.phase === "charging" ? "Charging…" : "Hold to charge"}
+              </button>
+              <a
+                href="https://science.nasa.gov/mission/viper/in-depth/"
+                target="_blank"
+                rel="noreferrer"
+              >
+                NASA VIPER: 0.36–0.72 km/h · Gameplay ≈
+                {Math.round(
+                  ROVER_MODEL.gameplaySpeed / ROVER_MODEL.referenceSpeed,
+                )}
+                × VIPER
+                <span className="rover-speed-context"> · boosted for play</span>
+              </a>
+            </div>
             <div className="rover-instruments">
               <div className="rover-speed">
-                <strong>{Math.round(Math.abs(r.speed) * 3.6)}</strong>
+                <strong>
+                  {(
+                    ((Math.abs(r.speed) * ROVER_MODEL.referenceSpeed) /
+                      ROVER_MODEL.gameplaySpeed) *
+                    3.6
+                  ).toFixed(2)}
+                </strong>
                 <span>
-                  KM/H
+                  KM/H · REFERENCE
                   <small>
                     {r.speed < -0.1
                       ? "REVERSE"
@@ -551,17 +609,11 @@ export function RoverScreen({
                   <i style={{ width: `${percent}%` }} />
                 </div>
                 <small>
-                  {r.version >= 3 && camp && Math.abs(r.speed) < 0.1
-                    ? camp.id === "east"
-                      ? "Solar station · hold E"
-                      : "Sunny checkpoint"
-                    : camp && Math.abs(r.speed) < 0.1
-                      ? r.campTime >= 1
-                        ? "☀ Charging · checkpoint saved"
-                        : "☀ Charging · stop to save"
-                      : roverLight(r.x, r.z)
-                        ? "Sunlit terrain"
-                        : "Shadow · no solar generation"}
+                  {r.phase === "charging"
+                    ? "Charging from sunlight"
+                    : roverLight(r.x, r.z)
+                      ? "Stop anywhere in sunlight to recharge"
+                      : "Shadow · move into sunlight to charge"}
                 </small>
               </div>
               {r.version === 4 ? (
@@ -577,7 +629,7 @@ export function RoverScreen({
             </div>
             {percent < 25 && r.phase === "exploring" ? (
               <div className="rover-power-warning" role="status">
-                LOW BATTERY · Find a sunny charging camp on the map.
+                LOW BATTERY · Stop in sunlight and hold Charge.
               </div>
             ) : null}
             {r.frames < 600 && r.phase === "exploring" ? (
@@ -610,7 +662,7 @@ export function RoverScreen({
             !r.paused &&
             !reviewing ? (
               <div className="rover-charging-card">
-                <span>SOLAR RIDGE · PHYSICAL LINK</span>
+                <span>SOLAR PANELS · SUNLIGHT</span>
                 <strong>
                   {r.phase === "charging"
                     ? "Charging… keep holding"
@@ -686,7 +738,7 @@ export function RoverScreen({
                 <p>
                   {r.deposited.length >= 2
                     ? "Both tubes secured. Park the rover inside the cargo bay."
-                    : "First sample safe. Next stop: Solar Ridge for a recharge."}
+                    : "First sample safe. Recharge in sunlight whenever you need."}
                 </p>
                 <button onClick={() => act({ type: "rover-continue" })}>
                   E · Continue
@@ -831,12 +883,14 @@ export function RoverScreen({
                     ? r.phaseTime < 1
                       ? "Opening cargo bay…"
                       : r.phaseTime < 2.3
-                        ? "Lining up the rover…"
+                        ? "Deploying wheel tracks…"
                         : r.phaseTime < 4.8
-                          ? "Driving up the ramp…"
+                          ? "Driving into the cargo bay…"
                           : "Closing the cargo bay…"
                     : r.phase === "deploying"
-                      ? "Remote rover link established…"
+                      ? r.phaseTime < 0.9
+                        ? "Opening hatch and unfolding tracks…"
+                        : "Rover rolling onto the Moon…"
                       : r.phase === "boarding"
                         ? "Samples secured. Ascent cabin readying…"
                         : "Ready for lunar ascent"}
@@ -923,7 +977,7 @@ export function RoverScreen({
                 </div>
                 <div className="rover-map-legend">
                   <span>● Sample sites</span>
-                  <span>☀ Charging camps</span>
+                  <span>☀ Sunlight & base</span>
                   <span>○ Craters</span>
                   <span>• Rocks</span>
                 </div>
@@ -955,11 +1009,11 @@ export function RoverScreen({
               <p>
                 Drive to the marked target, stop inside its circle and press E.
                 Hit the green timing zone, watch the collection, then
-                acknowledge the result. Deliver the first sample, hold E at
-                Solar Ridge to recharge, then explore the shadow target. A hard
-                layer reveals a nearby replacement site. Deliver the second
-                sample and park the rover in the cargo bay to unlock ascent.
-                Collection does not prove that the soil contains ice.
+                acknowledge the result. Deliver the first sample, hold E at any
+                sunny spot to recharge when needed, then explore the shadow
+                target. A hard layer reveals a nearby replacement site. Deliver
+                the second sample and park the rover in the cargo bay to unlock
+                ascent. Collection does not prove that the soil contains ice.
               </p>
             </div>,
             <div key="course">
@@ -970,10 +1024,10 @@ export function RoverScreen({
               </p>
               <p>
                 Power use follows your installed equipment. Sunlight feeds your
-                solar panels. Stop in sunlight to save; hold E at Solar Ridge to
-                fast-forward solar charging. A failed run retries there with
-                checkpointed cargo; later unsaved samples must be collected
-                again.
+                solar panels. Stop in sunlight to save; hold Charge anywhere in
+                sunlight to fast-forward solar charging. A failed run retries
+                there with checkpointed cargo; later unsaved samples must be
+                collected again.
               </p>
               <p>
                 Camera motion, terrain, grip and energy rates are authored

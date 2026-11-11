@@ -1,5 +1,7 @@
 import { completedMission } from "./missionReport";
 import { useState } from "react";
+import { isEngineFrozen } from "@exo/ui";
+import { sound } from "@exo/audio";
 import type { WorkshopSession } from "@/game/moon/workshop/lander/workshopSession";
 import {
   comparisonRecord,
@@ -23,12 +25,25 @@ export function ReportComparison({
     }),
     [status, setStatus] = useState("");
   const comparable = previous?.objective === current.objective;
+  const sameRecord =
+    previous !== null && JSON.stringify(previous) === JSON.stringify(current);
+  const outcomeName = (value: string) =>
+    value === "safe-return"
+      ? "Safe return"
+      : value === "partial"
+        ? "Partial finding"
+        : value === "success"
+          ? "Objective supported"
+          : "Incomplete";
   const save = () => {
-    if (!completedMission(session) || preview) return;
+    if (isEngineFrozen() || !completedMission(session) || preview) return;
+    sound.playClick();
     try {
       localStorage.setItem(COMPARISON_KEY, JSON.stringify(current));
       setPrevious(current);
-      setStatus("Saved on this browser. Finish another attempt to compare.");
+      setStatus(
+        "This attempt is saved on this browser. Complete a new attempt to compare another flight.",
+      );
     } catch {
       setStatus(
         "Comparison could not be saved. Your mission record is unchanged.",
@@ -36,7 +51,7 @@ export function ReportComparison({
     }
   };
   return (
-    <details>
+    <details className="report-comparison">
       <summary>Compare with a saved attempt</summary>
       <p>
         Same objective, different choices. Seed and assistance can also affect
@@ -46,14 +61,26 @@ export function ReportComparison({
         <>
           <p>
             {comparable
-              ? "Saved previous run"
+              ? sameRecord
+                ? "Saved record matches this attempt"
+                : "Saved comparison record"
               : "Different objective — compare separately"}{" "}
             · seed {previous.seed} ·{" "}
-            {previous.assisted ? "assisted" : "unassisted"} · {previous.route}
+            {previous.assisted ? "assisted" : "unassisted"} ·{" "}
+            {previous.route ?? "Route not recorded"}
           </p>
-          <div className="mission-comparison-scroll" hidden={!comparable}>
+          <p>
+            {sameRecord
+              ? "The saved and current records match. This is not evidence of a different historical flight."
+              : "Compare these saved totals with the current result. The saved record may be this same attempt; matching choices or totals do not establish another flight."}
+          </p>
+          <div className="report-table-scroll" hidden={!comparable}>
             <table>
-              <caption>Recorded attempts, not predicted discoveries</caption>
+              <caption>
+                {sameRecord
+                  ? "Matching saved and current totals"
+                  : "Recorded totals, not predicted discoveries"}
+              </caption>
               <thead>
                 <tr>
                   <th>Measure</th>
@@ -63,24 +90,40 @@ export function ReportComparison({
               </thead>
               <tbody>
                 {[
-                  ["Outcome", previous.outcome, current.outcome],
-                  ["Route", previous.route, current.route],
                   [
-                    "Service fuel kg",
+                    "Outcome",
+                    outcomeName(previous.outcome),
+                    outcomeName(current.outcome),
+                  ],
+                  [
+                    "Route",
+                    previous.route?.replaceAll("-", " ") ?? "Not recorded",
+                    current.route?.replaceAll("-", " ") ?? "Not recorded",
+                  ],
+                  [
+                    "Service propellant used (kg)",
                     previous.fuelKg?.toFixed(0) ?? null,
                     current.fuelKg?.toFixed(0) ?? null,
                   ],
-                  ["Equipment kg", previous.massKg, current.massKg],
+                  ["Equipment mass (kg)", previous.massKg, current.massKg],
                   [
                     "Credits (objective ledger)",
                     previous.credits,
                     current.credits,
                   ],
-                  ["Battery Wh", previous.batteryWh, current.batteryWh],
-                  ["Solar W", previous.solarW, current.solarW],
+                  [
+                    "Battery capacity (Wh)",
+                    previous.batteryWh,
+                    current.batteryWh,
+                  ],
+                  ["Full-sun generation (W)", previous.solarW, current.solarW],
                   ["Science points", previous.points, current.points],
                   ["Samples returned", previous.samples, current.samples],
-                  ["Days", previous.days.toFixed(2), current.days.toFixed(2)],
+                  [
+                    "Elapsed time (days)",
+                    previous.days.toFixed(2),
+                    current.days.toFixed(2),
+                  ],
                 ].map(([label, a, b]) => (
                   <tr key={label}>
                     <th scope="row">{label}</th>
@@ -98,7 +141,9 @@ export function ReportComparison({
       <button disabled={!completedMission(session) || preview} onClick={save}>
         Save this attempt for comparison
       </button>
-      <p role="status">{status}</p>
+      <p role="status" aria-live="polite">
+        {status}
+      </p>
     </details>
   );
 }

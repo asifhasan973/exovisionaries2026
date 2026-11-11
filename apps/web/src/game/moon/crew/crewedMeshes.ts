@@ -1,7 +1,9 @@
 import * as THREE from "three";
 
 /** Stylised mission hardware with identifiable closed hatches, pressure seals and landing gear. */
-export function createCrewedPlatform() {
+export function createCrewedPlatform({
+  roverCargo = false,
+}: { roverCargo?: boolean } = {}) {
   const root = new THREE.Group(),
     capsule = new THREE.Group(),
     lander = new THREE.Group();
@@ -174,6 +176,7 @@ export function createCrewedPlatform() {
     cyl(capsule, 0.75, 0.75, 0.035, silver, 0, y);
   for (let i = 0; i < 8; i++) {
     const angle = (i * Math.PI) / 4;
+    if (roverCargo && i === 0) continue;
     const panel = box(
       capsule,
       0.09,
@@ -258,11 +261,26 @@ export function createCrewedPlatform() {
   // Lunar descent stage: foil-wrapped octagon, engine, triangulated legs and broad footpads.
   const descent = cyl(descentStage, 0.91, 1.05, 0.74, gold, 0, 0.85, 0, 8);
   descent.name = "descent-stage";
+  if (roverCargo) {
+    descent.geometry.dispose();
+    descent.geometry = new THREE.CylinderGeometry(
+      0.91,
+      1.05,
+      0.74,
+      24,
+      1,
+      true,
+      0.65,
+      Math.PI * 2 - 1.3,
+    );
+    gold.side = THREE.DoubleSide;
+  }
   cyl(descentStage, 1.035, 1.035, 0.06, goldBright, 0, 1.24, 0, 8);
-  cyl(descentStage, 1.05, 1.05, 0.035, dark, 0, 0.47, 0, 8);
+  if (!roverCargo) cyl(descentStage, 1.05, 1.05, 0.035, dark, 0, 0.47, 0, 8);
   bell(descentStage, 0, 0.24, 0);
   for (let i = 0; i < 8; i++) {
     const angle = (i * Math.PI) / 4;
+    if (roverCargo && i === 0) continue;
     const panel = box(
       descentStage,
       0.14,
@@ -336,20 +354,22 @@ export function createCrewedPlatform() {
   for (const side of [-1, 1])
     box(ascentStage, 0.045, 0.5, 0.05, goldBright, side * 0.23, 1.55, 0.8);
   box(ascentStage, 0.055, 0.12, 0.05, dark, 0.12, 1.54, 0.83);
-  for (const x of [-0.19, 0.19])
-    rod(
-      descentStage,
-      new THREE.Vector3(x, 1.35, 0.86),
-      new THREE.Vector3(x, 0.08, 1.54),
-      0.023,
-    );
-  for (let i = 0; i < 7; i++)
-    rod(
-      descentStage,
-      new THREE.Vector3(-0.19, 0.15 + i * 0.17, 1.5 - i * 0.09),
-      new THREE.Vector3(0.19, 0.15 + i * 0.17, 1.5 - i * 0.09),
-      0.016,
-    );
+  if (!roverCargo) {
+    for (const x of [-0.19, 0.19])
+      rod(
+        descentStage,
+        new THREE.Vector3(x, 1.35, 0.86),
+        new THREE.Vector3(x, 0.08, 1.54),
+        0.023,
+      );
+    for (let i = 0; i < 7; i++)
+      rod(
+        descentStage,
+        new THREE.Vector3(-0.19, 0.15 + i * 0.17, 1.5 - i * 0.09),
+        new THREE.Vector3(0.19, 0.15 + i * 0.17, 1.5 - i * 0.09),
+        0.016,
+      );
+  }
   rod(
     ascentStage,
     new THREE.Vector3(-0.45, 2.35, 0),

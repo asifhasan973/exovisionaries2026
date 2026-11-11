@@ -11,6 +11,10 @@ export const ROVER_MODEL = {
   id: "crew-rover-v1",
   step: 0.1,
   speed: 5,
+  gameplaySpeed: 7.5,
+  // NASA VIPER design top speed (m/s), used only as an educational reference.
+  // https://science.nasa.gov/mission/viper/in-depth/
+  referenceSpeed: 0.2,
   turn: 1.65,
   radius: 1,
   drillSeconds: 6,
@@ -196,7 +200,7 @@ export type RoverEvent =
   | { type: "rover-restart" }
   | { type: "rover-talk" }
   | { type: "rover-control"; throttle: number; steer: number; drill: boolean }
-  | { type: "rover-tick"; seconds: number }
+  | { type: "rover-tick"; seconds: number; timeScale?: number }
   | { type: "rover-drill" }
   | { type: "rover-cancel" }
   | { type: "rover-unload" }
@@ -216,8 +220,7 @@ export const roverReady = (s: RoverState | undefined) =>
   ["ready", "complete"].includes(s.phase) &&
   roverAtBase(s) &&
   new Set(s.deposited).size >= ROVER_MODEL.required &&
-  (s.version < 3 ||
-    (!!s.stowed && !!s.chargeDone && s.hardSeen && s.debriefed));
+  (s.version < 3 || (!!s.stowed && s.hardSeen && s.debriefed));
 export function freshRover(
   moon: MoonSession,
   version: 1 | 2 | 3 | 4 = 4,
@@ -505,12 +508,6 @@ export function roverGoal(s: RoverState) {
       kind: "sample" as const,
       label: "Collect the sunlit sample",
     };
-  if (!s.chargeDone)
-    return {
-      ...ROVER_CHARGER,
-      kind: "charge" as const,
-      label: "Charge at Solar Ridge · hold E",
-    };
   if (!s.hardSeen)
     return {
       ...RUN_SITES[1],
@@ -589,8 +586,8 @@ export function advanceArcade(
           ? batteryStep(
               next.batteryWh,
               next.capacityWh,
-              roverPower(moon, "charging", 1).loadW,
-              roverPower(moon, "charging", 1).solarW,
+              roverPower(moon, "charging", roverLight(next.x, next.z)).loadW,
+              roverPower(moon, "charging", roverLight(next.x, next.z)).solarW,
               dt * 600,
             ).remainingWh
           : Math.min(
@@ -676,7 +673,7 @@ export function advanceArcade(
         next.batteryWh,
         next.capacityWh,
         power.loadW,
-        power.solarW,
+        0, // Reserve solar charging for stationary panel deployment.
         dt * (next.phase === "collecting" ? 120 : ROVER_MODEL.virtualRate),
       ).remainingWh;
     } else
@@ -735,7 +732,7 @@ export function advanceArcade(
           courseHeight(next.x - forward.x, next.z - forward.z)) /
         2;
     const top =
-        7.5 *
+        ROVER_MODEL.gameplaySpeed *
         Math.max(
           0.5,
           1 -

@@ -36,7 +36,7 @@ try {
   p.on("pageerror", (e) => report.pageErrors.push(String(e)));
   await p.goto(base + "/?report=1");
   await p
-    .getByRole("heading", { name: "Your Moon Mission Report", exact: true })
+    .getByRole("heading", { name: "Your Moon mission report", exact: true })
     .waitFor();
   await ready(p);
   const stored = await p.evaluate(() =>
@@ -64,14 +64,14 @@ try {
     await p.setViewportSize({ width, height });
     for (const name of [
       "Overview",
-      "What we found",
-      "What it means",
-      "Explore the location",
-      "Engineering lessons",
-      "Next investigation",
+      "Findings",
+      "Meaning",
+      "Location",
+      "Engineering",
+      "Next mission",
     ]) {
       await section(name);
-      if (name === "Explore the location") {
+      if (name === "Location") {
         await p
           .getByRole("img", { name: /overview. Reference coordinate/ })
           .waitFor();
@@ -112,14 +112,14 @@ try {
       assert.ok(bounds.content.width > 200);
       assert.ok(bounds.content.height > 65);
       report.layouts.push({ ...bounds, section: name });
-      if (["Overview", "Explore the location"].includes(name))
+      if (["Overview", "Location"].includes(name))
         await p.screenshot({
           path: `.impeccable/review/${name === "Overview" ? (width === 1440 ? "desktop" : width === 667 ? "mobile" : `user-${width}`) : `location-${width}`}.png`,
         });
     }
   }
   await p.setViewportSize({ width: 1440, height: 900 });
-  await section("Explore the location");
+  await section("Location");
   await p
     .getByRole("button", { name: "Historical temperature", exact: true })
     .click();
@@ -134,12 +134,10 @@ try {
     /85.30/,
   );
   await p.getByRole("button", { name: "Zoom to region", exact: true }).click();
-  await p
-    .getByRole("button", { name: "Back to overview", exact: true })
-    .click();
+  await p.getByRole("button", { name: "Overview", exact: true }).click();
   await p.waitForFunction(
     () =>
-      document.querySelector(".moon-report-content h3") ===
+      document.querySelector(".moon-report-content > h3") ===
       document.activeElement,
   );
   assert.equal(
@@ -151,7 +149,7 @@ try {
   report.checks.push(
     "All six sections at five landscape sizes; NASA layers, units, region, zoom; focus and immutable mission save",
   );
-  await section("Next investigation");
+  await section("Next mission");
   await p.getByText("Compare with a saved attempt", { exact: true }).click();
   await p
     .getByRole("button", {
@@ -187,7 +185,7 @@ try {
     })
     .click();
   await p
-    .getByRole("heading", { name: "Your Moon Mission Report", exact: true })
+    .getByRole("heading", { name: "Your Moon mission report", exact: true })
     .waitFor();
   await ready(p);
   assert.equal(
@@ -206,15 +204,13 @@ try {
     await p.getByText("Preview / review record", { exact: true }).isVisible(),
   );
   await p.screenshot({ path: ".impeccable/review/debrief-live.png" });
-  await section("What we found");
-  await section("Explore the location");
+  await section("Findings");
+  await section("Location");
   await p
     .getByRole("img", { name: /overview. Reference coordinate/ })
     .waitFor();
   await ready(p);
-  await p
-    .getByRole("button", { name: "Back to overview", exact: true })
-    .click();
+  await p.getByRole("button", { name: "Overview", exact: true }).click();
   assert.equal(
     await p.evaluate(() =>
       localStorage.getItem("zero_to_beyond_full_moon_v13"),
@@ -226,12 +222,12 @@ try {
   );
   await p
     .getByRole("navigation", { name: "Report sections" })
-    .getByRole("button", { name: "Engineering lessons", exact: true })
+    .getByRole("button", { name: "Engineering", exact: true })
     .focus();
   await p.keyboard.press("Enter");
   assert.equal(
-    await p.locator(".moon-report-content h3").innerText(),
-    "Engineering lessons",
+    await p.locator(".moon-report-content > h3").innerText(),
+    "Engineering",
   );
   await p.evaluate(async () => {
     const path = performance
@@ -245,8 +241,8 @@ try {
   });
   await section("Overview");
   assert.equal(
-    await p.locator(".moon-report-content h3").innerText(),
-    "Engineering lessons",
+    await p.locator(".moon-report-content > h3").innerText(),
+    "Engineering",
   );
   await p.evaluate(() => {
     window.reportLifecycle.getState().setLoadingBlocked(true);
@@ -254,8 +250,8 @@ try {
   });
   await section("Overview");
   assert.equal(
-    await p.locator(".moon-report-content h3").innerText(),
-    "Engineering lessons",
+    await p.locator(".moon-report-content > h3").innerText(),
+    "Engineering",
   );
   await p.evaluate(() =>
     window.reportLifecycle.getState().setLoadingBlocked(false),
@@ -270,12 +266,12 @@ try {
   );
   await broken.goto(base + "/?report=1");
   await broken
-    .getByRole("heading", { name: "Your Moon Mission Report", exact: true })
+    .getByRole("heading", { name: "Your Moon mission report", exact: true })
     .waitFor();
   await ready(broken);
   await broken
     .getByRole("navigation", { name: "Report sections" })
-    .getByRole("button", { name: "Explore the location", exact: true })
+    .getByRole("button", { name: "Location", exact: true })
     .click();
   await broken
     .getByRole("button", { name: "Retry reference data", exact: true })
@@ -288,7 +284,7 @@ try {
   assert.equal(
     await broken
       .getByRole("heading", {
-        name: "Your crew is back on Earth.",
+        name: "Useful data delivered; water was not confirmed.",
         exact: true,
       })
       .isVisible(),
@@ -355,7 +351,7 @@ try {
   );
   await p.goto(base + "/?report=1");
   await p
-    .getByRole("heading", { name: "Your Moon Mission Report", exact: true })
+    .getByRole("heading", { name: "Your Moon mission report", exact: true })
     .waitFor();
   await ready(p);
   await p.evaluate(async () => {
@@ -409,7 +405,12 @@ try {
   });
   const fixture = p.locator("#missing-balances-fixture");
   await fixture
-    .getByRole("button", { name: "Engineering lessons", exact: true })
+    .getByRole("button", { name: "Engineering", exact: true })
+    .click();
+  await fixture
+    .getByText("Complete resource accounting & design trade-offs", {
+      exact: true,
+    })
     .click();
   for (const name of [
     "Supplies used",

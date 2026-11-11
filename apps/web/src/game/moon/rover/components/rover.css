@@ -63,6 +63,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  width: 100%;
   min-height: 0;
 }
 .rover-migration-note {
@@ -946,5 +947,83 @@
     bottom: 10px;
     transform: none;
     max-height: calc(100% - 58px);
+  }
+}
+
+.conversation-game.conversation-game .free-rover-main.is-cabin {
+  justify-content: flex-start;
+}
+.free-rover-main.is-cabin .rover-cabin-wrap {
+  flex: 1 1 0;
+}
+
+/* Keep mission energy and time controls visible above the driving viewport. */
+.rover-top-energy {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  max-width: 46%;
+  padding: 10px 14px;
+  border: 1px solid #8ce2c266;
+  border-radius: 12px;
+  background: #0c1929ed;
+  color: #edf6ed;
+  font-size: 12px;
+}
+.rover-top-energy label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.rover-top-energy progress {
+  width: 100px;
+  height: 12px;
+  accent-color: #8ce2c2;
+}
+.rover-top-energy button,
+.rover-top-energy select {
+  border: 1px solid #8ce2c266;
+  border-radius: 6px;
+  padding: 6px 9px;
+  background: #163344;
+  color: #f1fff9;
+}
+.rover-top-energy button:disabled {
+  opacity: 0.45;
+}
+.rover-top-energy a {
+  color: #b7d4df;
+  font-size: 10px;
+}
+.free-rover-world .rover-map-button {
+  width: clamp(180px, 16vw, 230px) !important;
+  min-width: 180px !important;
+  border: 2px solid #8ce2c2;
+  box-shadow: 0 0 18px #8ce2c233;
+}
+.free-rover-world .rover-danger {
+  bottom: clamp(240px, 20vw, 290px);
+}
+@media (max-height: 450px) {
+  .free-rover-world .rover-map-button {
+    width: 145px !important;
+    min-width: 145px !important;
+  }
+  .rover-top-energy {
+    padding: 6px;
+    top: 8px;
+    gap: 5px;
+    font-size: 10px;
+  }
+  .rover-top-energy a {
+    display: none;
+  }
+  .free-rover-world .rover-danger {
+    bottom: 185px;
   }
 }

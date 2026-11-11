@@ -4,7 +4,7 @@ import { createCrewedPlatform } from "@/game/moon/crew/crewedMeshes";
 import { disposeGroup } from "@/game/moon/workshop/lander/workshopMeshes";
 import { returnFrameLimit } from "./return.ts";
 import type { ReturnState } from "./return.ts";
-import { useLoadingStore, SceneFallback } from "@exo/ui";
+import { useLoadingStore, SceneFallback, isEngineFrozen } from "@exo/ui";
 
 /** Close mission cameras; world distances and elapsed flight time are compressed. */
 export function ReturnViewport({
@@ -38,13 +38,13 @@ export function ReturnViewport({
     renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.35;
+    renderer.toneMappingExposure = 0.95;
     mount.appendChild(renderer.domElement);
     const scene = new THREE.Scene();
     scene.background = new THREE.Color("#070d1c");
     const camera = new THREE.PerspectiveCamera(39, 1, 0.1, 250);
-    scene.add(new THREE.HemisphereLight(0xdbeaff, 0x4d5366, 2.2));
-    const sun = new THREE.DirectionalLight(0xfff3df, 4);
+    scene.add(new THREE.HemisphereLight(0xdbeaff, 0x282337, 1.5));
+    const sun = new THREE.DirectionalLight(0xfff3df, 3);
     sun.position.set(-6, 12, 10);
     scene.add(sun);
     const hardware = createCrewedPlatform(),
@@ -107,39 +107,70 @@ export function ReturnViewport({
     const ground = new THREE.Group();
     scene.add(ground);
     const regolith = new THREE.MeshStandardMaterial({
-      color: 0x888a92,
+      color: 0x555965,
       roughness: 1,
     });
     add(ground, new THREE.CircleGeometry(70, 96), regolith).rotation.x =
       -Math.PI / 2;
-    for (let i = 0; i < 70; i++) {
-      const a = i * 2.399,
-        r = 5 + (i % 13) * 2.5,
-        x = Math.cos(a) * r,
-        z = Math.sin(a) * r;
-      const rock = add(
-        ground,
-        new THREE.DodecahedronGeometry(0.15 + (i % 5) * 0.15, 0),
-        regolith,
-        x,
-        0.1,
-        z,
+    const rockGeometry = new THREE.DodecahedronGeometry(1, 0);
+    const rocks = new THREE.InstancedMesh(rockGeometry, regolith, 46);
+    const rockTransform = new THREE.Object3D();
+    for (let i = 0; i < 46; i++) {
+      const angle = i * 2.399;
+      const radius = 4 + (i % 13) * 2.1;
+      const size = 0.12 + (i % 5) * 0.15;
+      rockTransform.position.set(
+        Math.cos(angle) * radius,
+        size * 0.3,
+        Math.sin(angle) * radius,
       );
-      rock.scale.y = 0.6 + (i % 3) * 0.3;
+      rockTransform.scale.set(size, size * 0.65, size);
+      rockTransform.rotation.y = angle;
+      rockTransform.updateMatrix();
+      rocks.setMatrixAt(i, rockTransform.matrix);
     }
+    ground.add(rocks);
+    const craterGeometry = new THREE.TorusGeometry(1, 0.06, 6, 32);
+    const craters = new THREE.InstancedMesh(craterGeometry, regolith, 12);
     for (let i = 0; i < 12; i++) {
-      const a = i * 2.4,
-        r = 8 + i * 2;
-      const rim = add(
-        ground,
-        new THREE.TorusGeometry(0.7 + (i % 3), 0.13, 8, 40),
-        regolith,
-        Math.sin(a) * r,
-        0.02,
-        Math.cos(a) * r,
+      const angle = i * 2.4;
+      const radius = 7 + i * 2;
+      rockTransform.position.set(
+        Math.sin(angle) * radius,
+        0.01,
+        Math.cos(angle) * radius,
       );
-      rim.rotation.x = -Math.PI / 2;
+      rockTransform.rotation.set(-Math.PI / 2, 0, 0);
+      rockTransform.scale.setScalar(0.7 + (i % 3));
+      rockTransform.updateMatrix();
+      craters.setMatrixAt(i, rockTransform.matrix);
     }
+    ground.add(craters);
+    const shadowCanvas = document.createElement("canvas");
+    shadowCanvas.width = shadowCanvas.height = 128;
+    const shadowContext = shadowCanvas.getContext("2d");
+    if (shadowContext) {
+      const fade = shadowContext.createRadialGradient(64, 64, 12, 64, 64, 64);
+      fade.addColorStop(0, "rgba(12, 10, 20, 0.55)");
+      fade.addColorStop(1, "rgba(12, 10, 20, 0)");
+      shadowContext.fillStyle = fade;
+      shadowContext.fillRect(0, 0, 128, 128);
+    }
+    const shadowMap = new THREE.CanvasTexture(shadowCanvas);
+    const contactShadow = add(
+      ground,
+      new THREE.CircleGeometry(1.6, 48),
+      new THREE.MeshBasicMaterial({
+        map: shadowMap,
+        transparent: true,
+        depthWrite: false,
+      }),
+      -2,
+      0.008,
+      0,
+    );
+    contactShadow.rotation.x = -Math.PI / 2;
+    contactShadow.scale.set(1, 0.65, 1);
     const stars = new THREE.BufferGeometry(),
       points = [];
     for (let i = 0; i < 650; i++)
@@ -299,17 +330,46 @@ export function ReturnViewport({
     );
     splash.rotation.x = -Math.PI / 2;
     splash.position.set(-2, 0.06, 0);
+    const route = new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints(
+        new THREE.QuadraticBezierCurve3(
+          new THREE.Vector3(-4, -0.4, 1),
+          new THREE.Vector3(1, 2, -4),
+          new THREE.Vector3(5, -1, -12),
+        ).getPoints(40),
+      ),
+      new THREE.LineDashedMaterial({
+        color: 0xbedbd0,
+        dashSize: 0.2,
+        gapSize: 0.16,
+        transparent: true,
+        opacity: 0.35,
+      }),
+    );
+    route.computeLineDistances();
+    scene.add(route);
     let raf = 0,
       disposed = false;
+    let displayedStage = latest.current.stage;
+    let displayedFrame = latest.current.frame;
     const draw = () => {
       if (disposed) return;
-      const r = latest.current,
-        p = r.frame / returnFrameLimit(r),
+      const r = latest.current;
+      if (displayedStage !== r.stage || gentle) {
+        displayedStage = r.stage;
+        displayedFrame = r.frame;
+      } else if (!r.paused && !isEngineFrozen()) {
+        displayedFrame += (r.frame - displayedFrame) * 0.28;
+      }
+      const p = displayedFrame / returnFrameLimit(r),
         surface = ["ready", "ascending"].includes(r.stage),
         dock = ["rendezvous", "docked"].includes(r.stage),
         travel = ["burning", "coast"].includes(r.stage),
         entry = ["entry-ready", "entry", "chute-ready"].includes(r.stage),
         ocean = ["chutes", "splashdown"].includes(r.stage);
+      route.visible = r.stage === "coast";
+      contactShadow.visible = surface;
+      earth.scale.setScalar(r.stage === "coast" ? 0.65 + p * 0.45 : 1);
       ground.visible = surface;
       descent.visible = surface;
       ascent.visible = surface || dock;
@@ -327,44 +387,60 @@ export function ReturnViewport({
       burn.visible = r.stage === "burning";
       heat.visible = r.stage === "entry";
       parachutes.visible = r.stage === "chutes";
-      const flicker = gentle ? 1 : 1 + Math.sin(r.frame * 2) * 0.1;
+      const flicker = gentle ? 1 : 1 + Math.sin(displayedFrame * 2) * 0.1;
       flame.scale.y = flicker;
       burn.scale.y = flicker;
       csm.rotation.set(0, 0, -Math.PI / 2);
       csm.position.set(-3, 0, 0);
-      capsule.rotation.set(0, 0, 0);
+      capsule.rotation.set(
+        0,
+        0,
+        r.stage === "entry-ready" && r.feedback === "wrongShield" ? Math.PI : 0,
+      );
       capsule.position.set(
         -2,
         ocean ? (r.stage === "splashdown" ? 0.05 : 3 - p * 2.6) : 1,
         0,
       );
       if (surface) {
-        camera.position.set(4, 3.5 + p * 7, 8.5);
-        camera.lookAt(0, 1.5 + (r.stage === "ascending" ? p * 9 : 0), 0);
+        const rise = r.stage === "ascending" ? p * 9 : 0;
+        if (gentle && r.stage === "ascending") {
+          camera.position.set(2.5, 6.8, 18);
+          camera.lookAt(-2, 5.5, 0);
+        } else {
+          camera.position.set(2.5, 3.2 + rise, 7);
+          camera.lookAt(-2, 1.3 + rise, 0);
+        }
       }
       if (dock) {
         ascent.rotation.z = Math.PI / 2;
         ascent.position.set(
-          r.stage === "docked" ? 4 : 4 + r.closingMS * 2,
-          r.alignment * 2,
+          // CSM nose: local y=4.28; ascent nose: local y=2.67.
+          // Their opposing +Y axes must meet after the quarter-turn rotations.
+          -3 + 4.28 + 2.67 + (r.stage === "docked" ? 0 : r.closingMS * 2),
+          r.stage === "docked" ? 0 : r.alignment * 2,
           0,
         );
         moon.position.set(-8, -12, -17);
-        camera.position.set(1, 3, 15);
-        camera.lookAt(1, 1, 0);
+        camera.position.set(1, 2, 12);
+        camera.lookAt(1, 0, 0);
       }
       if (travel) {
-        earth.position.set(1, -2, -17);
-        earth.rotation.y = 1.1 + p * 0.5;
+        earth.position.set(6, -2, -21);
+        earth.rotation.y = 1.1 + (gentle ? 0 : p * 0.5);
         moon.position.set(-24, -4, -35);
-        csm.position.set(-3, 1, 2);
-        camera.position.set(1, 4, 12);
-        camera.lookAt(0, 1, 0);
+        csm.position.set(r.stage === "coast" ? -3 + p * 1.5 : -3, 1, 2);
+        camera.position.set(1, 3, 11);
+        camera.lookAt(1, 1, 0);
       }
       if (entry) {
         earth.position.set(-3, -12, -13);
-        camera.position.set(3, 3, 9);
-        camera.lookAt(0, 1, 0);
+        capsule.position.x = -1;
+        if (r.stage === "entry-ready" && r.feedback === "wrongShield") {
+          capsule.position.y = 2.4;
+        }
+        camera.position.set(2, 2.4, 6.2);
+        camera.lookAt(-0.6, 1.1, 0);
       }
       if (ocean) {
         earth.visible = false;
@@ -372,9 +448,9 @@ export function ReturnViewport({
         camera.position.set(
           6,
           r.stage === "splashdown" ? 3.2 : 7,
-          r.stage === "splashdown" ? 13 : 18,
+          r.stage === "splashdown" ? 9 : 12,
         );
-        camera.lookAt(0, r.stage === "splashdown" ? 0.7 : 4.2, 0);
+        camera.lookAt(0, r.stage === "splashdown" ? 0.7 : 3.5, 0);
       } else scene.background = new THREE.Color("#070d1c");
       renderer.render(scene, camera);
     };
@@ -391,7 +467,8 @@ export function ReturnViewport({
     observer.observe(mount);
     resize();
     const animate = () => {
-      draw();
+      if (!document.hidden && !isEngineFrozen() && !latest.current.paused)
+        draw();
       raf = requestAnimationFrame(animate);
     };
     animate();
@@ -418,6 +495,7 @@ export function ReturnViewport({
       disposeGroup(scene);
       stars.dispose();
       earthMap.dispose();
+      shadowMap.dispose();
       renderer.dispose();
       renderer.forceContextLoss();
       renderer.domElement.remove();

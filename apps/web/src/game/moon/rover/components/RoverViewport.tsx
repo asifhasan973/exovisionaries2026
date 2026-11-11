@@ -18,7 +18,7 @@ import {
   ROVER_CHARGER,
 } from "../rover";
 import { createRoverBay, sampleColor } from "../roverBay";
-import { COURSE_PATHS, courseGroundHeight } from "../roverCourse";
+import { courseGroundHeight } from "../roverCourse";
 import type { RoverState } from "../rover";
 import { useLoadingStore } from "@exo/ui";
 import { isEngineFrozen } from "@exo/ui";
@@ -97,11 +97,14 @@ export function RoverViewport({
           antialias: true,
           powerPreference: "low-power",
         });
-        renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5));
+        // The full-screen driving view prioritizes frame cadence over supersampling.
+        // MSAA still smooths edges at the viewport's native CSS resolution.
+        renderer.setPixelRatio(1);
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
         renderer.toneMappingExposure = 1.25;
         renderer.outputColorSpace = THREE.SRGBColorSpace;
         renderer.shadowMap.enabled = true;
+        renderer.shadowMap.autoUpdate = false;
         renderer.shadowMap.type = THREE.PCFShadowMap;
         mount.append(renderer.domElement);
         scene = new THREE.Scene();
@@ -209,50 +212,6 @@ export function RoverViewport({
           rim.position.set(hole.x, elevation(hole.x, hole.z) + 0.025, hole.z);
           scene.add(rim);
         }
-        if (latest.current.version >= 2)
-          for (const path of COURSE_PATHS) {
-            const curve = new THREE.CatmullRomCurve3(
-                path.points.map(
-                  ([x, z]: readonly [number, number]) =>
-                    new THREE.Vector3(x, 0, z),
-                ),
-              ),
-              vertices: number[] = [];
-            for (let i = 0; i <= 180; i++) {
-              const t = i / 180,
-                p = curve.getPoint(t),
-                tangent = curve.getTangent(t);
-              for (const side of [-1, 1]) {
-                const x = p.x - tangent.z * 2.5 * side,
-                  z = p.z + tangent.x * 2.5 * side;
-                vertices.push(x, height(x, z) + 0.035, z);
-              }
-            }
-            const geometry = new THREE.BufferGeometry(),
-              indices: number[] = [];
-            geometry.setAttribute(
-              "position",
-              new THREE.Float32BufferAttribute(vertices, 3),
-            );
-            for (let i = 0; i < 180; i++) {
-              const a = i * 2;
-              indices.push(a, a + 2, a + 1, a + 1, a + 2, a + 3);
-            }
-            geometry.setIndex(indices);
-            geometry.computeVertexNormals();
-            const road = new THREE.Mesh(
-              geometry,
-              new THREE.MeshStandardMaterial({
-                color: 0xa7a297,
-                roughness: 1,
-                transparent: true,
-                opacity: 0.4,
-                depthWrite: false,
-                side: THREE.DoubleSide,
-              }),
-            );
-            scene.add(road);
-          }
         for (let i = 0; i < 22; i++) {
           const angle = (i * Math.PI * 2) / 22,
             backdrop = new THREE.Mesh(rockGeometry, rockMaterial);
@@ -332,7 +291,7 @@ export function RoverViewport({
           return { group, material, site, label };
         });
         for (const camp of ROVER_CAMPS.filter(
-          (camp: any) => latest.current.version < 3 || camp.id !== "west",
+          (camp: any) => latest.current.version < 3 || camp.id === "base",
         )) {
           const pad = new THREE.Mesh(
             new THREE.RingGeometry(2.8, 3, 64),
@@ -364,6 +323,7 @@ export function RoverViewport({
         }
         const platform = createCrewedPlatform();
         platform.capsule.visible = false;
+        platform.root.visible = latest.current.version < 3;
         platform.root.position.set(
           ROVER_BASE.x - 8,
           elevation(ROVER_BASE.x - 8, ROVER_BASE.z - 4),
@@ -550,7 +510,6 @@ export function RoverViewport({
           lookTarget = new THREE.Vector3(),
           raycaster = new THREE.Raycaster(),
           collisionObjects: THREE.Object3D[] = [
-            ground,
             ...rockMeshes,
             ...(latest.current.version >= 3 ? [bay.root] : []),
           ];
@@ -609,6 +568,14 @@ export function RoverViewport({
           if (event.key.toLowerCase() === "c" && !isEngineFrozen())
             resetCamera();
         };
+        let sampleStart = performance.now(),
+          sampleFrames = 0,
+          sampleRenderMs = 0;
+        let lastDraw = 0,
+          lastShadow = 0,
+          shadowHeading = Infinity,
+          shadowPhase = "";
+        const shadowPosition = new THREE.Vector3(Infinity, Infinity, Infinity);
         const draw = () => {
           if (
             disposed ||
@@ -618,6 +585,13 @@ export function RoverViewport({
             document.hidden
           )
             return;
+          const drawStart = performance.now();
+          const frameSteps = lastDraw
+            ? Math.min(0.05, (drawStart - lastDraw) / 1000) * 60
+            : 1;
+          lastDraw = drawStart;
+          const blend = (amount: number) =>
+            1 - Math.pow(1 - amount, frameSteps);
           const s = latest.current,
             y = elevation(s.x, s.z),
             moving = Math.abs(s.speed) > 0.1 && !s.paused;
@@ -642,7 +616,7 @@ export function RoverViewport({
             s.attempts === lastAttempts &&
             craft.position.distanceTo(position) < 5
           )
-            craft.position.lerp(position, 0.3);
+            craft.position.lerp(position, blend(0.3));
           else craft.position.copy(position);
           const autoDistance = previousCraftPosition.distanceTo(craft.position);
           if (bayPose && !s.paused && autoDistance < 1)
@@ -654,7 +628,7 @@ export function RoverViewport({
             Math.sin(-(bayPose?.heading ?? s.heading) - craft.rotation.y),
             Math.cos(-(bayPose?.heading ?? s.heading) - craft.rotation.y),
           );
-          craft.rotation.y += s.paused || gentle ? turn : turn * 0.35;
+          craft.rotation.y += s.paused || gentle ? turn : turn * blend(0.35);
           const dx = s.x - old.x,
             dz = s.z - old.z,
             distance = Math.hypot(dx, dz);
@@ -698,20 +672,11 @@ export function RoverViewport({
                 : (s.steerAngle ?? 0) * 0.2;
           });
           ramp.visible = s.version < 3 && !s.deployed;
-          const baseX = platform.root.position.x - s.x,
-            baseZ = platform.root.position.z - s.z,
-            backX = -Math.sin(s.heading + orbit.yaw),
+          const backX = -Math.sin(s.heading + orbit.yaw),
             backZ = Math.cos(s.heading + orbit.yaw);
-          const along = baseX * backX + baseZ * backZ,
-            across = Math.abs(baseX * backZ - baseZ * backX);
-          const behindBase =
-            s.phase === "exploring" &&
-            along > 0 &&
-            along < orbit.distance + 2 &&
-            across < 3;
           landerMaterials.forEach((opacity, material) => {
-            material.opacity = behindBase ? opacity * 0.3 : opacity;
-            material.depthWrite = !behindBase;
+            material.opacity = opacity;
+            material.depthWrite = true;
           });
           rockMeshes.forEach((mesh) => {
             const dx = mesh.position.x - s.x,
@@ -843,7 +808,7 @@ export function RoverViewport({
             performance.now() - orbit.lastLook > 1400 &&
             moving
           )
-            orbit.yaw *= 0.93;
+            orbit.yaw *= Math.pow(0.93, frameSteps);
           const sampleView =
               s.version >= 2 &&
               ["drilling", "collecting", "sample-result"].includes(s.phase),
@@ -899,15 +864,27 @@ export function RoverViewport({
             length = direction.length();
           raycaster.set(desiredLook, direction.normalize());
           raycaster.far = length;
-          const hit = raycaster
+          let hitDistance = raycaster
             .intersectObjects(collisionObjects, true)
-            .find((hit) => hit.distance > 1.2);
-          if (hit && hit.distance < length) {
-            if (hit.distance < 4.8) desiredPosition.y += 2;
+            .find((hit) => hit.distance > 1.2)?.distance;
+          // The ground has 131k triangles. Sample its height field along the
+          // short camera sightline instead of triangle-testing it every frame.
+          for (let step = 1; step <= 12; step++) {
+            const distance = (length * step) / 12;
+            const x = desiredLook.x + direction.x * distance;
+            const y = desiredLook.y + direction.y * distance;
+            const z = desiredLook.z + direction.z * distance;
+            if (distance > 1.2 && y < height(x, z) + 0.2) {
+              hitDistance = Math.min(hitDistance ?? length, distance);
+              break;
+            }
+          }
+          if (hitDistance !== undefined && hitDistance < length) {
+            if (hitDistance < 4.8) desiredPosition.y += 2;
             else
               desiredPosition
                 .copy(desiredLook)
-                .addScaledVector(direction, hit.distance - 0.45);
+                .addScaledVector(direction, hitDistance - 0.45);
           }
           desiredPosition.y = Math.max(
             desiredPosition.y,
@@ -918,8 +895,8 @@ export function RoverViewport({
             lookTarget.copy(desiredLook);
             cameraReady = true;
           } else {
-            cameraPosition.lerp(desiredPosition, 0.2);
-            lookTarget.lerp(desiredLook, 0.24);
+            cameraPosition.lerp(desiredPosition, blend(0.2));
+            lookTarget.lerp(desiredLook, blend(0.24));
           }
           camera.position.copy(cameraPosition);
           camera.lookAt(lookTarget);
@@ -946,26 +923,69 @@ export function RoverViewport({
                   : "chase";
             mount.dataset.cameraYaw = orbit.yaw.toFixed(2);
           }
+          // Camera-only movement does not change the sunlight shadow map.
+          // During movement, refresh shadows at the simulation cadence.
+          const shadowChanged =
+            shadowPosition.distanceToSquared(craft.position) > 0.01 ||
+            Math.abs(shadowHeading - craft.rotation.y) > 0.03 ||
+            shadowPhase !== s.phase;
+          const animatedHardware =
+            extracting ||
+            ["deploying", "stowing", "delivering", "boarding"].includes(
+              s.phase,
+            );
+          if (
+            (shadowChanged || animatedHardware) &&
+            drawStart - lastShadow >= 50
+          ) {
+            renderer.shadowMap.needsUpdate = true;
+            shadowPosition.copy(craft.position);
+            shadowHeading = craft.rotation.y;
+            shadowPhase = s.phase;
+            lastShadow = drawStart;
+          }
           renderer.render(scene, camera);
+          if (import.meta.env.DEV) {
+            sampleFrames++;
+            sampleRenderMs += performance.now() - drawStart;
+            const elapsed = performance.now() - sampleStart;
+            if (elapsed >= 1000) {
+              mount.dataset.renderFps = (
+                (sampleFrames * 1000) /
+                elapsed
+              ).toFixed(1);
+              mount.dataset.renderMs = (sampleRenderMs / sampleFrames).toFixed(
+                2,
+              );
+              mount.dataset.drawCalls = String(renderer.info.render.calls);
+              sampleStart = performance.now();
+              sampleFrames = 0;
+              sampleRenderMs = 0;
+            }
+          }
         };
         const active = () =>
           !latest.current.paused &&
           roverActive(latest.current) &&
           !isEngineFrozen() &&
           !document.hidden;
-        let lastPaint = 0;
-        const animate = (time: number) => {
+        const animate = () => {
+          frame = 0;
           if (disposed || !active()) return;
-          if (time - lastPaint > 30) {
-            draw();
-            lastPaint = time;
-          }
+          draw();
           frame = requestAnimationFrame(animate);
         };
         const repaint = () => {
-          cancelAnimationFrame(frame);
-          draw();
-          if (active()) frame = requestAnimationFrame(animate);
+          if (disposed) return;
+          if (active()) {
+            // State updates only update latest; they must not restart the frame loop.
+            if (!frame) frame = requestAnimationFrame(animate);
+          } else {
+            cancelAnimationFrame(frame);
+            frame = 0;
+            lastDraw = 0;
+            draw();
+          }
         };
         wake.current = repaint;
         const resize = () => {

@@ -5,41 +5,39 @@ import {
   isEngineFrozen,
   useLoadingStore,
 } from "@exo/ui";
-import { GEOLOGY_LABELS } from "@/game/moon/science/geologyCopy";
-import { lazy, Suspense, useEffect, useState, useEffectEvent } from "react";
 import {
+  lazy,
+  Suspense,
+  useEffect,
+  useState,
+  useEffectEvent,
+  useRef,
+} from "react";
+import {
+  ArrowLeft,
+  ArrowRight,
   Check,
   Info,
-  ShieldCheck,
-  Users,
+  Pause,
+  Play,
   TriangleAlert,
-  Anchor,
 } from "lucide-react";
 import type {
   WorkshopSession,
   MissionEvent,
 } from "@/game/moon/workshop/lander/workshopSession";
 import type { SelectionFrame } from "@/game/moon/crew/SelectionScreens";
-import { StoryShell, StoryControls } from "@/shared/shell";
+import { StoryShell } from "@/shared/shell";
 import { useStoryNavigation } from "@/game/moon/core/storyNavigationContext";
 import { EngineerCompanion } from "@/game/moon/narrative/components/EngineerCompanion";
 import { useGameSettings } from "@/shared/shell";
-import { Term } from "@/game/moon/core/learning/Learning";
 import { sound } from "@exo/audio";
-import {
-  canDock,
-  returnActive,
-  returnComplete,
-  returnFrameLimit,
-  returnReport,
-} from "./return.ts";
-import type { ReturnAction } from "./return.ts";
-import { nextReturnAction } from "@/game/moon/shared/expedition/moonExpedition";
-import { RETURN_LINES } from "./returnCopy.ts";
-import {
-  missionCard,
-  downloadMissionCard,
-} from "@/game/moon/shared/missionCard";
+import { canDock, returnActive, returnComplete, returnReport } from "./return";
+import type { ReturnAction } from "./return";
+import { returnPresentation } from "./returnPresentation";
+import { ReturnRail } from "./presentation";
+import { RETURN_LINES } from "./returnCopy";
+import { downloadMissionCard } from "@/game/moon/shared/missionCard";
 import "./return.css";
 const MissionDebrief = lazy(() => {
   const task = import("./debrief/MissionDebrief.tsx");
@@ -47,21 +45,9 @@ const MissionDebrief = lazy(() => {
   return task.then((m) => ({ default: m.MissionDebrief }));
 });
 const ReturnViewport = lazy(() =>
-  import("./ReturnViewport.tsx").then((m) => ({ default: m.ReturnViewport })),
+  import("./ReturnViewport").then((m) => ({ default: m.ReturnViewport })),
 );
-const TITLES = {
-  ready: "Time to come home",
-  ascending: "Lift off from the Moon",
-  rendezvous: "Meet your orbit crew",
-  docked: "Three crew. One cabin.",
-  burning: "Next stop: Earth",
-  coast: "On our way home",
-  "entry-ready": "Turn the heat shield forward",
-  entry: "Through Earth’s air",
-  "chute-ready": "Open the parachutes",
-  chutes: "Nearly home!",
-  splashdown: "Welcome back, explorers!",
-} as const;
+
 export function ReturnScreen({
   session,
   dispatch,
@@ -71,31 +57,30 @@ export function ReturnScreen({
   dispatch(e: MissionEvent): void;
   frame: SelectionFrame;
 }) {
-  const r = session.moon.returnFlight,
-    { effects, gentle } = useGameSettings(),
-    [panel, setPanel] = useState<"notes" | "back" | "retry" | null>(null),
-    geo = session.moon.objective === "lunar-geology",
-    debrief = session.progress.stepId === "mission-debrief";
+  const r = session.moon.returnFlight;
+  const { effects, gentle } = useGameSettings();
+  const [panel, setPanel] = useState<"notes" | "back" | "retry" | null>(null);
+  const geo = session.moon.objective === "lunar-geology";
+  const debrief = session.progress.stepId === "mission-debrief";
   const reviewing = !!useStoryNavigation()?.reviewing;
-  const active = returnActive(r),
-    complete = returnComplete(r, session.moon.designSignature),
-    report = returnReport(session.moon, r),
-    card = debrief ? missionCard(session) : null;
-  const act = (e: MissionEvent) => {
-      if (reviewing || isEngineFrozen()) return;
-      sound.setMuted(!effects);
-      sound.playClick();
-      dispatch(e);
-    },
-    action = (a: ReturnAction) => {
-      // Hint/help pauses the clock. An explicit cockpit action is also an intent
-      // to continue; otherwise the highlighted Brake/Align/Shield button is inert.
-      if (reviewing || isEngineFrozen()) return;
-      if (r.paused) dispatch({ type: "return-resume" });
-      act({ type: "return-action", action: a });
-    };
+  const active = returnActive(r);
+  const complete = returnComplete(r, session.moon.designSignature);
+  const report = returnReport(session.moon, r);
+  const presentation = returnPresentation(r, complete);
+  const celebrated = useRef(complete);
+  const act = (event: MissionEvent) => {
+    if (reviewing || isEngineFrozen()) return;
+    sound.setMuted(!effects);
+    sound.playClick();
+    dispatch(event);
+  };
+  const action = (value: ReturnAction) => {
+    if (reviewing || isEngineFrozen()) return;
+    if (r.paused) dispatch({ type: "return-resume" });
+    act({ type: "return-action", action: value });
+  };
   useEffect(() => {
-    if (!active || r.paused || debrief || reviewing) return;
+    if (!active || r.paused || debrief || reviewing || panel) return;
     let last = performance.now();
     const timer = setInterval(() => {
       const now = performance.now();
@@ -104,16 +89,16 @@ export function ReturnScreen({
       last = now;
     }, 100);
     return () => clearInterval(timer);
-  }, [active, r.paused, debrief, reviewing, dispatch]);
+  }, [active, r.paused, debrief, reviewing, panel, dispatch]);
   useEffect(() => {
-    const pause = () => dispatch({ type: "return-pause" }),
-      hide = () => {
-        if (document.hidden) pause();
-      },
-      hint = () => {
-        dispatch({ type: "return-hint" });
-        pause();
-      };
+    const pause = () => dispatch({ type: "return-pause" });
+    const hide = () => {
+      if (document.hidden) pause();
+    };
+    const hint = () => {
+      dispatch({ type: "return-hint" });
+      pause();
+    };
     window.addEventListener("game-help-open", pause);
     window.addEventListener("replay-game-help", hint);
     document.addEventListener("visibilitychange", hide);
@@ -125,29 +110,35 @@ export function ReturnScreen({
   }, [dispatch]);
   useEffect(() => {
     sound.setMuted(!effects);
-    if (reviewing) return;
-    if (complete) sound.playFanfare();
-    else if (["docked", "chutes"].includes(r.stage)) sound.playStagingThud();
-    else if (r.stage === "entry-ready") sound.playRadioBeep();
-  }, [r.stage, complete, effects, reviewing]);
+    if (complete && !celebrated.current && !reviewing && !isEngineFrozen())
+      sound.playFanfare();
+    celebrated.current = complete;
+  }, [complete, effects, reviewing]);
   useEffect(() => {
     sound.setMuted(!effects);
-    if (!reviewing && !r.paused && ["ascending", "burning"].includes(r.stage))
+    if (
+      !reviewing &&
+      !r.paused &&
+      !panel &&
+      ["ascending", "burning"].includes(r.stage)
+    )
       sound.startRocketRoar();
     else sound.stopRocketRoar();
     return () => sound.stopRocketRoar();
-  }, [r.stage, r.paused, effects, reviewing]);
-  const primary = nextReturnAction(r),
-    keyboardAction = useEffectEvent(action);
+  }, [r.stage, r.paused, effects, reviewing, panel]);
+  const keyboardAction = useEffectEvent(action);
   useEffect(() => {
     if (reviewing || debrief || panel) return;
     const key = (event: KeyboardEvent) => {
       if (
         event.repeat ||
         event.defaultPrevented ||
+        event.ctrlKey ||
+        event.metaKey ||
+        event.altKey ||
         (event.target instanceof HTMLElement &&
           event.target.closest(
-            "input,textarea,select,[contenteditable=true],[role=dialog]",
+            "input,textarea,select,a,[contenteditable=true],[role=dialog]",
           )) ||
         (event.key === " " && event.target instanceof HTMLButtonElement)
       )
@@ -161,7 +152,7 @@ export function ReturnScreen({
         else if (event.key === " " || event.key.toLowerCase() === "s")
           choice = "brake";
         else if (event.key.toLowerCase() === "e" && canDock(r)) choice = "dock";
-      } else if (event.key.toLowerCase() === "e") choice = primary;
+      }
       if (choice) {
         event.preventDefault();
         keyboardAction(choice);
@@ -169,89 +160,79 @@ export function ReturnScreen({
     };
     window.addEventListener("keydown", key);
     return () => window.removeEventListener("keydown", key);
-  }, [r, primary, reviewing, debrief, panel]);
-  const nextLabel = debrief
-    ? "Mission home"
-    : r.paused
-      ? "Resume"
-      : complete
-        ? "See our mission"
-        : r.stage === "ready"
-          ? "Launch ascent cabin"
-          : r.stage === "rendezvous"
-            ? r.closingMS > 0.25
-              ? "Slow the approach"
-              : Math.abs(r.alignment) > 0.2
-                ? "Line up the cabins"
-                : "Dock gently"
-            : r.stage === "docked"
-              ? "Fire Earth-return engine"
-              : r.stage === "entry-ready"
-                ? "Choose heat shield"
-                : r.stage === "chute-ready"
-                  ? "Open Earth parachutes"
-                  : r.stage === "coast"
-                    ? "Continue to Earth"
-                    : "Pause";
-  const next = () =>
-    reviewing
-      ? dispatch({ type: "next" })
-      : debrief
-        ? frame.onHome?.()
-        : r.paused
-          ? act({ type: "return-resume" })
-          : complete
-            ? act({ type: "next" })
-            : primary
-              ? action(primary)
-              : active
-                ? act({ type: "return-pause" })
-                : undefined;
+  }, [r, reviewing, debrief, panel]);
+  const next = () => {
+    if (reviewing || isEngineFrozen()) return;
+    if (complete) act({ type: "next" });
+    else if (r.paused) act({ type: "return-resume" });
+    else if (presentation.primaryAction && !presentation.primaryDisabled)
+      action(presentation.primaryAction);
+    else if (active) act({ type: "return-pause" });
+  };
   const warning = ["unsafeDock", "wrongShield", "fuel", "reserve"].includes(
-      r.feedback,
-    ),
-    stageIndex = ["ready", "ascending"].includes(r.stage)
-      ? 0
-      : ["rendezvous", "docked"].includes(r.stage)
-        ? 1
-        : ["burning", "coast"].includes(r.stage)
-          ? 2
-          : ["entry-ready", "entry", "chute-ready", "chutes"].includes(r.stage)
-            ? 3
-            : 4;
+    r.feedback,
+  );
+  const goBack = () => {
+    if (isEngineFrozen()) return;
+    dispatch({ type: "return-pause" });
+    dispatch({ type: "back" });
+  };
   return (
     <StoryShell
       {...frame}
       controls={
-        <StoryControls
-          onBack={() => {
-            dispatch({ type: "return-pause" });
-            dispatch({ type: "back" });
-          }}
-          onNext={next}
-          nextLabel={nextLabel}
-          nextDisabled={
-            !reviewing &&
-            !debrief &&
-            !r.paused &&
-            (r.stage === "entry-ready" ||
-              (r.stage === "ready" && !report.feasible))
-          }
-          progress={
-            <span>
-              {debrief
-                ? complete
-                  ? "Moon mission · report"
-                  : "Mission record · recovery incomplete"
-                : "Return · " + (stageIndex + 1) + "/5"}
+        debrief ? (
+          false
+        ) : (
+          <footer className="conversation-controls return-footer">
+            <button className="conversation-back" onClick={goBack}>
+              <ArrowLeft size={20} />
+              Back
+            </button>
+            <span className="return-footer-status" role="status">
+              {complete ? (
+                "Recovery complete"
+              ) : r.paused ? (
+                <>
+                  <Pause size={14} />
+                  Mission paused
+                </>
+              ) : active ? (
+                <>
+                  <Play size={14} />
+                  Flight running
+                </>
+              ) : (
+                `Return · ${presentation.stepIndex + 1}/5`
+              )}
             </span>
-          }
-          nextHint={
-            !debrief && r.stage === "rendezvous" && !canDock(r)
-              ? "Slow down and line up"
-              : undefined
-          }
-        />
+            <div className="next-control">
+              {complete && (
+                <button className="return-home-link" onClick={frame.onHome}>
+                  Back to Home
+                </button>
+              )}
+              {presentation.awaitingChoice ? (
+                <span className="return-choice-prompt">
+                  Choose an orientation above
+                </span>
+              ) : (
+                <button
+                  data-primary-action
+                  className="conversation-next"
+                  onClick={next}
+                  disabled={
+                    presentation.primaryDisabled ||
+                    (r.stage === "ready" && !report.feasible)
+                  }
+                >
+                  {presentation.primaryLabel}
+                  <ArrowRight size={20} />
+                </button>
+              )}
+            </div>
+          </footer>
+        )
       }
     >
       <main
@@ -259,319 +240,172 @@ export function ReturnScreen({
         data-return-stage={r.stage}
         id="story-content"
         tabIndex={-1}
-        aria-labelledby="return-title"
+        aria-labelledby={debrief ? "moon-report-title" : "return-title"}
       >
-        <div className="return-heading">
-          <div>
-            <span>{debrief ? "MISSION LOG" : "CREW RETURN"}</span>
-            <h1 id="return-title">
-              {debrief
-                ? card?.crewRecovered === 3
-                  ? "You brought everyone home."
-                  : "Mission debrief"
-                : (TITLES as Record<string, string>)[r.stage]}
-            </h1>
-          </div>
-          <button
-            className="game-info-trigger"
-            onClick={() => {
-              act({ type: "return-pause" });
-              setPanel("notes");
-            }}
-          >
-            <Info size={17} />
-            {debrief ? "Full mission log" : "Flight notes"}
-          </button>
-        </div>
-        {debrief && card ? (
+        {debrief ? (
           <Suspense
-            fallback={
-              <p role="status">Opening your recorded mission report…</p>
-            }
+            fallback={<p role="status">Opening your mission report…</p>}
           >
             <MissionDebrief
               session={session}
               onHome={frame.onHome}
               onRetry={() => setPanel("retry")}
-              preview={
-                reviewing ||
-                (import.meta.env.DEV && window.location.hash.includes("debug"))
-              }
+              preview={reviewing || frame.isDebugSession}
             />
           </Suspense>
         ) : (
           <>
+            <div className="return-heading">
+              <div>
+                <h1 id="return-title">{presentation.title}</h1>
+                <p>{presentation.instruction}</p>
+              </div>
+              <button
+                className="game-info-trigger"
+                aria-label="Flight notes"
+                title="Flight notes"
+                onClick={() => {
+                  act({ type: "return-pause" });
+                  setPanel("notes");
+                }}
+              >
+                <Info size={17} />
+                <span>Flight notes</span>
+              </button>
+            </div>
+            <ol
+              className="return-stage-track"
+              aria-label={`Crew return · stage ${presentation.stepIndex + 1} of 5`}
+            >
+              {["Lift off", "Dock", "Earth burn", "Re-entry", "Home"].map(
+                (name, index) => (
+                  <li
+                    key={name}
+                    aria-current={
+                      index === presentation.stepIndex ? "step" : undefined
+                    }
+                    className={
+                      index < presentation.stepIndex || complete
+                        ? "is-done"
+                        : index === presentation.stepIndex
+                          ? "is-current"
+                          : ""
+                    }
+                  >
+                    <span>
+                      {index < presentation.stepIndex || complete ? (
+                        <Check size={14} />
+                      ) : (
+                        index + 1
+                      )}
+                    </span>
+                    {name}
+                  </li>
+                ),
+              )}
+            </ol>
             <div className="return-layout">
-              <section className="return-console" aria-label="Return controls">
-                <div className="return-crew">
-                  <Users size={21} />
-                  <strong>
-                    {r.crewLocation === "moon-and-orbit"
-                      ? "2 Moon · 1 orbit"
-                      : r.crewLocation === "ascent-and-orbit"
-                        ? "2 ascent · 1 orbit"
-                        : r.crewLocation === "ocean"
-                          ? "3 crew recovered"
-                          : "3 aboard command module"}
-                  </strong>
-                </div>
-                {r.stage === "ready" ? (
-                  <>
-                    <h2>Our way home is ready</h2>
-                    <div className="return-checklist">
-                      <span>
-                        <Check />
-                        Rover parked
-                      </span>
-                      <span>
-                        <Check />
-                        Data relayed
-                      </span>
-                      <span>
-                        <Check />
-                        Ascent fuel protected
-                      </span>
-                    </div>
-                    {!report.contingencyOK ? (
-                      <p className="return-reserve-note">
-                        Using spare day kits. Return directly to Earth.
-                      </p>
-                    ) : null}
-                  </>
-                ) : r.stage === "rendezvous" ? (
-                  <>
-                    <h2>Slow. Line up. Dock.</h2>
-                    <div className="return-dock">
-                      <div>
-                        <span>Closing speed</span>
-                        <strong className={r.closingMS > 0.25 ? "is-warn" : ""}>
-                          {r.closingMS.toFixed(2)} m/s
-                        </strong>
-                        <small>Target ≤ 0.25 m/s</small>
-                      </div>
-                      <div>
-                        <span>Alignment</span>
-                        <strong
-                          className={
-                            Math.abs(r.alignment) > 0.2 ? "is-warn" : ""
-                          }
-                        >
-                          {Math.abs(r.alignment) <= 0.2
-                            ? "Centered"
-                            : "Off-center"}
-                        </strong>
-                        <div className="return-aim">
-                          <i />
-                          <b style={{ left: `${50 + r.alignment * 40}%` }} />
+              <section
+                className="return-scene-column"
+                aria-label="Return flight scene and briefing"
+              >
+                <div className="return-scene">
+                  <SceneBoundary
+                    fallback={
+                      <SceneFallback
+                        scene="return"
+                        label="Mission view"
+                        detail="Status and flight controls remain available"
+                      />
+                    }
+                  >
+                    <Suspense
+                      fallback={
+                        <div className="return-fallback">
+                          Opening return flight…
                         </div>
-                      </div>
+                      }
+                    >
+                      <ReturnViewport flight={r} gentle={gentle} />
+                    </Suspense>
+                  </SceneBoundary>
+                  <div className="return-scene-label">
+                    {r.stage === "splashdown"
+                      ? "Earth · recovery ocean"
+                      : [
+                            "entry-ready",
+                            "entry",
+                            "chute-ready",
+                            "chutes",
+                          ].includes(r.stage)
+                        ? "Earth · atmosphere"
+                        : ["coast", "burning"].includes(r.stage)
+                          ? "Moon → Earth"
+                          : ["rendezvous", "docked"].includes(r.stage)
+                            ? "Lunar orbit · rendezvous"
+                            : "Moon · departure"}
+                  </div>
+                  {r.stage === "rendezvous" && (
+                    <div className="return-docking-guide">
+                      <span>Command spacecraft</span>
+                      <span>← Docking direction</span>
+                      <span>Ascent cabin</span>
                     </div>
-                    <p>
-                      {r.closingMS > 0.25
-                        ? "First, slow the approach."
-                        : Math.abs(r.alignment) > 0.2
-                          ? "Now line up with the orbiting cabin."
-                          : "Aligned and slow. Ready to dock."}
-                    </p>
-                  </>
-                ) : r.stage === "docked" ? (
-                  <div className="return-checkpoint">
-                    <Users size={38} />
-                    <h2>Crew transferred!</h2>
-                    <p>Empty lander released before the Earth burn.</p>
-                  </div>
-                ) : r.stage === "entry-ready" ? (
-                  <>
-                    <h2>Which side faces Earth?</h2>
-                    <div className="return-orient">
-                      <button onClick={() => action("nose")}>
-                        <span>△</span>Nose first
-                      </button>
-                      <button data-return-hint onClick={() => action("shield")}>
-                        <ShieldCheck />
-                        Heat shield first
-                      </button>
+                  )}
+                  {r.stage === "entry-ready" && (
+                    <div
+                      className={`return-capsule-key ${r.feedback === "wrongShield" ? "is-nose-first" : ""}`}
+                    >
+                      <span>Pointed nose</span>
+                      <span>Broad dark heat shield</span>
                     </div>
+                  )}
+                  <span className="return-scene-note">
+                    Cinematic scale · time compressed
+                  </span>
+                  {r.paused && !complete && (
+                    <span className="return-paused-badge">
+                      <Pause size={14} />
+                      Paused
+                    </span>
+                  )}
+                </div>
+                <div className="return-briefing">
+                  <EngineerCompanion
+                    voiceEnabled={frame.voiceEnabled ?? true}
+                    reaction={
+                      complete ? "complete" : warning ? "warning" : "intro"
+                    }
+                    token={r.mistakes}
+                    scriptedReply={{
+                      // Revised lines use speech synthesis instead of an outdated recording.
+                      id:
+                        r.feedback === "ready" || r.feedback === "entry-ready"
+                          ? `return-briefing-${r.feedback}`
+                          : `return-${r.feedback}`,
+                      text: RETURN_LINES[r.feedback],
+                    }}
+                  />
+                </div>
+              </section>
+              <div className="return-rail-column">
+                <ReturnRail
+                  session={session}
+                  recovered={complete}
+                  action={action}
+                  dispatch={act}
+                />
+                {warning && (
+                  <div className="return-alert" role="alert">
+                    <TriangleAlert size={19} />
                     <p>
-                      Service module separates as we turn.{" "}
-                      <Term term="heatshield">Heat shield</Term>
-                    </p>
-                  </>
-                ) : r.stage === "chute-ready" ? (
-                  <div className="return-checkpoint">
-                    <ShieldCheck size={38} />
-                    <h2>Low & slow</h2>
-                    <p>
-                      Heat shield did its job.{" "}
-                      <Term term="parachutes">Parachutes</Term> come next.
-                    </p>
-                  </div>
-                ) : complete ? (
-                  <div className="return-checkpoint">
-                    <Anchor size={38} />
-                    <h2>Splashdown!</h2>
-                    <p>Three crew recovered. Data ready to review.</p>
-                  </div>
-                ) : (
-                  <div className="return-running">
-                    <h2>{(TITLES as Record<string, string>)[r.stage]}</h2>
-                    <progress
-                      max={returnFrameLimit(r)}
-                      value={r.frame}
-                      aria-label="Return phase progress"
-                    />
-                    <p>
-                      {r.stage === "coast"
-                        ? `${((r.frame / returnFrameLimit(r)) * 3).toFixed(1)} / 3 travel days`
-                        : r.stage === "ascending"
-                          ? "Climbing to the orbiting spacecraft"
-                          : r.stage === "burning"
-                            ? "Engine firing · Earth course locked"
-                            : r.stage === "entry"
-                              ? "Heat shield protecting the crew"
-                              : "Parachutes deployed · descending to the ocean"}
+                      {r.feedback === "unsafeDock"
+                        ? `${r.closingMS > 0.25 ? "Brake to 0.25 m/s or slower. " : ""}${Math.abs(r.alignment) > 0.2 ? "Center the cabins before docking." : ""}`
+                        : RETURN_LINES[r.feedback]}
                     </p>
                   </div>
                 )}
-                {!r.paused &&
-                !active &&
-                r.stage !== "rendezvous" &&
-                r.stage !== "entry-ready" ? (
-                  <button
-                    className="return-play-action"
-                    onClick={next}
-                    disabled={r.stage === "ready" && !report.feasible}
-                  >
-                    {complete ? "Mission complete · See results" : nextLabel}
-                    <span>→</span>
-                  </button>
-                ) : null}
-                {r.paused ? (
-                  <button
-                    className="return-play-action"
-                    onClick={() => act({ type: "return-resume" })}
-                  >
-                    Resume flight<span>▶</span>
-                  </button>
-                ) : null}
-                {r.stage === "rendezvous" ? (
-                  <div className="return-dock-actions">
-                    <button
-                      onClick={() => action("left")}
-                      aria-label="Align left"
-                    >
-                      ← Left
-                    </button>
-                    <button
-                      onClick={() => action("brake")}
-                      aria-label="Brake approach"
-                    >
-                      Brake
-                    </button>
-                    <button
-                      onClick={() => action("right")}
-                      aria-label="Align right"
-                    >
-                      Right →
-                    </button>
-                    <button
-                      className="return-dock-now"
-                      onClick={() => action("dock")}
-                      disabled={!canDock(r)}
-                    >
-                      Dock · E
-                    </button>
-                  </div>
-                ) : null}
-                {warning ? (
-                  <div className="return-alert" role="alert">
-                    <TriangleAlert size={23} />
-                    <strong>
-                      {(RETURN_LINES as Record<string, string>)[r.feedback]}
-                    </strong>
-                  </div>
-                ) : null}
-                <EngineerCompanion
-                  voiceEnabled={frame.voiceEnabled ?? true}
-                  reaction={
-                    complete ? "complete" : warning ? "warning" : "intro"
-                  }
-                  token={r.mistakes}
-                  scriptedReply={{
-                    id: `return-${r.feedback}`,
-                    text: (RETURN_LINES as Record<string, string>)[r.feedback],
-                  }}
-                />
-              </section>
-              <section className="return-scene">
-                <SceneBoundary
-                  fallback={
-                    <SceneFallback
-                      scene="return"
-                      label="Mission view"
-                      detail="Use the controls to keep playing"
-                    />
-                  }
-                >
-                  <Suspense
-                    fallback={
-                      <div className="return-fallback">
-                        Opening return flight…
-                      </div>
-                    }
-                  >
-                    <ReturnViewport flight={r} gentle={gentle} />
-                  </Suspense>
-                </SceneBoundary>
-                <div className="return-scene-label">
-                  <span>
-                    {r.stage === "splashdown"
-                      ? "EARTH · RECOVERY"
-                      : r.stage === "entry-ready"
-                        ? "EARTH · APPROACH"
-                        : ["chutes", "chute-ready", "entry"].includes(r.stage)
-                          ? "EARTH · ATMOSPHERE"
-                          : r.stage === "coast"
-                            ? "MOON → EARTH"
-                            : "MOON · CREW RETURN"}
-                  </span>
-                  <strong>
-                    {r.stage === "coast"
-                      ? "3-day return"
-                      : r.stage === "rendezvous"
-                        ? canDock(r)
-                          ? "Docking alignment ready"
-                          : "Brake and align"
-                        : r.stage === "ascending"
-                          ? "Ascent in progress"
-                          : "Bring the crew home"}
-                  </strong>
-                </div>
-                <div
-                  className="return-stage-track"
-                  aria-label={`Return journey stage ${stageIndex + 1} of 5`}
-                >
-                  {["LIFT OFF", "DOCK", "EARTH BURN", "RE-ENTRY", "HOME"].map(
-                    (name, index) => (
-                      <span
-                        key={name}
-                        className={
-                          index === stageIndex
-                            ? "is-current"
-                            : index < stageIndex
-                              ? "is-done"
-                              : ""
-                        }
-                      >
-                        {index < stageIndex ? "✓" : index + 1} {name}
-                      </span>
-                    ),
-                  )}
-                </div>
-                <div className="return-scene-note">
-                  Cinematic scale · time compressed · <Term term="gravity" />
-                </div>
-              </section>
+              </div>
             </div>
           </>
         )}
@@ -580,7 +414,7 @@ export function ReturnScreen({
         <GameInfo
           title={
             panel === "retry"
-              ? "Try another design?"
+              ? "Plan another mission"
               : panel === "back"
                 ? "Return checkpoint"
                 : "Crew return · evidence & model"
@@ -591,14 +425,20 @@ export function ReturnScreen({
               ? [
                   <div key="retry">
                     <p>
-                      Save your mission card to compare. Your crew and blueprint
-                      stay; flight and science start fresh on Earth.
+                      Your crew and blueprint stay. Flight and science progress
+                      will start again.
                     </p>
                     <button
                       className="game-info-trigger"
                       onClick={() => downloadMissionCard(session)}
                     >
-                      Save this result
+                      Export current result
+                    </button>
+                    <button
+                      className="game-info-trigger"
+                      onClick={() => setPanel(null)}
+                    >
+                      Cancel
                     </button>
                     <button
                       className="conversation-next"
@@ -619,7 +459,13 @@ export function ReturnScreen({
                         className="game-info-trigger"
                         onClick={frame.onHome}
                       >
-                        Mission home
+                        Back to Home
+                      </button>
+                      <button
+                        className="game-info-trigger"
+                        onClick={() => setPanel(null)}
+                      >
+                        Continue here
                       </button>
                     </div>,
                   ]
@@ -705,50 +551,6 @@ export function ReturnScreen({
                         certification.
                       </p>
                     </div>,
-                    ...(debrief
-                      ? session.moon.science.records.map((obs: any) => (
-                          <div key={obs.id}>
-                            <h3>
-                              {obs.instrumentId.toUpperCase()} ·{" "}
-                              {obs.locationId}
-                            </h3>
-                            <p>
-                              {obs.signal}.{" "}
-                              {obs.classification
-                                ? (GEOLOGY_LABELS as Record<string, string>)[
-                                    obs.classification
-                                  ]
-                                : (obs.result ?? "Uninterpreted clue")}{" "}
-                              · {obs.quality ?? obs.confidence} quality.{" "}
-                              {obs.transmitted
-                                ? "Transmitted"
-                                : "Not transmitted"}
-                              .
-                            </p>
-                            <p>
-                              {obs.points} new-measurement points.{" "}
-                              {obs.depthRangeCm
-                                ? `Sampled ${obs.depthRangeCm[0]}–${obs.depthRangeCm[1]} cm.`
-                                : "Surface scan."}
-                            </p>
-                          </div>
-                        ))
-                      : []),
-                    ...(debrief
-                      ? session.moon.science.hazards.log.map((log: any) => (
-                          <div key={log.id}>
-                            <h3>
-                              {log.kind} · {log.status}
-                            </h3>
-                            <p>{log.reason}</p>
-                            <p>
-                              {log.actions
-                                .map((a: any) => a.action)
-                                .join(" → ")}
-                            </p>
-                          </div>
-                        ))
-                      : []),
                   ]
           }
         />

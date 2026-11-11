@@ -93,6 +93,7 @@ export function StoryShell({
         return;
       if (document.querySelector("dialog[open]")) return;
       const target = event.target as HTMLElement;
+      if (target.closest(".moon-report")) return;
       // Native form submission and focused controls keep their keyboard behavior.
       if (
         target.closest(
@@ -168,6 +169,7 @@ export interface StoryControlsProps {
   nextLabel?: string;
   nextDisabled?: boolean;
   nextForm?: string;
+  extraActions?: ReactNode;
   progress?: ReactNode;
   dialog?: ReactNode;
   dialogHidden?: boolean;
@@ -186,6 +188,7 @@ export function StoryControls({
   nextLabel = "Next",
   nextDisabled = false,
   nextForm,
+  extraActions,
   progress,
   dialog,
   dialogHidden = false,
@@ -227,6 +230,7 @@ export function StoryControls({
       </div>
       <div className="next-control">
         {showSkip ? <JudgeSkip /> : null}
+        {extraActions}
         {!hintHidden && !navigation?.card ? (
           <HintButton disabled={hintDisabled} />
         ) : null}

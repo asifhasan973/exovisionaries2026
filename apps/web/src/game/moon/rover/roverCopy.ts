@@ -34,7 +34,7 @@ export const ROVER_RADIO = {
   },
   first: {
     speaker: "Commander",
-    text: "First sample delivered. Recharge at Solar Ridge.",
+    text: "First sample delivered. Stop anywhere in sunlight to recharge when needed.",
   },
   second: {
     speaker: "Commander",

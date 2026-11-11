@@ -43,7 +43,8 @@ export function RoverCabin({
     const task = Promise.all(
       [
         "story/lunar-cabin-v1.webp",
-        "story/crew-portraits/scientist-seated-v1.webp",
+        "story/crew-portraits/commander-pressure-suit-v2.webp",
+        "story/crew-portraits/scientist-pressure-suit-v2.webp",
       ].map((path) => {
         const image = new Image();
         image.src = `${import.meta.env.BASE_URL}${path}`;
@@ -94,17 +95,25 @@ export function RoverCabin({
         <div
           className={`rover-cabin-person rover-cabin-commander ${commander ? "is-speaking" : ""}`}
         >
-          <CharacterStage
-            cue={{
-              character: "commander",
-              expression: "confident",
-              pose: commander ? "explain" : "listen",
-            }}
-            active={commander}
-            speaking={commander && narration.status === "speaking"}
-            speechTime={controller.getSpeechTime}
-            label="Commander"
-          />
+          {gender === "male" ? (
+            <CharacterStage
+              cue={{
+                character: "commander",
+                expression: "confident",
+                pose: commander ? "explain" : "listen",
+              }}
+              active={commander}
+              speaking={commander && narration.status === "speaking"}
+              speechTime={controller.getSpeechTime}
+              label="Commander"
+            />
+          ) : (
+            <img
+              className="rover-cabin-portrait"
+              src={`${import.meta.env.BASE_URL}story/crew-portraits/commander-pressure-suit-v2.webp`}
+              alt="Commander seated in a fitted lunar pressure suit"
+            />
+          )}
           <span>Commander · Rover operator</span>
         </div>
         <div
@@ -112,7 +121,8 @@ export function RoverCabin({
           data-speaking={!commander && narration.status === "speaking"}
         >
           <img
-            src={`${import.meta.env.BASE_URL}story/crew-portraits/scientist-seated-v1.webp`}
+            className="rover-cabin-portrait"
+            src={`${import.meta.env.BASE_URL}story/crew-portraits/scientist-pressure-suit-v2.webp`}
             alt="Scientist seated at the lander's remote-control console"
           />
           <span>

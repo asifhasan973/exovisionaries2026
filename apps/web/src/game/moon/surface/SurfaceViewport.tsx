@@ -434,51 +434,6 @@ export function SurfaceViewport({
       const lampTarget = new THREE.Object3D();
       scene.add(lampTarget);
       lamp.target = lampTarget;
-      const astronaut = (x: number) => {
-        const group = new THREE.Group(),
-          white = new THREE.MeshStandardMaterial({
-            color: 0xe6e2da,
-            roughness: 0.6,
-          }),
-          gold = new THREE.MeshStandardMaterial({
-            color: 0x976b20,
-            metalness: 0.7,
-            roughness: 0.2,
-          }),
-          body = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.5, 0.26), white);
-        body.position.y = 0.65;
-        group.add(body);
-        const helmet = new THREE.Mesh(
-          new THREE.SphereGeometry(0.24, 20, 12),
-          white,
-        );
-        helmet.position.y = 1.1;
-        group.add(helmet);
-        const visor = new THREE.Mesh(
-          new THREE.SphereGeometry(0.205, 20, 12, 0, Math.PI),
-          gold,
-        );
-        visor.position.set(0, 1.1, 0.1);
-        group.add(visor);
-        for (const side of [-1, 1]) {
-          const limb = new THREE.Mesh(
-            new THREE.BoxGeometry(0.12, 0.45, 0.15),
-            white,
-          );
-          limb.position.set(side * 0.13, 0.24, 0);
-          group.add(limb);
-          const arm = new THREE.Mesh(
-            new THREE.CapsuleGeometry(0.065, 0.33, 4, 8),
-            white,
-          );
-          arm.position.set(side * 0.28, 0.69, 0);
-          group.add(arm);
-        }
-        group.position.set(x, 0, 1.6);
-        scene.add(group);
-        return group;
-      };
-      const astronauts = [astronaut(-8.2), astronaut(-7.1)];
       const dustColour = new THREE.Color(0x8a8084),
         paint = new Map<THREE.MeshStandardMaterial, THREE.Color>();
       rover.traverse((o) => {
@@ -717,19 +672,6 @@ export function SurfaceViewport({
         );
         scienceGlow.intensity =
           working && ["survey", "analysis"].includes(activity.phase) ? 2 : 0;
-        astronauts.forEach((a, i) => {
-          a.visible = !s.crewSheltered;
-          a.position.x =
-            activity?.recovery === "brush"
-              ? -6.5 + i * 1.5
-              : -8.2 + i * 1.1 + Math.sin(deployment * Math.PI) * 1.5;
-          a.position.y = surfaceHeight(a.position.x, a.position.z);
-          a.rotation.y = activity?.recovery === "brush" ? Math.PI / 2 : 0;
-          if (activity?.recovery === "brush")
-            a.children.slice(-2).forEach((arm) => {
-              arm.rotation.z = Math.sin((activity.frame ?? 0) * 0.65) * 0.45;
-            });
-        });
         ramp.visible = !s.deployed;
         const light = surfaceLight(p.x, p.z, moonRef.current);
         lamp.visible = s.deployed && light === 0;
@@ -783,8 +725,14 @@ export function SurfaceViewport({
             : new THREE.Vector3(-0.6, 0, -0.8);
           const offset = heading
             .clone()
-            .multiplyScalar(-9)
-            .add(new THREE.Vector3(-heading.z * 3, 5.8, heading.x * 3));
+            .multiplyScalar(s.deployed ? -6 : 6)
+            .add(
+              new THREE.Vector3(
+                -heading.z * 2,
+                s.deployed ? 3.2 : 4,
+                heading.x * 2,
+              ),
+            );
           desiredPosition = rover.position.clone().add(offset);
           desiredFocus = rover.position
             .clone()

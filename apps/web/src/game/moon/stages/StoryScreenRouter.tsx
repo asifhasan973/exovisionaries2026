@@ -71,6 +71,7 @@ export function StoryScreenRouter({
       <MissionHome
         frame={homeFrame}
         progress={mission.progress}
+        session={mission}
         onContinue={enterMission}
         onBack={back}
         onOpenArchive={onOpenArchive}

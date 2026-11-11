@@ -74,13 +74,14 @@
 .rover-cabin-commander figcaption {
   display: none;
 }
-.rover-cabin-scientist > img {
+.rover-cabin-person > .rover-cabin-portrait {
   position: absolute;
-  left: -6%;
-  bottom: -32%;
-  height: 132%;
-  width: 112%;
+  left: 0;
+  bottom: -6%;
+  height: 105%;
+  width: 100%;
   object-fit: contain;
+  object-position: center bottom;
   filter: drop-shadow(0 8px 10px #0008);
 }
 .rover-cabin-person > span {

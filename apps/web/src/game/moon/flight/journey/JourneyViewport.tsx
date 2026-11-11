@@ -19,7 +19,7 @@ export function JourneyViewport({
   preparation: PreparationSelection;
   gentle: boolean;
 }) {
-  const initialMode = journey.stage === "route" ? "trajectory" : "craft";
+  const initialMode = "craft";
   const host = useRef<HTMLDivElement>(null),
     latest = useRef(journey),
     view = useRef<"craft" | "trajectory">(initialMode);

@@ -28,7 +28,6 @@ import type {
 import { sound } from "@exo/audio";
 import { isEngineFrozen, useOrientationLifecycleStore } from "@exo/ui";
 import type { PreparationSelection } from "@/game/moon/core/design";
-import { useCargoRoverImage } from "@/game/moon/rover/useCargoRoverImage";
 import "./packingLab.css";
 
 type Dispatch = (event: MissionEvent) => void;
@@ -393,7 +392,7 @@ export function PackingLabScene({
   game,
   dispatch,
   effects,
-  preparation,
+  preparation: _preparation,
 }: {
   game: PackingGameState;
   dispatch: Dispatch;
@@ -415,7 +414,6 @@ export function PackingLabScene({
   } | null>(null);
   const frozen = useOrientationLifecycleStore((state) => state.isFrozen);
   const locked = frozen || game.phase === "passed";
-  const roverImage = useCargoRoverImage(preparation, game.id === "lander");
   const point = (event: PointerEvent<SVGElement>) => {
     const rect = svg.current!.getBoundingClientRect(),
       scale = Math.min(rect.width / 900, rect.height / 540);
@@ -811,35 +809,6 @@ export function PackingLabScene({
               />
               <CargoLander metal={metal} gold={gold} />
             </g>
-            {roverImage ? (
-              <g aria-label="Your assembled rover, packed with the lander">
-                <ellipse
-                  cx="214"
-                  cy="405"
-                  rx="104"
-                  ry="16"
-                  fill="#090e1e"
-                  opacity=".5"
-                />
-                <image
-                  href={roverImage}
-                  x="100"
-                  y="225"
-                  width="230"
-                  height="186"
-                />
-                <text
-                  x="215"
-                  y="440"
-                  textAnchor="middle"
-                  fontSize="15"
-                  fill="#c3f2dd"
-                  fontWeight="800"
-                >
-                  YOUR ROVER · SECURED
-                </text>
-              </g>
-            ) : null}
             <path
               d="M510 418v-44m-11 11 11-11 11 11"
               stroke="#ffe189"

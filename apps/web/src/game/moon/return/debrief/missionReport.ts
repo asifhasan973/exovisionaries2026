@@ -1,7 +1,10 @@
 import type { WorkshopSession } from "@/game/moon/workshop/lander/workshopSession";
 import type { ScienceObservation } from "@/game/moon/shared/session";
 import { returnComplete, missionOutcome } from "../return";
-import { expectedFinding } from "@/game/moon/science/science";
+import { expectedFinding, SCIENCE_TARGETS } from "@/game/moon/science/science";
+import { GEOLOGY_TARGETS } from "@/game/moon/science/geologyScience";
+import { partById } from "@/game/moon/core/preparation";
+import { roverSites } from "@/game/moon/rover/rover";
 import { missionDebrief } from "./missionDebrief.ts";
 
 export const completedMission = (s: Pick<WorkshopSession, "moon">) =>
@@ -25,6 +28,31 @@ export function reportLocation(site: WorkshopSession["moon"]["site"]) {
     explanation:
       "This mission uses an illustrative region, not a surveyed lunar coordinate. The reference map below is not your landing or sample point. Rover X/Y positions cannot be converted to real lunar coordinates.",
   };
+}
+
+/** Uses the same field names as the mission; unknown coordinates remain unspecified. */
+function fieldLocation(session: WorkshopSession, id: string) {
+  if (id === "base") return "Lander base";
+  if (id === "rover-field") return "Rover fieldwork area";
+  const roverSite = session.moon.rover
+    ? roverSites(session.moon.rover).find((site) => site.id === id)
+    : undefined;
+  const targets =
+    session.moon.objective === "lunar-geology"
+      ? GEOLOGY_TARGETS
+      : SCIENCE_TARGETS;
+  return (
+    roverSite?.name ??
+    targets.find((target) => target.id === id)?.name ??
+    "Unspecified field location"
+  );
+}
+
+function instrumentName(id: string) {
+  if (id === "crew-drill") return "Crew sample drill";
+  if (id === "msolo") return "Gas mass spectrometer (MSolo)";
+  if (id === "trident") return "Subsurface drill (TRIDENT)";
+  return partById(id)?.name ?? "Recorded science instrument";
 }
 
 function observationMeaning(
@@ -54,7 +82,7 @@ function observationMeaning(
   }
   if (record.kind === "mineral-evidence")
     return record.classification && record.classification !== "inconclusive"
-      ? `The recorded ${record.instrumentId} evidence supports a simulated ${record.classification} classification. It does not describe the composition of a real lunar sample.`
+      ? `The recorded ${instrumentName(record.instrumentId)} evidence supports a simulated ${record.classification} classification. It does not describe the composition of a real lunar sample.`
       : "The recorded mineral evidence does not support a definite rock classification.";
   return "This is a recorded field observation. A sealed sample, texture or subsurface clue alone does not establish composition.";
 }
@@ -97,12 +125,15 @@ export function missionReport(session: WorkshopSession) {
     location: reportLocation(m.site),
     samples: samples.map((sample) => ({
       ...sample,
+      locationName: fieldLocation(session, sample.location),
       returned: recovered && sample.stowed,
     })),
     returnedCount: returned.length,
     returnedKg: returned.reduce((total, sample) => total + sample.massKg, 0),
     observations: records.map((record) => ({
       ...record,
+      instrumentName: instrumentName(record.instrumentId),
+      locationName: fieldLocation(session, record.locationId),
       meaning: observationMeaning(record, delivered),
       receivedOnEarth: recovered && record.transmitted,
     })),

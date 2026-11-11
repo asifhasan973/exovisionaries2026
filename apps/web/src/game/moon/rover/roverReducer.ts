@@ -2,7 +2,6 @@ import type { MoonSession } from "@/game/moon/shared/session";
 import { COURSE_HOLES, COURSE_ROCKS } from "./roverCourse.ts";
 import {
   ROVER_CAMPS,
-  ROVER_CHARGER,
   ROVER_MODEL,
   type RoverCommand,
   type RoverEvent,
@@ -15,6 +14,7 @@ import {
   roverAtBase,
   roverGoal,
   roverReady,
+  roverLight,
   saveCamp,
   stopped,
   freshRover,
@@ -72,10 +72,9 @@ export function apply(
     case "charge": {
       if (s.version < 3 || s.paused) return s;
       if (!command.held) return s.chargeHeld ? { ...s, chargeHeld: false } : s;
-      return s.deposited.length >= 1 &&
-        s.phase === "exploring" &&
+      return s.phase === "exploring" &&
         Math.abs(s.speed) < 0.25 &&
-        Math.hypot(s.x - ROVER_CHARGER.x, s.z - ROVER_CHARGER.z) < 3.5
+        roverLight(s.x, s.z) > 0
         ? {
             ...s,
             phase: "charging",
@@ -256,7 +255,7 @@ export function apply(
         roverAtBase(s) &&
         s.deposited.length >= ROVER_MODEL.required &&
         Math.abs(s.speed) < 0.25 &&
-        (s.version < 3 || (s.chargeDone && s.hardSeen && s.debriefed))
+        (s.version < 3 || (s.hardSeen && s.debriefed))
         ? {
             ...s,
             phase: s.version >= 3 && !s.stowed ? "stowing" : "cabin",
@@ -356,7 +355,10 @@ export function reduceRover(
       !roverActive(s)
     )
       return s;
-    const seconds = remainder + Math.min(0.25, event.seconds),
+    const scale = [1, 3, 5, 10].includes(event.timeScale ?? 1)
+      ? (event.timeScale ?? 1)
+      : 1;
+    const seconds = remainder + Math.min(0.25, event.seconds) * scale,
       frames = Math.floor(
         (seconds + 1e-9) / (s.version >= 2 ? 0.05 : ROVER_MODEL.step),
       );
@@ -502,9 +504,8 @@ export function roverInteraction(
     };
   if (
     s.version >= 3 &&
-    s.deposited.length >= 1 &&
-    Math.hypot(s.x - ROVER_CHARGER.x, s.z - ROVER_CHARGER.z) < 3.5 &&
-    (!s.chargeDone || s.batteryWh < s.capacityWh * 0.95)
+    roverLight(s.x, s.z) > 0 &&
+    s.batteryWh < s.capacityWh * 0.25
   )
     return {
       label: "Hold E to charge",

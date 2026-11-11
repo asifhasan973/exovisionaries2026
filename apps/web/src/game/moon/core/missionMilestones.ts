@@ -319,11 +319,21 @@ export function trackMilestoneTransition(
     (next.progress.stepId === "mission-debrief" &&
       previous.progress.stepId === "crew-return");
   if (!forward) return next;
+  const finalReturn =
+    previous.progress.stepId === "crew-return" &&
+    next.progress.stepId === "mission-debrief";
   return {
     ...next,
     progress: {
       ...next.progress,
-      milestones: { ...state, introduced: true, pending: from.id },
+      milestones: finalReturn
+        ? {
+            ...state,
+            introduced: true,
+            pending: undefined,
+            celebrated: [...new Set([...state.celebrated, from.id])],
+          }
+        : { ...state, introduced: true, pending: from.id },
     },
   };
 }

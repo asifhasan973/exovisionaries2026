@@ -62,7 +62,11 @@ export function RestartStoryDialog({
       }}
     >
       <h2 id="restart-story-title">Start a new mission?</h2>
-      <p>This clears your name, design, checks and flight.</p>
+      <p>
+        This starts from the default mission and clears your name, crew,
+        blueprint, flight, science and current report. To keep your crew and
+        blueprint, choose “Plan another mission” in the report.
+      </p>
       <div>
         <button
           type="button"

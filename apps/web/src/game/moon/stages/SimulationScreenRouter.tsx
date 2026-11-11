@@ -38,19 +38,9 @@ const CrewScreen = lazy(() =>
     default: module.CrewScreen,
   })),
 );
-const SurfaceScreen = lazy(() =>
-  import("@/game/moon/surface/SurfaceScreen").then((module) => ({
-    default: module.SurfaceScreen,
-  })),
-);
-const ScienceScreen = lazy(() =>
-  import("@/game/moon/science/ScienceScreen").then((module) => ({
-    default: module.ScienceScreen,
-  })),
-);
-const RecoveryScreen = lazy(() =>
-  import("@/game/moon/return/debrief/RecoveryScreen").then((module) => ({
-    default: module.RecoveryScreen,
+const RoverScreen = lazy(() =>
+  import("@/game/moon/rover/components/RoverScreen").then((module) => ({
+    default: module.RoverScreen,
   })),
 );
 
@@ -192,37 +182,25 @@ export function SimulationScreenRouter({
     );
   }
 
-  // Module 08: Lunar Surface Deployment & Exploration
-  if (["lunar-surface", "surface-explore", "surface-ready"].includes(stepId)) {
-    return (
-      <Suspense
-        fallback={<div className="crew-loading">Opening Moon expedition…</div>}
-      >
-        <SurfaceScreen session={mission} dispatch={dispatch} frame={frame} />
-      </Suspense>
-    );
-  }
-
-  // Module 09: Ice Drilling & Spectrometry Science
-  if (["ice-science", "science-ready"].includes(stepId)) {
-    return (
-      <Suspense
-        fallback={<div className="crew-loading">Opening science lab…</div>}
-      >
-        <ScienceScreen session={mission} dispatch={dispatch} frame={frame} />
-      </Suspense>
-    );
-  }
-
-  // Module 10: Surface Incident & Recovery
-  if (["surface-recovery", "surface-secured"].includes(stepId)) {
+  // The free-driving expedition owns deployment, science and rover recovery.
+  if (
+    [
+      "lunar-surface",
+      "surface-explore",
+      "surface-ready",
+      "ice-science",
+      "science-ready",
+      "surface-recovery",
+      "surface-secured",
+    ].includes(stepId)
+  ) {
     return (
       <Suspense
         fallback={
-          <div className="crew-loading">Opening recovery checklist…</div>
+          <div className="crew-loading">Opening your rover expedition…</div>
         }
       >
-        <RecoveryScreen session={mission} dispatch={dispatch} frame={frame} />
+        <RoverScreen session={mission} dispatch={dispatch} frame={frame} />
       </Suspense>
     );
   }

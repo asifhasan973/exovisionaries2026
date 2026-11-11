@@ -386,6 +386,24 @@ export function RocketAssemblyScreen({
             onBack();
           }}
           onNext={() => dispatch({ type: "next" })}
+          extraActions={
+            <button
+              className="rocket-quick-build"
+              disabled={!ready || complete}
+              aria-pressed={auto}
+              onClick={() => {
+                if (isEngineFrozen()) return;
+                setBayView(false);
+                setAuto((value) => !value);
+                setAutoGhost(null);
+                setDrag(null);
+                dispatch({ type: "rocket-build-assist" });
+              }}
+            >
+              {auto ? <X size={18} /> : <WandSparkles size={19} />}{" "}
+              {auto ? "Stop build" : "Quick build"}
+            </button>
+          }
           nextLabel="Ready"
           nextDisabled={!complete || auto || !ready}
           progress={`${build.installed.length}/${ROCKET_PARTS.length}`}
@@ -406,22 +424,6 @@ export function RocketAssemblyScreen({
       >
         <div className="rocket-assembly-heading">
           <h1 id="rocket-assembly-title">Build your rocket</h1>
-          <button
-            className="rocket-quick-build"
-            disabled={!ready || complete}
-            aria-pressed={auto}
-            onClick={() => {
-              if (isEngineFrozen()) return;
-              setBayView(false);
-              setAuto((value) => !value);
-              setAutoGhost(null);
-              setDrag(null);
-              dispatch({ type: "rocket-build-assist" });
-            }}
-          >
-            {auto ? <X size={18} /> : <WandSparkles size={19} />}{" "}
-            {auto ? "Stop build" : "Quick build"}
-          </button>
         </div>
         <div className="rocket-assembly-layout">
           {shelf(ROCKET_SHELVES[0])}

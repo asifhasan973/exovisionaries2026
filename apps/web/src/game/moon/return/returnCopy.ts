@@ -1,6 +1,7 @@
 /** Short authored continuation. The source script did not supply a flight ending. */
 export const RETURN_LINES = {
-  ready: "Rover parked. Data sent. Bring our two Moon explorers back to orbit!",
+  ready:
+    "Bring the two Moon explorers back to their orbit crew. Check the return supplies before lift-off.",
   ascending:
     "Only the upper cabin lifts off. The legs and rover stay on the Moon.",
   rendezvous: "Line up the cabins. Slow down before you dock.",
@@ -10,7 +11,7 @@ export const RETURN_LINES = {
   burning: "Our service engine sends us home. Keep the cabin attached.",
   coast: "Three days home, sped up. Our crew still uses food and power.",
   "entry-ready":
-    "Earth ahead! Leave the service module. Turn the heat shield forward.",
+    "Earth ahead! Leave the service module, then choose which side of the capsule should face the atmosphere.",
   shield: "Heat shield first! Earth’s air slows our capsule.",
   wrongShield:
     "That points the nose into the heat. Turn the broad shield forward.",

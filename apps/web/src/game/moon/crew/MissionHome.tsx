@@ -12,22 +12,35 @@ import type { StoryProgress } from "@/game/moon/core/types";
 import { useMobileGame } from "@/shared/shell";
 import type { SelectionFrame } from "./selectionConfig";
 import { JudgeInstructionsDialog } from "./JudgeInstructionsDialog";
+import type { WorkshopSession } from "@/game/moon/workshop/lander/workshopSession";
+import {
+  completedMission,
+  missionReport,
+} from "@/game/moon/return/debrief/missionReport";
 
 export function MissionHome({
   progress,
+  session,
   onContinue,
   onRestart,
   frame,
   onOpenArchive: _onOpenArchive,
 }: {
   progress: StoryProgress;
+  session?: WorkshopSession;
   onContinue(): void;
   onBack(): void;
   onRestart(): void;
   frame: SelectionFrame;
   onOpenArchive?: () => void;
 }) {
-  const hasProgress = !!progress.playerName;
+  const completed =
+    !!session &&
+    !frame.isDebugSession &&
+    !session.review &&
+    completedMission(session);
+  const lastMission = completed ? missionReport(session) : null;
+  const hasProgress = completed || !!progress.playerName;
   const mobileGame = useMobileGame();
   const { isInstalled, promptInstall } = usePwaStore();
   const [judgeInstructionsOpen, setJudgeInstructionsOpen] = useState(false);
@@ -101,7 +114,13 @@ export function MissionHome({
               }}
             >
               <Play size={14} fill="currentColor" />
-              <span>{hasProgress ? "Resume" : "Play now"}</span>
+              <span>
+                {completed
+                  ? "View mission report"
+                  : hasProgress
+                    ? "Resume"
+                    : "Play now"}
+              </span>
               <ArrowRight size={14} />
             </button>
             {hasProgress ? (
@@ -115,7 +134,7 @@ export function MissionHome({
                 title="Start a new mission from scratch"
               >
                 <RotateCcw size={13} />
-                <span>New Game</span>
+                <span>{completed ? "New mission" : "New Game"}</span>
               </button>
             ) : null}
           </div>
@@ -148,19 +167,36 @@ export function MissionHome({
               <span>Judge Demo</span>
             </button>
           </div>
-          <div className="home-mission-trail" aria-label="Mission path">
-            <span>
-              <span>01</span>Build
-            </span>
-            <i />
-            <span>
-              <span>02</span>Test
-            </span>
-            <i />
-            <span>
-              <span>03</span>Launch
-            </span>
-          </div>
+          {lastMission ? (
+            <div
+              className="home-completed-summary"
+              aria-label="Last mission completed"
+            >
+              <strong>Last mission completed</strong>
+              <span>
+                {lastMission.objective} · {lastMission.location.name} · Crew
+                recovered
+              </span>
+              <p>
+                {lastMission.outcome?.reasons[1] ??
+                  `${lastMission.deliveredCount} observations delivered. ${lastMission.returnedCount} samples returned.`}
+              </p>
+            </div>
+          ) : (
+            <div className="home-mission-trail" aria-label="Mission path">
+              <span>
+                <span>01</span>Build
+              </span>
+              <i />
+              <span>
+                <span>02</span>Test
+              </span>
+              <i />
+              <span>
+                <span>03</span>Launch
+              </span>
+            </div>
+          )}
         </section>
       </main>
 

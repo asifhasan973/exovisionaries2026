@@ -1,4 +1,6 @@
 import * as THREE from "three";
+import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
+import { createCrewedPlatform } from "@/game/moon/crew/crewedMeshes";
 import { ROVER_BASE } from "./rover.ts";
 import type { RoverState, RoverSiteId } from "./rover.ts";
 
@@ -10,132 +12,104 @@ const smooth = (value: number) => {
   return t * t * (3 - 2 * t);
 };
 
+/** The lander is static; batch its solid pieces without changing the animated doors or tracks. */
+function batchLander(lander: THREE.Group) {
+  lander.updateMatrixWorld(true);
+  const inverse = lander.matrixWorld.clone().invert();
+  const batches = new Map<THREE.Material, THREE.Mesh[]>();
+  lander.traverse((object) => {
+    if (object instanceof THREE.Mesh && !Array.isArray(object.material)) {
+      const batch = batches.get(object.material) ?? [];
+      batch.push(object);
+      batches.set(object.material, batch);
+    }
+  });
+  for (const [material, pieces] of batches) {
+    if (pieces.length < 2) continue;
+    const geometries = pieces.map((piece) =>
+      piece.geometry
+        .clone()
+        .applyMatrix4(
+          new THREE.Matrix4().multiplyMatrices(inverse, piece.matrixWorld),
+        ),
+    );
+    const geometry = mergeGeometries(geometries, false);
+    geometries.forEach((part) => part.dispose());
+    if (!geometry) continue;
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.castShadow = mesh.receiveShadow = true;
+    const originals = new Set<THREE.BufferGeometry>();
+    pieces.forEach((piece) => {
+      piece.removeFromParent();
+      originals.add(piece.geometry);
+    });
+    originals.forEach((part) => part.dispose());
+    lander.add(mesh);
+  }
+}
+
 /** Cargo handling is driven entirely by recorded phase time, including after reload. */
 export function createRoverBay(height: (x: number, z: number) => number) {
   const root = new THREE.Group();
   root.name = "lander-rover-cargo-bay";
   root.position.set(ROVER_BAY.x, height(ROVER_BAY.x, ROVER_BAY.z), ROVER_BAY.z);
-  const metal = new THREE.MeshStandardMaterial({
-      color: 0x3d4858,
-      roughness: 0.65,
-      metalness: 0.5,
-    }),
-    trim = new THREE.MeshStandardMaterial({
-      color: 0xb29b65,
-      roughness: 0.5,
-      metalness: 0.6,
-    });
-  const box = (
-    w: number,
-    h: number,
-    d: number,
-    x: number,
-    y: number,
-    z: number,
-    material: THREE.Material = metal,
-  ) => {
-    const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), material);
-    mesh.position.set(x, y, z);
-    mesh.castShadow = true;
-    mesh.receiveShadow = true;
-    root.add(mesh);
-    return mesh;
-  };
-  box(3.6, 0.18, 4.4, 0, 0.28, 0);
-  box(0.15, 2.6, 4.4, -1.72, 1.65, 0);
-  box(0.15, 2.6, 4.4, 1.72, 1.65, 0);
-  box(3.6, 2.6, 0.15, 0, 1.65, -2.15);
-  box(3.6, 0.15, 4.5, 0, 2.95, 0);
-  box(0.13, 2.8, 0.18, -1.65, 1.6, 2.25, trim);
-  box(0.13, 2.8, 0.18, 1.65, 1.6, 2.25, trim);
-  const door = box(3.3, 2.6, 0.12, 0, 1.65, 2.2, trim);
-  const ramp = new THREE.Group();
-  ramp.position.set(0, 0.34, 2.2);
-  root.add(ramp);
-  const rampDeck = new THREE.Mesh(
-    new THREE.BoxGeometry(3.25, 0.12, 3.4),
-    metal,
-  );
-  rampDeck.position.z = 1.7;
-  rampDeck.receiveShadow = true;
-  ramp.add(rampDeck);
-  for (const x of [-1.4, 1.4]) {
-    const edge = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.14, 3.4), trim);
-    edge.position.set(x, 0.1, 1.7);
-    ramp.add(edge);
-  }
-  const glow = new THREE.MeshBasicMaterial({ color: 0xa5f3d0 });
-  box(2.8, 0.06, 0.08, 0, 2.75, 1.9, glow);
-  const lamp = new THREE.PointLight(0x9debd3, 9, 7);
-  lamp.position.set(0, 2.5, 0.8);
-  root.add(lamp);
-  const label = document.createElement("canvas");
-  label.width = 512;
-  label.height = 100;
-  const ctx = label.getContext("2d")!;
-  ctx.fillStyle = "#17252d";
-  ctx.fillRect(0, 0, 512, 100);
-  ctx.fillStyle = "#cbf4df";
-  ctx.font = "bold 44px sans-serif";
-  ctx.textAlign = "center";
-  ctx.fillText("ROVER BAY", 256, 65);
-  const sign = new THREE.Mesh(
-    new THREE.PlaneGeometry(2.7, 0.53),
-    new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(label) }),
-  );
-  sign.position.set(0, 3.18, 2.3);
-  root.add(sign);
-  const post = box(0.18, 1.8, 0.18, 2, 1.25, 1.4, trim),
-    arm = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.065, 0.065, 1, 12),
-      metal,
-    );
-  root.add(arm);
-  const gripper = new THREE.Group();
-  root.add(gripper);
-  for (const side of [-1, 1]) {
-    const finger = new THREE.Mesh(
-      new THREE.BoxGeometry(0.055, 0.3, 0.09),
-      trim,
-    );
-    finger.position.set(side * 0.19, -0.13, 0);
-    gripper.add(finger);
-  }
-  const tubeMaterial = new THREE.MeshStandardMaterial({
-    color: sampleColor("A"),
-    metalness: 0.45,
+  const platform = createCrewedPlatform({ roverCargo: true });
+  platform.capsule.visible = false;
+  batchLander(platform.lander);
+  platform.lander.position.set(0, 0, -3);
+  platform.lander.scale.setScalar(2.4);
+  root.add(platform.root);
+  const alloy = new THREE.MeshStandardMaterial({
+    color: 0xa8b3bd,
+    metalness: 0.7,
     roughness: 0.4,
   });
-  const tube = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.13, 0.13, 0.4, 16),
-    tubeMaterial,
-  );
-  tube.position.y = -0.32;
-  gripper.add(tube);
-  const rack = box(1.45, 0.12, 0.7, 0.5, 0.65, 0.5, metal);
-  const stored = [0, 1].map((index) => {
-    const mesh = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.13, 0.13, 0.4, 16),
-      new THREE.MeshStandardMaterial({
-        color: sampleColor(index ? "C" : "A"),
-        metalness: 0.45,
-        roughness: 0.4,
-      }),
-    );
-    mesh.position.set(0.15 + index * 0.65, 0.91, 0.5);
-    root.add(mesh);
-    return mesh;
+  const gold = new THREE.MeshStandardMaterial({
+    color: 0xb69550,
+    metalness: 0.65,
+    roughness: 0.5,
+  });
+  const doors = [-1, 1].map((side) => {
+    const panel = new THREE.Mesh(new THREE.BoxGeometry(1.3, 2.45, 0.12), gold);
+    panel.position.set(side * 0.65, 1.68, -0.5);
+    panel.castShadow = true;
+    root.add(panel);
+    return panel;
   });
   const dock = new THREE.Vector3(
-      ROVER_BAY.x,
-      root.position.y + 0.36,
-      ROVER_BAY.z,
-    ),
-    approach = new THREE.Vector3(
-      ROVER_BAY.x,
-      height(ROVER_BAY.x, ROVER_BAY.z + 5.6),
-      ROVER_BAY.z + 5.6,
+    ROVER_BAY.x,
+    root.position.y + 0.44,
+    ROVER_BAY.z - 2.2,
+  );
+  const approach = new THREE.Vector3(
+    ROVER_BAY.x,
+    height(ROVER_BAY.x, ROVER_BAY.z + 5.1),
+    ROVER_BAY.z + 5.1,
+  );
+  const length = dock.distanceTo(approach);
+  const incline = Math.atan2(dock.y - approach.y, approach.z - dock.z);
+  const tracks = new THREE.Group();
+  tracks.name = "folding-rover-wheel-tracks";
+  tracks.position.set(0, dock.y - root.position.y, dock.z - ROVER_BAY.z);
+  root.add(tracks);
+  for (const x of [-0.9, 0.9]) {
+    const track = new THREE.Mesh(
+      new THREE.BoxGeometry(0.65, 0.08, length),
+      alloy,
     );
+    track.position.set(x, -0.04, length / 2);
+    track.receiveShadow = true;
+    track.castShadow = true;
+    tracks.add(track);
+    for (const side of [-1, 1]) {
+      const edge = new THREE.Mesh(
+        new THREE.BoxGeometry(0.035, 0.08, length),
+        alloy,
+      );
+      edge.position.set(x + side * 0.3, 0.025, length / 2);
+      tracks.add(edge);
+    }
+  }
   function pose(s: RoverState) {
     if (s.version < 3) return null;
     if (s.stowed && s.phase !== "stowing")
@@ -145,23 +119,23 @@ export function createRoverBay(height: (x: number, z: number) => number) {
         t = s.phaseTime;
       const position =
         t < 2.3
-          ? from.lerp(approach, smooth((t - 0.7) / 1.6))
+          ? from.lerp(approach, smooth((t - 1.5) / 0.8))
           : approach.clone().lerp(dock, smooth((t - 2.3) / 2.5));
       const angle = Math.atan2(Math.sin(-s.heading), Math.cos(-s.heading));
-      return { position, heading: s.heading + angle * smooth((t - 0.7) / 1.6) };
+      return { position, heading: s.heading + angle * smooth((t - 1.5) / 0.8) };
     }
     if (s.phase === "deploying") {
       const t = s.phaseTime,
         home = new THREE.Vector3(s.x, height(s.x, s.z), s.z);
       return {
         position:
-          t < 1.6
-            ? dock.clone().lerp(approach, smooth((t - 0.45) / 1.15))
-            : approach.clone().lerp(home, smooth((t - 1.6) / 1.4)),
+          t < 2.3
+            ? dock.clone().lerp(approach, smooth((t - 0.9) / 1.4))
+            : approach.clone().lerp(home, smooth((t - 2.3) / 0.7)),
         heading: THREE.MathUtils.lerp(
           Math.PI,
           s.heading,
-          smooth((t - 1.6) / 1.4),
+          smooth((t - 2.3) / 0.7),
         ),
       };
     }
@@ -169,59 +143,28 @@ export function createRoverBay(height: (x: number, z: number) => number) {
   }
   function update(
     s: RoverState,
-    craft: THREE.Group,
-    sourceLocal: THREE.Vector3,
+    _craft: THREE.Group,
+    _sourceLocal: THREE.Vector3,
   ) {
-    const transfer = s.version >= 3 && s.phase === "delivering",
-      t = s.phaseTime;
+    const t = s.phaseTime;
     const opening =
       s.phase === "stowing"
-        ? smooth(t / 0.7) * (1 - smooth((t - 4.8) / 1.2))
+        ? smooth(t / 1.1) * (1 - smooth((t - 4.9) / 1.1))
         : s.phase === "deploying"
-          ? smooth(t / 0.4) * (1 - smooth((t - 2.6) / 0.4))
-          : transfer
-            ? smooth(t / 0.7) * (1 - smooth((t - 3.1) / 0.7))
-            : 0;
-    const doorScale = Math.max(0.01, 1 - opening);
-    door.scale.y = doorScale;
-    door.position.y = 2.95 - 1.3 * doorScale;
-    door.visible = opening < 0.99;
-    ramp.rotation.x = THREE.MathUtils.lerp(-Math.PI / 2, 0.1, opening);
-    arm.visible = gripper.visible = transfer;
-    post.visible = rack.visible = true;
-    const progress = THREE.MathUtils.clamp(t / 3.8, 0, 1);
-    stored.forEach((mesh, index) => {
-      mesh.visible =
-        index < s.deposited.length ||
-        (transfer && progress > 0.88 && index === s.deposited.length);
+          ? smooth(t / 0.6) * (1 - smooth((t - 2.65) / 0.35))
+          : 0;
+    const extension =
+      s.phase === "stowing"
+        ? smooth((t - 0.7) / 0.8) * (1 - smooth((t - 4.8) / 0.8))
+        : s.phase === "deploying"
+          ? smooth((t - 0.3) / 0.6) * (1 - smooth((t - 2.6) / 0.4))
+          : 0;
+    doors.forEach((door, index) => {
+      door.position.x = (index ? 1 : -1) * (0.65 + opening * 1.45);
     });
-    if (!transfer) return;
-    root.updateMatrixWorld(true);
-    craft.updateMatrixWorld(true);
-    const source = root
-        .worldToLocal(craft.localToWorld(sourceLocal.clone()))
-        .add(new THREE.Vector3(0, 0.32, 0)),
-      destination = new THREE.Vector3(
-        0.15 + s.deposited.length * 0.65,
-        1.25,
-        0.5,
-      );
-    const point =
-      progress < 0.25
-        ? destination.clone().lerp(source, smooth(progress / 0.25))
-        : source.clone().lerp(destination, smooth((progress - 0.38) / 0.45));
-    point.y += Math.sin(smooth((progress - 0.38) / 0.45) * Math.PI) * 0.75;
-    gripper.position.copy(point);
-    tube.visible = progress >= 0.25 && progress < 0.88;
-    tubeMaterial.color.setHex(sampleColor(s.deliveryIds?.[0] ?? "A"));
-    const pivot = post.position.clone().add(new THREE.Vector3(0, 0.9, 0)),
-      direction = point.clone().sub(pivot);
-    arm.position.copy(pivot).lerp(point, 0.5);
-    arm.scale.y = direction.length();
-    arm.quaternion.setFromUnitVectors(
-      new THREE.Vector3(0, 1, 0),
-      direction.normalize(),
-    );
+    tracks.visible = extension > 0.001;
+    tracks.rotation.x = THREE.MathUtils.lerp(-Math.PI / 2, incline, extension);
+    tracks.scale.z = THREE.MathUtils.lerp(0.2, 1, extension);
   }
   return { root, pose, update, dock };
 }

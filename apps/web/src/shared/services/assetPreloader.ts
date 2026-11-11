@@ -183,6 +183,8 @@ export async function preloadMissionSubsystems(
       "/story/crew-portraits/geologist.webp",
       "/story/crew-portraits/robotics-specialist.webp",
       "/story/crew-portraits/scientist-seated-v1.webp",
+      "/story/crew-portraits/commander-pressure-suit-v2.webp",
+      "/story/crew-portraits/scientist-pressure-suit-v2.webp",
       "/story/crew-portraits/systems-engineer.webp",
     ];
     await Promise.allSettled([
