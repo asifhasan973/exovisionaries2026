@@ -99,6 +99,8 @@ export function CrewScreen({
       pointerId: number;
       startX: number;
       startY: number;
+      lastX: number;
+      lastY: number;
       moved: boolean;
     } | null>(null),
     suppress = useRef(false);
@@ -143,20 +145,29 @@ export function CrewScreen({
     event: React.PointerEvent<HTMLButtonElement>,
     id: Specialist,
   ) => {
-    if (event.button !== 0 || !event.isPrimary || review) return;
+    if ((event.button !== 0 && event.pointerType === "mouse") || review) return;
     suppress.current = false;
     pointer.current = {
       id,
       pointerId: event.pointerId,
       startX: event.clientX,
       startY: event.clientY,
+      lastX: event.clientX,
+      lastY: event.clientY,
       moved: false,
     };
-    event.currentTarget.setPointerCapture(event.pointerId);
+    try {
+      event.currentTarget.setPointerCapture(event.pointerId);
+    } catch {}
   };
-  const move = (event: React.PointerEvent<HTMLButtonElement>) => {
+  const move = (
+    event: React.PointerEvent<HTMLButtonElement> | PointerEvent,
+  ) => {
     const active = pointer.current;
-    if (!active || active.pointerId !== event.pointerId) return;
+    if (!active) return;
+    if ("pointerId" in event && active.pointerId !== event.pointerId) return;
+    active.lastX = event.clientX;
+    active.lastY = event.clientY;
     if (
       Math.hypot(event.clientX - active.startX, event.clientY - active.startY) >
       7
@@ -167,43 +178,184 @@ export function CrewScreen({
       setDragging({ id: active.id, x: event.clientX, y: event.clientY });
     }
   };
-  const end = (event: React.PointerEvent<HTMLButtonElement>) => {
+  const end = (event: React.PointerEvent<HTMLButtonElement> | PointerEvent) => {
     const active = pointer.current;
-    if (!active || active.pointerId !== event.pointerId) return;
+    if (!active) return;
+    if ("pointerId" in event && active.pointerId !== event.pointerId) return;
     if (active.moved) {
-      for (const role of ["scientist", "support"] as const) {
-        const rect = slots.current[role]?.getBoundingClientRect();
-        if (
-          rect &&
-          event.clientX >= rect.left - 12 &&
-          event.clientX <= rect.right + 12 &&
-          event.clientY >= rect.top - 12 &&
-          event.clientY <= rect.bottom + 12
-        ) {
-          assign(role, active.id);
-          break;
+      const dropX = event.clientX || active.lastX;
+      const dropY = event.clientY || active.lastY;
+      let targetRole: "scientist" | "support" | null = null;
+      const hit = document.elementFromPoint(dropX, dropY);
+      const hitSeat = hit?.closest("[data-crew-role]") as HTMLElement | null;
+      if (hitSeat?.dataset.crewRole) {
+        targetRole = hitSeat.dataset.crewRole as "scientist" | "support";
+      }
+      if (!targetRole) {
+        for (const role of ["scientist", "support"] as const) {
+          const rect = slots.current[role]?.getBoundingClientRect();
+          if (
+            rect &&
+            dropX >= rect.left - 28 &&
+            dropX <= rect.right + 28 &&
+            dropY >= rect.top - 28 &&
+            dropY <= rect.bottom + 28
+          ) {
+            targetRole = role;
+            break;
+          }
         }
+      }
+      if (targetRole) {
+        assign(targetRole, active.id);
+      }
+    } else {
+      setSelected(active.id);
+      const candidate = CREW_CANDIDATES.find((p) => p.id === active.id);
+      if (candidate) {
+        say(candidate.role === "science" ? "scienceSeat" : "supportSeat");
       }
     }
     pointer.current = null;
     setDragging(null);
-    if (event.currentTarget.hasPointerCapture(event.pointerId))
-      event.currentTarget.releasePointerCapture(event.pointerId);
+    if (
+      "currentTarget" in event &&
+      event.currentTarget instanceof HTMLElement
+    ) {
+      try {
+        if (event.currentTarget.hasPointerCapture(event.pointerId))
+          event.currentTarget.releasePointerCapture(event.pointerId);
+      } catch {}
+    }
   };
   const cancel = () => {
     pointer.current = null;
     setDragging(null);
     suppress.current = true;
   };
+
+  const handleTouchStart = (
+    event: React.TouchEvent<HTMLButtonElement>,
+    id: Specialist,
+  ) => {
+    if (review) return;
+    const touch = event.touches[0];
+    if (!touch) return;
+    suppress.current = false;
+    pointer.current = {
+      id,
+      pointerId: touch.identifier,
+      startX: touch.clientX,
+      startY: touch.clientY,
+      lastX: touch.clientX,
+      lastY: touch.clientY,
+      moved: false,
+    };
+  };
+
+  const handleTouchMove = (event: React.TouchEvent<HTMLButtonElement>) => {
+    const active = pointer.current;
+    if (!active) return;
+    const touch =
+      Array.from(event.touches).find(
+        (t) => t.identifier === active.pointerId,
+      ) || event.touches[0];
+    if (!touch) return;
+    active.lastX = touch.clientX;
+    active.lastY = touch.clientY;
+    if (
+      Math.hypot(touch.clientX - active.startX, touch.clientY - active.startY) >
+      7
+    )
+      active.moved = true;
+    if (active.moved) {
+      suppress.current = true;
+      setDragging({ id: active.id, x: touch.clientX, y: touch.clientY });
+    }
+  };
+
+  const handleTouchEnd = (event: React.TouchEvent<HTMLButtonElement>) => {
+    const active = pointer.current;
+    if (!active) return;
+    const touch =
+      Array.from(event.changedTouches).find(
+        (t) => t.identifier === active.pointerId,
+      ) || event.changedTouches[0];
+    const dropX = touch?.clientX ?? active.lastX;
+    const dropY = touch?.clientY ?? active.lastY;
+
+    if (active.moved) {
+      let targetRole: "scientist" | "support" | null = null;
+      const hit = document.elementFromPoint(dropX, dropY);
+      const hitSeat = hit?.closest("[data-crew-role]") as HTMLElement | null;
+      if (hitSeat?.dataset.crewRole) {
+        targetRole = hitSeat.dataset.crewRole as "scientist" | "support";
+      }
+      if (!targetRole) {
+        for (const role of ["scientist", "support"] as const) {
+          const rect = slots.current[role]?.getBoundingClientRect();
+          if (
+            rect &&
+            dropX >= rect.left - 28 &&
+            dropX <= rect.right + 28 &&
+            dropY >= rect.top - 28 &&
+            dropY <= rect.bottom + 28
+          ) {
+            targetRole = role;
+            break;
+          }
+        }
+      }
+      if (targetRole) {
+        assign(targetRole, active.id);
+      }
+    } else {
+      setSelected(active.id);
+      const candidate = CREW_CANDIDATES.find((p) => p.id === active.id);
+      if (candidate) {
+        say(candidate.role === "science" ? "scienceSeat" : "supportSeat");
+      }
+    }
+    pointer.current = null;
+    setDragging(null);
+  };
+
+  const moveRef = useRef(move);
+  const endRef = useRef(end);
+  const cancelRef = useRef(cancel);
+
   useEffect(() => {
+    moveRef.current = move;
+    endRef.current = end;
+    cancelRef.current = cancel;
+  });
+
+  useEffect(() => {
+    const onWindowPointerMove = (e: PointerEvent) => {
+      if (pointer.current) moveRef.current(e);
+    };
+    const onWindowPointerUp = (e: PointerEvent) => {
+      if (pointer.current) endRef.current(e);
+    };
+    const onWindowPointerCancel = () => {
+      if (pointer.current) cancelRef.current();
+    };
     const stop = () => {
       pointer.current = null;
       setDragging(null);
       suppress.current = true;
     };
+    window.addEventListener("pointermove", onWindowPointerMove, {
+      passive: true,
+    });
+    window.addEventListener("pointerup", onWindowPointerUp);
+    window.addEventListener("pointercancel", onWindowPointerCancel);
     window.addEventListener("blur", stop);
     window.addEventListener("game-help-open", stop);
     return () => {
+      window.removeEventListener("pointermove", onWindowPointerMove);
+      window.removeEventListener("pointerup", onWindowPointerUp);
+      window.removeEventListener("pointercancel", onWindowPointerCancel);
       window.removeEventListener("blur", stop);
       window.removeEventListener("game-help-open", stop);
     };
@@ -321,6 +473,11 @@ export function CrewScreen({
                       onPointerMove={move}
                       onPointerUp={end}
                       onPointerCancel={cancel}
+                      onTouchStart={(event) => handleTouchStart(event, id)}
+                      onTouchMove={handleTouchMove}
+                      onTouchEnd={handleTouchEnd}
+                      onTouchCancel={cancel}
+                      onContextMenu={(e) => e.preventDefault()}
                       onLostPointerCapture={() => {
                         if (pointer.current?.id === id) cancel();
                       }}

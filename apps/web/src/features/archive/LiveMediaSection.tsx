@@ -33,7 +33,7 @@ export const LiveMediaSection: React.FC<LiveMediaSectionProps> = ({
   return (
     <div className="tree-live-media-section">
       <div className="live-media-heading">
-        <Sparkles size={14} className="text-amber-400" />
+        <Sparkles size={14} className="text-amber-200" />
         <span>NASA IMAGE & VIDEO LIBRARY ARCHIVAL RECORDS ({year})</span>
       </div>
 

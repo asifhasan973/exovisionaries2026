@@ -375,7 +375,6 @@
   .conversation-game.conversation-game.is-mobile-game .workshop-heading {
     height: auto;
     display: flex;
-    align-items: center;
     justify-content: space-between;
     width: 100%;
     gap: 12px;

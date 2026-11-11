@@ -115,7 +115,7 @@ export function JourneyScreen({
       ? "Rotate craft with A/D so backward thrust points opposite the Moon. Hold Space to brake into lunar orbit."
       : "Align with the marker. Hold Space to fire. Cut the engine at the target delta-v."
     : JOURNEY_LINES[adviceId as keyof typeof JOURNEY_LINES];
-  const best = pilot
+  const _best = pilot
     ? TRANSFER_DATES.flatMap((date) =>
         ROUTES.map((r) => ({
           date,
@@ -152,11 +152,11 @@ export function JourneyScreen({
         let changed = false;
 
         if (held.current.has("left")) {
-          newAngle = Math.max(-180, newAngle - 75 * dt);
+          newAngle = Math.max(-90, newAngle - 75 * dt);
           changed = true;
         }
         if (held.current.has("right")) {
-          newAngle = Math.min(180, newAngle + 75 * dt);
+          newAngle = Math.min(90, newAngle + 75 * dt);
           changed = true;
         }
         if (held.current.has("up")) {
@@ -439,27 +439,40 @@ export function JourneyScreen({
         aria-labelledby="journey-title"
       >
         <div className="journey-heading">
-          <h1 id="journey-title">
-            {selection
-              ? "Choose your Moon route"
-              : complete
-                ? "Hello, lunar orbit!"
-                : j.stage === "coast"
-                  ? "Next stop: the Moon"
-                  : j.stage.startsWith("loi")
-                    ? "Slow down at the Moon"
-                    : "Leave Earth orbit"}
-          </h1>
-          <button
-            className="game-info-trigger"
-            onClick={() => {
-              act({ type: "journey-pause" });
-              setPanel("model");
+          <div style={{ display: "flex", alignItems: "center", gap: "3vw" }}>
+            <h1 id="journey-title">
+              {selection
+                ? "Choose your Moon route"
+                : complete
+                  ? "Hello, lunar orbit!"
+                  : j.stage === "coast"
+                    ? "Next stop: the Moon"
+                    : j.stage.startsWith("loi")
+                      ? "Slow down at the Moon"
+                      : "Leave Earth orbit"}
+            </h1>
+
+            <button
+              className="game-info-trigger"
+              onClick={() => {
+                act({ type: "journey-pause" });
+                setPanel("model");
+              }}
+            >
+              <Info size={16} />
+              Flight model
+            </button>
+          </div>
+
+          <EngineerCompanion
+            voiceEnabled={frame.voiceEnabled ?? true}
+            reaction={complete ? "complete" : j.feedback ? "warning" : "intro"}
+            token={j.attempts}
+            scriptedReply={{
+              id: pilotBurn ? "journey-pilot-burn" : `journey-${adviceId}`,
+              text: advice,
             }}
-          >
-            <Info size={16} />
-            Flight model
-          </button>
+          />
         </div>
         <div className="journey-layout">
           <section className="journey-console" aria-label="Journey controls">
@@ -483,12 +496,6 @@ export function JourneyScreen({
                     ))}
                   </select>
                 </label>
-                <p className="journey-date-note">
-                  Aim where the Moon will be.{" "}
-                  {best
-                    ? `Lowest burn fuel in this dataset: ${formatDepartureDate(best.date)}, ${best.report.days} days.`
-                    : "Compare time, fuel and crew supplies."}
-                </p>
                 <div className="journey-mode">
                   {(["guided", "challenge"] as const).map((mode) => (
                     <button
@@ -522,13 +529,6 @@ export function JourneyScreen({
                           </strong>
                           <b>{report.days} days</b>
                         </span>
-                        {pilot ? (
-                          <small>
-                            {report.solution
-                              ? "NASA ephemeris · computed transfer"
-                              : "No converged candidate for this date"}
-                          </small>
-                        ) : null}
                         <small>
                           Fuel: {Math.round(report.tliFuelKg / 1000)} t
                           departure · {Math.round(report.loiFuelKg / 1000)} t
@@ -557,80 +557,272 @@ export function JourneyScreen({
                     ? "Capture lunar orbit"
                     : "Fly your departure burn"}
                 </h2>
-                <p>
-                  A/D align · W/S throttle · hold Space to fire · Enter checks
-                  trajectory
+                <p className="journey-controls-guide">
+                  A/D steer anchor to 0° · W/S throttle · hold Space to fire
                 </p>
-                <label className="journey-align-field">
-                  <span className="journey-align-label">
-                    <span>Alignment: {j.angle ?? 0}°</span>
-                    <span
-                      className={`journey-align-badge ${Math.abs(j.angle ?? 0) <= 8 ? "is-aligned" : "is-misaligned"}`}
-                    >
-                      {Math.abs(j.angle ?? 0) <= 8
-                        ? "ALIGNED ✓"
-                        : j.stage === "loi-burn"
-                          ? "ROTATE THRUST OPPOSITE MOON (±8°)"
-                          : "ALIGN TO 0° (±8°)"}
-                    </span>
-                  </span>
-                  <input
-                    type="range"
-                    min="-180"
-                    max="180"
-                    step="1"
-                    value={j.angle ?? 0}
-                    onChange={(e) =>
-                      act({
-                        type: "journey-pilot",
-                        angle: Number(e.target.value),
-                      })
-                    }
-                  />
-                </label>
-                <label>
-                  Throttle: {Math.round((j.throttle ?? 0.5) * 100)}%
-                  <input
-                    type="range"
-                    min="0"
-                    max="1"
-                    step=".05"
-                    value={j.throttle ?? 0.5}
-                    onChange={(e) =>
-                      act({
-                        type: "journey-pilot",
-                        throttle: Number(e.target.value),
-                      })
-                    }
-                  />
-                </label>
-                <strong>
-                  {Math.round(j.dv ?? 0)} / {Math.round(required)} m/s
-                </strong>
-                <progress
-                  value={Math.max(0, j.dv ?? 0)}
-                  max={required}
-                  aria-label="Delivered delta-v"
-                />
-                <button
-                  className="journey-fire"
-                  aria-pressed={!!j.firing}
-                  disabled={j.paused}
-                  onClick={() =>
-                    act({ type: "journey-pilot", firing: !j.firing })
-                  }
-                >
-                  {j.firing ? "Cut engine" : "Fire engine"}
-                </button>
-                {j.stage === "loi-burn" && orbit ? (
-                  <p role="status">
-                    {orbit.bound ? "Captured" : "Flyby"} · closest orbit
-                    altitude {Math.round(orbit.periapsisKm)} km · highest{" "}
-                    {Number.isFinite(orbit.apoapsisKm)
-                      ? `${Math.round(orbit.apoapsisKm)} km`
-                      : "escape"}
-                  </p>
-                ) : null}
+
+                {(() => {
+                  const angle = Math.max(-90, Math.min(90, j.angle ?? 0));
+                  const isAligned = Math.abs(angle) <= 8;
+                  const throttle = Math.max(0, Math.min(1, j.throttle ?? 0.5));
+                  const _throttlePct = Math.round(throttle * 100);
+
+                  const _throttleRegion =
+                    throttle < 0.1
+                      ? "cutoff"
+                      : throttle <= 0.35
+                        ? "precision"
+                        : throttle <= 0.7
+                          ? "cruise"
+                          : "boost";
+
+                  const currentDv = Math.max(0, j.dv ?? 0);
+                  const reqDv = required || 3149;
+                  const vRatio = Math.max(0, currentDv / reqDv);
+                  const vPct = Math.min(100, Math.round(vRatio * 100));
+                  const isOverburned = currentDv > reqDv * 1.008;
+                  const isAcquired =
+                    currentDv >= reqDv * 0.992 && currentDv <= reqDv * 1.008;
+
+                  const phase =
+                    vRatio < 0.65
+                      ? "boost"
+                      : vRatio < 0.88
+                        ? "cruise"
+                        : "precision";
+
+                  const beamWidthPct = (Math.abs(angle) / 90) * 50;
+                  const beamLeftPct = angle < 0 ? 50 - beamWidthPct : 50;
+
+                  return (
+                    <>
+                      {/* Center-Zero Alignment HUD */}
+                      <div
+                        className="journey-align-hud"
+                        role="group"
+                        aria-label="Flight alignment HUD"
+                      >
+                        <div className="journey-align-header">
+                          <span className="journey-hud-title">
+                            Alignment HUD
+                          </span>
+                        </div>
+
+                        <div className="journey-align-scale">
+                          <div className="journey-align-track">
+                            <div
+                              className={`journey-align-target-zone ${isAligned ? "is-active" : ""}`}
+                            />
+                            <div className="journey-align-center-line" />
+                            {Math.abs(angle) > 0.5 && (
+                              <div
+                                className={`journey-align-beam ${isAligned ? "is-aligned" : angle < 0 ? "is-left" : "is-right"}`}
+                                style={{
+                                  left: `${beamLeftPct}%`,
+                                  width: `${beamWidthPct}%`,
+                                }}
+                              >
+                                <div className="journey-align-tip" />
+                              </div>
+                            )}
+                          </div>
+
+                          <input
+                            type="range"
+                            min="-90"
+                            max="90"
+                            step="1"
+                            value={angle}
+                            className="journey-align-slider"
+                            aria-label="Spacecraft alignment angle"
+                            onChange={(e) =>
+                              act({
+                                type: "journey-pilot",
+                                angle: Number(e.target.value),
+                              })
+                            }
+                          />
+
+                          <div className="journey-scale-labels">
+                            <span>-90°</span>
+                            <span>-45°</span>
+                            <span className="is-zero">0° (TARGET)</span>
+                            <span>+45°</span>
+                            <span>+90°</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* 3-Region Colored Throttle Scale */}
+                      <div
+                        className="journey-throttle-hud"
+                        role="group"
+                        aria-label="Colored throttle scale"
+                      >
+                        <div className="journey-throttle-header">
+                          <span className="journey-hud-title">
+                            Thrust Throttle
+                          </span>
+                          <span
+                            className={`journey-phase-badge phase-${phase}`}
+                          >
+                            {phase === "boost"
+                              ? "RECOMMENDED: HIGH BOOST (70–100%)"
+                              : phase === "cruise"
+                                ? "RECOMMENDED: CRUISE TRIM (35–70%)"
+                                : "RECOMMENDED: PRECISION (10–35%)"}
+                          </span>
+                        </div>
+
+                        <div className="journey-throttle-track-wrapper">
+                          <div className="journey-throttle-regions">
+                            <div
+                              className="region-band band-cutoff"
+                              title="Cutoff (0-10%)"
+                            />
+                            <div
+                              className="region-band band-precision"
+                              title="Precision Vernier (10-35%)"
+                            />
+                            <div
+                              className="region-band band-cruise"
+                              title="Cruise Trim (35-70%)"
+                            />
+                            <div
+                              className="region-band band-boost"
+                              title="High Boost (70-100%)"
+                            />
+                          </div>
+
+                          <input
+                            type="range"
+                            min="0"
+                            max="1"
+                            step="0.02"
+                            value={throttle}
+                            className="journey-throttle-slider"
+                            aria-label="Engine throttle scale"
+                            onChange={(e) =>
+                              act({
+                                type: "journey-pilot",
+                                throttle: Number(e.target.value),
+                              })
+                            }
+                          />
+                        </div>
+
+                        <div className="journey-throttle-labels">
+                          <span>0% CUTOFF</span>
+                          <span className="label-precision">
+                            10–35% PRECISION
+                          </span>
+                          <span className="label-cruise">35–70% CRUISE</span>
+                          <span className="label-boost">70–100% BOOST</span>
+                        </div>
+                      </div>
+
+                      {/* Velocity (Delta-V) Gauge with Scientific Phase Guidance */}
+                      <div
+                        className="journey-velocity-hud"
+                        role="group"
+                        aria-label="Delivered delta-v telemetry"
+                      >
+                        <div className="journey-velocity-header">
+                          <span className="journey-hud-title">
+                            Velocity Telemetry
+                          </span>
+                          <strong
+                            className={`journey-velocity-number ${isOverburned ? "is-overburn" : isAcquired ? "is-acquired" : ""}`}
+                          >
+                            {Math.round(currentDv)} / {Math.round(reqDv)} m/s (
+                            {vPct}%)
+                          </strong>
+                        </div>
+
+                        <div className="journey-velocity-gauge">
+                          <div
+                            className={`journey-velocity-fill ${isOverburned ? "is-overburn" : isAcquired ? "is-acquired" : ""}`}
+                            style={{
+                              width: `${Math.min(100, (currentDv / reqDv) * 100)}%`,
+                            }}
+                          />
+                          <div
+                            className="phase-marker marker-65"
+                            title="Cruise transition (65%)"
+                            style={{ left: "65%" }}
+                          >
+                            <span />
+                          </div>
+                          <div
+                            className="phase-marker marker-88"
+                            title="Precision cutoff transition (88%)"
+                            style={{ left: "88%" }}
+                          >
+                            <span />
+                          </div>
+                          <div
+                            className="phase-marker marker-target"
+                            title="Target cutoff (100%)"
+                            style={{ left: "100%" }}
+                          >
+                            <span />
+                          </div>
+                        </div>
+
+                        <div className="journey-velocity-phase-note">
+                          <small>
+                            {vRatio < 0.65
+                              ? "Stage 1: Bulk acceleration · Run high boost (70–100%) to accumulate velocity"
+                              : vRatio < 0.88
+                                ? "Stage 2: Rocket mass decreasing · Throttle back to cruise trim (35–70%)"
+                                : "Stage 3: Terminal cutoff · Fine precision throttle (10–35%) prevents overburn"}
+                          </small>
+                        </div>
+                      </div>
+
+                      {/* Action buttons */}
+                      <div className="journey-pilot-actions">
+                        <button
+                          className="journey-fire"
+                          aria-pressed={!!j.firing}
+                          disabled={j.paused || isOverburned}
+                          onClick={() =>
+                            act({ type: "journey-pilot", firing: !j.firing })
+                          }
+                        >
+                          {j.firing
+                            ? "Cut engine (Space)"
+                            : "Fire engine (Space)"}
+                        </button>
+                        {isOverburned ? (
+                          <button
+                            className="journey-retry-btn"
+                            onClick={() => act({ type: "journey-retry" })}
+                          >
+                            Retry departure burn
+                          </button>
+                        ) : isAcquired ? (
+                          <button
+                            className="journey-lock-btn"
+                            onClick={() => act({ type: "journey-finish-burn" })}
+                          >
+                            Confirm trajectory (Enter) →
+                          </button>
+                        ) : null}
+                      </div>
+
+                      {j.stage === "loi-burn" && orbit ? (
+                        <p role="status">
+                          {orbit.bound ? "Captured" : "Flyby"} · closest orbit
+                          altitude {Math.round(orbit.periapsisKm)} km · highest{" "}
+                          {Number.isFinite(orbit.apoapsisKm)
+                            ? `${Math.round(orbit.apoapsisKm)} km`
+                            : "escape"}
+                        </p>
+                      ) : null}
+                    </>
+                  );
+                })()}
                 <small>
                   Burn time ×20 · engine thrust is an authored spacecraft input.
                 </small>
@@ -847,17 +1039,6 @@ export function JourneyScreen({
                 </div>
               </>
             ) : null}
-            <EngineerCompanion
-              voiceEnabled={frame.voiceEnabled ?? true}
-              reaction={
-                complete ? "complete" : j.feedback ? "warning" : "intro"
-              }
-              token={j.attempts}
-              scriptedReply={{
-                id: pilotBurn ? "journey-pilot-burn" : `journey-${adviceId}`,
-                text: advice,
-              }}
-            />
           </section>
           <section
             className="journey-scene"

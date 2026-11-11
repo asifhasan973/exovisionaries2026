@@ -1400,7 +1400,6 @@ body:has(.conversation-game) {
   }
   .conversation-game .readiness-connectors button {
     min-height: 46px;
-    flex-direction: row;
     font-size: 11px;
     padding: 5px;
   }
@@ -1842,7 +1841,6 @@ body:has(.conversation-game) {
   }
   .conversation-game .readiness-connectors button {
     min-height: 42px;
-    flex-direction: row;
     font-size: 11px;
   }
   .conversation-game .readiness-action {

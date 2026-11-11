@@ -442,12 +442,15 @@
   opacity: 1;
 }
 
-.radar-plug {
+.radar-plug,
+.radar-cable {
   transition: transform 0.7s cubic-bezier(0.3, 0.6, 0.2, 1);
 }
 
 .is-connecting .radar-plug,
-.is-online .radar-plug {
+.is-online .radar-plug,
+.is-connecting .radar-cable,
+.is-online .radar-cable {
   transform: translateX(15px);
 }
 
@@ -455,7 +458,8 @@
   animation: radar-ping 0.3s infinite alternate;
 }
 
-.is-online .radar-plug rect {
+.is-online .radar-plug rect,
+.is-online .radar-cable {
   fill: #91edc8;
 }
 

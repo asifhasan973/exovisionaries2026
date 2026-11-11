@@ -234,24 +234,39 @@ function advance(
       );
     }
     if (next.mode === "medium") {
-      // Stability assistance follows player input; it never aims for a landing pad.
-      const desiredVx = next.direction * 5.2;
-      const ax = clamp((desiredVx - next.vx) * 1.6, -1.15, 1.15);
+      // Lateral RCS translation follows player steer commands
+      const desiredVx = next.direction * 8.5;
+      const rcsAx =
+        next.direction !== 0
+          ? clamp((desiredVx - next.vx) * 3.8, -5.5, 5.5)
+          : clamp(-next.vx * 3.0, -4.5, 4.5);
+
+      // Vertical descent rate controller: smooth descent that slows down gently when braking
       const desiredVy = next.brake
         ? -Math.min(
-            4.5,
-            Math.max(0.85, Math.sqrt(Math.max(0, next.height)) * 0.42),
+            2.4,
+            Math.max(0.85, Math.sqrt(Math.max(0, next.height)) * 0.36),
           )
-        : -7;
-      const ay = clamp((desiredVy - next.vy) * 1.7, -0.7, 2.8);
-      const angle = Math.atan2(ax, LANDING_MODEL.gravity + ay);
-      next.steer = clamp(angle / ((20 * Math.PI) / 180), -1, 1);
+        : -5.8;
+      const ay = clamp((desiredVy - next.vy) * 2.4, -2.0, 3.2);
+      const targetAy = Math.max(0.1, LANDING_MODEL.gravity + ay);
+
+      // Banking angle proportional to lateral acceleration
+      next.steer = clamp(rcsAx / 5.5, -1, 1);
+      const angle = (next.steer * 20 * Math.PI) / 180;
+
+      // Vertical throttle strictly satisfies target vertical acceleration without overpowering gravity
       next.throttle = clamp(
-        (Math.hypot(ax, LANDING_MODEL.gravity + ay) *
-          (input.dryKg + next.fuelKg)) /
-          LANDING_MODEL.thrustN,
-        0,
-        1,
+        (targetAy * (input.dryKg + next.fuelKg)) /
+          (LANDING_MODEL.thrustN * Math.max(0.8, Math.cos(angle))),
+        0.05,
+        0.95,
+      );
+
+      next.vx = clamp(next.vx + rcsAx * dt, -9.0, 9.0);
+      next.vy = Math.min(
+        -0.35,
+        next.vy + (targetAy - LANDING_MODEL.gravity) * dt,
       );
     }
     const requested = LANDING_MODEL.thrustN * next.throttle,
@@ -260,8 +275,14 @@ function advance(
       thrust = (used / dt) * 9.80665 * PLATFORM_MODEL.descentIspSeconds;
     const mass = input.dryKg + next.fuelKg - used / 2,
       angle = (next.steer * 20 * Math.PI) / 180;
-    next.vx += ((Math.sin(angle) * thrust) / mass) * dt;
-    next.vy += ((Math.cos(angle) * thrust) / mass - LANDING_MODEL.gravity) * dt;
+    if (next.mode !== "medium") {
+      next.vx += ((Math.sin(angle) * thrust) / mass) * dt;
+      next.vy +=
+        ((Math.cos(angle) * thrust) / mass - LANDING_MODEL.gravity) * dt;
+      if (next.mode === "guided") {
+        next.vy = Math.min(-0.35, next.vy);
+      }
+    }
     next.x += next.vx * dt;
     next.height += next.vy * dt;
     next.fuelKg -= used;
@@ -361,7 +382,9 @@ function apply(
             decisionPending: false,
             paused: false,
             feedback: null,
-            ...(l.mode === "medium" ? { direction: 0, brake: false } : {}),
+            ...(l.mode === "medium"
+              ? { direction: 0, steer: 0, brake: false }
+              : {}),
           }
         : l;
     case "control": {
@@ -371,14 +394,28 @@ function apply(
         (l.mode === "medium" && l.paused)
       )
         return l;
-      if (l.mode === "medium")
+      if (l.mode === "medium") {
+        const nextDirection =
+          c.steer === undefined ? l.direction : clamp(c.steer, -1, 1);
+        const nextBrake = c.brake ?? l.brake;
+        let nextVx = l.vx;
+        if (c.steer !== undefined && c.steer !== 0 && c.steer !== l.direction) {
+          nextVx = clamp(l.vx + Math.sign(c.steer) * 1.8, -8.5, 8.5);
+        }
+        let nextVy = l.vy;
+        if (c.brake === true && !l.brake) {
+          nextVy = Math.max(-2.5, l.vy + 0.5);
+        }
         return {
           ...l,
-          direction:
-            c.steer === undefined ? l.direction : clamp(c.steer, -1, 1),
-          brake: c.brake ?? l.brake,
+          direction: nextDirection,
+          steer: nextDirection,
+          brake: nextBrake,
+          vx: nextVx,
+          vy: Math.min(-0.35, nextVy),
           feedback: null,
         };
+      }
       const throttle =
           c.throttle === undefined ? l.throttle : clamp(c.throttle, 0, 1),
         steer = c.steer === undefined ? l.steer : clamp(c.steer, -1, 1);

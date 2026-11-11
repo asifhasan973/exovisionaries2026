@@ -265,23 +265,157 @@ export function SurfaceViewport({
       const crew = createCrewedPlatform();
       crew.capsule.visible = false;
       crew.lander.position.set(0, 0, 0);
-      crew.root.position.set(-35 / 6 - 3, surfaceHeight(-35 / 6 - 3, 0), 0);
+      const landerRootX = -35 / 6 - 3,
+        landerRootY = surfaceHeight(landerRootX, 0);
+      crew.root.position.set(landerRootX, landerRootY, 0);
       crew.lander.scale.setScalar(1.7);
       scene.add(crew.root);
-      const ramp = new THREE.Mesh(
-        new THREE.BoxGeometry(3, 0.08, 1.2),
-        new THREE.MeshStandardMaterial({
-          color: 0x91929d,
-          metalness: 0.5,
-          roughness: 0.5,
-        }),
+
+      // Authentic Descent Stage Equipment Bay with Clamshell Doors & Motorized Ramp
+      const cargoBayGroup = new THREE.Group();
+      cargoBayGroup.position.set(landerRootX + 1.48, landerRootY + 1.15, 0);
+      scene.add(cargoBayGroup);
+
+      const bayCavityMat = new THREE.MeshStandardMaterial({
+        color: 0x161922,
+        roughness: 0.72,
+        metalness: 0.35,
+      });
+      const bayFrameMat = new THREE.MeshStandardMaterial({
+        color: 0xd4b36a,
+        roughness: 0.38,
+        metalness: 0.75,
+      });
+      const titaniumMat = new THREE.MeshStandardMaterial({
+        color: 0xc4cbd4,
+        roughness: 0.35,
+        metalness: 0.7,
+      });
+
+      const bayBox = new THREE.Mesh(
+        new THREE.BoxGeometry(0.85, 0.72, 1.05),
+        bayCavityMat,
       );
-      ramp.rotation.z = -0.28;
-      ramp.position.set(-35 / 6 - 1.7, surfaceHeight(-35 / 6, 0) + 0.5, 0);
-      ramp.receiveShadow = true;
-      scene.add(ramp);
+      bayBox.position.set(-0.35, 0, 0);
+      cargoBayGroup.add(bayBox);
+
+      const bayBezelTop = new THREE.Mesh(
+        new THREE.BoxGeometry(0.1, 0.06, 1.12),
+        bayFrameMat,
+      );
+      bayBezelTop.position.set(0.06, 0.36, 0);
+      cargoBayGroup.add(bayBezelTop);
+
+      const bayBezelBottom = new THREE.Mesh(
+        new THREE.BoxGeometry(0.1, 0.06, 1.12),
+        bayFrameMat,
+      );
+      bayBezelBottom.position.set(0.06, -0.36, 0);
+      cargoBayGroup.add(bayBezelBottom);
+
+      const bayLamp = new THREE.PointLight(0xffeedd, 2.5, 3.5);
+      bayLamp.position.set(-0.1, 0.28, 0);
+      cargoBayGroup.add(bayLamp);
+
+      const bayStatusMat = new THREE.MeshBasicMaterial({ color: 0xffaa33 });
+      const bayStatusL = new THREE.Mesh(
+        new THREE.SphereGeometry(0.03, 8, 8),
+        bayStatusMat,
+      );
+      bayStatusL.position.set(0.08, 0.32, -0.5);
+      const bayStatusR = new THREE.Mesh(
+        new THREE.SphereGeometry(0.03, 8, 8),
+        bayStatusMat,
+      );
+      bayStatusR.position.set(0.08, 0.32, 0.5);
+      cargoBayGroup.add(bayStatusL, bayStatusR);
+
+      // Left and Right Clamshell Doors
+      const doorGeom = new THREE.BoxGeometry(0.03, 0.68, 0.52);
+      const leftDoorHinge = new THREE.Group();
+      leftDoorHinge.position.set(0.06, 0, -0.52);
+      cargoBayGroup.add(leftDoorHinge);
+
+      const leftDoorPanel = new THREE.Mesh(doorGeom, bayFrameMat);
+      leftDoorPanel.position.set(0, 0, 0.26);
+      leftDoorPanel.castShadow = true;
+      leftDoorHinge.add(leftDoorPanel);
+
+      const rightDoorHinge = new THREE.Group();
+      rightDoorHinge.position.set(0.06, 0, 0.52);
+      cargoBayGroup.add(rightDoorHinge);
+
+      const rightDoorPanel = new THREE.Mesh(doorGeom, bayFrameMat);
+      rightDoorPanel.position.set(0, 0, -0.26);
+      rightDoorPanel.castShadow = true;
+      rightDoorHinge.add(rightDoorPanel);
+
+      // Motorized Deployment Ramp
+      const rampHinge = new THREE.Group();
+      rampHinge.position.set(0.06, -0.36, 0);
+      cargoBayGroup.add(rampHinge);
+
+      const rampLength = 1.95,
+        rampWidth = 0.82;
+      const rampGroup = new THREE.Group();
+      rampHinge.add(rampGroup);
+
+      const railGeom = new THREE.BoxGeometry(rampLength, 0.045, 0.06);
+      const railL = new THREE.Mesh(railGeom, titaniumMat);
+      railL.position.set(rampLength / 2, 0, -rampWidth / 2);
+      railL.receiveShadow = true;
+      railL.castShadow = true;
+
+      const railR = new THREE.Mesh(railGeom, titaniumMat);
+      railR.position.set(rampLength / 2, 0, rampWidth / 2);
+      railR.receiveShadow = true;
+      railR.castShadow = true;
+      rampGroup.add(railL, railR);
+
+      const rungCount = 10,
+        rungGeom = new THREE.BoxGeometry(0.035, 0.025, rampWidth);
+      for (let ri = 0; ri < rungCount; ri++) {
+        const rung = new THREE.Mesh(rungGeom, titaniumMat);
+        rung.position.set((ri + 0.5) * (rampLength / rungCount), 0.015, 0);
+        rampGroup.add(rung);
+      }
+
+      const runnerGeom = new THREE.BoxGeometry(
+        rampLength,
+        0.012,
+        rampWidth - 0.12,
+      );
+      const runnerMat = new THREE.MeshStandardMaterial({
+        color: 0x4a4e58,
+        roughness: 0.8,
+        metalness: 0.3,
+      });
+      const runner = new THREE.Mesh(runnerGeom, runnerMat);
+      runner.position.set(rampLength / 2, 0.008, 0);
+      runner.receiveShadow = true;
+      rampGroup.add(runner);
+
+      const cableMat = new THREE.LineBasicMaterial({ color: 0x8a94a2 });
+      const cablePoints = [
+        new THREE.Vector3(0, 0.32, -0.48),
+        new THREE.Vector3(rampLength * 0.75, 0, -rampWidth / 2),
+      ];
+      const cableL = new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints(cablePoints),
+        cableMat,
+      );
+      const cablePointsR = [
+        new THREE.Vector3(0, 0.32, 0.48),
+        new THREE.Vector3(rampLength * 0.75, 0, rampWidth / 2),
+      ];
+      const cableR = new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints(cablePointsR),
+        cableMat,
+      );
+      cargoBayGroup.add(cableL, cableR);
       const rover = new THREE.Group(),
         assembly = buildAssembly(preparation);
+      rover.scale.setScalar(0.42);
       scene.add(rover);
       for (const part of [...assembly.children]) {
         if (partById(part.name)?.category === "lander") continue;
@@ -434,6 +568,51 @@ export function SurfaceViewport({
       const lampTarget = new THREE.Object3D();
       scene.add(lampTarget);
       lamp.target = lampTarget;
+      const astronaut = (x: number) => {
+        const group = new THREE.Group(),
+          white = new THREE.MeshStandardMaterial({
+            color: 0xe6e2da,
+            roughness: 0.6,
+          }),
+          gold = new THREE.MeshStandardMaterial({
+            color: 0x976b20,
+            metalness: 0.7,
+            roughness: 0.2,
+          }),
+          body = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.5, 0.26), white);
+        body.position.y = 0.65;
+        group.add(body);
+        const helmet = new THREE.Mesh(
+          new THREE.SphereGeometry(0.24, 20, 12),
+          white,
+        );
+        helmet.position.y = 1.1;
+        group.add(helmet);
+        const visor = new THREE.Mesh(
+          new THREE.SphereGeometry(0.205, 20, 12, 0, Math.PI),
+          gold,
+        );
+        visor.position.set(0, 1.1, 0.1);
+        group.add(visor);
+        for (const side of [-1, 1]) {
+          const limb = new THREE.Mesh(
+            new THREE.BoxGeometry(0.12, 0.45, 0.15),
+            white,
+          );
+          limb.position.set(side * 0.13, 0.24, 0);
+          group.add(limb);
+          const arm = new THREE.Mesh(
+            new THREE.CapsuleGeometry(0.065, 0.33, 4, 8),
+            white,
+          );
+          arm.position.set(side * 0.28, 0.69, 0);
+          group.add(arm);
+        }
+        group.position.set(x, 0, 1.6);
+        scene.add(group);
+        return group;
+      };
+      const astronauts = [astronaut(-8.2), astronaut(-7.1)];
       const dustColour = new THREE.Color(0x8a8084),
         paint = new Map<THREE.MeshStandardMaterial, THREE.Color>();
       rover.traverse((o) => {
@@ -518,13 +697,49 @@ export function SurfaceViewport({
               : s.stage === "deploying"
                 ? s.phaseFrame / SURFACE_MODEL.deployFrames
                 : 1;
-        const target = new THREE.Vector3(
-          s.deployed ? p.x / 6 : -35 / 6 - 2.5 * (1 - deployment),
-          s.deployed
-            ? surfaceHeight(p.x / 6, p.z / 6)
-            : surfaceHeight(-35 / 6, 0) + 1.3 * (1 - deployment),
-          s.deployed ? p.z / 6 : 0,
+
+        // Phase 1: Clamshell Cargo Doors Swing Open Outward
+        const doorPhase = THREE.MathUtils.clamp(deployment / 0.35, 0, 1);
+        const doorEase = doorPhase * doorPhase * (3 - 2 * doorPhase);
+        leftDoorHinge.rotation.y = -doorEase * 1.83;
+        rightDoorHinge.rotation.y = doorEase * 1.83;
+        bayStatusMat.color.setHex(doorPhase >= 0.95 ? 0x5df2b2 : 0xffaa33);
+
+        // Phase 2: Motorized Deployment Ramp Lowers to Regolith
+        const rampPhase = THREE.MathUtils.clamp(
+          (deployment - 0.25) / 0.4,
+          0,
+          1,
         );
+        const rampEase = rampPhase * rampPhase * (3 - 2 * rampPhase);
+        rampHinge.rotation.z = THREE.MathUtils.lerp(1.2, -0.38, rampEase);
+
+        // Phase 3: Rover Emerges and Rolls Down Ramp
+        const rollPhase = THREE.MathUtils.clamp((deployment - 0.5) / 0.5, 0, 1);
+        const rollEase = rollPhase * rollPhase * (3 - 2 * rollPhase);
+
+        let targetX = 0,
+          targetY = 0,
+          targetZ = 0;
+        const startX = landerRootX + 1.13;
+        const startY = landerRootY + 0.88;
+        const endX = -35 / 6;
+        const endY = surfaceHeight(endX, 0);
+
+        if (s.deployed) {
+          targetX = p.x / 6;
+          targetY = surfaceHeight(targetX, p.z / 6);
+          targetZ = p.z / 6;
+        } else if (rollPhase <= 0) {
+          targetX = startX;
+          targetY = startY;
+          targetZ = 0;
+        } else {
+          targetX = THREE.MathUtils.lerp(startX, endX, rollEase);
+          targetY = THREE.MathUtils.lerp(startY, endY, rollEase);
+          targetZ = 0;
+        }
+        const target = new THREE.Vector3(targetX, targetY, targetZ);
         if (snap || gentle || s.paused) rover.position.copy(target);
         else rover.position.lerp(target, 0.35);
         const delta = rover.position.clone().sub(oldPosition);
@@ -540,28 +755,46 @@ export function SurfaceViewport({
             Math.max(0, (s.legFrame - 1) / SURFACE_MODEL.legFrames),
           );
           rover.rotation.y = Math.atan2(behind.x - ahead.x, behind.z - ahead.z);
+        } else if (!s.deployed) {
+          rover.rotation.y = -Math.PI / 2;
         }
-        if (delta.length() > 0.001 && rolling)
+        const isRolling =
+          rolling ||
+          (!s.deployed &&
+            s.stage === "deploying" &&
+            rollPhase > 0 &&
+            rollPhase < 1);
+        if (delta.length() > 0.0005 && isRolling)
           rover.traverse((o) => {
-            if (o.userData.wheelPivot) o.rotation.x += delta.length() / 0.32;
+            if (o.userData.wheelPivot)
+              o.rotation.x += delta.length() / (0.32 * 0.42);
           });
         const forwardSlope = new THREE.Vector3(0, 0, -0.55).applyAxisAngle(
           new THREE.Vector3(0, 1, 0),
           rover.rotation.y,
         );
-        rover.rotation.x = gentle
-          ? 0
-          : Math.atan2(
-              surfaceHeight(
-                rover.position.x + forwardSlope.x,
-                rover.position.z + forwardSlope.z,
-              ) -
+        if (!s.deployed && rollPhase > 0 && rollPhase < 1) {
+          rover.rotation.z = 0;
+          rover.rotation.x = THREE.MathUtils.lerp(-0.35, 0, rollEase * 1.3);
+        } else if (!s.deployed && rollPhase <= 0) {
+          rover.rotation.z = 0;
+          rover.rotation.x = 0;
+        } else {
+          rover.rotation.z = 0;
+          rover.rotation.x = gentle
+            ? 0
+            : Math.atan2(
                 surfaceHeight(
-                  rover.position.x - forwardSlope.x,
-                  rover.position.z - forwardSlope.z,
-                ),
-              1.1,
-            ) * -0.45;
+                  rover.position.x + forwardSlope.x,
+                  rover.position.z + forwardSlope.z,
+                ) -
+                  surfaceHeight(
+                    rover.position.x - forwardSlope.x,
+                    rover.position.z - forwardSlope.z,
+                  ),
+                1.1,
+              ) * -0.45;
+        }
         rover.updateMatrixWorld(true);
         wheels.forEach((wheel) => {
           wheel.getWorldPosition(wheelPoint);
@@ -672,7 +905,20 @@ export function SurfaceViewport({
         );
         scienceGlow.intensity =
           working && ["survey", "analysis"].includes(activity.phase) ? 2 : 0;
-        ramp.visible = !s.deployed;
+        astronauts.forEach((a, i) => {
+          a.visible = !s.crewSheltered;
+          a.position.x =
+            activity?.recovery === "brush"
+              ? -6.5 + i * 1.5
+              : -8.2 + i * 1.1 + Math.sin(deployment * Math.PI) * 1.5;
+          a.position.y = surfaceHeight(a.position.x, a.position.z);
+          a.rotation.y = activity?.recovery === "brush" ? Math.PI / 2 : 0;
+          if (activity?.recovery === "brush")
+            a.children.slice(-2).forEach((arm) => {
+              arm.rotation.z = Math.sin((activity.frame ?? 0) * 0.65) * 0.45;
+            });
+        });
+        cargoBayGroup.visible = true;
         const light = surfaceLight(p.x, p.z, moonRef.current);
         lamp.visible = s.deployed && light === 0;
         const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(
@@ -725,14 +971,8 @@ export function SurfaceViewport({
             : new THREE.Vector3(-0.6, 0, -0.8);
           const offset = heading
             .clone()
-            .multiplyScalar(s.deployed ? -6 : 6)
-            .add(
-              new THREE.Vector3(
-                -heading.z * 2,
-                s.deployed ? 3.2 : 4,
-                heading.x * 2,
-              ),
-            );
+            .multiplyScalar(-9)
+            .add(new THREE.Vector3(-heading.z * 3, 5.8, heading.x * 3));
           desiredPosition = rover.position.clone().add(offset);
           desiredFocus = rover.position
             .clone()

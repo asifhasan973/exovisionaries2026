@@ -270,7 +270,8 @@ export function reduceMission(
   if (event.type.startsWith("human-") || event.type === "visit-crew")
     return reduceHumanEvent(session, event as HumanEvent);
   if (event.type.startsWith("moon-")) {
-    if (session.progress.stepId !== "crew-selection") return session;
+    if (!["crew-selection", "crew-plan"].includes(session.progress.stepId))
+      return session;
     const moon = reduceMoonSession(
       session.moon,
       event as MoonEvent,

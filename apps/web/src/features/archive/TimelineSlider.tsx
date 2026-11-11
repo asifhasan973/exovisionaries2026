@@ -1,8 +1,21 @@
-import React, { useLayoutEffect, useRef, useState } from "react";
-import { ArrowUp, ArrowDown, RotateCcw, ArrowUpRight } from "lucide-react";
-import { NASA_MISSION_EVENTS, NASA_BUBBLE_PLACEHOLDER } from "@exo/engine";
+import React, {
+  useRef,
+  useEffect,
+  useState,
+  useCallback,
+  useMemo,
+} from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  buildTimelineYears,
+  type TimelineYearItem,
+  NASA_MISSION_EVENTS,
+} from "@exo/engine";
 import { sound } from "@exo/audio";
 import { useOrientationLifecycleStore } from "@exo/ui";
+import { useTimelineInertia } from "./useTimelineInertia";
+import { TimelineYearNode } from "./TimelineYearNode";
+import { TimelineFooterHud } from "./TimelineNavHud";
 
 interface TimelineSliderProps {
   onSelectYear: (year: number, eventId?: string) => void;
@@ -10,206 +23,333 @@ interface TimelineSliderProps {
   isVisible: boolean;
 }
 
-const CURRENT_YEAR = new Date().getFullYear();
-const archiveYears = [
-  ...new Set([...NASA_MISSION_EVENTS.map((event) => event.year), CURRENT_YEAR]),
-].sort((a, b) => a - b);
+const allEventYears = NASA_MISSION_EVENTS.map((e) => e.year);
+const START_YEAR = Math.min(1958, ...allEventYears);
+const CURRENT_YEAR =
+  typeof window !== "undefined" ? new Date().getFullYear() : 2026;
+const END_YEAR = Math.max(CURRENT_YEAR + 4, ...allEventYears);
 
 export const TimelineSlider: React.FC<TimelineSliderProps> = ({
   onSelectYear,
+  selectedYear,
   isVisible,
 }) => {
-  const viewportRef = useRef<HTMLDivElement>(null);
-  const rowRefs = useRef(new Map<number, HTMLElement>());
-  const returnFocusRef = useRef<HTMLElement | null>(null);
-  const scrollPosition = useRef(0);
-  const activeYearRef = useRef(CURRENT_YEAR);
-  const lastTickAt = useRef(0);
-  const [activeYear, setActiveYear] = useState(CURRENT_YEAR);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
   const isFrozen = useOrientationLifecycleStore((state) => state.isFrozen);
+  const [timelineYears] = useState<TimelineYearItem[]>(() =>
+    buildTimelineYears(START_YEAR, END_YEAR),
+  );
+  const [activeCenterYear, setActiveCenterYear] =
+    useState<number>(CURRENT_YEAR);
+  const activeCenterYearRef = useRef<number>(CURRENT_YEAR);
+  const [isMagnetDocked, setIsMagnetDocked] = useState<boolean>(true);
+  const [brokenImgMap, setBrokenImgMap] = useState<Record<string, boolean>>({});
 
-  const goToYear = (year: number) => {
-    const viewport = viewportRef.current;
-    const row = rowRefs.current.get(year);
-    if (!viewport || !row) return;
-    viewport.scrollTop =
-      row.offsetTop + row.offsetHeight / 2 - viewport.clientHeight / 2;
-    scrollPosition.current = viewport.scrollTop;
-  };
+  const lastSoundScrollLeft = useRef<number>(0);
+  const lastSoundTime = useRef<number>(0);
 
-  useLayoutEffect(() => {
-    goToYear(CURRENT_YEAR);
-    const observer = new ResizeObserver(() => goToYear(activeYearRef.current));
-    if (viewportRef.current) observer.observe(viewportRef.current);
-    return () => observer.disconnect();
-  }, []);
-
-  useLayoutEffect(() => {
-    if (isVisible && !isFrozen)
-      returnFocusRef.current?.focus({ preventScroll: true });
-  }, [isVisible, isFrozen]);
-
-  const handleScroll = () => {
-    const viewport = viewportRef.current;
-    if (!viewport) return;
-    if (useOrientationLifecycleStore.getState().isFrozen || !isVisible) {
-      viewport.scrollTop = scrollPosition.current;
-      return;
-    }
-    scrollPosition.current = viewport.scrollTop;
-    const center = viewport.scrollTop + viewport.clientHeight / 2;
-    let nearest = CURRENT_YEAR;
-    let distance = Infinity;
-    rowRefs.current.forEach((row, year) => {
-      const delta = Math.abs(row.offsetTop + row.offsetHeight / 2 - center);
-      if (delta < distance) {
-        nearest = year;
-        distance = delta;
+  const milestonePlacement = useMemo(() => {
+    const map = new Map<number, boolean>();
+    let count = 0;
+    timelineYears.forEach((item) => {
+      if (item.hasEvents) {
+        map.set(item.year, count % 2 === 0);
+        count++;
       }
     });
-    if (nearest !== activeYearRef.current) {
-      activeYearRef.current = nearest;
-      setActiveYear(nearest);
-      const now = performance.now();
-      if (sound.getArchiveActive() && now - lastTickAt.current > 100) {
-        sound.playTimelineSlideTick(0.6);
-        lastTickAt.current = now;
+    return map;
+  }, [timelineYears]);
+
+  const getColWidth = useCallback(() => {
+    if (trackRef.current) {
+      const node = trackRef.current.querySelector<HTMLElement>(
+        ".timeline-year-node",
+      );
+      if (node && node.offsetWidth > 0) {
+        return node.offsetWidth;
+      }
+    }
+    return typeof window !== "undefined" && window.innerHeight <= 450
+      ? 76
+      : 104;
+  }, []);
+
+  const [spacerWidth, setSpacerWidth] = useState<number>(() => {
+    if (typeof window === "undefined") return 300;
+    const colW = window.innerHeight <= 450 ? 76 : 104;
+    return Math.max(0, window.innerWidth / 2 - colW / 2);
+  });
+
+  const updateSpacerWidth = useCallback(() => {
+    if (!containerRef.current) return;
+    const colW = getColWidth();
+    const halfWidth = containerRef.current.clientWidth / 2;
+    setSpacerWidth(Math.max(0, halfWidth - colW / 2));
+  }, [getColWidth]);
+
+  const updateCenterYear = useCallback(() => {
+    if (!containerRef.current) return;
+    const colWidth = getColWidth();
+    const container = containerRef.current;
+    const rawIdx = Math.round(container.scrollLeft / colWidth);
+    const clampedIdx = Math.max(0, Math.min(timelineYears.length - 1, rawIdx));
+    const yearItem = timelineYears[clampedIdx];
+
+    if (yearItem && yearItem.year !== activeCenterYearRef.current) {
+      activeCenterYearRef.current = yearItem.year;
+      setActiveCenterYear(yearItem.year);
+    }
+
+    const distToCenter = Math.abs(container.scrollLeft - clampedIdx * colWidth);
+    setIsMagnetDocked(distToCenter <= 10);
+  }, [getColWidth, timelineYears]);
+
+  const handleScroll = () => {
+    if (isFrozen) return;
+    updateCenterYear();
+
+    if (!isVisible || !containerRef.current || !sound.getArchiveActive())
+      return;
+    const currentScroll = containerRef.current.scrollLeft;
+    const now = performance.now();
+    const delta = Math.abs(currentScroll - lastSoundScrollLeft.current);
+    const timeDelta = now - lastSoundTime.current;
+
+    if (delta >= 14 && timeDelta >= 18) {
+      const velocity = Math.min(
+        3.0,
+        Math.max(0.6, (delta / Math.max(1, timeDelta)) * 2.0),
+      );
+      sound.playTimelineSlideTick(velocity);
+      lastSoundScrollLeft.current = currentScroll;
+      lastSoundTime.current = now;
+
+      if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+        try {
+          navigator.vibrate(3);
+        } catch {}
       }
     }
   };
 
-  const selectMission = (year: number, eventId?: string) => {
-    if (useOrientationLifecycleStore.getState().isFrozen) return;
-    returnFocusRef.current =
-      document.activeElement instanceof HTMLElement
-        ? document.activeElement
-        : null;
+  const snapToNearestYear = useCallback(
+    (targetYearIdx?: number, playAudio = true) => {
+      if (!containerRef.current) return;
+      const colW = getColWidth();
+      const idx =
+        targetYearIdx !== undefined
+          ? targetYearIdx
+          : Math.max(
+              0,
+              Math.min(
+                timelineYears.length - 1,
+                Math.round(containerRef.current.scrollLeft / colW),
+              ),
+            );
+      const targetScroll = idx * colW;
+
+      containerRef.current.scrollTo({ left: targetScroll, behavior: "smooth" });
+      if (playAudio) {
+        sound.playMagneticSnap();
+      }
+      const targetYear = timelineYears[idx]?.year;
+      if (targetYear) {
+        activeCenterYearRef.current = targetYear;
+        setActiveCenterYear(targetYear);
+      }
+      setIsMagnetDocked(true);
+    },
+    [getColWidth, timelineYears],
+  );
+
+  const {
+    isDragging,
+    hasMovedDrag,
+    handlePointerDown,
+    handleWheel,
+    stopInertia,
+  } = useTimelineInertia({
+    containerRef,
+    snapToNearestYear,
+  });
+
+  const jumpToCurrentYear = () => {
+    if (isFrozen) return;
+    const currentYearIdx = Math.max(0, CURRENT_YEAR - START_YEAR);
+    snapToNearestYear(currentYearIdx, true);
+  };
+
+  const jumpToNearestMilestone = (direction: -1 | 1) => {
+    if (isFrozen || !containerRef.current) return;
+    const colWidth = getColWidth();
+    const currentIdx = Math.max(
+      0,
+      Math.min(
+        timelineYears.length - 1,
+        Math.round(containerRef.current.scrollLeft / colWidth),
+      ),
+    );
+
+    let targetIdx: number | null = null;
+    if (direction === -1) {
+      for (let i = currentIdx - 1; i >= 0; i--) {
+        if (timelineYears[i].hasEvents) {
+          targetIdx = i;
+          break;
+        }
+      }
+    } else {
+      for (let i = currentIdx + 1; i < timelineYears.length; i++) {
+        if (timelineYears[i].hasEvents) {
+          targetIdx = i;
+          break;
+        }
+      }
+    }
+
+    if (targetIdx !== null) {
+      sound.playClick(720);
+      snapToNearestYear(targetIdx, true);
+    } else {
+      sound.playClick(440);
+    }
+  };
+
+  useEffect(() => {
+    updateSpacerWidth();
+
+    const frameId = requestAnimationFrame(() => {
+      updateSpacerWidth();
+      if (!containerRef.current) return;
+      const colW = getColWidth();
+      const currentYearIdx = Math.max(0, CURRENT_YEAR - START_YEAR);
+      const targetScroll = currentYearIdx * colW;
+
+      containerRef.current.scrollLeft = targetScroll;
+      activeCenterYearRef.current = CURRENT_YEAR;
+      setActiveCenterYear(CURRENT_YEAR);
+      lastSoundScrollLeft.current = targetScroll;
+      lastSoundTime.current = performance.now();
+      setIsMagnetDocked(true);
+    });
+
+    return () => {
+      cancelAnimationFrame(frameId);
+    };
+  }, [getColWidth, updateSpacerWidth]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      updateSpacerWidth();
+      if (!containerRef.current) return;
+      const colW = getColWidth();
+      const currentIdx = Math.max(0, activeCenterYearRef.current - START_YEAR);
+      containerRef.current.scrollLeft = currentIdx * colW;
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      stopInertia();
+    };
+  }, [getColWidth, updateSpacerWidth, stopInertia]);
+
+  const handleYearClick = (year: number) => {
+    if (isFrozen || hasMovedDrag.current) return;
+    sound.playClick(680);
+    const targetIdx = Math.max(0, year - START_YEAR);
+    snapToNearestYear(targetIdx, false);
+    onSelectYear(year);
+  };
+
+  const handleBubbleClick = (year: number, eventId?: string) => {
+    if (isFrozen || hasMovedDrag.current) return;
     sound.playPop();
-    navigator.vibrate?.(8);
+    const targetIdx = Math.max(0, year - START_YEAR);
+    snapToNearestYear(targetIdx, false);
     onSelectYear(year, eventId);
   };
 
   return (
     <div
-      className={`nasa-timeline-slider-wrapper ${isVisible ? "is-visible" : "is-slid-up"} ${isFrozen ? "is-suspended" : ""}`}
-      inert={!isVisible || isFrozen}
+      className={`nasa-timeline-slider-wrapper ${isVisible ? "is-visible" : "is-slid-up"}`}
+      role="region"
+      aria-label="NASA Mission Archive Interactive Timeline"
     >
-      <div className="archive-scroll-guide">
-        <ArrowUp size={15} /> Scroll up to travel back in time
-      </div>
-      <div
-        ref={viewportRef}
-        className={`archive-timeline-viewport ${isFrozen ? "is-frozen" : ""}`}
-        tabIndex={0}
-        role="region"
-        aria-label="Mission timeline. Scroll up for older missions, down for newer missions."
-        onScroll={handleScroll}
+      {/* Side Quick Step Buttons */}
+      <button
+        type="button"
+        className="timeline-step-btn step-prev"
+        onClick={() => jumpToNearestMilestone(-1)}
+        title="Jump to previous milestone event"
+        aria-label="Previous timeline milestone"
       >
-        <div className="archive-timeline-track">
-          {archiveYears.map((year) => {
-            const events = NASA_MISSION_EVENTS.filter(
-              (event) => event.year === year,
-            );
-            return (
-              <section
-                key={year}
-                ref={(node) => {
-                  if (node) rowRefs.current.set(year, node);
-                  else rowRefs.current.delete(year);
-                }}
-                className={`archive-year-row ${activeYear === year ? "is-current-focus" : ""}`}
-                aria-label={`${year} missions`}
-              >
-                {[0, 1].map((side) => (
-                  <div
-                    key={side}
-                    className={`archive-mission-side ${side === 0 ? "side-left" : "side-right"}`}
-                  >
-                    {events
-                      .filter((_, index) => index % 2 === side)
-                      .map((event) => (
-                        <button
-                          key={event.id}
-                          type="button"
-                          className="archive-mission-image"
-                          onClick={() => selectMission(year, event.id)}
-                          aria-label={`View ${event.title}`}
-                        >
-                          <img
-                            src={event.thumbnail || NASA_BUBBLE_PLACEHOLDER}
-                            alt=""
-                            draggable={false}
-                            decoding="async"
-                            onError={(e) => {
-                              e.currentTarget.onerror = null;
-                              e.currentTarget.src = NASA_BUBBLE_PLACEHOLDER;
-                            }}
-                          />
-                          <span className="archive-image-caption">
-                            <small>{event.category}</small>
-                            <strong>{event.title}</strong>
-                            <span>
-                              Explore mission <ArrowUpRight size={15} />
-                            </span>
-                          </span>
-                        </button>
-                      ))}
-                  </div>
-                ))}
-                <button
-                  type="button"
-                  className="archive-year-marker"
-                  onClick={() => selectMission(year)}
-                >
-                  <span>{year}</span>
-                  {year === CURRENT_YEAR && <small>NOW</small>}
-                  {year > CURRENT_YEAR && <small>UPCOMING</small>}
-                </button>
-              </section>
-            );
-          })}
+        <ChevronLeft size={20} />
+      </button>
+
+      <button
+        type="button"
+        className="timeline-step-btn step-next"
+        onClick={() => jumpToNearestMilestone(1)}
+        title="Jump to next milestone event"
+        aria-label="Next timeline milestone"
+      >
+        <ChevronRight size={20} />
+      </button>
+
+      <div
+        ref={containerRef}
+        className={`timeline-viewport ${isDragging ? "is-dragging" : ""}`}
+        onScroll={handleScroll}
+        onWheel={isFrozen ? undefined : handleWheel}
+        onPointerDown={isFrozen ? undefined : handlePointerDown}
+      >
+        <div ref={trackRef} className="timeline-track">
+          <div
+            className="timeline-spacer-lead"
+            style={{ width: spacerWidth }}
+          />
+
+          {timelineYears.map((item) => (
+            <TimelineYearNode
+              key={item.year}
+              item={item}
+              selectedYear={selectedYear}
+              activeCenterYear={activeCenterYear}
+              isAbove={milestonePlacement.get(item.year) ?? true}
+              currentYear={CURRENT_YEAR}
+              brokenImgMap={brokenImgMap}
+              onBubbleClick={handleBubbleClick}
+              onYearClick={handleYearClick}
+              onImageError={(id) =>
+                setBrokenImgMap((prev) => ({ ...prev, [id]: true }))
+              }
+            />
+          ))}
+
+          <div
+            className="timeline-spacer-tail"
+            style={{ width: spacerWidth }}
+          />
         </div>
       </div>
-      <nav
-        className="archive-timeline-controls"
-        aria-label="Timeline navigation"
+
+      <div
+        className={`timeline-synced-center-pointer ${isMagnetDocked ? "is-magnet-docked" : ""}`}
+        aria-hidden="true"
       >
-        <button
-          type="button"
-          onClick={() =>
-            goToYear(
-              archiveYears[Math.max(0, archiveYears.indexOf(activeYear) - 1)],
-            )
-          }
-          aria-label="Older missions"
-        >
-          <ArrowUp size={18} />
-        </button>
-        <span aria-live="polite">{activeYear}</span>
-        <button
-          type="button"
-          onClick={() =>
-            goToYear(
-              archiveYears[
-                Math.min(
-                  archiveYears.length - 1,
-                  archiveYears.indexOf(activeYear) + 1,
-                )
-              ],
-            )
-          }
-          aria-label="Newer missions"
-        >
-          <ArrowDown size={18} />
-        </button>
-        <button
-          type="button"
-          className="archive-return-now"
-          onClick={() => goToYear(CURRENT_YEAR)}
-        >
-          <RotateCcw size={15} /> Back to {CURRENT_YEAR}
-        </button>
-      </nav>
+        <div className="pointer-top-needle" />
+        <div className="pointer-frame-bracket" />
+        <div className="pointer-bottom-needle" />
+      </div>
+
+      <TimelineFooterHud
+        activeCenterYear={activeCenterYear}
+        currentYear={CURRENT_YEAR}
+        milestonesCount={timelineYears.filter((y) => y.hasEvents).length}
+        onJumpCurrentYear={jumpToCurrentYear}
+      />
     </div>
   );
 };

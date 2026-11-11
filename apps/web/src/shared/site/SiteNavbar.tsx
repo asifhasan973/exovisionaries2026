@@ -9,7 +9,6 @@ export type { SitePage } from "./siteNavigation";
 
 const pages: { id: SitePage; label: string; href: string }[] = [
   { id: "home", label: "Home", href: "/" },
-  { id: "mission", label: "Play Mission", href: "/" },
   { id: "archive", label: "NASA Archive", href: "/?explore=archive" },
   {
     id: "engineering",

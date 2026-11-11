@@ -89,10 +89,12 @@ export function LandingViewport({
 }) {
   const host = useRef<HTMLDivElement>(null),
     latest = useRef(landing),
+    lastTickTime = useRef(0),
     wake = useRef(() => {}),
     [failed, setFailed] = useState(false);
   useEffect(() => {
     latest.current = landing;
+    lastTickTime.current = performance.now();
     wake.current();
   }, [landing]);
   useEffect(() => {
@@ -298,6 +300,29 @@ export function LandingViewport({
         const engineGlow = new THREE.PointLight(0x8dcdff, 0, 18, 2);
         engineGlow.position.y = 0.5;
         crew.lander.add(engineGlow);
+        const rcsMaterial = new THREE.MeshBasicMaterial({
+          color: 0xaee6ff,
+          transparent: true,
+          opacity: 0.8,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+        });
+        const rcsLeft = new THREE.Mesh(
+          new THREE.ConeGeometry(0.11, 0.6, 16),
+          rcsMaterial,
+        );
+        rcsLeft.position.set(-1.18, 0.85, 0);
+        rcsLeft.rotation.z = Math.PI / 2;
+        rcsLeft.visible = false;
+        crew.lander.add(rcsLeft);
+        const rcsRight = new THREE.Mesh(
+          new THREE.ConeGeometry(0.11, 0.6, 16),
+          rcsMaterial,
+        );
+        rcsRight.position.set(1.18, 0.85, 0);
+        rcsRight.rotation.z = -Math.PI / 2;
+        rcsRight.visible = false;
+        crew.lander.add(rcsRight);
         const groundGlow = new THREE.Mesh(
           new THREE.CircleGeometry(5, 48),
           new THREE.MeshBasicMaterial({
@@ -386,8 +411,17 @@ export function LandingViewport({
             intro = l.stage === "ready";
           const phase = l.phaseSteps * LANDING_MODEL.step;
           const fraction = Math.min(1, phase / (l.version === 2 ? 2 : 4));
+          const tickOrigin = lastTickTime.current || now;
+          const subTick = Math.min(
+            0.05,
+            Math.max(0, (now - tickOrigin) / 1000),
+          );
           let x = l.x * SCALE,
             y = Math.max(0, l.height) * SCALE;
+          if (l.stage === "descending" && !l.paused) {
+            x += l.vx * SCALE * subTick;
+            y += l.vy * SCALE * subTick;
+          }
           if (orbital) {
             x = -6 + (intro ? 0 : fraction * 3);
             y = 48 - (intro ? 0 : fraction * 4);
@@ -401,16 +435,26 @@ export function LandingViewport({
             x = -4;
             y = 29;
           }
-          const smooth = first ? 1 : 1 - Math.exp(-dt * 12);
+          const smooth = first ? 1 : 1 - Math.exp(-dt * 26);
           if (!l.paused || first) {
             displayX += (x - displayX) * smooth;
             displayY += (y - displayY) * smooth;
+            const targetTilt = orbital ? 0 : (-l.steer * 20 * Math.PI) / 180;
             displayTilt +=
-              ((orbital ? 0 : (-l.steer * 20 * Math.PI) / 180) - displayTilt) *
-              smooth;
+              (targetTilt - displayTilt) * (first ? 1 : 1 - Math.exp(-dt * 14));
           }
           crew.lander.position.set(displayX, displayY, 0);
           crew.lander.rotation.z = displayTilt;
+          const steeringLeft =
+            !l.paused &&
+            l.stage === "descending" &&
+            (l.direction < 0 || l.steer < -0.05);
+          const steeringRight =
+            !l.paused &&
+            l.stage === "descending" &&
+            (l.direction > 0 || l.steer > 0.05);
+          rcsRight.visible = steeringLeft;
+          rcsLeft.visible = steeringRight;
           crew.descentStage.visible = !["aborting", "aborted"].includes(
             l.stage,
           );
