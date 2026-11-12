@@ -189,7 +189,16 @@ export default function ExactStory({
         onToggleVoice={toggleAudioMute}
         onRestart={nav.requestRestart}
       >
-        <LearningProvider>
+        <LearningProvider
+          stepId={nav.home || nav.milestoneCard ? undefined : progress.stepId}
+          objective={progress.selections.objective}
+          activity={moon.rover?.phase}
+          text={
+            !nav.home && !nav.milestoneCard && step.kind === "conversation"
+              ? step.lines[progress.lineIndex]?.text
+              : undefined
+          }
+        >
           <StoryNavigationContext.Provider
             value={
               nav.home

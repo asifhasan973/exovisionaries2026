@@ -1,3 +1,4 @@
+import { LearningText } from "@/game/moon/core/learning/Learning";
 import { partById } from "@/game/moon/core/preparation";
 import { roverPower, roverCapability } from "../roverEquipment";
 import {
@@ -845,10 +846,16 @@ export function RoverScreen({
                         .map((record: any) => (
                           <li key={record.id}>
                             <b>
-                              {partById(record.instrumentId)?.name ??
-                                record.instrumentId}
+                              <LearningText
+                                text={
+                                  partById(record.instrumentId)?.name ??
+                                  record.instrumentId
+                                }
+                              />
                             </b>
-                            <span>{record.signal}</span>
+                            <span>
+                              <LearningText text={record.signal} />
+                            </span>
                           </li>
                         ))}
                     </ul>

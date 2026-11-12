@@ -36,14 +36,14 @@ export const GLOSSARY = {
   mineral: {
     name: "Mineral",
     icon: "💎",
-    text: "A natural solid that can be an ingredient of a rock.",
+    text: "A natural solid that is one of the ingredients in a rock.",
     example:
       "One rock can contain several minerals. Matching tools help us find which ones.",
   },
   plagioclase: {
     name: "Plagioclase",
     icon: "⬜",
-    text: "A mineral often found in pale Moon rocks.",
+    text: "A pale natural crystal found in many Moon rocks.",
     example:
       "It can be in other rock types too. Check a second kind of clue before naming the rock.",
   },
@@ -55,47 +55,47 @@ export const GLOSSARY = {
       "Calcium and aluminium are two kinds. A scanner checks which pieces a rock contains.",
   },
   anorthosite: {
-    name: "Ancient crust rock",
+    name: "Ancient crust rock \u00b7 Anorthosite",
     icon: "⬜",
-    text: "A rock rich in pale minerals called plagioclase.",
+    text: "A pale rock that makes up much of the Moon’s oldest outer layer.",
     example:
       "Many Moon highland rocks are like this. Light and element clues help us check.",
   },
   basalt: {
-    name: "Lava rock",
+    name: "Lava rock \u00b7 Basalt",
     icon: "🌋",
     text: "Rock made when hot melted rock cools.",
     example: "We look for matching mineral and element clues before naming it.",
   },
   breccia: {
-    name: "Impact-mixed rock",
+    name: "Impact-mixed rock \u00b7 Breccia",
     icon: "🧩",
     text: "Different broken rock pieces joined together.",
     example:
       "A big space-rock crash can break and mix Moon rocks. A mixed soil sample alone is not proof.",
   },
   xrf: {
-    name: "Element scanner",
+    name: "XRF \u00b7 Element scanner",
     icon: "🧱",
     text: "A tool that checks which tiny building pieces are in a rock.",
     example:
       "Elements are like ingredients. This tool checks them, not how the crystals are arranged.",
   },
   xrd: {
-    name: "Crystal lab",
+    name: "XRD \u00b7 Crystal lab",
     icon: "💎",
-    text: "A tool that finds minerals by how their tiny pieces are arranged.",
+    text: "A tool that finds what a rock is made of by checking its tiny crystal shapes.",
     example: "First collect a sample. Then the lab checks its crystal pattern.",
   },
   gpr: {
-    name: "Layer radar",
+    name: "GPR \u00b7 Ground-penetrating radar",
     icon: "📡",
     text: "A tool that listens for radio echoes from under the ground.",
     example:
       "An echo can show a boundary. It cannot name a rock’s ingredients.",
   },
   seismometer: {
-    name: "Moonquake sensor",
+    name: "Moonquake sensor \u00b7 Seismometer",
     icon: "〰️",
     text: "A tool that records tiny shakes in the ground.",
     example:
@@ -135,7 +135,7 @@ export const GLOSSARY = {
   mass: {
     name: "Mass",
     icon: "⚖️",
-    text: "How much stuff is in something. We count it in kilograms (kg).",
+    text: "How much stuff is in something, measured in kilograms (kg).",
     example: "More parts add more mass. Our rocket can only carry so much.",
   },
   budget: {
@@ -210,7 +210,7 @@ export const GLOSSARY = {
   thermal: {
     name: "Thermal protection",
     icon: "🧥",
-    text: "Layers and heaters that help keep the robot at a safe temperature.",
+    text: "Layers that protect a spacecraft or robot from too much heat or cold.",
     example: "Like a warm coat and a heater for our rover.",
   },
   navigation: {
@@ -258,7 +258,7 @@ export const GLOSSARY = {
   crater: {
     name: "Crater rim",
     icon: "🌙",
-    text: "The edge of a big bowl-shaped hole in the ground.",
+    text: "The raised edge of a large bowl-shaped hole in the ground.",
     example:
       "A Moon crater’s edge can get light while its deep floor stays dark.",
   },
@@ -269,7 +269,7 @@ export const GLOSSARY = {
     example: "Our lander, rover and tools travel inside the rocket.",
   },
   adapter: {
-    name: "Adapter",
+    name: "Adapter \u00b7 Payload mount",
     icon: "🧩",
     text: "A joining piece that holds two things together.",
     example: "It holds our explorer firmly inside the rocket.",
@@ -287,7 +287,7 @@ export const GLOSSARY = {
     example: "When its fuel is used up, we let it go to carry less mass.",
   },
   eva: {
-    name: "Suit time · EVA",
+    name: "EVA \u00b7 Extravehicular activity",
     icon: "🧑‍🚀",
     text: "Time astronauts spend outside their spacecraft.",
     example:
@@ -316,7 +316,7 @@ export const GLOSSARY = {
   orbit: {
     name: "Orbit",
     icon: "🌍",
-    text: "Moving around a planet while gravity pulls you toward it.",
+    text: "A path around a planet, moon, or star.",
     example:
       "Our spacecraft moves sideways fast enough to keep going around Earth.",
   },
@@ -357,7 +357,7 @@ export const GLOSSARY = {
   hydroxyl: {
     name: "Hydroxyl",
     icon: "🧩",
-    text: "A small oxygen-and-hydrogen piece that can be attached to a mineral.",
+    text: "An oxygen piece joined to a hydrogen piece, which is only part of water.",
     example:
       "It is not a whole water molecule. We need more clues before saying there is water.",
   },
@@ -374,16 +374,16 @@ export const GLOSSARY = {
     example: "A faint or mixed clue means we should say we are not sure yet.",
   },
   nss: {
-    name: "NSS",
+    name: "NSS \u00b7 Neutron Spectrometer System",
     icon: "🔎",
-    text: "A tool that looks for tiny particle clues called neutrons.",
+    text: "A tool that looks for tiny particle clues to help find water’s building pieces.",
     example:
       "It can find hydrogen clues. More tools must check whether there is water ice.",
   },
   nirvss: {
-    name: "NIRVSS",
+    name: "NIRVSS \u00b7 Near-Infrared Volatiles Spectrometer System",
     icon: "🌈",
-    text: "A tool that studies the ground using light our eyes cannot see.",
+    text: "A tool that uses light we cannot see to look for water and rock clues.",
     example: "The light can give clues about water and minerals.",
   },
   trident: {
@@ -393,10 +393,208 @@ export const GLOSSARY = {
     example: "Other tools can study the pieces it digs up.",
   },
   msolo: {
-    name: "MSOLO",
+    name: "MSOLO \u00b7 Mass Spectrometer Observing Lunar Operations",
     icon: "🫧",
-    text: "A tool that checks gases coming from the soil.",
+    text: "A tool that checks gases coming from Moon soil.",
     example: "It helps scientists look for clues of water and other gases.",
+  },
+  astrobiologist: {
+    name: "Astrobiologist",
+    icon: "🔎",
+    text: "A scientist who looks for signs of life beyond Earth.",
+    example: "",
+  },
+  braking: {
+    name: "Braking burn",
+    icon: "🔎",
+    text: "An engine push that slows a spacecraft down.",
+    example: "",
+  },
+  burnwindow: {
+    name: "Burn window",
+    icon: "🔎",
+    text: "The right time to fire a spacecraft’s engine.",
+    example: "",
+  },
+  calibration: {
+    name: "Calibration",
+    icon: "🔎",
+    text: "Checking a tool so its readings are right.",
+    example: "",
+  },
+  coasting: {
+    name: "Coasting",
+    icon: "🔎",
+    text: "Moving through space with the engines turned off.",
+    example: "",
+  },
+  contingency: {
+    name: "Contingency",
+    icon: "🔎",
+    text: "A backup plan for when something goes wrong.",
+    example: "",
+  },
+  ejecta: {
+    name: "Crater ejecta",
+    icon: "🔎",
+    text: "Rock and dust thrown out when something crashes into the ground.",
+    example: "",
+  },
+  crewdays: {
+    name: "Crew-days",
+    icon: "🔎",
+    text: "A way to count supplies, where one person for one day uses one crew-day.",
+    example: "",
+  },
+  crystalpattern: {
+    name: "Crystal pattern",
+    icon: "🔎",
+    text: "The repeating way tiny pieces fit together inside a crystal.",
+    example: "",
+  },
+  deltav: {
+    name: "Delta-v · Change in speed",
+    icon: "🔎",
+    text: "How much a spacecraft can change its speed or direction.",
+    example: "",
+  },
+  descent: {
+    name: "Descent",
+    icon: "🔎",
+    text: "Moving down toward the ground.",
+    example: "",
+  },
+  drymass: {
+    name: "Dry mass",
+    icon: "🔎",
+    text: "How much a spacecraft and its cargo weigh without fuel.",
+    example: "",
+  },
+  parkingorbit: {
+    name: "Earth parking orbit",
+    icon: "🔎",
+    text: "A path around Earth where a spacecraft waits before flying farther.",
+    example: "",
+  },
+  ephemeris: {
+    name: "Ephemeris",
+    icon: "🔎",
+    text: "A timetable showing where planets and moons will be.",
+    example: "",
+  },
+  escapetower: {
+    name: "Escape tower",
+    icon: "🔎",
+    text: "A small rocket that pulls the crew’s cabin away from danger at launch.",
+    example: "",
+  },
+  flyby: {
+    name: "Flyby",
+    icon: "🔎",
+    text: "Flying past a planet or moon without landing or staying there.",
+    example: "",
+  },
+  highgain: {
+    name: "High-gain communication",
+    icon: "🔎",
+    text: "Sending a radio message in a narrow beam to reach far away.",
+    example: "",
+  },
+  rocketequation: {
+    name: "Ideal rocket equation",
+    icon: "🔎",
+    text: "A rule that links a rocket’s fuel and mass to how much it can change speed.",
+    example: "",
+  },
+  isp: {
+    name: "Isp · Specific impulse",
+    icon: "🔎",
+    text: "A measure of how much push an engine gets from its fuel.",
+    example: "",
+  },
+  lunarcapture: {
+    name: "Lunar capture",
+    icon: "🔎",
+    text: "Slowing down near the Moon so the spacecraft stays around it.",
+    example: "",
+  },
+  lunarorbit: {
+    name: "Lunar orbit",
+    icon: "🔎",
+    text: "A path that goes around the Moon.",
+    example: "",
+  },
+  interpretation: {
+    name: "Mineral interpretation",
+    icon: "🔎",
+    text: "Using rock clues to work out what a rock is made of.",
+    example: "",
+  },
+  moontransfer: {
+    name: "Moon transfer",
+    icon: "🔎",
+    text: "The trip from a path around Earth to the Moon.",
+    example: "",
+  },
+  neutrons: {
+    name: "Neutrons",
+    icon: "🔎",
+    text: "Tiny pieces inside most atoms that can help us look for water clues.",
+    example: "",
+  },
+  propellant: {
+    name: "Propellant",
+    icon: "🔎",
+    text: "The material a rocket throws out to push itself along.",
+    example: "",
+  },
+  rendezvous: {
+    name: "Rendezvous",
+    icon: "🔎",
+    text: "Bringing two spacecraft close together in the same part of space.",
+    example: "",
+  },
+  spaceweather: {
+    name: "Space weather",
+    icon: "🔎",
+    text: "Changes from the Sun that can affect people and machines in space.",
+    example: "",
+  },
+  stereocamera: {
+    name: "Stereo hazard camera",
+    icon: "🔎",
+    text: "Two cameras that work together to spot bumps and holes ahead.",
+    example: "",
+  },
+  tdb: {
+    name: "TDB · Barycentric Dynamical Time",
+    icon: "🔎",
+    text: "A shared space clock used to work out where planets and moons will be.",
+    example: "",
+  },
+  throttle: {
+    name: "Throttle",
+    icon: "🔎",
+    text: "The control that makes an engine push more or less.",
+    example: "",
+  },
+  trajectory: {
+    name: "Trajectory",
+    icon: "🔎",
+    text: "The path a spacecraft follows as it moves.",
+    example: "",
+  },
+  upperstage: {
+    name: "Upper stage",
+    icon: "🔎",
+    text: "The top rocket section that keeps pushing after the lower sections fall away.",
+    example: "",
+  },
+  volatiles: {
+    name: "Volatiles",
+    icon: "🔎",
+    text: "Materials such as water that can turn into gas when warmed.",
+    example: "",
   },
 } as const;
 export type LearningTerm = keyof typeof GLOSSARY;
@@ -421,11 +619,11 @@ export const PART_TERMS: Record<string, LearningTerm> = {
   "medium-battery": "battery",
   "large-battery": "battery",
   "basic-navigation-camera": "navigation",
-  "stereo-hazard-camera": "navigation",
+  "stereo-hazard-camera": "stereocamera",
   "basic-thermal": "thermal",
   "advanced-thermal": "thermal",
   "basic-communication": "communication",
-  "high-gain-communication": "communication",
+  "high-gain-communication": "highgain",
 };
 
 for (const p of GEOLOGY_PARTS)
@@ -447,6 +645,29 @@ export const WORD_GROUPS: {
     name: "Rocket",
     icon: "🚀",
     terms: [
+      "braking",
+      "burnwindow",
+      "coasting",
+      "contingency",
+      "deltav",
+      "descent",
+      "drymass",
+      "parkingorbit",
+      "ephemeris",
+      "escapetower",
+      "flyby",
+      "rocketequation",
+      "isp",
+      "lunarcapture",
+      "lunarorbit",
+      "moontransfer",
+      "propellant",
+      "rendezvous",
+      "tdb",
+      "throttle",
+      "trajectory",
+      "upperstage",
+
       "ascent",
       "docking",
       "heatshield",
@@ -486,6 +707,10 @@ export const WORD_GROUPS: {
     name: "Rock lab",
     icon: "🪨",
     terms: [
+      "ejecta",
+      "crystalpattern",
+      "interpretation",
+
       "mineral",
       "plagioclase",
       "elements",
@@ -503,6 +728,11 @@ export const WORD_GROUPS: {
     name: "Moon",
     icon: "🌙",
     terms: [
+      "astrobiologist",
+      "crewdays",
+      "spaceweather",
+      "volatiles",
+
       "dust",
       "radiation",
       "care",
@@ -518,6 +748,11 @@ export const WORD_GROUPS: {
     name: "Rover & tools",
     icon: "🛞",
     terms: [
+      "calibration",
+      "highgain",
+      "neutrons",
+      "stereocamera",
+
       "hydrogen",
       "hydroxyl",
       "evidence",

@@ -1,0 +1,188 @@
+/* Keyword-only refinements leave other information drawers unchanged. */
+.keyword-drawer .keyword-navigation {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.keyword-drawer .game-info-trigger,
+.keyword-drawer .keyword-carousel-controls button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 44px;
+  padding: 9px 12px;
+  border: 1px solid rgba(189, 160, 208, 0.55);
+  border-radius: 10px;
+  color: #f4eafa;
+  background: #392348;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+.keyword-drawer .keyword-navigation [aria-pressed="true"] {
+  border-color: var(--mint, #8ce2c2);
+  color: var(--mint, #8ce2c2);
+  background: #263d3d;
+}
+.keyword-drawer .keyword-scene-label {
+  color: #dfcce9;
+  font-size: 14px;
+}
+.keyword-drawer .keyword-card {
+  padding: 0 0 22px;
+  margin-bottom: 22px;
+  border-bottom: 1px solid rgba(189, 160, 208, 0.3);
+}
+.keyword-drawer .keyword-card:last-child {
+  margin-bottom: 0;
+  border-bottom: 0;
+}
+.keyword-drawer .keyword-card h3 {
+  margin: 0 0 8px;
+  font-family: Fredoka, sans-serif;
+  font-size: clamp(19px, 2.4vh, 23px);
+  line-height: 1.25;
+  color: var(--cream, #fff1df);
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+}
+.keyword-drawer .keyword-card p {
+  line-height: 1.5;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.keyword-drawer .keyword-media {
+  margin: 12px 0;
+}
+.keyword-drawer .keyword-media-stage {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: clamp(210px, 30vh, 250px);
+  overflow: hidden;
+  border-radius: 12px;
+  background: #100c20;
+  touch-action: pan-y;
+}
+.keyword-drawer .keyword-media-stage img,
+.keyword-drawer .keyword-media-stage video,
+.keyword-drawer .keyword-video,
+.keyword-drawer .keyword-youtube,
+.keyword-drawer .keyword-youtube iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  object-fit: contain;
+  border: 0;
+}
+.keyword-drawer .keyword-media-stage img {
+  background: #100c20;
+}
+.keyword-drawer .keyword-video {
+  position: relative;
+}
+.keyword-drawer .keyword-video > span,
+.keyword-drawer .keyword-video > a {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: #100c20;
+}
+.keyword-drawer .keyword-play {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 18px;
+  gap: 10px;
+  border: 1px solid rgba(189, 160, 208, 0.4);
+  border-radius: 12px;
+  color: var(--mint, #8ce2c2);
+  background: #20172f;
+  font: inherit;
+  cursor: pointer;
+}
+.keyword-drawer .keyword-play span {
+  color: #f4eafa;
+  font-size: 14px;
+}
+.keyword-drawer .keyword-media figcaption {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 8px;
+  color: #dfcce9;
+  font-size: 13px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.keyword-drawer a {
+  color: var(--mint, #8ce2c2);
+  text-underline-offset: 3px;
+}
+.keyword-drawer .keyword-source {
+  align-self: flex-start;
+  font-size: 12px;
+  padding: 6px 0;
+}
+.keyword-drawer .keyword-carousel-controls,
+.keyword-drawer .keyword-library-pages {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+}
+.keyword-drawer .keyword-carousel-controls button {
+  min-width: 44px;
+}
+.keyword-drawer .keyword-library-pages {
+  margin-top: 16px;
+}
+.keyword-drawer .learning-word-grid button {
+  min-height: 48px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: left;
+}
+.keyword-drawer button:hover:not(:disabled) {
+  border-color: var(--mint, #8ce2c2);
+}
+.keyword-drawer :is(button, a, [tabindex]):focus-visible {
+  outline: 2px solid var(--mint, #8ce2c2);
+  outline-offset: 3px;
+}
+.keyword-drawer ::selection {
+  background: #744586;
+  color: #fff;
+}
+@media (max-height: 450px) {
+  .keyword-drawer .keyword-navigation {
+    margin-bottom: 10px;
+  }
+  .keyword-drawer .keyword-card {
+    padding-bottom: 16px;
+    margin-bottom: 16px;
+  }
+  .keyword-drawer .keyword-media-stage {
+    height: 210px;
+  }
+  .keyword-drawer .learning-word-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .keyword-drawer .learning-word-grid button {
+    min-height: 44px;
+  }
+}
+
+.keyword-drawer header .conversation-icon {
+  min-width: 44px;
+  min-height: 44px;
+}
